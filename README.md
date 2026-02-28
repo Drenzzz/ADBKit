@@ -1,6 +1,18 @@
 # ADBKit
+MacOS Optimization 
 
+This specific version is a native build optimized for Apple Silicon (M1/M2/M3).
+
+Cool & Quiet: Runs efficiently without spiking your CPU.
+
+Portable: Check the Releases section for the pre-built .dmg.
+
+Credits 🤝
+
+Original core logic and project by @Drenzzz. This fork focuses on providing a stable build and installer for the macOS community.
 A simple, modern GUI for ADB and Fastboot.
+
+
 Built with **Wails** (Go + React) for speed, lightweight resource usage, and native performance.
 
 ---
