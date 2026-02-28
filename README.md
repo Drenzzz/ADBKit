@@ -1,6 +1,6 @@
 # ADBKit
 MacOS Optimization 
-
+docs: update README with macOS Apple Silicon info and credits.
 This specific version is a native build optimized for Apple Silicon (M1/M2/M3).
 
 Cool & Quiet: Runs efficiently without spiking your CPU.
