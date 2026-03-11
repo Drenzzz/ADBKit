@@ -18,7 +18,7 @@ export function useFileActions(currentPath: string, refreshFiles: (path: string)
 
   const getBasename = (fullPath: string) => fullPath.replace(/\\/g, "/").split("/").pop() || fullPath;
 
-  const showBatchToast = (toastId: string | number, entityLabel: string, total: number, failures: BatchFailure[]) => {
+  const showBatchToast = (toastId: string | number, entityLabel: string, total: number, successes: string[], failures: BatchFailure[]) => {
     if (total === 0) return;
 
     if (failures.length === 0) {
@@ -26,18 +26,15 @@ export function useFileActions(currentPath: string, refreshFiles: (path: string)
       return;
     }
 
-    const description = failures
-      .slice(0, 5)
-      .map((item) => `${item.name}: ${item.error}`)
-      .join("\n");
-
-    const successCount = total - failures.length;
+    const successCount = successes.length;
     const title = failures.length === total ? `Failed to import ${entityLabel}${total > 1 ? "s" : ""}` : `Imported ${successCount}/${total} ${entityLabel}${successCount === 1 ? "" : "s"}`;
+    const succeededSection = successCount > 0 ? `Succeeded:\n${successes.map((name) => `- ${name}`).join("\n")}` : "Succeeded:\n- none";
+    const failedSection = `Failed:\n${failures.map((item) => `- ${item.name}: ${item.error}`).join("\n")}`;
 
     toast.error(title, {
       id: toastId,
-      description,
-      duration: 8000,
+      description: `${succeededSection}\n\n${failedSection}`,
+      duration: 12000,
     });
   };
 
@@ -51,19 +48,21 @@ export function useFileActions(currentPath: string, refreshFiles: (path: string)
       const description = localPaths.length === 1 ? `To: ${path.posix.join(currentPath, getBasename(localPaths[0]))}` : undefined;
       toastId = toast.loading(localPaths.length === 1 ? `Pushing ${getBasename(localPaths[0])}...` : `Pushing ${localPaths.length} files...`, { description });
 
+      const successes: string[] = [];
       const failures: BatchFailure[] = [];
       for (const localPath of localPaths) {
         const fileName = getBasename(localPath);
         const remotePath = path.posix.join(currentPath, fileName);
         try {
           await PushFile(localPath, remotePath);
+          successes.push(fileName);
         } catch (error) {
           console.error("Import file error:", error);
           failures.push({ name: fileName, error: String(error) });
         }
       }
 
-      showBatchToast(toastId, "file", localPaths.length, failures);
+      showBatchToast(toastId, "file", localPaths.length, successes, failures);
       refreshFiles(currentPath);
     } catch (error) {
       console.error("Import file error:", error);
@@ -88,18 +87,20 @@ export function useFileActions(currentPath: string, refreshFiles: (path: string)
         description: localFolders.length === 1 ? `To: ${currentPath}` : undefined,
       });
 
+      const successes: string[] = [];
       const failures: BatchFailure[] = [];
       for (const localFolderPath of localFolders) {
         const folderName = getBasename(localFolderPath);
         try {
           await PushFile(localFolderPath, currentPath);
+          successes.push(folderName);
         } catch (error) {
           console.error("Import folder error:", error);
           failures.push({ name: folderName, error: String(error) });
         }
       }
 
-      showBatchToast(toastId, "folder", localFolders.length, failures);
+      showBatchToast(toastId, "folder", localFolders.length, successes, failures);
       refreshFiles(currentPath);
     } catch (error) {
       console.error("Import folder error:", error);
@@ -139,9 +140,11 @@ export function useFileActions(currentPath: string, refreshFiles: (path: string)
         onSuccess();
       } catch (error) {
         console.error("Batch export error:", error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
         toast.error("Batch Export Failed", {
-          description: String(error),
+          description: errorMessage,
           id: toastId,
+          duration: 12000,
         });
       } finally {
         setIsPulling(false);

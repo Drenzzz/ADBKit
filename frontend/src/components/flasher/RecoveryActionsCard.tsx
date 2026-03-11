@@ -12,9 +12,10 @@ interface RecoveryActionsCardProps {
   isWiping: boolean;
   onWipe: () => void;
   canWipe: boolean;
+  isRecoveryMode: boolean;
 }
 
-export function RecoveryActionsCard({ sideloadFilePath, onSelectSideloadFile, isSideloading, onSideload, isWiping, onWipe, canWipe }: RecoveryActionsCardProps) {
+export function RecoveryActionsCard({ sideloadFilePath, onSelectSideloadFile, isSideloading, onSideload, isWiping, onWipe, canWipe, isRecoveryMode }: RecoveryActionsCardProps) {
   return (
     <Card>
       <CardHeader>
@@ -33,8 +34,17 @@ export function RecoveryActionsCard({ sideloadFilePath, onSelectSideloadFile, is
             </Button>
           </div>
           <p className="truncate text-sm text-muted-foreground">{sideloadFilePath ? sideloadFilePath : "No ZIP selected."}</p>
-          <p className="text-sm text-muted-foreground">Ensure the device shows recovery sideload mode before starting the transfer.</p>
-          <Button variant="default" className="w-full" disabled={isSideloading || !sideloadFilePath} onClick={onSideload}>
+          
+          {!isRecoveryMode ? (
+            <div className="flex items-center gap-2 text-sm text-amber-500 bg-amber-500/10 p-2 rounded">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>Device is not in recovery/sideload mode. Connect device in sideload mode to enable.</span>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Device ready. Start the transfer below.</p>
+          )}
+
+          <Button variant="default" className="w-full" disabled={isSideloading || !sideloadFilePath || !isRecoveryMode} onClick={onSideload}>
             {isSideloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Package className="mr-2 h-4 w-4" />}
             Sideload Package
           </Button>

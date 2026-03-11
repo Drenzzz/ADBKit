@@ -30,6 +30,10 @@ export function EnableWirelessAdb(arg1:string):Promise<string>;
 
 export function FlashPartition(arg1:string,arg2:string):Promise<void>;
 
+export function FlashRomFolder(arg1:string,arg2:string,arg3:backend.FlashPlan):Promise<void>;
+
+export function GetCommandHistory(arg1:string,arg2:number):Promise<Array<backend.CommandLogEntry>>;
+
 export function GetDeviceInfo():Promise<backend.DeviceInfo>;
 
 export function GetDeviceMode():Promise<string>;
@@ -37,6 +41,10 @@ export function GetDeviceMode():Promise<string>;
 export function GetDevices():Promise<Array<backend.Device>>;
 
 export function GetFastbootDevices():Promise<Array<backend.Device>>;
+
+export function GetFastbootSlot(arg1:string):Promise<string>;
+
+export function GetPerformanceSnapshot(arg1:string):Promise<backend.PerformanceSnapshot>;
 
 export function Greet(arg1:string):Promise<string>;
 
@@ -64,6 +72,8 @@ export function RunFastbootHostCommand(arg1:string):Promise<string>;
 
 export function RunShellCommand(arg1:string):Promise<string>;
 
+export function ScanRomFolder(arg1:string):Promise<backend.FlashPlan>;
+
 export function SelectApkFile():Promise<string>;
 
 export function SelectDirectoryForPull():Promise<string>;
@@ -84,7 +94,15 @@ export function SelectSaveFile(arg1:string):Promise<string>;
 
 export function SelectZipFile():Promise<string>;
 
+export function SetActiveSerial(arg1:string):Promise<void>;
+
+export function SetFastbootSlot(arg1:string,arg2:string):Promise<void>;
+
 export function SideloadPackage(arg1:string):Promise<string>;
+
+export function StartLogcat(arg1:string,arg2:string):Promise<void>;
+
+export function StopLogcat(arg1:string):Promise<void>;
 
 export function UninstallMultiplePackages(arg1:Array<string>):Promise<string>;
 

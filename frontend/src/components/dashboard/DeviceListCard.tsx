@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Pencil, RefreshCw, Smartphone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { getNickname, setNickname } from "@/lib/nicknameStore";
+import { useDevice } from "@/lib/deviceContext";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 
@@ -18,6 +19,7 @@ interface DeviceListCardProps {
 }
 
 export function DeviceListCard({ devices, isRefreshing, onRefresh }: DeviceListCardProps) {
+  const { activeSerial, setActiveSerial } = useDevice();
   const [editingDevice, setEditingDevice] = useState<Device | null>(null);
   const [newNickname, setNewNickname] = useState("");
 
@@ -59,16 +61,22 @@ export function DeviceListCard({ devices, isRefreshing, onRefresh }: DeviceListC
               {devices.map((device) => {
                 const displayName = getNickname(device.Serial) || device.Serial;
                 const isOnline = device.Status === "device";
+                const isActive = activeSerial === device.Serial;
+
                 return (
-                  <div key={device.Serial} className="flex items-center justify-between rounded-lg bg-muted p-3 group">
+                  <div 
+                    key={device.Serial} 
+                    className={`flex items-center justify-between rounded-lg p-3 group cursor-pointer transition-colors ${isActive ? 'bg-primary/20 border-primary/50 border' : 'bg-muted border border-transparent hover:bg-muted/80'}`}
+                    onClick={() => setActiveSerial(device.Serial)}
+                  >
                     <div className="flex flex-col">
-                      <span className="text-lg font-semibold">{displayName}</span>
+                      <span className="text-lg font-semibold">{displayName} {isActive && <span className="text-xs ml-2 px-2 py-0.5 bg-primary/30 text-primary-foreground rounded">Active</span>}</span>
                       {displayName !== device.Serial && <span className="font-mono text-xs text-muted-foreground">{device.Serial}</span>}
                     </div>
 
                     <div className="flex items-center gap-2">
                       <span className={`font-semibold ${isOnline ? "text-green-500" : "text-yellow-500"}`}>{device.Status}</span>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleOpenEdit(device)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); handleOpenEdit(device); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </div>

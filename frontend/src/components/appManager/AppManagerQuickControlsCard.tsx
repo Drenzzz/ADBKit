@@ -26,7 +26,7 @@ interface AppManagerQuickControlsCardProps {
 
 export function AppManagerQuickControlsCard({ quickControlSelects, selectedCount, isBusy, onEnableSelected, onDisableSelected, onUninstallSelected, onClearSelection, onResetFilters }: AppManagerQuickControlsCardProps) {
   return (
-    <Card className="border border-border/60 bg-card/90 backdrop-blur shadow-xl">
+    <Card className="border border-border/60 bg-card shadow-lg">
       <CardHeader>
         <CardTitle>Quick controls</CardTitle>
         <CardDescription>Adjust filters or batch actions without leaving the table.</CardDescription>

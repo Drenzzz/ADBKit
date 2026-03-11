@@ -36,7 +36,7 @@ func (a *App) getBinaryPath(name string) (string, error) {
 	exePath, err := os.Executable()
 	if err == nil {
 		installDir := filepath.Dir(exePath)
-		candidates = append(candidates, 
+		candidates = append(candidates,
 			filepath.Join(installDir, "bin", platformDir, name+extension),
 			filepath.Join(installDir, "bin", name+extension),
 		)
@@ -84,12 +84,17 @@ func (a *App) runCommandContext(ctx context.Context, name string, args ...string
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 
+	start := time.Now()
 	err = cmd.Run()
+	duration := time.Since(start)
+
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
+			a.logCommand(name, args, duration, fmt.Errorf("timeout"), "")
 			return "", fmt.Errorf("command timed out after %s", DefaultCommandTimeout)
 		}
 		if ctx.Err() == context.Canceled {
+			a.logCommand(name, args, duration, fmt.Errorf("cancelled"), "")
 			return "", fmt.Errorf("command cancelled by user")
 		}
 
@@ -97,7 +102,9 @@ func (a *App) runCommandContext(ctx context.Context, name string, args ...string
 		if errOutput == "" {
 			errOutput = err.Error()
 		}
-		
+
+		a.logCommand(name, args, duration, fmt.Errorf("%s", errOutput), errOutput)
+
 		if strings.Contains(errOutput, "device offline") {
 			return "", fmt.Errorf("device is offline. Try reconnecting USB")
 		}
@@ -108,7 +115,9 @@ func (a *App) runCommandContext(ctx context.Context, name string, args ...string
 		return "", fmt.Errorf("%s", errOutput)
 	}
 
-	return strings.TrimSpace(out.String()), nil
+	outStr := strings.TrimSpace(out.String())
+	a.logCommand(name, args, duration, nil, outStr)
+	return outStr, nil
 }
 
 func (a *App) runCommand(name string, args ...string) (string, error) {
@@ -128,10 +137,52 @@ func (a *App) runCommandRaw(name string, args ...string) (string, error) {
 	return a.runCommandContext(context.Background(), name, args...)
 }
 
+func (a *App) resolveActiveAdbSerial() (string, error) {
+	if serial := strings.TrimSpace(a.getActiveSerial()); serial != "" {
+		return serial, nil
+	}
+
+	devices, err := a.GetDevices()
+	if err != nil {
+		return "", err
+	}
+
+	for _, device := range devices {
+		if strings.TrimSpace(device.Serial) == "" {
+			continue
+		}
+		status := strings.ToLower(strings.TrimSpace(device.Status))
+		if status == "device" || status == "recovery" || status == "sideload" {
+			_ = a.SetActiveSerial(device.Serial)
+			return device.Serial, nil
+		}
+	}
+
+	return "", fmt.Errorf("no active device selected")
+}
+
+func (a *App) runAdbCommandWithSerial(serial string, args ...string) (string, error) {
+	trimmedSerial := strings.TrimSpace(serial)
+	if trimmedSerial == "" {
+		return "", fmt.Errorf("device serial cannot be empty")
+	}
+
+	commandArgs := append([]string{"-s", trimmedSerial}, args...)
+	return a.runCommand("adb", commandArgs...)
+}
+
+func (a *App) runAdbCommand(args ...string) (string, error) {
+	serial, err := a.resolveActiveAdbSerial()
+	if err != nil {
+		return "", err
+	}
+	return a.runAdbCommandWithSerial(serial, args...)
+}
+
 func (a *App) runShellCommand(shellCommand string) (string, error) {
 	// Security: simplistic check to prevent completely reckless command injection
 	// Ideally, shell commands should be avoided in favor of direct args, but adb shell requires it often.
-	if strings.ContainsAny(shellCommand, "&|;") {
+	if strings.ContainsAny(shellCommand, "&|;><$`") {
 		return "", fmt.Errorf("illegal characters in command")
 	}
 
@@ -140,11 +191,16 @@ func (a *App) runShellCommand(shellCommand string) (string, error) {
 		return "", err
 	}
 
+	serial, err := a.resolveActiveAdbSerial()
+	if err != nil {
+		return "", err
+	}
+
 	// Shell commands default to 60s timeout too
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultCommandTimeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, binaryPath, "shell", shellCommand)
+	cmd := exec.CommandContext(ctx, binaryPath, "-s", serial, "shell", shellCommand)
 	setCommandWindowMode(cmd)
 
 	var out bytes.Buffer
@@ -152,19 +208,27 @@ func (a *App) runShellCommand(shellCommand string) (string, error) {
 	cmd.Stdout = &out
 	cmd.Stderr = &stderr
 
+	start := time.Now()
 	err = cmd.Run()
+	duration := time.Since(start)
+
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
+			a.logCommand("adb", []string{"-s", serial, "shell", shellCommand}, duration, fmt.Errorf("timeout"), "")
 			return "", fmt.Errorf("shell command timed out")
 		}
 		errOutput := strings.TrimSpace(stderr.String())
 		if errOutput == "" {
 			errOutput = err.Error()
 		}
+
+		a.logCommand("adb", []string{"-s", serial, "shell", shellCommand}, duration, fmt.Errorf("%s", errOutput), errOutput)
 		return "", fmt.Errorf("shell error: %s", errOutput)
 	}
 
-	return strings.TrimSpace(out.String()), nil
+	outStr := strings.TrimSpace(out.String())
+	a.logCommand("adb", []string{"-s", serial, "shell", shellCommand}, duration, nil, outStr)
+	return outStr, nil
 }
 
 func (a *App) CheckSystemRequirements() (string, error) {

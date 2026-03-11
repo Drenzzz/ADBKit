@@ -44,7 +44,7 @@ export function DirectoryContentsCard({ visibleFiles, fileList, isLoading, allVi
       <CardContent className="space-y-4">
         <div className="rounded-2xl border bg-card/80">
           <div className="min-w-[640px]">
-            <div className="sticky top-0 z-10 flex bg-muted/60 backdrop-blur border-b">
+            <div className="sticky top-0 z-10 flex bg-muted border-b">
               <div className="flex items-center justify-center w-[50px] h-10 px-4">
                 <Checkbox checked={allVisibleSelected} onCheckedChange={(checked) => onToggleSelectAll(Boolean(checked))} aria-label="Select all" />
               </div>
@@ -55,7 +55,7 @@ export function DirectoryContentsCard({ visibleFiles, fileList, isLoading, allVi
               <div className="flex items-center w-[80px] h-10 px-4 text-sm font-medium text-muted-foreground">Time</div>
             </div>
 
-            <div ref={parentRef} className="max-h-[60vh] overflow-auto custom-scroll">
+            <div ref={parentRef} className="max-h-[60vh] overflow-auto custom-scroll perf-scroll">
               {isLoading ? (
                 <div className="flex items-center justify-center h-24">
                   <Loader2 className="h-6 w-6 animate-spin" />

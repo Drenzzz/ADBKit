@@ -10,6 +10,10 @@ func (a *App) RunShellCommand(command string) (string, error) {
 		return "", fmt.Errorf("command cannot be empty")
 	}
 
+	if err := a.validateShellCommand(command); err != nil {
+		return "", err
+	}
+
 	output, err := a.runShellCommand(command)
 	if err != nil {
 		return "", fmt.Errorf("command failed: %w. Output: %s", err, output)
@@ -25,6 +29,10 @@ func (a *App) RunAdbHostCommand(args string) (string, error) {
 
 	argSlice := strings.Fields(args)
 
+	if err := a.validateHostCommand(argSlice); err != nil {
+		return "", err
+	}
+
 	output, err := a.runCommand("adb", argSlice...)
 	if err != nil {
 		return "", fmt.Errorf("command failed: %w. Output: %s", err, output)
@@ -34,9 +42,7 @@ func (a *App) RunAdbHostCommand(args string) (string, error) {
 }
 
 func (a *App) SideloadPackage(filePath string) (string, error) {
-
-
-	output, err := a.runCommand("adb", "sideload", filePath)
+	output, err := a.runAdbCommand("sideload", filePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to sideload package: %w. Output: %s", err, output)
 	}

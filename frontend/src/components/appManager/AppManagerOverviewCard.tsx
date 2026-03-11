@@ -16,7 +16,7 @@ interface AppManagerOverviewCardProps {
 
 export function AppManagerOverviewCard({ isBusy, onSync, metrics }: AppManagerOverviewCardProps) {
   return (
-    <Card className="border border-border/60 bg-card/90 backdrop-blur shadow-xl">
+    <Card className="border border-border/60 bg-card shadow-lg">
       <CardContent className="space-y-6 p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">

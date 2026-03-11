@@ -3,16 +3,120 @@ package backend
 import (
 	"context"
 	"fmt"
+	"path"
 	"regexp"
 	"strings"
 	"time"
 )
 
+var transferRetryAttempts = 3
+var transferRetryDelay = 2 * time.Second
+
+func quoteShellArg(value string) string {
+	return "'" + strings.ReplaceAll(value, "'", "'\"'\"'") + "'"
+}
+
+type batchTransferFailure struct {
+	Path   string
+	Reason string
+}
+
+func isTransientTransferError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errText := strings.ToLower(err.Error())
+	if strings.Contains(errText, "cancelled by user") || strings.Contains(errText, "command cancelled") {
+		return false
+	}
+
+	markers := []string{
+		"device offline",
+		"device not found",
+		"connection reset",
+		"broken pipe",
+		"protocol fault",
+		"transport error",
+		"resource temporarily unavailable",
+		"no such device",
+	}
+
+	for _, marker := range markers {
+		if strings.Contains(errText, marker) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (a *App) runTransferWithRetry(ctx context.Context, operation func() (string, error)) (string, error) {
+	var output string
+	var err error
+
+	for attempt := 1; attempt <= transferRetryAttempts; attempt++ {
+		if ctx.Err() != nil {
+			return "", ctx.Err()
+		}
+
+		output, err = operation()
+		if err == nil {
+			return output, nil
+		}
+
+		if ctx.Err() != nil {
+			return output, ctx.Err()
+		}
+
+		if !isTransientTransferError(err) || attempt == transferRetryAttempts {
+			return output, err
+		}
+
+		select {
+		case <-ctx.Done():
+			return output, ctx.Err()
+		case <-time.After(transferRetryDelay):
+		}
+	}
+
+	return output, err
+}
+
+func formatTransferBatchSummary(destination string, successes []string, failures []batchTransferFailure) string {
+	total := len(successes) + len(failures)
+	var summary strings.Builder
+
+	summary.WriteString(fmt.Sprintf("Transfer summary: %d/%d succeeded, %d failed.", len(successes), total, len(failures)))
+	if destination != "" {
+		summary.WriteString(fmt.Sprintf(" Destination: %s", destination))
+	}
+
+	if len(successes) > 0 {
+		summary.WriteString("\n\nSucceeded items:")
+		for _, item := range successes {
+			summary.WriteString("\n- ")
+			summary.WriteString(item)
+		}
+	}
+
+	if len(failures) > 0 {
+		summary.WriteString("\n\nFailed items:")
+		for _, item := range failures {
+			summary.WriteString("\n- ")
+			summary.WriteString(item.Path)
+			summary.WriteString(": ")
+			summary.WriteString(item.Reason)
+		}
+	}
+
+	return summary.String()
+}
+
 func (a *App) ListFiles(path string) ([]FileEntry, error) {
 
-	
 	// List files uses default timeout (60s) which is sufficient
-	output, err := a.runCommand("adb", "shell", "ls", "-lA", path)
+	output, err := a.runAdbCommand("shell", "ls", "-lA", path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list files: %w. Output: %s", err, output)
 	}
@@ -101,9 +205,15 @@ func (a *App) ListFiles(path string) ([]FileEntry, error) {
 
 func (a *App) PushFile(localPath string, remotePath string) (string, error) {
 
-	
+	serial, err := a.resolveActiveAdbSerial()
+	if err != nil {
+		return "", err
+	}
+
 	a.opMutex.Lock()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	// Large file/folder transfers can exceed 30 minutes.
+	// Use explicit user cancellation instead of hard timeout.
+	ctx, cancel := context.WithCancel(context.Background())
 	a.currentCancel = cancel
 	a.opMutex.Unlock()
 
@@ -116,7 +226,9 @@ func (a *App) PushFile(localPath string, remotePath string) (string, error) {
 		a.opMutex.Unlock()
 	}()
 
-	output, err := a.runCommandContext(ctx, "adb", "push", localPath, remotePath)
+	output, err := a.runTransferWithRetry(ctx, func() (string, error) {
+		return a.runCommandContext(ctx, "adb", "-s", serial, "push", localPath, remotePath)
+	})
 	if err != nil {
 		if ctx.Err() == context.Canceled {
 			return "", fmt.Errorf("push cancelled by user")
@@ -128,13 +240,17 @@ func (a *App) PushFile(localPath string, remotePath string) (string, error) {
 
 func (a *App) PullFile(remotePath string, localPath string) (string, error) {
 
-	
+	serial, err := a.resolveActiveAdbSerial()
+	if err != nil {
+		return "", err
+	}
+
 	a.opMutex.Lock()
 	// No timeout for file transfers, only user cancellation
 	ctx, cancel := context.WithCancel(context.Background())
 	a.currentCancel = cancel
 	a.opMutex.Unlock()
-	
+
 	defer func() {
 		cancel()
 		a.opMutex.Lock()
@@ -144,7 +260,9 @@ func (a *App) PullFile(remotePath string, localPath string) (string, error) {
 		a.opMutex.Unlock()
 	}()
 
-	output, err := a.runCommandContext(ctx, "adb", "pull", "-a", remotePath, localPath)
+	output, err := a.runTransferWithRetry(ctx, func() (string, error) {
+		return a.runCommandContext(ctx, "adb", "-s", serial, "pull", "-a", remotePath, localPath)
+	})
 	if err != nil {
 		if ctx.Err() == context.Canceled {
 			return "", fmt.Errorf("pull cancelled by user")
@@ -155,7 +273,11 @@ func (a *App) PullFile(remotePath string, localPath string) (string, error) {
 }
 
 func (a *App) CreateFolder(fullPath string) (string, error) {
-	command := fmt.Sprintf("mkdir -p '%s'", fullPath)
+	if err := a.validateRemotePath(fullPath); err != nil {
+		return "", err
+	}
+
+	command := fmt.Sprintf("mkdir -p %s", quoteShellArg(fullPath))
 
 	output, err := a.runShellCommand(command)
 	if err != nil {
@@ -166,7 +288,11 @@ func (a *App) CreateFolder(fullPath string) (string, error) {
 }
 
 func (a *App) DeleteFile(fullPath string) (string, error) {
-	command := fmt.Sprintf("rm -rf '%s'", fullPath)
+	if err := a.validateRemotePath(fullPath); err != nil {
+		return "", err
+	}
+
+	command := fmt.Sprintf("rm -rf %s", quoteShellArg(fullPath))
 
 	output, err := a.runShellCommand(command)
 	if err != nil {
@@ -177,7 +303,15 @@ func (a *App) DeleteFile(fullPath string) (string, error) {
 }
 
 func (a *App) RenameFile(oldPath string, newPath string) (string, error) {
-	command := fmt.Sprintf("mv '%s' '%s'", oldPath, newPath)
+	if err := a.validateRemotePath(oldPath); err != nil {
+		return "", err
+	}
+
+	if err := a.validateRemotePath(newPath); err != nil {
+		return "", err
+	}
+
+	command := fmt.Sprintf("mv %s %s", quoteShellArg(oldPath), quoteShellArg(newPath))
 
 	output, err := a.runShellCommand(command)
 	if err != nil {
@@ -228,41 +362,41 @@ func (a *App) PullMultipleFiles(remotePaths []string) (string, error) {
 		return "Export cancelled by user.", nil
 	}
 
-	var successCount int
-	var failCount int
-	var errorMessages strings.Builder
+	successes := make([]string, 0, len(remotePaths))
+	failures := make([]batchTransferFailure, 0)
 
 	// Batch pull: each file pull is discrete. We could potentially make the whole batch cancellable,
 	// but currently only individual calls to PullFile are cancellable via the App.currentCancel mechanism.
 	// Since PullFile implements the lock/cancel mechanism internally, cancelling *during* one file
-	// will stop that file. 
+	// will stop that file.
 	// To cancel the whole batch, the user would hit "Cancel" which triggers App.CancelOperation().
 	// That would kill the *current* PullFile command.
 	// The loop here continues. Ideally we should check if cancellation happened.
 	// But `a.currentCancel` is reset after each PullFile.
-	// So repeatedly clicking cancel would be needed. 
+	// So repeatedly clicking cancel would be needed.
 	// For now, this is acceptable for basic batch support.
 
 	for _, remotePath := range remotePaths {
 		_, err := a.PullFile(remotePath, localSaveFolder)
+		itemName := path.Base(remotePath)
+		if itemName == "." || itemName == "/" || strings.TrimSpace(itemName) == "" {
+			itemName = remotePath
+		}
+
 		if err != nil {
 			if strings.Contains(err.Error(), "cancelled by user") {
-				// If one is cancelled, we might stop the batch?
-				// Yes, assuming user wants to stop everything.
-				failCount++
-				errorMessages.WriteString(fmt.Sprintf("Cancelled %s\n", remotePath))
-				break 
+				failures = append(failures, batchTransferFailure{Path: itemName, Reason: "cancelled by user"})
+				break
 			}
-			failCount++
-			errorMessages.WriteString(fmt.Sprintf("Failed %s: %v\n", remotePath, err))
+			failures = append(failures, batchTransferFailure{Path: itemName, Reason: err.Error()})
 		} else {
-			successCount++
+			successes = append(successes, itemName)
 		}
 	}
 
-	summary := fmt.Sprintf("Successfully exported %d items to %s.", successCount, localSaveFolder)
-	if failCount > 0 {
-		summary += fmt.Sprintf(" Failed to export %d items.\nDetails:\n%s", failCount, errorMessages.String())
+	summary := formatTransferBatchSummary(localSaveFolder, successes, failures)
+	if len(failures) > 0 {
+		return "", fmt.Errorf(summary)
 	}
 
 	return summary, nil

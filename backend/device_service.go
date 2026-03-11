@@ -32,16 +32,16 @@ func (a *App) GetDevices() ([]Device, error) {
 	return devices, nil
 }
 
-func (a *App) getProp(prop string) string {
-	output, err := a.runCommand("adb", "shell", "getprop", prop)
+func (a *App) getProp(serial string, prop string) string {
+	output, err := a.runAdbCommandWithSerial(serial, "shell", "getprop", prop)
 	if err != nil {
 		return "N/A"
 	}
 	return strings.TrimSpace(output)
 }
 
-func (a *App) checkRootStatus() string {
-	output, err := a.runCommand("adb", "shell", "su", "-c", "id -u")
+func (a *App) checkRootStatus(serial string) string {
+	output, err := a.runAdbCommandWithSerial(serial, "shell", "su", "-c", "id -u")
 	cleanOutput := strings.TrimSpace(output)
 	if err == nil && cleanOutput == "0" {
 		return "Yes"
@@ -49,8 +49,8 @@ func (a *App) checkRootStatus() string {
 	return "No"
 }
 
-func (a *App) getIPAddress() string {
-	output, err := a.runCommand("adb", "shell", "ip", "addr", "show", "wlan0")
+func (a *App) getIPAddress(serial string) string {
+	output, err := a.runAdbCommandWithSerial(serial, "shell", "ip", "addr", "show", "wlan0")
 	if err == nil {
 		re := regexp.MustCompile(`inet (\d+\.\d+\.\d+\.\d+)/\d+`)
 		matches := re.FindStringSubmatch(output)
@@ -59,16 +59,16 @@ func (a *App) getIPAddress() string {
 		}
 	}
 
-	ip := a.getProp("dhcp.wlan0.ipaddress")
+	ip := a.getProp(serial, "dhcp.wlan0.ipaddress")
 	if ip != "N/A" && ip != "" {
 		return ip
 	}
-	
+
 	return "N/A (Not on WiFi?)"
 }
 
-func (a *App) getRamTotal() string {
-	output, err := a.runCommand("adb", "shell", "cat /proc/meminfo | grep MemTotal")
+func (a *App) getRamTotal(serial string) string {
+	output, err := a.runAdbCommandWithSerial(serial, "shell", "cat", "/proc/meminfo")
 	if err != nil {
 		return "N/A"
 	}
@@ -88,8 +88,8 @@ func (a *App) getRamTotal() string {
 	return fmt.Sprintf("%.1f GB", gb)
 }
 
-func (a *App) getStorageInfo() string {
-	output, err := a.runCommand("adb", "shell", "df /data")
+func (a *App) getStorageInfo(serial string) string {
+	output, err := a.runAdbCommandWithSerial(serial, "shell", "df /data")
 	if err != nil {
 		return "N/A"
 	}
@@ -103,7 +103,7 @@ func (a *App) getStorageInfo() string {
 	if len(fields) < 4 {
 		return "N/A"
 	}
-	
+
 	totalKB, errTotal := strconv.ParseFloat(fields[1], 64)
 	usedKB, errUsed := strconv.ParseFloat(fields[2], 64)
 
@@ -117,11 +117,15 @@ func (a *App) getStorageInfo() string {
 	return fmt.Sprintf("%.1f GB / %.1f GB", usedGB, totalGB)
 }
 
-
 func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 	var info DeviceInfo
 	var wg sync.WaitGroup
 	var mu sync.Mutex
+
+	serial, err := a.resolveActiveAdbSerial()
+	if err != nil {
+		return info, err
+	}
 
 	propKeys := []struct {
 		prop   string
@@ -139,7 +143,7 @@ func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 		wg.Add(1)
 		go func(prop string, setter func(string)) {
 			defer wg.Done()
-			val := a.getProp(prop)
+			val := a.getProp(serial, prop)
 			mu.Lock()
 			setter(val)
 			mu.Unlock()
@@ -149,7 +153,7 @@ func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		val := a.getIPAddress()
+		val := a.getIPAddress(serial)
 		mu.Lock()
 		info.IPAddress = val
 		mu.Unlock()
@@ -158,7 +162,7 @@ func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		val := a.checkRootStatus()
+		val := a.checkRootStatus(serial)
 		mu.Lock()
 		info.RootStatus = val
 		mu.Unlock()
@@ -167,7 +171,7 @@ func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		val := a.getRamTotal()
+		val := a.getRamTotal(serial)
 		mu.Lock()
 		info.RamTotal = val
 		mu.Unlock()
@@ -176,7 +180,7 @@ func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		val := a.getStorageInfo()
+		val := a.getStorageInfo(serial)
 		mu.Lock()
 		info.StorageInfo = val
 		mu.Unlock()
@@ -185,12 +189,12 @@ func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if serial, err := a.runCommand("adb", "get-serialno"); err == nil {
+		if serialOutput, err := a.runAdbCommandWithSerial(serial, "get-serialno"); err == nil {
 			mu.Lock()
-			info.Serial = strings.TrimSpace(serial)
+			info.Serial = strings.TrimSpace(serialOutput)
 			mu.Unlock()
 		} else {
-			val := a.getProp("ro.serialno")
+			val := a.getProp(serial, "ro.serialno")
 			mu.Lock()
 			info.Serial = strings.TrimSpace(val)
 			mu.Unlock()
@@ -200,12 +204,12 @@ func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		batteryOutput, err := a.runShellCommand("dumpsys battery | grep level")
+		batteryOutput, err := a.runAdbCommandWithSerial(serial, "shell", "dumpsys battery | grep level")
 		mu.Lock()
 		if err != nil {
 			info.BatteryLevel = "N/A"
 		} else {
-			re := regexp.MustCompile(`:\s*(\d+)`)
+			re := regexp.MustCompile(`(?m)^\s*level:\s*(\d+)\s*$`)
 			matches := re.FindStringSubmatch(batteryOutput)
 			if len(matches) > 1 {
 				info.BatteryLevel = matches[1] + "%"
@@ -223,8 +227,12 @@ func (a *App) GetDeviceInfo() (DeviceInfo, error) {
 
 func (a *App) detectDeviceMode() (DeviceMode, error) {
 	adbDevices, adbErr := a.GetDevices()
+	activeSerial := strings.TrimSpace(a.getActiveSerial())
 	if adbErr == nil {
 		for _, device := range adbDevices {
+			if activeSerial != "" && device.Serial != activeSerial {
+				continue
+			}
 			status := strings.ToLower(strings.TrimSpace(device.Status))
 			switch status {
 			case "device", "recovery", "sideload":
@@ -235,7 +243,14 @@ func (a *App) detectDeviceMode() (DeviceMode, error) {
 
 	fastbootDevices, fastbootErr := a.GetFastbootDevices()
 	if fastbootErr == nil && len(fastbootDevices) > 0 {
-		return DeviceModeFastboot, nil
+		if activeSerial == "" {
+			return DeviceModeFastboot, nil
+		}
+		for _, device := range fastbootDevices {
+			if device.Serial == activeSerial {
+				return DeviceModeFastboot, nil
+			}
+		}
 	}
 
 	if adbErr != nil && fastbootErr != nil {
@@ -252,7 +267,6 @@ func (a *App) GetDeviceMode() (string, error) {
 
 func (a *App) Reboot(mode string) error {
 
-	
 	connectionMode, detectionErr := a.detectDeviceMode()
 	if detectionErr != nil {
 		return detectionErr
@@ -266,7 +280,7 @@ func (a *App) Reboot(mode string) error {
 		if mode != "" {
 			args = append(args, mode)
 		}
-		_, err := a.runCommand("adb", args...)
+		_, err := a.runAdbCommand(args...)
 		return err
 	case DeviceModeFastboot:
 		if mode == "bootloader" {

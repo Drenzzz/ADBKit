@@ -12,7 +12,7 @@ interface InstallApplicationCardProps {
 
 export function InstallApplicationCard({ apkPath, isInstalling, onSelectApk, onInstall }: InstallApplicationCardProps) {
   return (
-    <Card className="border border-border/60 bg-card/90 backdrop-blur shadow-xl">
+    <Card className="border border-border/60 bg-card shadow-lg">
       <CardHeader>
         <CardTitle className="text-xl">Install new application</CardTitle>
         <CardDescription>Use the picker below to sideload an APK onto the connected device.</CardDescription>

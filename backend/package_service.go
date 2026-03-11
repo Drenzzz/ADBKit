@@ -9,8 +9,11 @@ import (
 )
 
 func (a *App) InstallPackage(filePath string) (string, error) {
+	serial, err := a.resolveActiveAdbSerial()
+	if err != nil {
+		return "", err
+	}
 
-	
 	a.opMutex.Lock()
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	a.currentCancel = cancel
@@ -26,7 +29,7 @@ func (a *App) InstallPackage(filePath string) (string, error) {
 	}()
 
 	// Use runCommandContext directly to utilize the cancellable context
-	output, err := a.runCommandContext(ctx, "adb", "install", "-r", filePath)
+	output, err := a.runCommandContext(ctx, "adb", "-s", serial, "install", "-r", filePath)
 	if err != nil {
 		if ctx.Err() == context.Canceled {
 			return "", fmt.Errorf("installation cancelled by user")
@@ -38,8 +41,7 @@ func (a *App) InstallPackage(filePath string) (string, error) {
 
 func (a *App) UninstallPackage(packageName string) (string, error) {
 
-	
-	output, err := a.runCommand("adb", "shell", "pm", "uninstall", packageName)
+	output, err := a.runAdbCommand("shell", "pm", "uninstall", packageName)
 	if err != nil {
 		return "", fmt.Errorf("failed to uninstall package: %w. Output: %s", err, output)
 	}
@@ -63,7 +65,7 @@ func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	
+
 	var enabledPackages []string
 	var disabledPackages []string
 	var errEnabled error
@@ -77,7 +79,7 @@ func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
 			argsEnabled = append(argsEnabled, filterFlag)
 		}
 
-		outputEnabled, err := a.runCommand("adb", argsEnabled...)
+		outputEnabled, err := a.runAdbCommand(argsEnabled...)
 		if err != nil {
 			mu.Lock()
 			errEnabled = fmt.Errorf("failed to list enabled packages: %w", err)
@@ -105,7 +107,7 @@ func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
 			argsDisabled = append(argsDisabled, filterFlag)
 		}
 
-		outputDisabled, err := a.runCommand("adb", argsDisabled...)
+		outputDisabled, err := a.runAdbCommand(argsDisabled...)
 		if err != nil {
 			mu.Lock()
 			errDisabled = fmt.Errorf("failed to list disabled packages: %w", err)
@@ -135,14 +137,14 @@ func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
 	}
 
 	packageMap := make(map[string]PackageInfo)
-	
+
 	for _, pkgName := range enabledPackages {
 		packageMap[pkgName] = PackageInfo{
 			PackageName: pkgName,
 			IsEnabled:   true,
 		}
 	}
-	
+
 	for _, pkgName := range disabledPackages {
 		packageMap[pkgName] = PackageInfo{
 			PackageName: pkgName,
@@ -154,15 +156,13 @@ func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
 	for _, pkg := range packageMap {
 		packages = append(packages, pkg)
 	}
-	
+
 	return packages, nil
 }
 
-
 func (a *App) ClearData(packageName string) (string, error) {
 
-
-	output, err := a.runCommand("adb", "shell", "pm", "clear", packageName)
+	output, err := a.runAdbCommand("shell", "pm", "clear", packageName)
 
 	if err != nil {
 		return "", fmt.Errorf("failed to run clear data command for %s: %w", packageName, err)
@@ -177,8 +177,7 @@ func (a *App) ClearData(packageName string) (string, error) {
 
 func (a *App) DisablePackage(packageName string) (string, error) {
 
-
-	output, err := a.runCommand("adb", "shell", "pm", "disable-user", "--user", "0", packageName)
+	output, err := a.runAdbCommand("shell", "pm", "disable-user", "--user", "0", packageName)
 	if err != nil {
 		return "", fmt.Errorf("failed to run disable command for %s: %w", packageName, err)
 	}
@@ -190,14 +189,13 @@ func (a *App) DisablePackage(packageName string) (string, error) {
 	if strings.Contains(output, "new state:") {
 		return output, nil
 	}
-	
+
 	return "", fmt.Errorf("failed to disable package %s: %s", packageName, output)
 }
 
 func (a *App) EnablePackage(packageName string) (string, error) {
 
-
-	output, err := a.runCommand("adb", "shell", "pm", "enable", "--user", "0", packageName)
+	output, err := a.runAdbCommand("shell", "pm", "enable", "--user", "0", packageName)
 	if err != nil {
 		return "", fmt.Errorf("failed to run enable command for %s: %w", packageName, err)
 	}
@@ -211,8 +209,7 @@ func (a *App) EnablePackage(packageName string) (string, error) {
 
 func (a *App) PullApk(packageName string) (string, error) {
 
-
-	pathOutput, err := a.runCommand("adb", "shell", "pm", "path", packageName)
+	pathOutput, err := a.runAdbCommand("shell", "pm", "path", packageName)
 	if err != nil {
 		return "", fmt.Errorf("failed to find package path for %s: %w", packageName, err)
 	}
@@ -239,6 +236,11 @@ func (a *App) PullApk(packageName string) (string, error) {
 		return "APK pull cancelled by user", nil
 	}
 
+	serial, err := a.resolveActiveAdbSerial()
+	if err != nil {
+		return "", err
+	}
+
 	a.opMutex.Lock()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	a.currentCancel = cancel
@@ -250,7 +252,7 @@ func (a *App) PullApk(packageName string) (string, error) {
 		a.opMutex.Unlock()
 	}()
 
-	output, err := a.runCommandContext(ctx, "adb", "pull", remotePath, localPath)
+	output, err := a.runCommandContext(ctx, "adb", "-s", serial, "pull", remotePath, localPath)
 	if err != nil {
 		if ctx.Err() == context.Canceled {
 			return "", fmt.Errorf("pull cancelled by user")

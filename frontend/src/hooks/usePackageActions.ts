@@ -2,11 +2,12 @@ import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { InstallPackage, ClearData, DisablePackage, EnablePackage, PullApk, UninstallMultiplePackages, DisableMultiplePackages, EnableMultiplePackages } from "../../wailsjs/go/backend/App";
 import { backend } from "../../wailsjs/go/models";
+import type { FilterType } from "./usePackageList";
 
 // Re-export type if needed, but usually imported from models
 type PackageInfo = backend.PackageInfo;
 
-export function usePackageActions(refreshList: (filter: any) => void, currentFilter: any) {
+export function usePackageActions(refreshList: (filter: FilterType) => void, currentFilter: FilterType) {
   const [isInstalling, setIsInstalling] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [isTogglingPackageName, setIsTogglingPackageName] = useState<string>("");

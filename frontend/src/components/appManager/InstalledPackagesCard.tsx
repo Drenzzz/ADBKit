@@ -86,7 +86,7 @@ export function InstalledPackagesCard({
       <CardContent className="space-y-4">
         <div className="rounded-2xl border bg-card/80">
           <div className="min-w-[640px]">
-            <div className="sticky top-0 z-10 flex bg-background/95 backdrop-blur border-b">
+            <div className="sticky top-0 z-10 flex bg-background border-b">
               <div className="flex items-center justify-center w-[50px] h-10 px-4">
                 <Checkbox checked={allVisibleSelected} onCheckedChange={(checked) => onToggleSelectAll(Boolean(checked))} aria-label="Select all" />
               </div>
@@ -95,7 +95,7 @@ export function InstalledPackagesCard({
               <div className="flex items-center justify-end w-[120px] h-10 px-4 text-sm font-medium text-muted-foreground">Actions</div>
             </div>
 
-            <div ref={parentRef} className="max-h-[60vh] overflow-auto custom-scroll">
+            <div ref={parentRef} className="max-h-[60vh] overflow-auto custom-scroll perf-scroll">
               {isLoadingList ? (
                 <div className="flex items-center justify-center h-32">
                   <Loader2 className="h-6 w-6 animate-spin" />
