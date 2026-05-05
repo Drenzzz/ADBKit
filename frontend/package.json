@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -38,6 +40,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "prettier": "^3.8.3",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.1",
     "vite": "^8.0.10"
