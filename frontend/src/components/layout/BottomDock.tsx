@@ -8,7 +8,10 @@ import {
   Terminal,
   MonitorPlay,
   Settings,
+  Sun,
+  Moon,
 } from 'lucide-react'
+import { useUIStore } from '@/stores/useUIStore'
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -22,6 +25,8 @@ const navItems = [
 ]
 
 export function BottomDock() {
+  const { theme, toggleTheme } = useUIStore()
+
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/50 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-2xl items-center justify-center gap-0.5 px-4 py-1.5">
@@ -50,6 +55,17 @@ export function BottomDock() {
             )}
           </NavLink>
         ))}
+
+        <span className="mx-1 h-5 w-px bg-border/50" />
+
+        <button
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="flex flex-col items-center gap-0.5 rounded-md px-3 py-1.5 text-muted-foreground transition-all duration-150 hover:bg-accent/40 hover:text-foreground"
+        >
+          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          <span className="text-[10px] font-medium leading-none">Theme</span>
+        </button>
       </div>
     </nav>
   )
