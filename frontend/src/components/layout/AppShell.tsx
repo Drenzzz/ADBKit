@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { BottomDock } from './BottomDock'
+import { CommandPalette } from '@/components/common/CommandPalette'
 
 export function AppShell() {
   return (
@@ -10,6 +11,7 @@ export function AppShell() {
         </div>
       </main>
       <BottomDock />
+      <CommandPalette />
     </div>
   )
 }
