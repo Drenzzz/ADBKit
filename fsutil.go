@@ -5,16 +5,18 @@ import (
 	"path/filepath"
 )
 
-// WriteFileAtomic writes data to a file atomically by writing to a temp file
-// then renaming. Prevents partial writes on crash.
 func WriteFileAtomic(path string, data []byte) error {
+	return WriteFileAtomicWithMode(path, data, 0o644)
+}
+
+func WriteFileAtomicWithMode(path string, data []byte, mode os.FileMode) error {
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return NewOperationError("fsutil", "failed to create directory", err.Error(), true)
 	}
 
 	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+	if err := os.WriteFile(tmp, data, mode); err != nil {
 		return NewOperationError("fsutil", "failed to write temp file", err.Error(), true)
 	}
 

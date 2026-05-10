@@ -8,17 +8,18 @@ import (
 
 // AppConfig holds the persistent configuration for ADBKit.
 type AppConfig struct {
-	AdbPath         string            `json:"adb_path"`
-	FastbootPath    string            `json:"fastboot_path"`
-	ScrcpyPath      string            `json:"scrcpy_path"`
-	SetupCompleted  bool              `json:"setup_completed"`
-	ScrcpyEnabled   bool              `json:"scrcpy_enabled"`
-	BinaryVersions  map[string]string `json:"binary_versions"`
+	AdbPath        string            `json:"adb_path"`
+	FastbootPath   string            `json:"fastboot_path"`
+	ScrcpyPath     string            `json:"scrcpy_path"`
+	SetupCompleted bool              `json:"setup_completed"`
+	ScrcpyEnabled  bool              `json:"scrcpy_enabled"`
+	BinaryVersions map[string]string `json:"binary_versions"`
 }
 
 // DefaultConfig returns a fresh config with empty paths.
 func DefaultConfig() *AppConfig {
 	return &AppConfig{
+		ScrcpyEnabled:  true,
 		BinaryVersions: make(map[string]string),
 	}
 }
@@ -38,6 +39,12 @@ func LoadConfig(dataDir string) (*AppConfig, error) {
 	if err := json.Unmarshal(data, cfg); err != nil {
 		return nil, NewOperationError("config", "failed to parse config", err.Error(), false)
 	}
+	if cfg.BinaryVersions == nil {
+		cfg.BinaryVersions = make(map[string]string)
+	}
+	if !cfg.ScrcpyEnabled && cfg.ScrcpyPath == "" {
+		cfg.ScrcpyEnabled = true
+	}
 	return cfg, nil
 }
 
@@ -48,5 +55,5 @@ func SaveConfig(dataDir string, cfg *AppConfig) error {
 	if err != nil {
 		return NewOperationError("config", "failed to marshal config", err.Error(), true)
 	}
-	return WriteFileAtomic(path, data)
+	return WriteFileAtomicWithMode(path, data, 0o600)
 }
