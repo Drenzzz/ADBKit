@@ -1,7 +1,10 @@
+import { PagePlaceholder } from '@/components/layout/PagePlaceholder'
+
 export default function SettingsPage() {
   return (
-    <div className="flex h-full items-center justify-center">
-      <h1 className="text-2xl font-semibold">Settings</h1>
-    </div>
+    <PagePlaceholder
+      title="Settings"
+      description="Binary manager, audit logs, preferences, and diagnostics."
+    />
   )
 }

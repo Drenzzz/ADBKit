@@ -1,7 +1,10 @@
+import { PagePlaceholder } from '@/components/layout/PagePlaceholder'
+
 export default function TerminalPage() {
   return (
-    <div className="flex h-full items-center justify-center">
-      <h1 className="text-2xl font-semibold">Terminal</h1>
-    </div>
+    <PagePlaceholder
+      title="Terminal"
+      description="Interactive ADB shell, command history, and logcat viewer."
+    />
   )
 }
