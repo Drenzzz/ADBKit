@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -22,7 +23,6 @@ func ValidatePath(path string) error {
 	return nil
 }
 
-// ValidateExecutable checks if a file exists and has execute permission.
 func ValidateExecutable(path string) error {
 	if err := ValidatePath(path); err != nil {
 		return err
@@ -33,6 +33,23 @@ func ValidateExecutable(path string) error {
 	}
 	if info.IsDir() {
 		return NewOperationError("validation", "path is a directory, not a file", path, false)
+	}
+	if runtime.GOOS != "windows" && info.Mode().Perm()&0o111 == 0 {
+		return NewOperationError("validation", "file is not executable", path, false)
+	}
+	return nil
+}
+
+func ValidateBinaryExecutable(name, path string) error {
+	if !IsSupportedBinaryName(name) {
+		return NewOperationError("validation", "unsupported binary name", name, false)
+	}
+	if err := ValidateExecutable(path); err != nil {
+		return err
+	}
+	actualName := strings.TrimSuffix(strings.ToLower(filepath.Base(path)), ".exe")
+	if actualName != name {
+		return NewOperationError("validation", "binary name does not match", path, false)
 	}
 	return nil
 }

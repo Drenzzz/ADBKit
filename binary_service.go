@@ -2,26 +2,31 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
-// BinaryStatus represents the state of a detected binary.
+const (
+	BinaryNameAdb      = "adb"
+	BinaryNameFastboot = "fastboot"
+	BinaryNameScrcpy   = "scrcpy"
+)
+
 type BinaryStatus string
 
 const (
-	BinaryFound      BinaryStatus = "found"
-	BinaryMissing    BinaryStatus = "missing"
-	BinaryInvalid    BinaryStatus = "invalid_path"
+	BinaryFound       BinaryStatus = "found"
+	BinaryMissing     BinaryStatus = "missing"
+	BinaryInvalid     BinaryStatus = "invalid_path"
 	BinaryDownloading BinaryStatus = "downloading"
-	BinaryReady      BinaryStatus = "ready"
-	BinarySkipped    BinaryStatus = "skipped"
+	BinaryReady       BinaryStatus = "ready"
 )
 
-// BinaryInfo holds the detection result for a single binary.
 type BinaryInfo struct {
 	Name    string       `json:"name"`
 	Path    string       `json:"path"`
@@ -31,124 +36,143 @@ type BinaryInfo struct {
 	Reason  string       `json:"reason,omitempty"`
 }
 
-// BinaryService manages detection and validation of external binaries.
 type BinaryService struct {
 	dataDir string
 }
 
-// NewBinaryService creates a new BinaryService.
 func NewBinaryService(dataDir string) *BinaryService {
 	return &BinaryService{dataDir: dataDir}
 }
 
-// DetectAll runs detection for adb, fastboot, and scrcpy.
 func (bs *BinaryService) DetectAll(cfg *AppConfig) []*BinaryInfo {
 	results := make([]*BinaryInfo, 0, 3)
-	results = append(results, bs.Detect("adb", cfg.AdbPath))
-	results = append(results, bs.Detect("fastboot", cfg.FastbootPath))
-	results = append(results, bs.DetectScrcpy(cfg.ScrcpyPath, cfg.ScrcpyEnabled))
+	results = append(results, bs.Detect(BinaryNameAdb, cfg.AdbPath))
+	results = append(results, bs.Detect(BinaryNameFastboot, cfg.FastbootPath))
+	results = append(results, bs.Detect(BinaryNameScrcpy, cfg.ScrcpyPath))
 	return results
 }
 
-// Detect runs the full discovery and validation flow for a required binary.
 func (bs *BinaryService) Detect(name string, configPath string) *BinaryInfo {
-	info := &BinaryInfo{Name: name}
-
-	// Step 1: custom path from config
-	if configPath != "" {
-		if err := ValidateExecutable(configPath); err == nil {
-			info.Path = configPath
-			info.Source = "config"
-			info.Status = BinaryReady
-			info.Version = bs.getVersion(name, configPath)
-			return info
-		}
-		info.Path = configPath
-		info.Source = "config"
+	info := &BinaryInfo{Name: name, Status: BinaryMissing}
+	if !IsSupportedBinaryName(name) {
 		info.Status = BinaryInvalid
-		info.Reason = "saved path is invalid"
-	}
-
-	// Step 2: system PATH
-	if path, err := exec.LookPath(name); err == nil {
-		if err := ValidateExecutable(path); err == nil {
-			info.Path = path
-			info.Source = "system-path"
-			info.Status = BinaryReady
-			info.Version = bs.getVersion(name, path)
-			return info
-		}
-	}
-
-	// Step 3: app data bin directory
-	appBin := filepath.Join(bs.dataDir, "bin", name)
-	if runtime.GOOS == "windows" {
-		appBin += ".exe"
-	}
-	if err := ValidateExecutable(appBin); err == nil {
-		info.Path = appBin
-		info.Source = "app-data"
-		info.Status = BinaryReady
-		info.Version = bs.getVersion(name, appBin)
+		info.Reason = "unsupported binary name"
 		return info
 	}
 
-	// Step 4: common locations per OS
-	for _, candidate := range bs.commonPaths(name) {
-		if err := ValidateExecutable(candidate); err == nil {
-			info.Path = candidate
-			info.Source = "common-path"
-			info.Status = BinaryReady
-			info.Version = bs.getVersion(name, candidate)
-			return info
+	if configPath != "" {
+		resolved := bs.resolveCandidate(name, configPath, "config", true)
+		if resolved.Status == BinaryReady {
+			return resolved
+		}
+		info = resolved
+	}
+
+	if path, err := exec.LookPath(binaryExecutableName(name)); err == nil {
+		resolved := bs.resolveCandidate(name, path, "system-path", false)
+		if resolved.Status == BinaryReady {
+			return resolved
 		}
 	}
 
-	info.Status = BinaryMissing
+	managedPath := filepath.Join(bs.dataDir, "bin", binaryExecutableName(name))
+	resolved := bs.resolveCandidate(name, managedPath, "app-data", false)
+	if resolved.Status == BinaryReady {
+		return resolved
+	}
+
+	for _, candidate := range bs.commonPaths(name) {
+		resolved := bs.resolveCandidate(name, candidate, "common-path", false)
+		if resolved.Status == BinaryReady {
+			return resolved
+		}
+	}
+
 	return info
 }
 
-// DetectScrcpy runs detection for scrcpy, which is optional.
-func (bs *BinaryService) DetectScrcpy(configPath string, enabled bool) *BinaryInfo {
-	if !enabled {
-		return &BinaryInfo{
-			Name:   "scrcpy",
-			Status: BinarySkipped,
-			Reason: "scrcpy is disabled in config",
+func (bs *BinaryService) resolveCandidate(name, path, source string, explicit bool) *BinaryInfo {
+	info := &BinaryInfo{Name: name, Path: path, Source: source, Status: BinaryMissing}
+	if err := ValidateBinaryExecutable(name, path); err != nil {
+		if explicit {
+			info.Status = BinaryInvalid
+			info.Reason = err.Error()
 		}
+		return info
 	}
-	return bs.Detect("scrcpy", configPath)
+	version, err := bs.getVersion(name, path)
+	if err != nil {
+		info.Status = BinaryInvalid
+		info.Reason = err.Error()
+		return info
+	}
+	info.Status = BinaryReady
+	info.Version = version
+	return info
 }
 
-// GetVersion runs the version command for the given binary at path.
-func (bs *BinaryService) getVersion(name, path string) string {
-	ctx := context.Background()
-	result, err := RunCommand(ctx, ExecRequest{
-		Command: path,
-		Args:    versionArgs(name),
-		Timeout: 5e9, // 5 seconds
-	})
-	if err != nil || result.ExitCode != 0 {
-		return ""
-	}
-	return parseVersion(result.Stdout)
-}
-
-func versionArgs(name string) []string {
+func IsSupportedBinaryName(name string) bool {
 	switch name {
-	case "adb":
-		return []string{"version"}
-	case "fastboot":
-		return []string{"--version"}
-	case "scrcpy":
-		return []string{"--version"}
+	case BinaryNameAdb, BinaryNameFastboot, BinaryNameScrcpy:
+		return true
 	default:
-		return []string{"--version"}
+		return false
+	}
+}
+
+func binaryExecutableName(name string) string {
+	if runtime.GOOS == "windows" {
+		return name + ".exe"
+	}
+	return name
+}
+
+func (bs *BinaryService) getVersion(name, path string) (string, error) {
+	var lastErr error
+	for _, args := range versionCommands(name) {
+		ctx := context.Background()
+		result, err := RunCommand(ctx, ExecRequest{
+			Command: path,
+			Args:    args,
+			Timeout: 5 * time.Second,
+		})
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		if result.ExitCode != 0 {
+			lastErr = errors.New(strings.TrimSpace(result.Stderr))
+			continue
+		}
+		version := parseVersion(result.Stdout)
+		if version == "" {
+			version = parseVersion(result.Stderr)
+		}
+		if version != "" {
+			return version, nil
+		}
+		lastErr = errors.New("version output is empty")
+	}
+	if lastErr != nil {
+		return "", lastErr
+	}
+	return "", errors.New("version command is unavailable")
+}
+
+func versionCommands(name string) [][]string {
+	switch name {
+	case BinaryNameAdb:
+		return [][]string{{"version"}}
+	case BinaryNameFastboot:
+		return [][]string{{"--version"}, {"version"}}
+	case BinaryNameScrcpy:
+		return [][]string{{"--version"}}
+	default:
+		return [][]string{{"--version"}}
 	}
 }
 
 func parseVersion(output string) string {
-	// Extract first line that looks like a version string.
 	for _, line := range strings.Split(output, "\n") {
 		line = strings.TrimSpace(line)
 		if line != "" {
@@ -160,25 +184,26 @@ func parseVersion(output string) string {
 
 func (bs *BinaryService) commonPaths(name string) []string {
 	home, _ := os.UserHomeDir()
+	executable := binaryExecutableName(name)
 
 	switch runtime.GOOS {
 	case "linux":
 		return []string{
-			filepath.Join(home, "Android", "Sdk", "platform-tools", name),
-			"/usr/bin/" + name,
-			"/usr/local/bin/" + name,
+			filepath.Join(home, "Android", "Sdk", "platform-tools", executable),
+			filepath.Join("/usr", "bin", executable),
+			filepath.Join("/usr", "local", "bin", executable),
 		}
 	case "darwin":
 		return []string{
-			filepath.Join(home, "Library", "Android", "sdk", "platform-tools", name),
-			"/usr/local/bin/" + name,
-			"/opt/homebrew/bin/" + name,
+			filepath.Join(home, "Library", "Android", "sdk", "platform-tools", executable),
+			filepath.Join("/usr", "local", "bin", executable),
+			filepath.Join("/opt", "homebrew", "bin", executable),
 		}
 	case "windows":
 		appData := os.Getenv("APPDATA")
 		return []string{
-			filepath.Join(home, "AppData", "Local", "Android", "Sdk", "platform-tools", name+".exe"),
-			filepath.Join(appData, "adbkit", "bin", name+".exe"),
+			filepath.Join(home, "AppData", "Local", "Android", "Sdk", "platform-tools", executable),
+			filepath.Join(appData, "adbkit", "bin", executable),
 		}
 	default:
 		return nil
