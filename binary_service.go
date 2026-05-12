@@ -36,6 +36,24 @@ type BinaryInfo struct {
 	Reason  string       `json:"reason,omitempty"`
 }
 
+type BinarySetupResult struct {
+	Adb      *BinaryInfo `json:"adb"`
+	Fastboot *BinaryInfo `json:"fastboot"`
+	Scrcpy   *BinaryInfo `json:"scrcpy"`
+	Ready    bool        `json:"ready"`
+}
+
+type SetupState struct {
+	Status         *BinarySetupResult `json:"status"`
+	SetupCompleted bool               `json:"setupCompleted"`
+	CanFinish      bool               `json:"canFinish"`
+}
+
+type RevalidationResult struct {
+	Status  *BinarySetupResult `json:"status"`
+	Changed bool               `json:"changed"`
+}
+
 type BinaryService struct {
 	dataDir string
 }
@@ -50,6 +68,96 @@ func (bs *BinaryService) DetectAll(cfg *AppConfig) []*BinaryInfo {
 	results = append(results, bs.Detect(BinaryNameFastboot, cfg.FastbootPath))
 	results = append(results, bs.Detect(BinaryNameScrcpy, cfg.ScrcpyPath))
 	return results
+}
+
+func (bs *BinaryService) GetBinaryStatus(cfg *AppConfig) *BinarySetupResult {
+	adb := bs.Detect(BinaryNameAdb, cfg.AdbPath)
+	fastboot := bs.Detect(BinaryNameFastboot, cfg.FastbootPath)
+	scrcpy := bs.Detect(BinaryNameScrcpy, cfg.ScrcpyPath)
+
+	return &BinarySetupResult{
+		Adb:      adb,
+		Fastboot: fastboot,
+		Scrcpy:   scrcpy,
+		Ready:    adb.Status == BinaryReady && fastboot.Status == BinaryReady && scrcpy.Status == BinaryReady,
+	}
+}
+
+func (bs *BinaryService) GetSetupState(cfg *AppConfig) *SetupState {
+	status := bs.GetBinaryStatus(cfg)
+	return &SetupState{
+		Status:         status,
+		SetupCompleted: cfg.SetupCompleted && status.Ready,
+		CanFinish:      status.Ready,
+	}
+}
+
+func (bs *BinaryService) SetCustomBinary(cfg *AppConfig, name, path string) error {
+	resolved := bs.resolveCandidate(name, path, "config", true)
+	if resolved.Status != BinaryReady {
+		return NewOperationError("set_custom_binary", "binary path is invalid", resolved.Reason, false)
+	}
+	assignBinaryPath(cfg, name, resolved.Path)
+	cfg.BinaryVersions[name] = resolved.Version
+	cfg.SetupCompleted = false
+	return nil
+}
+
+func (bs *BinaryService) ClearCustomBinary(cfg *AppConfig, name string) error {
+	if !IsSupportedBinaryName(name) {
+		return NewOperationError("clear_custom_binary", "unsupported binary name", name, false)
+	}
+	assignBinaryPath(cfg, name, "")
+	delete(cfg.BinaryVersions, name)
+	cfg.SetupCompleted = false
+	return nil
+}
+
+func (bs *BinaryService) CompleteSetup(cfg *AppConfig) (*SetupState, error) {
+	state := bs.GetSetupState(cfg)
+	if !state.CanFinish {
+		return nil, NewOperationError("complete_setup", "required binaries are not ready", "adb, fastboot, and scrcpy must be ready", false)
+	}
+	cfg.SetupCompleted = true
+	return bs.GetSetupState(cfg), nil
+}
+
+func (bs *BinaryService) RevalidateConfig(cfg *AppConfig) *RevalidationResult {
+	status := bs.GetBinaryStatus(cfg)
+	changed := false
+	changed = syncBinaryConfig(cfg, BinaryNameAdb, status.Adb) || changed
+	changed = syncBinaryConfig(cfg, BinaryNameFastboot, status.Fastboot) || changed
+	changed = syncBinaryConfig(cfg, BinaryNameScrcpy, status.Scrcpy) || changed
+	if cfg.SetupCompleted && !status.Ready {
+		cfg.SetupCompleted = false
+		changed = true
+	}
+	if changed {
+		status = bs.GetBinaryStatus(cfg)
+	}
+	return &RevalidationResult{Status: status, Changed: changed}
+}
+
+func (bs *BinaryService) GetManagedBinaryDir() string {
+	return filepath.Join(bs.dataDir, "bin")
+}
+
+func (bs *BinaryService) ListManagedBinaries() ([]string, error) {
+	dir := bs.GetManagedBinaryDir()
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return nil, NewOperationError("list_managed_binaries", "failed to prepare managed binary directory", err.Error(), true)
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, NewOperationError("list_managed_binaries", "failed to read managed binary directory", err.Error(), true)
+	}
+	binaries := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			binaries = append(binaries, entry.Name())
+		}
+	}
+	return binaries, nil
 }
 
 func (bs *BinaryService) Detect(name string, configPath string) *BinaryInfo {
@@ -207,5 +315,50 @@ func (bs *BinaryService) commonPaths(name string) []string {
 		}
 	default:
 		return nil
+	}
+}
+
+func assignBinaryPath(cfg *AppConfig, name, path string) {
+	switch name {
+	case BinaryNameAdb:
+		cfg.AdbPath = path
+	case BinaryNameFastboot:
+		cfg.FastbootPath = path
+	case BinaryNameScrcpy:
+		cfg.ScrcpyPath = path
+		cfg.ScrcpyEnabled = true
+	}
+}
+
+func syncBinaryConfig(cfg *AppConfig, name string, info *BinaryInfo) bool {
+	if info == nil || info.Status != BinaryReady {
+		return false
+	}
+	changed := false
+	if pathChanged(cfg, name, info.Path) {
+		assignBinaryPath(cfg, name, info.Path)
+		changed = true
+	}
+	if cfg.BinaryVersions == nil {
+		cfg.BinaryVersions = make(map[string]string)
+		changed = true
+	}
+	if cfg.BinaryVersions[name] != info.Version {
+		cfg.BinaryVersions[name] = info.Version
+		changed = true
+	}
+	return changed
+}
+
+func pathChanged(cfg *AppConfig, name, path string) bool {
+	switch name {
+	case BinaryNameAdb:
+		return cfg.AdbPath != path
+	case BinaryNameFastboot:
+		return cfg.FastbootPath != path
+	case BinaryNameScrcpy:
+		return cfg.ScrcpyPath != path
+	default:
+		return false
 	}
 }

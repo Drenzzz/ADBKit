@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 )
 
 type App struct {
@@ -14,6 +15,7 @@ type App struct {
 	binaryService *BinaryService
 	config        *AppConfig
 	dataDir       string
+	mu            sync.Mutex
 }
 
 func NewApp() *App {
@@ -82,4 +84,82 @@ func appDataDir() (string, error) {
 
 func (a *App) Greet(name string) string {
 	return "Hello " + name + ", It's show time!"
+}
+
+func (a *App) GetBinaryStatus() *BinarySetupResult {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.binaryService.GetBinaryStatus(a.config)
+}
+
+func (a *App) GetSetupState() *SetupState {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.binaryService.GetSetupState(a.config)
+}
+
+func (a *App) RetryBinaryDetection() (*BinarySetupResult, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	result := a.binaryService.RevalidateConfig(a.config)
+	if result.Changed {
+		if err := SaveConfig(a.dataDir, a.config); err != nil {
+			return nil, err
+		}
+	}
+	return result.Status, nil
+}
+
+func (a *App) SetCustomBinary(name string, path string) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if err := a.binaryService.SetCustomBinary(a.config, name, path); err != nil {
+		return err
+	}
+	return SaveConfig(a.dataDir, a.config)
+}
+
+func (a *App) ClearCustomBinary(name string) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if err := a.binaryService.ClearCustomBinary(a.config, name); err != nil {
+		return err
+	}
+	return SaveConfig(a.dataDir, a.config)
+}
+
+func (a *App) CompleteSetup() (*SetupState, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	state, err := a.binaryService.CompleteSetup(a.config)
+	if err != nil {
+		return nil, err
+	}
+	if err := SaveConfig(a.dataDir, a.config); err != nil {
+		return nil, err
+	}
+	return state, nil
+}
+
+func (a *App) GetManagedBinaryDir() string {
+	return a.binaryService.GetManagedBinaryDir()
+}
+
+func (a *App) ListManagedBinaries() ([]string, error) {
+	return a.binaryService.ListManagedBinaries()
+}
+
+func (a *App) GetCapabilities() map[string]bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	status := a.binaryService.GetBinaryStatus(a.config)
+	return map[string]bool{
+		"adbAvailable":             status.Adb.Status == BinaryReady,
+		"fastbootAvailable":        status.Fastboot.Status == BinaryReady,
+		"scrcpyAvailable":          status.Scrcpy.Status == BinaryReady,
+		"setupCompleted":           a.config.SetupCompleted && status.Ready,
+		"wirelessPairingSupported": status.Adb.Status == BinaryReady,
+		"audioCaptureSupported":    status.Scrcpy.Status == BinaryReady,
+		"clipboardSyncSupported":   status.Scrcpy.Status == BinaryReady,
+	}
 }
