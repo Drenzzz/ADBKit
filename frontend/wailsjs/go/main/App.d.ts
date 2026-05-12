@@ -20,4 +20,8 @@ export function ListManagedBinaries():Promise<Array<string>>;
 
 export function RetryBinaryDetection():Promise<main.BinarySetupResult>;
 
+export function SelectBinaryFile(arg1:string):Promise<string>;
+
+export function SelectPlatformToolsDirectory():Promise<main.PlatformToolsSelection>;
+
 export function SetCustomBinary(arg1:string,arg2:string):Promise<void>;

@@ -38,6 +38,14 @@ export function RetryBinaryDetection() {
   return window['go']['main']['App']['RetryBinaryDetection']();
 }
 
+export function SelectBinaryFile(arg1) {
+  return window['go']['main']['App']['SelectBinaryFile'](arg1);
+}
+
+export function SelectPlatformToolsDirectory() {
+  return window['go']['main']['App']['SelectPlatformToolsDirectory']();
+}
+
 export function SetCustomBinary(arg1, arg2) {
   return window['go']['main']['App']['SetCustomBinary'](arg1, arg2);
 }

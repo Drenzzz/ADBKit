@@ -58,6 +58,22 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class PlatformToolsSelection {
+	    directory: string;
+	    adbPath: string;
+	    fastbootPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new PlatformToolsSelection(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.directory = source["directory"];
+	        this.adbPath = source["adbPath"];
+	        this.fastbootPath = source["fastbootPath"];
+	    }
+	}
 	export class SetupState {
 	    status?: BinarySetupResult;
 	    setupCompleted: boolean;

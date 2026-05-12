@@ -13,6 +13,7 @@ type App struct {
 	ctx           context.Context
 	auditLog      *AuditLog
 	binaryService *BinaryService
+	dialogService *DialogService
 	config        *AppConfig
 	dataDir       string
 	mu            sync.Mutex
@@ -42,6 +43,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.config = config
 	a.binaryService = NewBinaryService(a.dataDir)
+	a.dialogService = NewDialogService(ctx)
 
 	al, err := NewAuditLog(a.dataDir)
 	if err != nil {
@@ -162,4 +164,12 @@ func (a *App) GetCapabilities() map[string]bool {
 		"audioCaptureSupported":    status.Scrcpy.Status == BinaryReady,
 		"clipboardSyncSupported":   status.Scrcpy.Status == BinaryReady,
 	}
+}
+
+func (a *App) SelectBinaryFile(name string) (string, error) {
+	return a.dialogService.SelectBinaryFile(name)
+}
+
+func (a *App) SelectPlatformToolsDirectory() (*PlatformToolsSelection, error) {
+	return a.dialogService.SelectPlatformToolsDirectory()
 }

@@ -1,0 +1,66 @@
+package main
+
+import (
+	"context"
+	"path/filepath"
+
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+)
+
+type PlatformToolsSelection struct {
+	Directory    string `json:"directory"`
+	AdbPath      string `json:"adbPath"`
+	FastbootPath string `json:"fastbootPath"`
+}
+
+type DialogService struct {
+	ctx context.Context
+}
+
+func NewDialogService(ctx context.Context) *DialogService {
+	return &DialogService{ctx: ctx}
+}
+
+func (s *DialogService) SetContext(ctx context.Context) {
+	s.ctx = ctx
+}
+
+func (s *DialogService) SelectBinaryFile(name string) (string, error) {
+	if s.ctx == nil {
+		return "", NewOperationError("select_binary_file", "application context is not initialized", "", true)
+	}
+	if !IsSupportedBinaryName(name) {
+		return "", NewOperationError("select_binary_file", "unsupported binary name", name, false)
+	}
+	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+		Title:           "Select " + name + " binary",
+		ShowHiddenFiles: true,
+		Filters: []wailsruntime.FileFilter{
+			{DisplayName: "Executable files", Pattern: "*"},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+func (s *DialogService) SelectPlatformToolsDirectory() (*PlatformToolsSelection, error) {
+	if s.ctx == nil {
+		return nil, NewOperationError("select_platform_tools_directory", "application context is not initialized", "", true)
+	}
+	dir, err := wailsruntime.OpenDirectoryDialog(s.ctx, wailsruntime.OpenDialogOptions{
+		Title: "Select platform-tools directory",
+	})
+	if err != nil {
+		return nil, err
+	}
+	if dir == "" {
+		return &PlatformToolsSelection{}, nil
+	}
+	return &PlatformToolsSelection{
+		Directory:    dir,
+		AdbPath:      filepath.Join(dir, binaryExecutableName(BinaryNameAdb)),
+		FastbootPath: filepath.Join(dir, binaryExecutableName(BinaryNameFastboot)),
+	}, nil
+}
