@@ -20,11 +20,9 @@ const (
 type BinaryStatus string
 
 const (
-	BinaryFound       BinaryStatus = "found"
-	BinaryMissing     BinaryStatus = "missing"
-	BinaryInvalid     BinaryStatus = "invalid_path"
-	BinaryDownloading BinaryStatus = "downloading"
-	BinaryReady       BinaryStatus = "ready"
+	BinaryMissing BinaryStatus = "missing"
+	BinaryInvalid BinaryStatus = "invalid_path"
+	BinaryReady   BinaryStatus = "ready"
 )
 
 type BinaryInfo struct {
@@ -326,7 +324,6 @@ func assignBinaryPath(cfg *AppConfig, name, path string) {
 		cfg.FastbootPath = path
 	case BinaryNameScrcpy:
 		cfg.ScrcpyPath = path
-		cfg.ScrcpyEnabled = true
 	}
 }
 

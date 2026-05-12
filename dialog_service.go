@@ -58,9 +58,16 @@ func (s *DialogService) SelectPlatformToolsDirectory() (*PlatformToolsSelection,
 	if dir == "" {
 		return &PlatformToolsSelection{}, nil
 	}
+	adbPath := filepath.Join(dir, binaryExecutableName(BinaryNameAdb))
+	fastbootPath := filepath.Join(dir, binaryExecutableName(BinaryNameFastboot))
+	adbValid := ValidateExecutable(adbPath) == nil
+	fastbootValid := ValidateExecutable(fastbootPath) == nil
+	if !adbValid && !fastbootValid {
+		return nil, NewOperationError("select_platform_tools_directory", "no adb or fastboot found in selected directory", dir, false)
+	}
 	return &PlatformToolsSelection{
 		Directory:    dir,
-		AdbPath:      filepath.Join(dir, binaryExecutableName(BinaryNameAdb)),
-		FastbootPath: filepath.Join(dir, binaryExecutableName(BinaryNameFastboot)),
+		AdbPath:      adbPath,
+		FastbootPath: fastbootPath,
 	}, nil
 }
