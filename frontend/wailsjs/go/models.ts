@@ -58,6 +58,82 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class DeviceInfo {
+	    serial: string;
+	    state: string;
+	    mode: string;
+	    product?: string;
+	    model?: string;
+	    device?: string;
+	    brand?: string;
+	    codename?: string;
+	    manufacturer?: string;
+	    androidVersion?: string;
+	    sdkVersion?: string;
+	    buildId?: string;
+	    securityPatch?: string;
+	    abis?: string;
+	    transportId?: string;
+	    connectionLabel?: string;
+	    ipAddress?: string;
+	    rootStatus?: string;
+	    batteryLevel?: string;
+	    storageInfo?: string;
+	    ramTotal?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeviceInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.state = source["state"];
+	        this.mode = source["mode"];
+	        this.product = source["product"];
+	        this.model = source["model"];
+	        this.device = source["device"];
+	        this.brand = source["brand"];
+	        this.codename = source["codename"];
+	        this.manufacturer = source["manufacturer"];
+	        this.androidVersion = source["androidVersion"];
+	        this.sdkVersion = source["sdkVersion"];
+	        this.buildId = source["buildId"];
+	        this.securityPatch = source["securityPatch"];
+	        this.abis = source["abis"];
+	        this.transportId = source["transportId"];
+	        this.connectionLabel = source["connectionLabel"];
+	        this.ipAddress = source["ipAddress"];
+	        this.rootStatus = source["rootStatus"];
+	        this.batteryLevel = source["batteryLevel"];
+	        this.storageInfo = source["storageInfo"];
+	        this.ramTotal = source["ramTotal"];
+	    }
+	}
+	export class DeviceSummary {
+	    serial: string;
+	    state: string;
+	    mode: string;
+	    product?: string;
+	    model?: string;
+	    device?: string;
+	    transportId?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeviceSummary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.state = source["state"];
+	        this.mode = source["mode"];
+	        this.product = source["product"];
+	        this.model = source["model"];
+	        this.device = source["device"];
+	        this.transportId = source["transportId"];
+	    }
+	}
 	export class PlatformToolsSelection {
 	    directory: string;
 	    adbPath: string;

@@ -10,12 +10,28 @@ export function CompleteSetup() {
   return window['go']['main']['App']['CompleteSetup']();
 }
 
+export function GetActiveSerial() {
+  return window['go']['main']['App']['GetActiveSerial']();
+}
+
 export function GetBinaryStatus() {
   return window['go']['main']['App']['GetBinaryStatus']();
 }
 
 export function GetCapabilities() {
   return window['go']['main']['App']['GetCapabilities']();
+}
+
+export function GetDeviceInfo(arg1) {
+  return window['go']['main']['App']['GetDeviceInfo'](arg1);
+}
+
+export function GetDeviceMode(arg1) {
+  return window['go']['main']['App']['GetDeviceMode'](arg1);
+}
+
+export function GetDevices() {
+  return window['go']['main']['App']['GetDevices']();
 }
 
 export function GetManagedBinaryDir() {
@@ -34,6 +50,10 @@ export function ListManagedBinaries() {
   return window['go']['main']['App']['ListManagedBinaries']();
 }
 
+export function RebootDevice(arg1, arg2) {
+  return window['go']['main']['App']['RebootDevice'](arg1, arg2);
+}
+
 export function RetryBinaryDetection() {
   return window['go']['main']['App']['RetryBinaryDetection']();
 }
@@ -44,6 +64,10 @@ export function SelectBinaryFile(arg1) {
 
 export function SelectPlatformToolsDirectory() {
   return window['go']['main']['App']['SelectPlatformToolsDirectory']();
+}
+
+export function SetActiveSerial(arg1) {
+  return window['go']['main']['App']['SetActiveSerial'](arg1);
 }
 
 export function SetCustomBinary(arg1, arg2) {

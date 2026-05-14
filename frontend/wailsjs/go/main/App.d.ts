@@ -6,9 +6,17 @@ export function ClearCustomBinary(arg1:string):Promise<void>;
 
 export function CompleteSetup():Promise<main.SetupState>;
 
+export function GetActiveSerial():Promise<string>;
+
 export function GetBinaryStatus():Promise<main.BinarySetupResult>;
 
 export function GetCapabilities():Promise<Record<string, boolean>>;
+
+export function GetDeviceInfo(arg1:string):Promise<main.DeviceInfo>;
+
+export function GetDeviceMode(arg1:string):Promise<main.DeviceMode>;
+
+export function GetDevices():Promise<Array<main.DeviceSummary>>;
 
 export function GetManagedBinaryDir():Promise<string>;
 
@@ -18,10 +26,14 @@ export function Greet(arg1:string):Promise<string>;
 
 export function ListManagedBinaries():Promise<Array<string>>;
 
+export function RebootDevice(arg1:string,arg2:string):Promise<string>;
+
 export function RetryBinaryDetection():Promise<main.BinarySetupResult>;
 
 export function SelectBinaryFile(arg1:string):Promise<string>;
 
 export function SelectPlatformToolsDirectory():Promise<main.PlatformToolsSelection>;
+
+export function SetActiveSerial(arg1:string):Promise<void>;
 
 export function SetCustomBinary(arg1:string,arg2:string):Promise<void>;

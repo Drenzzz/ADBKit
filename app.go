@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,9 +14,11 @@ type App struct {
 	ctx           context.Context
 	auditLog      *AuditLog
 	binaryService *BinaryService
+	deviceService *DeviceService
 	dialogService *DialogService
 	config        *AppConfig
 	dataDir       string
+	activeSerial  string
 	mu            sync.Mutex
 }
 
@@ -43,6 +46,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.config = config
 	a.binaryService = NewBinaryService(a.dataDir)
+	a.deviceService = NewDeviceService(a.dataDir)
 	a.dialogService = NewDialogService(ctx)
 
 	al, err := NewAuditLog(a.dataDir)
@@ -172,4 +176,63 @@ func (a *App) SelectBinaryFile(name string) (string, error) {
 
 func (a *App) SelectPlatformToolsDirectory() (*PlatformToolsSelection, error) {
 	return a.dialogService.SelectPlatformToolsDirectory()
+}
+
+func (a *App) GetDevices() ([]DeviceSummary, error) {
+	return a.deviceService.ListDevices(a.ctx)
+}
+
+func (a *App) GetActiveSerial() string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.activeSerial
+}
+
+func (a *App) SetActiveSerial(serial string) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	devices, err := a.deviceService.ListDevices(a.ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, device := range devices {
+		if device.Serial == serial {
+			a.activeSerial = serial
+			return nil
+		}
+	}
+
+	return NewOperationError("set_active_serial", "device not found", fmt.Sprintf("serial '%s' is not connected", serial), true)
+}
+
+func (a *App) GetDeviceInfo(serial string) (*DeviceInfo, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	return a.deviceService.GetDeviceInfo(a.ctx, resolved)
+}
+
+func (a *App) GetDeviceMode(serial string) (DeviceMode, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	return a.deviceService.DetectDeviceMode(a.ctx, resolved)
+}
+
+func (a *App) RebootDevice(serial string, mode string) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	return a.deviceService.RebootDevice(a.ctx, resolved, mode)
 }
