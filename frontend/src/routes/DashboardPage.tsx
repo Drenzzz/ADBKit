@@ -1,6 +1,7 @@
 import { DeviceListCard } from '@/components/dashboard/DeviceListCard'
 import { DeviceInfoCard } from '@/components/dashboard/DeviceInfoCard'
 import { BinaryStatusCard } from '@/components/dashboard/BinaryStatusCard'
+import { WirelessConnectCard } from '@/components/dashboard/WirelessConnectCard'
 
 export default function DashboardPage() {
   return (
@@ -17,6 +18,7 @@ export default function DashboardPage() {
         </div>
         <BinaryStatusCard />
       </div>
+      <WirelessConnectCard />
       <DeviceInfoCard />
     </div>
   )
