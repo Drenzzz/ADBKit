@@ -6,6 +6,12 @@ export function ClearCustomBinary(arg1:string):Promise<void>;
 
 export function CompleteSetup():Promise<main.SetupState>;
 
+export function ConnectWireless(arg1:string):Promise<string>;
+
+export function DisconnectWireless(arg1:string):Promise<string>;
+
+export function EnableWirelessTCPIP(arg1:string,arg2:string):Promise<string>;
+
 export function GetActiveSerial():Promise<string>;
 
 export function GetBinaryStatus():Promise<main.BinarySetupResult>;

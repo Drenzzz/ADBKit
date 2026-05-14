@@ -11,15 +11,16 @@ import (
 )
 
 type App struct {
-	ctx           context.Context
-	auditLog      *AuditLog
-	binaryService *BinaryService
-	deviceService *DeviceService
-	dialogService *DialogService
-	config        *AppConfig
-	dataDir       string
-	activeSerial  string
-	mu            sync.Mutex
+	ctx             context.Context
+	auditLog        *AuditLog
+	binaryService   *BinaryService
+	deviceService   *DeviceService
+	wirelessService *WirelessService
+	dialogService   *DialogService
+	config          *AppConfig
+	dataDir         string
+	activeSerial    string
+	mu              sync.Mutex
 }
 
 func NewApp() *App {
@@ -47,6 +48,7 @@ func (a *App) startup(ctx context.Context) {
 	a.config = config
 	a.binaryService = NewBinaryService(a.dataDir)
 	a.deviceService = NewDeviceService(a.dataDir)
+	a.wirelessService = NewWirelessService(a.dataDir)
 	a.dialogService = NewDialogService(ctx)
 
 	al, err := NewAuditLog(a.dataDir)
@@ -235,4 +237,22 @@ func (a *App) RebootDevice(serial string, mode string) (string, error) {
 		a.mu.Unlock()
 	}
 	return a.deviceService.RebootDevice(a.ctx, resolved, mode)
+}
+
+func (a *App) ConnectWireless(address string) (string, error) {
+	return a.wirelessService.Connect(a.ctx, address)
+}
+
+func (a *App) EnableWirelessTCPIP(port string, serial string) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	return a.wirelessService.EnableTCPIP(a.ctx, resolved, port)
+}
+
+func (a *App) DisconnectWireless(address string) (string, error) {
+	return a.wirelessService.Disconnect(a.ctx, address)
 }

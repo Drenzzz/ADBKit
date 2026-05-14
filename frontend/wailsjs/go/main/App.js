@@ -10,6 +10,18 @@ export function CompleteSetup() {
   return window['go']['main']['App']['CompleteSetup']();
 }
 
+export function ConnectWireless(arg1) {
+  return window['go']['main']['App']['ConnectWireless'](arg1);
+}
+
+export function DisconnectWireless(arg1) {
+  return window['go']['main']['App']['DisconnectWireless'](arg1);
+}
+
+export function EnableWirelessTCPIP(arg1, arg2) {
+  return window['go']['main']['App']['EnableWirelessTCPIP'](arg1, arg2);
+}
+
 export function GetActiveSerial() {
   return window['go']['main']['App']['GetActiveSerial']();
 }
