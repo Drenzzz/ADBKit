@@ -50,6 +50,10 @@ export function GetManagedBinaryDir() {
   return window['go']['main']['App']['GetManagedBinaryDir']();
 }
 
+export function GetPerformanceSnapshot(arg1) {
+  return window['go']['main']['App']['GetPerformanceSnapshot'](arg1);
+}
+
 export function GetSetupState() {
   return window['go']['main']['App']['GetSetupState']();
 }

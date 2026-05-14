@@ -26,6 +26,8 @@ export function GetDevices():Promise<Array<main.DeviceSummary>>;
 
 export function GetManagedBinaryDir():Promise<string>;
 
+export function GetPerformanceSnapshot(arg1:string):Promise<main.PerformanceSnapshot>;
+
 export function GetSetupState():Promise<main.SetupState>;
 
 export function Greet(arg1:string):Promise<string>;

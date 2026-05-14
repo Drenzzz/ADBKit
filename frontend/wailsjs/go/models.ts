@@ -134,6 +134,44 @@ export namespace main {
 	        this.transportId = source["transportId"];
 	    }
 	}
+	export class PerformanceSnapshot {
+	    serial: string;
+	    cpuUsage: number;
+	    ramUsage: number;
+	    ramUsedBytes?: number;
+	    ramTotalBytes?: number;
+	    networkRxBytes?: number;
+	    networkTxBytes?: number;
+	    networkRxSec: number;
+	    networkTxSec: number;
+	    batteryLevel?: number;
+	    batteryTemperatureC?: number;
+	    storageUsedBytes?: number;
+	    storageTotalBytes?: number;
+	    uptimeSeconds?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PerformanceSnapshot(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.cpuUsage = source["cpuUsage"];
+	        this.ramUsage = source["ramUsage"];
+	        this.ramUsedBytes = source["ramUsedBytes"];
+	        this.ramTotalBytes = source["ramTotalBytes"];
+	        this.networkRxBytes = source["networkRxBytes"];
+	        this.networkTxBytes = source["networkTxBytes"];
+	        this.networkRxSec = source["networkRxSec"];
+	        this.networkTxSec = source["networkTxSec"];
+	        this.batteryLevel = source["batteryLevel"];
+	        this.batteryTemperatureC = source["batteryTemperatureC"];
+	        this.storageUsedBytes = source["storageUsedBytes"];
+	        this.storageTotalBytes = source["storageTotalBytes"];
+	        this.uptimeSeconds = source["uptimeSeconds"];
+	    }
+	}
 	export class PlatformToolsSelection {
 	    directory: string;
 	    adbPath: string;

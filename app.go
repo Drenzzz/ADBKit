@@ -16,6 +16,7 @@ type App struct {
 	binaryService   *BinaryService
 	deviceService   *DeviceService
 	wirelessService *WirelessService
+	monitorService  *MonitorService
 	dialogService   *DialogService
 	config          *AppConfig
 	dataDir         string
@@ -49,6 +50,7 @@ func (a *App) startup(ctx context.Context) {
 	a.binaryService = NewBinaryService(a.dataDir)
 	a.deviceService = NewDeviceService(a.dataDir)
 	a.wirelessService = NewWirelessService(a.dataDir)
+	a.monitorService = NewMonitorService(a.dataDir)
 	a.dialogService = NewDialogService(ctx)
 
 	al, err := NewAuditLog(a.dataDir)
@@ -255,4 +257,14 @@ func (a *App) EnableWirelessTCPIP(port string, serial string) (string, error) {
 
 func (a *App) DisconnectWireless(address string) (string, error) {
 	return a.wirelessService.Disconnect(a.ctx, address)
+}
+
+func (a *App) GetPerformanceSnapshot(serial string) (PerformanceSnapshot, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	return a.monitorService.GetSnapshot(a.ctx, resolved)
 }
