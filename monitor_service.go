@@ -4,15 +4,27 @@ import (
 	"context"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
+type monitorSnapshot struct {
+	rxBytes int64
+	txBytes int64
+	at      time.Time
+}
+
 type MonitorService struct {
 	dataDir string
+	mu      sync.Mutex
+	prev    map[string]monitorSnapshot
 }
 
 func NewMonitorService(dataDir string) *MonitorService {
-	return &MonitorService{dataDir: dataDir}
+	return &MonitorService{
+		dataDir: dataDir,
+		prev:    make(map[string]monitorSnapshot),
+	}
 }
 
 func (s *MonitorService) GetSnapshot(ctx context.Context, serial string) (PerformanceSnapshot, error) {
@@ -29,6 +41,29 @@ func (s *MonitorService) GetSnapshot(ctx context.Context, serial string) (Perfor
 	snap.BatteryLevel, snap.BatteryTemperatureC = s.fetchBattery(ctx, trimmedSerial)
 	snap.StorageUsedBytes, snap.StorageTotalBytes = s.fetchStorage(ctx, trimmedSerial)
 	snap.UptimeSeconds = s.fetchUptime(ctx, trimmedSerial)
+
+	now := time.Now()
+	s.mu.Lock()
+	prev, exists := s.prev[trimmedSerial]
+	if exists && now.After(prev.at) {
+		elapsed := now.Sub(prev.at).Seconds()
+		if elapsed > 0 {
+			snap.NetworkRxSec = float64(snap.NetworkRxBytes-prev.rxBytes) / elapsed
+			snap.NetworkTxSec = float64(snap.NetworkTxBytes-prev.txBytes) / elapsed
+			if snap.NetworkRxSec < 0 {
+				snap.NetworkRxSec = 0
+			}
+			if snap.NetworkTxSec < 0 {
+				snap.NetworkTxSec = 0
+			}
+		}
+	}
+	s.prev[trimmedSerial] = monitorSnapshot{
+		rxBytes: snap.NetworkRxBytes,
+		txBytes: snap.NetworkTxBytes,
+		at:      now,
+	}
+	s.mu.Unlock()
 
 	return snap, nil
 }

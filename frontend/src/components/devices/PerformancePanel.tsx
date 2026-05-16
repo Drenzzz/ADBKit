@@ -1,10 +1,9 @@
-import { useEffect, useCallback } from 'react'
 import { Activity, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getPerformanceSnapshot } from '@/services/deviceService'
-import { useDeviceStore } from '@/stores/useDeviceStore'
+import { useMonitor } from '@/hooks/useMonitor'
+import { useDevices } from '@/hooks/useDevices'
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
@@ -49,33 +48,9 @@ function formatUptime(seconds?: number): string {
 }
 
 export function PerformancePanel() {
-  const { activeSerial, performance, perfLoading, setPerformance, setPerfLoading, setError } = useDeviceStore()
-
-  const refresh = useCallback(async () => {
-    if (!activeSerial) {
-      setPerformance(null)
-      return
-    }
-    setPerfLoading(true)
-    setError(null)
-    try {
-      const snap = await getPerformanceSnapshot(activeSerial)
-      setPerformance(snap)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to fetch performance data')
-      setPerformance(null)
-    } finally {
-      setPerfLoading(false)
-    }
-  }, [activeSerial, setPerformance, setPerfLoading, setError])
-
-  useEffect(() => {
-    refresh()
-    if (activeSerial) {
-      const interval = setInterval(refresh, 5000)
-      return () => clearInterval(interval)
-    }
-  }, [refresh, activeSerial])
+  const { activeSerial, deviceMode } = useDevices()
+  const isOnline = deviceMode === 'adb'
+  const { snapshot, polling, refresh } = useMonitor(activeSerial, isOnline)
 
   return (
     <Card>
@@ -84,31 +59,33 @@ export function PerformancePanel() {
           <Activity className="h-4 w-4" />
           Performance Monitor
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={refresh} disabled={perfLoading || !activeSerial}>
-          <RefreshCw className={`h-3.5 w-3.5 ${perfLoading ? 'animate-spin' : ''}`} />
+        <Button variant="outline" size="sm" onClick={refresh} disabled={polling || !activeSerial || !isOnline}>
+          <RefreshCw className={`h-3.5 w-3.5 ${polling ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
       </CardHeader>
       <CardContent>
         {!activeSerial ? (
           <p className="text-sm text-muted-foreground">Select a device first.</p>
-        ) : perfLoading && !performance ? (
+        ) : !isOnline ? (
+          <p className="text-sm text-muted-foreground">Device must be in ADB mode for monitoring.</p>
+        ) : polling && !snapshot ? (
           <LoadingSkeleton />
-        ) : !performance ? (
+        ) : !snapshot ? (
           <p className="text-sm text-muted-foreground">No performance data available.</p>
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            <Metric label="CPU Usage" value={`${performance.cpuUsage.toFixed(1)}%`} />
-            <Metric label="RAM Usage" value={`${performance.ramUsage.toFixed(1)}%`} />
-            <Metric label="RAM Used" value={formatBytes(performance.ramUsedBytes)} />
-            <Metric label="RAM Total" value={formatBytes(performance.ramTotalBytes)} />
-            <Metric label="Battery" value={performance.batteryLevel ? `${performance.batteryLevel}%` : '—'} />
-            <Metric label="Battery Temp" value={performance.batteryTemperatureC ? `${performance.batteryTemperatureC.toFixed(1)}°C` : '—'} />
-            <Metric label="Storage Used" value={formatBytes(performance.storageUsedBytes)} />
-            <Metric label="Storage Total" value={formatBytes(performance.storageTotalBytes)} />
-            <Metric label="Network RX" value={formatBytes(performance.networkRxBytes)} />
-            <Metric label="Network TX" value={formatBytes(performance.networkTxBytes)} />
-            <Metric label="Uptime" value={formatUptime(performance.uptimeSeconds)} />
+            <Metric label="CPU Usage" value={`${snapshot.cpuUsage.toFixed(1)}%`} />
+            <Metric label="RAM Usage" value={`${snapshot.ramUsage.toFixed(1)}%`} />
+            <Metric label="RAM Used" value={formatBytes(snapshot.ramUsedBytes)} />
+            <Metric label="RAM Total" value={formatBytes(snapshot.ramTotalBytes)} />
+            <Metric label="Battery" value={snapshot.batteryLevel ? `${snapshot.batteryLevel}%` : '—'} />
+            <Metric label="Battery Temp" value={snapshot.batteryTemperatureC ? `${snapshot.batteryTemperatureC.toFixed(1)}°C` : '—'} />
+            <Metric label="Storage Used" value={formatBytes(snapshot.storageUsedBytes)} />
+            <Metric label="Storage Total" value={formatBytes(snapshot.storageTotalBytes)} />
+            <Metric label="Network RX" value={formatBytes(snapshot.networkRxBytes)} />
+            <Metric label="Network TX" value={formatBytes(snapshot.networkTxBytes)} />
+            <Metric label="Uptime" value={formatUptime(snapshot.uptimeSeconds)} />
           </div>
         )}
       </CardContent>
