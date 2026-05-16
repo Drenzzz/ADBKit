@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, Check, Smartphone } from 'lucide-react'
-import { useDeviceStore } from '@/stores/useDeviceStore'
-import { setActiveSerial as setActiveSerialIPC } from '@/services/deviceService'
-import { toast } from 'sonner'
+import { useDevices } from '@/hooks/useDevices'
 
 export function ActiveDeviceSelector() {
-  const { devices, activeSerial, setActiveSerial } = useDeviceStore()
+  const { devices, activeSerial, selectDevice } = useDevices()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -20,15 +18,8 @@ export function ActiveDeviceSelector() {
   }, [])
 
   const handleSelect = async (serial: string) => {
-    try {
-      await setActiveSerialIPC(serial)
-      setActiveSerial(serial)
-      setOpen(false)
-    } catch (e) {
-      toast.error('Failed to select device', {
-        description: e instanceof Error ? e.message : String(e),
-      })
-    }
+    await selectDevice(serial)
+    setOpen(false)
   }
 
   if (devices.length === 0) return null

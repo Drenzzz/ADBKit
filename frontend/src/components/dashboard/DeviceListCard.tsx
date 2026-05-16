@@ -1,15 +1,14 @@
-import { useEffect, useState, useCallback } from 'react'
 import { RefreshCw, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getDevices } from '@/services/deviceService'
-import { useDeviceStore } from '@/stores/useDeviceStore'
+import { useDevices } from '@/hooks/useDevices'
 import type { DeviceSummary } from '@/lib/types'
 
-function DeviceRow({ device, isActive, onSelect }: {
+function DeviceRow({ device, nickname, isActive, onSelect }: {
   device: DeviceSummary
+  nickname: string
   isActive: boolean
   onSelect: () => void
 }) {
@@ -20,6 +19,8 @@ function DeviceRow({ device, isActive, onSelect }: {
       : device.state === 'offline'
         ? 'text-muted-foreground'
         : 'text-blue-400'
+
+  const displayName = nickname || device.model || device.product || device.serial
 
   return (
     <button
@@ -32,14 +33,14 @@ function DeviceRow({ device, isActive, onSelect }: {
     >
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{device.serial}</span>
+          <span className="text-sm font-medium">{displayName}</span>
           {isActive && <Badge variant="default" className="text-[10px]">active</Badge>}
         </div>
-        {(device.model || device.product) && (
-          <span className="text-xs text-muted-foreground">
-            {device.model || device.product}
-            {device.mode === 'fastboot' ? ' (fastboot)' : ''}
-          </span>
+        {displayName !== device.serial && (
+          <span className="text-xs text-muted-foreground font-mono">{device.serial}</span>
+        )}
+        {device.mode === 'fastboot' && (
+          <span className="text-xs text-muted-foreground">fastboot</span>
         )}
       </div>
       <span className={`text-xs font-medium ${stateColor}`}>
@@ -59,33 +60,7 @@ function LoadingSkeleton() {
 }
 
 export function DeviceListCard() {
-  const { devices, activeSerial, devicesLoading, setDevices, setActiveSerial, setDevicesLoading, setError } = useDeviceStore()
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
-  const refresh = useCallback(async () => {
-    setDevicesLoading(true)
-    setError(null)
-    try {
-      const list = await getDevices()
-      setDevices(list)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to fetch devices')
-    } finally {
-      setDevicesLoading(false)
-    }
-  }, [setDevices, setDevicesLoading, setError])
-
-  useEffect(() => {
-    refresh()
-    const interval = setInterval(refresh, 3000)
-    return () => clearInterval(interval)
-  }, [refresh])
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true)
-    await refresh()
-    setIsRefreshing(false)
-  }
+  const { devices, activeSerial, loading, refreshing, refreshDevices, selectDevice, nicknames } = useDevices()
 
   return (
     <Card>
@@ -94,12 +69,12 @@ export function DeviceListCard() {
           <Smartphone className="h-4 w-4" />
           Connected Devices
         </CardTitle>
-        <Button variant="ghost" size="icon" onClick={handleRefresh} disabled={isRefreshing}>
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+        <Button variant="ghost" size="icon" onClick={refreshDevices} disabled={refreshing}>
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
         </Button>
       </CardHeader>
       <CardContent>
-        {devicesLoading && devices.length === 0 ? (
+        {loading && devices.length === 0 ? (
           <LoadingSkeleton />
         ) : devices.length === 0 ? (
           <p className="text-sm text-muted-foreground">
@@ -111,8 +86,9 @@ export function DeviceListCard() {
               <DeviceRow
                 key={device.serial}
                 device={device}
+                nickname={nicknames[device.serial] ?? ''}
                 isActive={activeSerial === device.serial}
-                onSelect={() => setActiveSerial(device.serial)}
+                onSelect={() => selectDevice(device.serial)}
               />
             ))}
           </div>

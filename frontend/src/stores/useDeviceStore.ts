@@ -4,6 +4,7 @@ import type {
   DeviceInfo,
   DeviceMode,
   PerformanceSnapshot,
+  DeviceNicknames,
 } from '@/lib/types'
 
 interface DeviceState {
@@ -12,10 +13,13 @@ interface DeviceState {
   deviceInfo: DeviceInfo | null
   deviceMode: DeviceMode | null
   performance: PerformanceSnapshot | null
-  devicesLoading: boolean
+  nicknames: DeviceNicknames
+  loading: boolean
+  refreshing: boolean
   infoLoading: boolean
   perfLoading: boolean
   error: string | null
+  lastUpdatedAt: number | null
 }
 
 interface DeviceActions {
@@ -24,10 +28,15 @@ interface DeviceActions {
   setDeviceInfo: (info: DeviceInfo | null) => void
   setDeviceMode: (mode: DeviceMode | null) => void
   setPerformance: (perf: PerformanceSnapshot | null) => void
-  setDevicesLoading: (loading: boolean) => void
-  setInfoLoading: (loading: boolean) => void
-  setPerfLoading: (loading: boolean) => void
+  setNicknames: (nicknames: DeviceNicknames) => void
+  setNickname: (serial: string, nickname: string) => void
+  getNickname: (serial: string) => string
+  setLoading: (loading: boolean) => void
+  setRefreshing: (refreshing: boolean) => void
+  setInfoLoading: (infoLoading: boolean) => void
+  setPerfLoading: (perfLoading: boolean) => void
   setError: (error: string | null) => void
+  setLastUpdatedAt: (timestamp: number | null) => void
   reset: () => void
 }
 
@@ -39,13 +48,16 @@ const initialState: DeviceState = {
   deviceInfo: null,
   deviceMode: null,
   performance: null,
-  devicesLoading: false,
+  nicknames: {},
+  loading: false,
+  refreshing: false,
   infoLoading: false,
   perfLoading: false,
   error: null,
+  lastUpdatedAt: null,
 }
 
-export const useDeviceStore = create<DeviceStore>()((set) => ({
+export const useDeviceStore = create<DeviceStore>()((set, get) => ({
   ...initialState,
 
   setDevices: (devices) => set({ devices }),
@@ -53,9 +65,26 @@ export const useDeviceStore = create<DeviceStore>()((set) => ({
   setDeviceInfo: (deviceInfo) => set({ deviceInfo }),
   setDeviceMode: (deviceMode) => set({ deviceMode }),
   setPerformance: (performance) => set({ performance }),
-  setDevicesLoading: (devicesLoading) => set({ devicesLoading }),
+  setNicknames: (nicknames) => set({ nicknames }),
+  setNickname: (serial, nickname) =>
+    set((state) => {
+      const trimmed = serial.trim()
+      if (!trimmed) return state
+      const next = { ...state.nicknames }
+      const trimmedNick = nickname.trim()
+      if (trimmedNick) {
+        next[trimmed] = trimmedNick
+      } else {
+        delete next[trimmed]
+      }
+      return { nicknames: next }
+    }),
+  getNickname: (serial) => get().nicknames[serial] ?? '',
+  setLoading: (loading) => set({ loading }),
+  setRefreshing: (refreshing) => set({ refreshing }),
   setInfoLoading: (infoLoading) => set({ infoLoading }),
   setPerfLoading: (perfLoading) => set({ perfLoading }),
   setError: (error) => set({ error }),
+  setLastUpdatedAt: (lastUpdatedAt) => set({ lastUpdatedAt }),
   reset: () => set(initialState),
 }))

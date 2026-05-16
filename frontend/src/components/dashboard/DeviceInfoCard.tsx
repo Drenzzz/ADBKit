@@ -1,4 +1,3 @@
-import { useEffect, useState, useCallback } from 'react'
 import {
   Building, Code, Cpu, Database, Hash, Info, RefreshCw, Server,
   ShieldCheck, Smartphone, Tag, Wifi, Battery,
@@ -6,8 +5,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getDeviceInfo } from '@/services/deviceService'
-import { useDeviceStore } from '@/stores/useDeviceStore'
+import { useDevices } from '@/hooks/useDevices'
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string }) {
   return (
@@ -32,36 +30,7 @@ function LoadingSkeleton() {
 }
 
 export function DeviceInfoCard() {
-  const { activeSerial, deviceInfo, infoLoading, setDeviceInfo, setInfoLoading, setError } = useDeviceStore()
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
-  const refresh = useCallback(async () => {
-    if (!activeSerial) {
-      setDeviceInfo(null)
-      return
-    }
-    setInfoLoading(true)
-    setError(null)
-    try {
-      const info = await getDeviceInfo(activeSerial)
-      setDeviceInfo(info)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to fetch device info')
-      setDeviceInfo(null)
-    } finally {
-      setInfoLoading(false)
-    }
-  }, [activeSerial, setDeviceInfo, setInfoLoading, setError])
-
-  useEffect(() => {
-    refresh()
-  }, [refresh])
-
-  const handleRefresh = async () => {
-    setIsRefreshing(true)
-    await refresh()
-    setIsRefreshing(false)
-  }
+  const { activeSerial, deviceInfo, loading, refreshDevices } = useDevices()
 
   const infoItems = deviceInfo
     ? [
@@ -87,15 +56,15 @@ export function DeviceInfoCard() {
           <Info className="h-4 w-4" />
           Device Info
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing || !activeSerial}>
-          <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+        <Button variant="outline" size="sm" onClick={refreshDevices} disabled={loading || !activeSerial}>
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
       </CardHeader>
       <CardContent>
         {!activeSerial ? (
           <p className="text-sm text-muted-foreground">Select a device to view info.</p>
-        ) : infoLoading && !deviceInfo ? (
+        ) : loading && !deviceInfo ? (
           <LoadingSkeleton />
         ) : !deviceInfo ? (
           <p className="text-sm text-muted-foreground">Click "Refresh" to load device data.</p>
