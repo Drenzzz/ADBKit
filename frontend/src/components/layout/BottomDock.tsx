@@ -12,6 +12,8 @@ import {
   Moon,
 } from 'lucide-react'
 import { useUIStore } from '@/stores/useUIStore'
+import { DeviceModeBadge } from '@/components/devices/DeviceModeBadge'
+import { ActiveDeviceSelector } from '@/components/devices/ActiveDeviceSelector'
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -57,6 +59,10 @@ export function BottomDock() {
         ))}
 
         <span className="mx-1 h-5 w-px bg-border/50" />
+
+        <DeviceModeBadge />
+
+        <ActiveDeviceSelector />
 
         <button
           onClick={toggleTheme}
