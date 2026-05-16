@@ -9,12 +9,16 @@ import {
   EnableWirelessTCPIP,
   DisconnectWireless,
   GetPerformanceSnapshot,
+  GetDeviceNicknames,
+  SetDeviceNickname,
+  ClearDeviceNickname,
 } from '../../wailsjs/go/main/App'
 import type {
   DeviceSummary,
   DeviceInfo,
   DeviceMode,
   PerformanceSnapshot,
+  DeviceNicknames,
 } from '@/lib/types'
 
 export async function getDevices(): Promise<DeviceSummary[]> {
@@ -67,4 +71,20 @@ export async function getPerformanceSnapshot(
 ): Promise<PerformanceSnapshot> {
   const raw = await GetPerformanceSnapshot(serial ?? '')
   return raw as unknown as PerformanceSnapshot
+}
+
+export async function getDeviceNicknames(): Promise<DeviceNicknames> {
+  const raw = await GetDeviceNicknames()
+  return raw as unknown as DeviceNicknames
+}
+
+export async function setDeviceNickname(
+  serial: string,
+  nickname: string,
+): Promise<void> {
+  await SetDeviceNickname(serial, nickname)
+}
+
+export async function clearDeviceNickname(serial: string): Promise<void> {
+  await ClearDeviceNickname(serial)
 }

@@ -268,3 +268,23 @@ func (a *App) GetPerformanceSnapshot(serial string) (PerformanceSnapshot, error)
 	}
 	return a.monitorService.GetSnapshot(a.ctx, resolved)
 }
+
+func (a *App) GetDeviceNicknames() map[string]string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.config.DeviceNicknames
+}
+
+func (a *App) SetDeviceNickname(serial string, nickname string) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.config.DeviceNicknames[serial] = nickname
+	return SaveConfig(a.dataDir, a.config)
+}
+
+func (a *App) ClearDeviceNickname(serial string) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	delete(a.config.DeviceNicknames, serial)
+	return SaveConfig(a.dataDir, a.config)
+}

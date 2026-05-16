@@ -6,6 +6,10 @@ export function ClearCustomBinary(arg1) {
   return window['go']['main']['App']['ClearCustomBinary'](arg1);
 }
 
+export function ClearDeviceNickname(arg1) {
+  return window['go']['main']['App']['ClearDeviceNickname'](arg1);
+}
+
 export function CompleteSetup() {
   return window['go']['main']['App']['CompleteSetup']();
 }
@@ -40,6 +44,10 @@ export function GetDeviceInfo(arg1) {
 
 export function GetDeviceMode(arg1) {
   return window['go']['main']['App']['GetDeviceMode'](arg1);
+}
+
+export function GetDeviceNicknames() {
+  return window['go']['main']['App']['GetDeviceNicknames']();
 }
 
 export function GetDevices() {
@@ -88,4 +96,8 @@ export function SetActiveSerial(arg1) {
 
 export function SetCustomBinary(arg1, arg2) {
   return window['go']['main']['App']['SetCustomBinary'](arg1, arg2);
+}
+
+export function SetDeviceNickname(arg1, arg2) {
+  return window['go']['main']['App']['SetDeviceNickname'](arg1, arg2);
 }

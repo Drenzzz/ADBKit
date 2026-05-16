@@ -4,6 +4,8 @@ import {main} from '../models';
 
 export function ClearCustomBinary(arg1:string):Promise<void>;
 
+export function ClearDeviceNickname(arg1:string):Promise<void>;
+
 export function CompleteSetup():Promise<main.SetupState>;
 
 export function ConnectWireless(arg1:string):Promise<string>;
@@ -21,6 +23,8 @@ export function GetCapabilities():Promise<Record<string, boolean>>;
 export function GetDeviceInfo(arg1:string):Promise<main.DeviceInfo>;
 
 export function GetDeviceMode(arg1:string):Promise<main.DeviceMode>;
+
+export function GetDeviceNicknames():Promise<Record<string, string>>;
 
 export function GetDevices():Promise<Array<main.DeviceSummary>>;
 
@@ -45,3 +49,5 @@ export function SelectPlatformToolsDirectory():Promise<main.PlatformToolsSelecti
 export function SetActiveSerial(arg1:string):Promise<void>;
 
 export function SetCustomBinary(arg1:string,arg2:string):Promise<void>;
+
+export function SetDeviceNickname(arg1:string,arg2:string):Promise<void>;

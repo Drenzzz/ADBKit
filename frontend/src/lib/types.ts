@@ -119,3 +119,5 @@ export interface PerformanceSnapshot {
   storageTotalBytes?: number
   uptimeSeconds?: number
 }
+
+export type DeviceNicknames = Record<string, string>
