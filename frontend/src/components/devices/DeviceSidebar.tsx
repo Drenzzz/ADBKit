@@ -49,6 +49,8 @@ export function DeviceSidebar() {
   const [address, setAddress] = useState('')
   const [connecting, setConnecting] = useState(false)
 
+  const onlineCount = devices.filter((d) => d.state === 'device').length
+
   async function handleConnect() {
     if (!address.trim()) {
       toast.error('Enter an IP address like 192.168.1.100:5555')
@@ -70,9 +72,16 @@ export function DeviceSidebar() {
   return (
     <div className="flex h-full w-56 flex-col overflow-hidden rounded-xl border border-border/50 bg-card">
       <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Devices
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Devices
+          </span>
+          {devices.length > 0 && (
+            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">
+              {onlineCount}/{devices.length}
+            </span>
+          )}
+        </div>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={refreshDevices} disabled={refreshing}>
           <RefreshCw className={`h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
         </Button>
@@ -85,7 +94,12 @@ export function DeviceSidebar() {
             <Skeleton className="h-10 w-full" />
           </div>
         ) : devices.length === 0 ? (
-          <p className="py-6 text-center text-[11px] text-muted-foreground">No devices</p>
+          <div className="flex flex-col items-center gap-2 py-8">
+            <p className="text-center text-[11px] text-muted-foreground">No devices</p>
+            <p className="text-center text-[10px] text-muted-foreground/60">
+              Connect via USB or pair wirelessly
+            </p>
+          </div>
         ) : (
           <div className="flex flex-col gap-0.5">
             {devices.map((device) => (

@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { RotateCw, Shield, Power, RefreshCw, ArrowRight, Loader2 } from 'lucide-react'
+import { RotateCw, Shield, Power, RefreshCw, ArrowRight, Loader2, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { rebootDevice } from '@/services/deviceService'
+import { rebootDevice, disconnectWireless } from '@/services/deviceService'
 import { useDevices } from '@/hooks/useDevices'
 import { toast } from 'sonner'
 import type { DeviceState } from '@/lib/types'
@@ -31,6 +31,10 @@ const FASTBOOT_OPTIONS: RebootOption[] = [
 const RECOVERY_OPTIONS: RebootOption[] = [
   { mode: 'system', label: 'Exit to System', icon: ArrowRight, variant: 'default' },
 ]
+
+function isWireless(serial: string): boolean {
+  return /^\d{1,3}(?:\.\d{1,3}){3}:\d+$/.test(serial)
+}
 
 function getOptionsForState(state: DeviceState): RebootOption[] {
   switch (state) {
@@ -66,6 +70,7 @@ export function DeviceActions() {
   const state = deviceInfo?.state ?? 'unknown'
   const options = getOptionsForState(state)
   const stateLabel = getStateLabel(state)
+  const isWirelessDevice = activeSerial ? isWireless(activeSerial) : false
 
   const handleReboot = async (mode: string) => {
     if (!activeSerial) return
@@ -80,6 +85,19 @@ export function DeviceActions() {
     } finally {
       setRebooting(null)
       setConfirmMode(null)
+    }
+  }
+
+  const handleForget = async () => {
+    if (!activeSerial) return
+    try {
+      const message = await disconnectWireless(activeSerial)
+      toast.success('Disconnected', { description: message })
+      refreshDevices()
+    } catch (e) {
+      toast.error('Disconnect failed', {
+        description: e instanceof Error ? e.message : String(e),
+      })
     }
   }
 
@@ -144,6 +162,34 @@ export function DeviceActions() {
                 )}
               </div>
             ))}
+
+            {isWirelessDevice && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setConfirmMode('forget')}
+                disabled={rebooting !== null}
+              >
+                <WifiOff className="mr-1.5 h-3.5 w-3.5" />
+                Disconnect
+              </Button>
+            )}
+          </div>
+        )}
+
+        {confirmMode === 'forget' && (
+          <div className="mt-3 flex items-center gap-2 border-t border-border/50 pt-3">
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleForget}
+              disabled={rebooting !== null}
+            >
+              Confirm Disconnect
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
+              Cancel
+            </Button>
           </div>
         )}
       </CardContent>
