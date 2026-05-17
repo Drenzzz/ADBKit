@@ -18,6 +18,7 @@ const ONLINE_OPTIONS: RebootOption[] = [
   { mode: 'system', label: 'Reboot', icon: RotateCw, variant: 'default' },
   { mode: 'bootloader', label: 'Bootloader', icon: Shield, variant: 'secondary' },
   { mode: 'recovery', label: 'Recovery', icon: Power, variant: 'secondary' },
+  { mode: 'fastboot', label: 'Reboot Fastbootd', icon: RotateCw, variant: 'secondary' },
 ]
 
 const FASTBOOT_OPTIONS: RebootOption[] = [
