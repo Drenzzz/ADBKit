@@ -6,8 +6,8 @@ import { useMetricsHistoryStore } from '@/stores/metricsHistoryStore'
 const MONITOR_POLL_INTERVAL = 5000
 
 export function useMonitor(serial: string, isActive: boolean) {
-  const { performance, perfLoading, setPerformance, setPerfLoading, setError } = useDeviceStore()
-  const { pushCPU, pushRAM, pushRX } = useMetricsHistoryStore()
+  const { performance, perfLoading, error, setPerformance, setPerfLoading, setError } = useDeviceStore()
+  const { pushCPU, pushRAM, pushRX, reset } = useMetricsHistoryStore()
 
   const refresh = useCallback(async () => {
     if (!serial || !isActive) {
@@ -33,9 +33,11 @@ export function useMonitor(serial: string, isActive: boolean) {
   useEffect(() => {
     if (!serial || !isActive) {
       setPerformance(null)
+      reset()
       return
     }
 
+    reset()
     refresh()
 
     const intervalId = window.setInterval(() => {
@@ -52,12 +54,12 @@ export function useMonitor(serial: string, isActive: boolean) {
       window.clearInterval(intervalId)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [serial, isActive, refresh, setPerformance])
+  }, [serial, isActive, refresh, setPerformance, reset])
 
   return {
     snapshot: performance,
     polling: perfLoading,
-    error: null as string | null,
+    error,
     refresh,
   }
 }
