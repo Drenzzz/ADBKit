@@ -231,7 +231,14 @@ func TestRebootDevice_FastbootMode(t *testing.T) {
 	invocationPath := filepath.Join(tempDir, "adb-invocation.txt")
 	adbPath := filepath.Join(tempDir, "adb")
 
-	script := "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$ADB_TEST_OUTPUT\"\n"
+	// Stub handles two invocations: adb devices -l and adb -s SER123 reboot fastboot
+	script := `#!/bin/sh
+if [ "$1" = "devices" ]; then
+  printf 'SER123\tfastboot\n'
+else
+  printf '%s\n' "$@" >> "$ADB_TEST_OUTPUT"
+fi
+`
 	if err := os.WriteFile(adbPath, []byte(script), 0o755); err != nil {
 		t.Fatalf("failed to create adb stub: %v", err)
 	}
@@ -256,6 +263,50 @@ func TestRebootDevice_FastbootMode(t *testing.T) {
 
 	invocation := strings.TrimSpace(string(rawInvocation))
 	if invocation != "-s\nSER123\nreboot\nfastboot" {
+		t.Fatalf("unexpected adb invocation: %q", invocation)
+	}
+}
+
+func TestRebootDevice_ADBMode(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell-based adb stub not supported on windows")
+	}
+
+	tempDir := t.TempDir()
+	invocationPath := filepath.Join(tempDir, "adb-invocation.txt")
+	adbPath := filepath.Join(tempDir, "adb")
+
+	script := `#!/bin/sh
+if [ "$1" = "devices" ]; then
+  printf 'SER123\tdevice\n'
+else
+  printf '%s\n' "$@" >> "$ADB_TEST_OUTPUT"
+fi
+`
+	if err := os.WriteFile(adbPath, []byte(script), 0o755); err != nil {
+		t.Fatalf("failed to create adb stub: %v", err)
+	}
+
+	t.Setenv("PATH", tempDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	t.Setenv("ADB_TEST_OUTPUT", invocationPath)
+
+	s := NewDeviceService(t.TempDir())
+	message, err := s.RebootDevice(context.Background(), "SER123", "recovery")
+	if err != nil {
+		t.Fatalf("expected reboot command to succeed, got error: %v", err)
+	}
+
+	if message != "Reboot command sent to SER123 (recovery)" {
+		t.Fatalf("unexpected success message: %s", message)
+	}
+
+	rawInvocation, err := os.ReadFile(invocationPath)
+	if err != nil {
+		t.Fatalf("failed to read adb invocation: %v", err)
+	}
+
+	invocation := strings.TrimSpace(string(rawInvocation))
+	if invocation != "-s\nSER123\nreboot\nrecovery" {
 		t.Fatalf("unexpected adb invocation: %q", invocation)
 	}
 }

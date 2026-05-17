@@ -177,31 +177,53 @@ func (s *DeviceService) RebootDevice(ctx context.Context, serial string, mode st
 		return "", NewOperationError("reboot_device", "device serial is required", "serial must not be empty", false)
 	}
 
-	allowedModes := map[string][]string{
-		"system":     {"-s", serial, "reboot"},
-		"bootloader": {"-s", serial, "reboot", "bootloader"},
-		"recovery":   {"-s", serial, "reboot", "recovery"},
-		"fastboot":   {"-s", serial, "reboot", "fastboot"},
-	}
+	mode = strings.TrimSpace(mode)
 
-	args, ok := allowedModes[mode]
-	if !ok {
-		return "", NewOperationError("reboot_device", "unsupported reboot mode", fmt.Sprintf("mode '%s' is not supported", mode), false)
-	}
-
-	result, err := RunCommand(ctx, ExecRequest{
-		Command: BinaryNameAdb,
-		Args:    args,
-		Timeout: 10e9,
-	})
+	connectionMode, err := s.DetectDeviceMode(ctx, serial)
 	if err != nil {
-		return "", NewOperationError("reboot_device", "failed to reboot device", err.Error(), true)
-	}
-	if result.ExitCode != 0 {
-		return "", NewOperationError("reboot_device", "reboot command failed", strings.TrimSpace(result.Stderr), true)
+		return "", err
 	}
 
-	return fmt.Sprintf("Reboot command sent to %s (%s)", serial, mode), nil
+	switch connectionMode {
+	case DeviceModeADB:
+		args := []string{"-s", serial, "reboot"}
+		if mode != "" {
+			args = append(args, mode)
+		}
+		result, err := RunCommand(ctx, ExecRequest{
+			Command: BinaryNameAdb,
+			Args:    args,
+			Timeout: 10e9,
+		})
+		if err != nil {
+			return "", NewOperationError("reboot_device", "failed to reboot device", err.Error(), true)
+		}
+		if result.ExitCode != 0 {
+			return "", NewOperationError("reboot_device", "reboot command failed", strings.TrimSpace(result.Stderr), true)
+		}
+		return fmt.Sprintf("Reboot command sent to %s (%s)", serial, mode), nil
+
+	case DeviceModeFastboot:
+		args := []string{"reboot"}
+		if mode != "" {
+			args = append(args, mode)
+		}
+		result, err := RunCommand(ctx, ExecRequest{
+			Command: BinaryNameFastboot,
+			Args:    args,
+			Timeout: 10e9,
+		})
+		if err != nil {
+			return "", NewOperationError("reboot_device", "failed to reboot device", err.Error(), true)
+		}
+		if result.ExitCode != 0 {
+			return "", NewOperationError("reboot_device", "reboot command failed", strings.TrimSpace(result.Stderr), true)
+		}
+		return fmt.Sprintf("Reboot command sent to %s (%s)", serial, mode), nil
+
+	default:
+		return "", NewOperationError("reboot_device", "no connected device detected in adb or fastboot mode", fmt.Sprintf("serial '%s' mode is %s", serial, connectionMode), true)
+	}
 }
 
 func (s *DeviceService) listADBDevices(ctx context.Context) ([]DeviceSummary, error) {

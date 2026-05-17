@@ -24,6 +24,7 @@ const FASTBOOT_OPTIONS: RebootOption[] = [
   { mode: 'system', label: 'Reboot to System', icon: ArrowRight, variant: 'default' },
   { mode: 'bootloader', label: 'Reboot Bootloader', icon: Shield, variant: 'secondary' },
   { mode: 'recovery', label: 'Recovery', icon: Power, variant: 'secondary' },
+  { mode: 'fastboot', label: 'Reboot Fastbootd', icon: RotateCw, variant: 'secondary' },
 ]
 
 const RECOVERY_OPTIONS: RebootOption[] = [
