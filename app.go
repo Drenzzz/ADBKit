@@ -17,6 +17,7 @@ type App struct {
 	deviceService   *DeviceService
 	wirelessService *WirelessService
 	monitorService  *MonitorService
+	packageService  *PackageService
 	dialogService   *DialogService
 	config          *AppConfig
 	dataDir         string
@@ -52,6 +53,7 @@ func (a *App) startup(ctx context.Context) {
 	a.wirelessService = NewWirelessService(a.dataDir)
 	a.monitorService = NewMonitorService(a.dataDir)
 	a.dialogService = NewDialogService(ctx)
+	a.packageService = NewPackageService(a.resolveActiveSerial, a.dialogService.SelectSaveFile)
 
 	al, err := NewAuditLog(a.dataDir)
 	if err != nil {
@@ -287,4 +289,86 @@ func (a *App) ClearDeviceNickname(serial string) error {
 	defer a.mu.Unlock()
 	delete(a.config.DeviceNicknames, serial)
 	return SaveConfig(a.dataDir, a.config)
+}
+
+func (a *App) resolveActiveSerial(ctx context.Context) (string, error) {
+	a.mu.Lock()
+	serial := a.activeSerial
+	a.mu.Unlock()
+
+	if serial != "" {
+		return serial, nil
+	}
+
+	devices, err := a.deviceService.ListDevices(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	for _, d := range devices {
+		if d.Mode == DeviceModeADB && d.State == DeviceStateReady {
+			a.mu.Lock()
+			a.activeSerial = d.Serial
+			a.mu.Unlock()
+			return d.Serial, nil
+		}
+	}
+
+	return "", NewOperationError("resolve_active_serial", "No active device is available", "no ready ADB device found", true)
+}
+
+func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
+	return a.packageService.ListPackages(a.ctx, filterType)
+}
+
+func (a *App) InstallPackage(filePath string) (string, error) {
+	return a.packageService.InstallPackage(a.ctx, filePath)
+}
+
+func (a *App) UninstallPackage(packageName string) (string, error) {
+	return a.packageService.UninstallPackage(a.ctx, packageName)
+}
+
+func (a *App) UninstallMultiplePackages(packageNames []string) (string, error) {
+	return a.packageService.UninstallMultiplePackages(a.ctx, packageNames)
+}
+
+func (a *App) EnablePackage(packageName string) (string, error) {
+	return a.packageService.EnablePackage(a.ctx, packageName)
+}
+
+func (a *App) EnableMultiplePackages(packageNames []string) (string, error) {
+	return a.packageService.EnableMultiplePackages(a.ctx, packageNames)
+}
+
+func (a *App) DisablePackage(packageName string) (string, error) {
+	return a.packageService.DisablePackage(a.ctx, packageName)
+}
+
+func (a *App) DisableMultiplePackages(packageNames []string) (string, error) {
+	return a.packageService.DisableMultiplePackages(a.ctx, packageNames)
+}
+
+func (a *App) ClearPackageData(packageName string) (string, error) {
+	return a.packageService.ClearPackageData(a.ctx, packageName)
+}
+
+func (a *App) PullPackageApk(packageName string) (string, error) {
+	return a.packageService.PullPackageApk(a.ctx, packageName)
+}
+
+func (a *App) LaunchPackage(packageName string) (string, error) {
+	return a.packageService.LaunchPackage(a.ctx, packageName)
+}
+
+func (a *App) ForceStopPackage(packageName string) (string, error) {
+	return a.packageService.ForceStopPackage(a.ctx, packageName)
+}
+
+func (a *App) GetPackageDetails(packageName string) (PackageDetails, error) {
+	return a.packageService.GetPackageDetails(a.ctx, packageName)
+}
+
+func (a *App) SelectApkFile() (string, error) {
+	return a.dialogService.SelectApkFile()
 }

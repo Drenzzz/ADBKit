@@ -71,3 +71,34 @@ func (s *DialogService) SelectPlatformToolsDirectory() (*PlatformToolsSelection,
 		FastbootPath: fastbootPath,
 	}, nil
 }
+
+func (s *DialogService) SelectApkFile() (string, error) {
+	if s.ctx == nil {
+		return "", NewOperationError("select_apk_file", "application context is not initialized", "", true)
+	}
+	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+		Title:           "Select APK file",
+		ShowHiddenFiles: false,
+		Filters: []wailsruntime.FileFilter{
+			{DisplayName: "APK files", Pattern: "*.apk"},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+func (s *DialogService) SelectSaveFile(defaultFilename string) (string, error) {
+	if s.ctx == nil {
+		return "", NewOperationError("select_save_file", "application context is not initialized", "", true)
+	}
+	path, err := wailsruntime.SaveFileDialog(s.ctx, wailsruntime.SaveDialogOptions{
+		Title:           "Save file",
+		DefaultFilename: defaultFilename,
+	})
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
