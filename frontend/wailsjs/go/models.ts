@@ -134,6 +134,44 @@ export namespace main {
 	        this.transportId = source["transportId"];
 	    }
 	}
+	export class PackageDetails {
+	    packageName: string;
+	    versionName: string;
+	    versionCode: string;
+	    apkSizeBytes: number;
+	    dataSizeBytes: number;
+	    totalSizeBytes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PackageDetails(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.packageName = source["packageName"];
+	        this.versionName = source["versionName"];
+	        this.versionCode = source["versionCode"];
+	        this.apkSizeBytes = source["apkSizeBytes"];
+	        this.dataSizeBytes = source["dataSizeBytes"];
+	        this.totalSizeBytes = source["totalSizeBytes"];
+	    }
+	}
+	export class PackageInfo {
+	    packageName: string;
+	    isEnabled: boolean;
+	    isSystemApp: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new PackageInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.packageName = source["packageName"];
+	        this.isEnabled = source["isEnabled"];
+	        this.isSystemApp = source["isSystemApp"];
+	    }
+	}
 	export class PerformanceSnapshot {
 	    serial: string;
 	    cpuUsage: number;

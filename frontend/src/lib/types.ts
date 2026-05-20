@@ -121,3 +121,26 @@ export interface PerformanceSnapshot {
 }
 
 export type DeviceNicknames = Record<string, string>
+
+export type PackageFilter = 'user' | 'system' | 'all'
+
+export type PackageStatusFilter = 'all' | 'enabled' | 'disabled'
+
+export type PackageSortOrder = 'az' | 'za'
+
+export type PackageBatchAction = 'uninstall' | 'enable' | 'disable' | 'clear-data' | 'pull-apk'
+
+export interface PackageInfo {
+  packageName: string
+  isEnabled: boolean
+  isSystemApp: boolean
+}
+
+export interface PackageDetails {
+  packageName: string
+  versionName: string
+  versionCode: string
+  apkSizeBytes: number
+  dataSizeBytes: number
+  totalSizeBytes: number
+}

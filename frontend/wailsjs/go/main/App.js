@@ -10,6 +10,10 @@ export function ClearDeviceNickname(arg1) {
   return window['go']['main']['App']['ClearDeviceNickname'](arg1);
 }
 
+export function ClearPackageData(arg1) {
+  return window['go']['main']['App']['ClearPackageData'](arg1);
+}
+
 export function CompleteSetup() {
   return window['go']['main']['App']['CompleteSetup']();
 }
@@ -18,12 +22,32 @@ export function ConnectWireless(arg1) {
   return window['go']['main']['App']['ConnectWireless'](arg1);
 }
 
+export function DisableMultiplePackages(arg1) {
+  return window['go']['main']['App']['DisableMultiplePackages'](arg1);
+}
+
+export function DisablePackage(arg1) {
+  return window['go']['main']['App']['DisablePackage'](arg1);
+}
+
 export function DisconnectWireless(arg1) {
   return window['go']['main']['App']['DisconnectWireless'](arg1);
 }
 
+export function EnableMultiplePackages(arg1) {
+  return window['go']['main']['App']['EnableMultiplePackages'](arg1);
+}
+
+export function EnablePackage(arg1) {
+  return window['go']['main']['App']['EnablePackage'](arg1);
+}
+
 export function EnableWirelessTCPIP(arg1, arg2) {
   return window['go']['main']['App']['EnableWirelessTCPIP'](arg1, arg2);
+}
+
+export function ForceStopPackage(arg1) {
+  return window['go']['main']['App']['ForceStopPackage'](arg1);
 }
 
 export function GetActiveSerial() {
@@ -58,6 +82,10 @@ export function GetManagedBinaryDir() {
   return window['go']['main']['App']['GetManagedBinaryDir']();
 }
 
+export function GetPackageDetails(arg1) {
+  return window['go']['main']['App']['GetPackageDetails'](arg1);
+}
+
 export function GetPerformanceSnapshot(arg1) {
   return window['go']['main']['App']['GetPerformanceSnapshot'](arg1);
 }
@@ -70,8 +98,24 @@ export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
 
+export function InstallPackage(arg1) {
+  return window['go']['main']['App']['InstallPackage'](arg1);
+}
+
+export function LaunchPackage(arg1) {
+  return window['go']['main']['App']['LaunchPackage'](arg1);
+}
+
 export function ListManagedBinaries() {
   return window['go']['main']['App']['ListManagedBinaries']();
+}
+
+export function ListPackages(arg1) {
+  return window['go']['main']['App']['ListPackages'](arg1);
+}
+
+export function PullPackageApk(arg1) {
+  return window['go']['main']['App']['PullPackageApk'](arg1);
 }
 
 export function RebootDevice(arg1, arg2) {
@@ -80,6 +124,10 @@ export function RebootDevice(arg1, arg2) {
 
 export function RetryBinaryDetection() {
   return window['go']['main']['App']['RetryBinaryDetection']();
+}
+
+export function SelectApkFile() {
+  return window['go']['main']['App']['SelectApkFile']();
 }
 
 export function SelectBinaryFile(arg1) {
@@ -100,4 +148,12 @@ export function SetCustomBinary(arg1, arg2) {
 
 export function SetDeviceNickname(arg1, arg2) {
   return window['go']['main']['App']['SetDeviceNickname'](arg1, arg2);
+}
+
+export function UninstallMultiplePackages(arg1) {
+  return window['go']['main']['App']['UninstallMultiplePackages'](arg1);
+}
+
+export function UninstallPackage(arg1) {
+  return window['go']['main']['App']['UninstallPackage'](arg1);
 }

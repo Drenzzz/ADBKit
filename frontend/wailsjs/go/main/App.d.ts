@@ -6,13 +6,25 @@ export function ClearCustomBinary(arg1:string):Promise<void>;
 
 export function ClearDeviceNickname(arg1:string):Promise<void>;
 
+export function ClearPackageData(arg1:string):Promise<string>;
+
 export function CompleteSetup():Promise<main.SetupState>;
 
 export function ConnectWireless(arg1:string):Promise<string>;
 
+export function DisableMultiplePackages(arg1:Array<string>):Promise<string>;
+
+export function DisablePackage(arg1:string):Promise<string>;
+
 export function DisconnectWireless(arg1:string):Promise<string>;
 
+export function EnableMultiplePackages(arg1:Array<string>):Promise<string>;
+
+export function EnablePackage(arg1:string):Promise<string>;
+
 export function EnableWirelessTCPIP(arg1:string,arg2:string):Promise<string>;
+
+export function ForceStopPackage(arg1:string):Promise<string>;
 
 export function GetActiveSerial():Promise<string>;
 
@@ -30,17 +42,29 @@ export function GetDevices():Promise<Array<main.DeviceSummary>>;
 
 export function GetManagedBinaryDir():Promise<string>;
 
+export function GetPackageDetails(arg1:string):Promise<main.PackageDetails>;
+
 export function GetPerformanceSnapshot(arg1:string):Promise<main.PerformanceSnapshot>;
 
 export function GetSetupState():Promise<main.SetupState>;
 
 export function Greet(arg1:string):Promise<string>;
 
+export function InstallPackage(arg1:string):Promise<string>;
+
+export function LaunchPackage(arg1:string):Promise<string>;
+
 export function ListManagedBinaries():Promise<Array<string>>;
+
+export function ListPackages(arg1:string):Promise<Array<main.PackageInfo>>;
+
+export function PullPackageApk(arg1:string):Promise<string>;
 
 export function RebootDevice(arg1:string,arg2:string):Promise<string>;
 
 export function RetryBinaryDetection():Promise<main.BinarySetupResult>;
+
+export function SelectApkFile():Promise<string>;
 
 export function SelectBinaryFile(arg1:string):Promise<string>;
 
@@ -51,3 +75,7 @@ export function SetActiveSerial(arg1:string):Promise<void>;
 export function SetCustomBinary(arg1:string,arg2:string):Promise<void>;
 
 export function SetDeviceNickname(arg1:string,arg2:string):Promise<void>;
+
+export function UninstallMultiplePackages(arg1:Array<string>):Promise<string>;
+
+export function UninstallPackage(arg1:string):Promise<string>;
