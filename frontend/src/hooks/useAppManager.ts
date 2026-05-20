@@ -17,7 +17,7 @@ import {
   getPackageDetails as svcGetDetails,
   selectApkFile as svcSelectApk,
 } from '@/services/packageService'
-import type { PackageDetails, PackageInfo } from '@/lib/types'
+import type { PackageDetails } from '@/lib/types'
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Operation failed'
