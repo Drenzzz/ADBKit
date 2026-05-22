@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { RefreshCw, Upload, Search, ArrowDownAZ, ArrowDownZA } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select'
 import { useDevices } from '@/hooks/useDevices'
 import { useAppManager } from '@/hooks/useAppManager'
+import { onFileDrop } from '@/services/fileDropService'
 import { PackageTable } from '@/components/apps/PackageTable'
 import { BatchBar } from '@/components/apps/BatchBar'
 import { InstallApkDialog } from '@/components/apps/InstallApkDialog'
@@ -27,6 +28,7 @@ export default function AppsPage() {
   const appManager = useAppManager()
 
   const [installDialogOpen, setInstallDialogOpen] = useState(false)
+  const [installApkPath, setInstallApkPath] = useState<string | undefined>()
   const [detailPackage, setDetailPackage] = useState<string | null>(null)
   const [confirmAction, setConfirmAction] = useState<{
     title: string
@@ -35,6 +37,15 @@ export default function AppsPage() {
     confirmLabel: string
     onConfirm: () => void
   } | null>(null)
+
+  useEffect(() => {
+    return onFileDrop((paths) => {
+      const apkPath = paths.find((p) => p.toLowerCase().endsWith('.apk'))
+      if (!apkPath) return
+      setInstallApkPath(apkPath)
+      setInstallDialogOpen(true)
+    })
+  }, [])
 
   if (!activeSerial) {
     return (
@@ -242,12 +253,20 @@ export default function AppsPage() {
 
       <InstallApkDialog
         open={installDialogOpen}
-        onOpenChange={setInstallDialogOpen}
-        installing={appManager.installing}
-        onInstall={() => {
-          appManager.installApk()
-          setInstallDialogOpen(false)
+        onOpenChange={(open) => {
+          setInstallDialogOpen(open)
+          if (!open) setInstallApkPath(undefined)
         }}
+        onInstall={async (filePath) => {
+          const success = await appManager.installApkFromPath(filePath)
+          if (success) setInstallDialogOpen(false)
+          return success
+        }}
+        onSelectFile={async () => {
+          const { selectApkFile } = await import('@/services/packageService')
+          return selectApkFile()
+        }}
+        initialFilePath={installApkPath}
       />
 
       <PackageDetailSheet

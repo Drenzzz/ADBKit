@@ -94,6 +94,24 @@ export function useAppManager() {
     }
   }, [fetchPackages])
 
+  const installApkFromPath = useCallback(
+    async (filePath: string): Promise<boolean> => {
+      try {
+        store.setInstalling(true)
+        const message = await svcInstallPackage(filePath)
+        toast.success(message)
+        await fetchPackages(true)
+        return true
+      } catch (err) {
+        toast.error(getErrorMessage(err))
+        return false
+      } finally {
+        store.setInstalling(false)
+      }
+    },
+    [fetchPackages],
+  )
+
   const uninstallSingle = useCallback(
     async (packageName: string) => {
       store.setBusyPackageName(packageName)
@@ -289,6 +307,7 @@ export function useAppManager() {
 
     fetchPackages,
     installApk,
+    installApkFromPath,
     uninstallSingle,
     uninstallBatch,
     enableSingle,
