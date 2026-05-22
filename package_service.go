@@ -323,6 +323,7 @@ func (s *PackageService) GetPackageDetails(ctx context.Context, packageName stri
 	})
 	if infoResult != nil {
 		details.VersionName, details.VersionCode = parsePackageVersionOutput(infoResult.Stdout)
+		details.DataSizeBytes = parseDataSizeFromDumpsys(infoResult.Stdout)
 	}
 
 	pathResult, _ := RunCommand(ctx, ExecRequest{
@@ -344,13 +345,26 @@ func (s *PackageService) GetPackageDetails(ctx context.Context, packageName stri
 		}
 	}
 
-	dataSizeResult, _ := RunCommand(ctx, ExecRequest{
-		Command: BinaryNameAdb,
-		Args:    []string{"-s", serial, "shell", "du", "-s", fmt.Sprintf("/data/data/%s", trimmedName)},
-		Timeout: packageDetailsTimeout,
-	})
-	if dataSizeResult != nil {
-		details.DataSizeBytes = parseDUSizeOutput(dataSizeResult.Stdout)
+	if details.DataSizeBytes < 0 {
+		dataSizeResult, _ := RunCommand(ctx, ExecRequest{
+			Command: BinaryNameAdb,
+			Args:    []string{"-s", serial, "shell", "du", "-s", fmt.Sprintf("/data/data/%s", trimmedName)},
+			Timeout: packageDetailsTimeout,
+		})
+		if dataSizeResult != nil && dataSizeResult.ExitCode == 0 {
+			details.DataSizeBytes = parseDUSizeOutput(dataSizeResult.Stdout)
+		}
+	}
+
+	if details.DataSizeBytes < 0 {
+		dataSizeResult, _ := RunCommand(ctx, ExecRequest{
+			Command: BinaryNameAdb,
+			Args:    []string{"-s", serial, "shell", "du", "-s", fmt.Sprintf("/data/user/0/%s", trimmedName)},
+			Timeout: packageDetailsTimeout,
+		})
+		if dataSizeResult != nil && dataSizeResult.ExitCode == 0 {
+			details.DataSizeBytes = parseDUSizeOutput(dataSizeResult.Stdout)
+		}
 	}
 
 	if details.ApkSizeBytes >= 0 && details.DataSizeBytes >= 0 {
@@ -628,6 +642,37 @@ func parsePackageVersionOutput(output string) (string, string) {
 	}
 
 	return versionName, versionCode
+}
+
+// dumpsys package reports dataSize in the "Data Sizes" section, e.g.:
+//   dataSize=12345
+// or in some Android versions:
+//   Code Size: 12345 Data Size: 67890
+func parseDataSizeFromDumpsys(output string) int64 {
+	for _, rawLine := range strings.Split(output, "\n") {
+		line := strings.TrimSpace(rawLine)
+		if strings.Contains(line, "dataSize=") {
+			parts := strings.SplitN(line, "dataSize=", 2)
+			if len(parts) == 2 {
+				var size int64
+				_, err := fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &size)
+				if err == nil && size > 0 {
+					return size
+				}
+			}
+		}
+		if strings.Contains(line, "Data Size:") {
+			parts := strings.SplitN(line, "Data Size:", 2)
+			if len(parts) == 2 {
+				var size int64
+				_, err := fmt.Sscanf(strings.TrimSpace(parts[1]), "%d", &size)
+				if err == nil && size > 0 {
+					return size
+				}
+			}
+		}
+	}
+	return -1
 }
 
 func parseByteSizeOutput(output string) int64 {
