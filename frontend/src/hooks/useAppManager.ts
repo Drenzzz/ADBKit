@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useAppManagerStore } from '@/stores/useAppManagerStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
@@ -31,6 +31,8 @@ function isReadyAdbDevice(d: DeviceSummary): boolean {
 export function useAppManager() {
   const store = useAppManagerStore()
   const { devices, activeSerial } = useDeviceStore()
+  const [detailsCache, setDetailsCache] = useState<Map<string, PackageDetails>>(new Map())
+  const pendingDetailsRef = useRef<Set<string>>(new Set())
 
   const hasReadyAdbDevice = useMemo(
     () => devices.some(isReadyAdbDevice),
@@ -95,14 +97,63 @@ export function useAppManager() {
       )
     }
 
-    if (store.sortOrder === 'za') {
-      result.sort((a, b) => b.packageName.localeCompare(a.packageName))
-    } else {
-      result.sort((a, b) => a.packageName.localeCompare(b.packageName))
+    switch (store.sortOrder) {
+      case 'za':
+        result.sort((a, b) => b.packageName.localeCompare(a.packageName))
+        break
+      case 'size-desc':
+        result.sort((a, b) => {
+          const sizeA = detailsCache.get(a.packageName)?.totalSizeBytes ?? -1
+          const sizeB = detailsCache.get(b.packageName)?.totalSizeBytes ?? -1
+          return sizeB - sizeA
+        })
+        break
+      case 'size-asc':
+        result.sort((a, b) => {
+          const sizeA = detailsCache.get(a.packageName)?.totalSizeBytes ?? -1
+          const sizeB = detailsCache.get(b.packageName)?.totalSizeBytes ?? -1
+          return sizeA - sizeB
+        })
+        break
+      default:
+        result.sort((a, b) => a.packageName.localeCompare(b.packageName))
     }
 
     return result
-  }, [store.packages, store.statusFilter, store.searchTerm, store.sortOrder])
+  }, [store.packages, store.statusFilter, store.searchTerm, store.sortOrder, detailsCache])
+
+  const isSizeSort = store.sortOrder === 'size-desc' || store.sortOrder === 'size-asc'
+
+  useEffect(() => {
+    if (!isSizeSort || filteredPackages.length === 0) return
+
+    const uncached = filteredPackages
+      .filter((pkg) => !detailsCache.has(pkg.packageName) && !pendingDetailsRef.current.has(pkg.packageName))
+      .slice(0, 20)
+
+    if (uncached.length === 0) return
+
+    for (const pkg of uncached) {
+      pendingDetailsRef.current.add(pkg.packageName)
+    }
+
+    void Promise.allSettled(
+      uncached.map(async (pkg) => {
+        try {
+          const details = await svcGetDetails(pkg.packageName)
+          if (details) {
+            setDetailsCache((prev) => {
+              const next = new Map(prev)
+              next.set(pkg.packageName, details)
+              return next
+            })
+          }
+        } finally {
+          pendingDetailsRef.current.delete(pkg.packageName)
+        }
+      }),
+    )
+  }, [isSizeSort, filteredPackages])
 
   const installApk = useCallback(async () => {
     try {

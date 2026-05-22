@@ -126,7 +126,7 @@ export type PackageFilter = 'user' | 'system' | 'all'
 
 export type PackageStatusFilter = 'all' | 'enabled' | 'disabled'
 
-export type PackageSortOrder = 'az' | 'za'
+export type PackageSortOrder = 'az' | 'za' | 'size-desc' | 'size-asc'
 
 export type PackageBatchAction = 'uninstall' | 'enable' | 'disable' | 'force-stop' | 'clear-data' | 'pull-apk'
 

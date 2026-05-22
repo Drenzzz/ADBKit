@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { RefreshCw, Upload, Search, ArrowDownAZ, ArrowDownZA } from 'lucide-react'
+import { RefreshCw, Upload, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -140,23 +140,24 @@ export default function AppsPage() {
           </SelectContent>
         </Select>
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-8 w-8"
-          onClick={() =>
+        <Select
+          value={appManager.sortOrder}
+          onValueChange={(v) =>
             appManager.setSortOrder(
-              appManager.sortOrder === 'az' ? 'za' : 'az',
+              v as 'az' | 'za' | 'size-desc' | 'size-asc',
             )
           }
-          title={appManager.sortOrder === 'az' ? 'Sort Z→A' : 'Sort A→Z'}
         >
-          {appManager.sortOrder === 'az' ? (
-            <ArrowDownAZ className="h-3.5 w-3.5" />
-          ) : (
-            <ArrowDownZA className="h-3.5 w-3.5" />
-          )}
-        </Button>
+          <SelectTrigger className="h-8 w-32 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="az">A → Z</SelectItem>
+            <SelectItem value="za">Z → A</SelectItem>
+            <SelectItem value="size-desc">Largest</SelectItem>
+            <SelectItem value="size-asc">Smallest</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {appManager.error && (
