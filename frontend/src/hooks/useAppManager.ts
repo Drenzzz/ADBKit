@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useAppManagerStore } from '@/stores/useAppManagerStore'
+import { useDeviceStore } from '@/stores/useDeviceStore'
 import {
   listPackages,
   installPackage as svcInstallPackage,
@@ -17,17 +18,42 @@ import {
   getPackageDetails as svcGetDetails,
   selectApkFile as svcSelectApk,
 } from '@/services/packageService'
-import type { PackageDetails } from '@/lib/types'
+import type { PackageDetails, DeviceSummary } from '@/lib/types'
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Operation failed'
 }
 
+function isReadyAdbDevice(d: DeviceSummary): boolean {
+  return d.mode === 'adb' && d.state === 'device'
+}
+
 export function useAppManager() {
   const store = useAppManagerStore()
+  const { devices, activeSerial } = useDeviceStore()
+
+  const hasReadyAdbDevice = useMemo(
+    () => devices.some(isReadyAdbDevice),
+    [devices],
+  )
+
+  const hasReadyActiveDevice = useMemo(
+    () => devices.some((d) => d.serial === activeSerial && isReadyAdbDevice(d)),
+    [activeSerial, devices],
+  )
 
   const fetchPackages = useCallback(
     async (isRefresh = false) => {
+      if (!hasReadyAdbDevice || !hasReadyActiveDevice) {
+        store.setPackages([])
+        store.clearSelection()
+        store.setLastUpdatedAt(null)
+        store.setError('No ADB device connected')
+        store.setLoading(false)
+        store.setRefreshing(false)
+        return
+      }
+
       if (isRefresh) {
         store.setRefreshing(true)
       } else {
@@ -46,7 +72,7 @@ export function useAppManager() {
         store.setRefreshing(false)
       }
     },
-    [store],
+    [store, hasReadyAdbDevice, hasReadyActiveDevice],
   )
 
   useEffect(() => {

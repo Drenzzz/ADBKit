@@ -90,8 +90,8 @@ func (s *PackageService) ListPackages(ctx context.Context, filterType string) ([
 
 func (s *PackageService) InstallPackage(ctx context.Context, filePath string) (string, error) {
 	trimmedPath := strings.TrimSpace(filePath)
-	if trimmedPath == "" {
-		return "", NewOperationError("install_package", "APK file path is required", "", false)
+	if err := ValidateAPKFile(trimmedPath); err != nil {
+		return "", err
 	}
 
 	serial, err := s.requireActiveSerial(ctx)

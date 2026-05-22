@@ -54,6 +54,32 @@ func ValidateBinaryExecutable(name, path string) error {
 	return nil
 }
 
+var allowedAPKExtensions = map[string]struct{}{
+	".apk": {},
+}
+
+func ValidateAPKFile(filePath string) error {
+	trimmedPath := strings.TrimSpace(filePath)
+	if trimmedPath == "" {
+		return NewOperationError("validate_apk_file", "APK file path is required", "file path must not be empty", false)
+	}
+
+	extension := strings.ToLower(filepath.Ext(trimmedPath))
+	if _, ok := allowedAPKExtensions[extension]; !ok {
+		return NewOperationError("validate_apk_file", "APK file type is invalid", "only .apk files are allowed", false)
+	}
+
+	info, err := os.Stat(trimmedPath)
+	if err != nil {
+		return NewOperationError("validate_apk_file", "File could not be accessed", err.Error(), false)
+	}
+	if info.IsDir() {
+		return NewOperationError("validate_apk_file", "File path points to a directory", "expected a regular file", false)
+	}
+
+	return nil
+}
+
 // EnsureDir creates a directory and all parents if it doesn't exist.
 func EnsureDir(path string) error {
 	return os.MkdirAll(path, 0o755)
