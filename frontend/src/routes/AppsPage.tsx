@@ -248,6 +248,20 @@ export default function AppsPage() {
         }
         onEnable={appManager.enableBatch}
         onDisable={appManager.disableBatch}
+        onForceStop={appManager.forceStopBatch}
+        onClearData={() =>
+          setConfirmAction({
+            title: 'Clear Data for Selected',
+            description: `Clear data for ${appManager.selectedPackages.length} selected package(s)? This cannot be undone.`,
+            variant: 'destructive',
+            confirmLabel: 'Clear All',
+            onConfirm: () => {
+              appManager.clearDataBatch()
+              setConfirmAction(null)
+            },
+          })
+        }
+        onExportApk={appManager.exportApkBatch}
         onClear={appManager.clearSelection}
       />
 

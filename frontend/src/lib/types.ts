@@ -128,7 +128,7 @@ export type PackageStatusFilter = 'all' | 'enabled' | 'disabled'
 
 export type PackageSortOrder = 'az' | 'za'
 
-export type PackageBatchAction = 'uninstall' | 'enable' | 'disable' | 'clear-data' | 'pull-apk'
+export type PackageBatchAction = 'uninstall' | 'enable' | 'disable' | 'force-stop' | 'clear-data' | 'pull-apk'
 
 export interface PackageInfo {
   packageName: string

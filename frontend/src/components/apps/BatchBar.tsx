@@ -1,4 +1,4 @@
-import { Trash2, Eye, EyeOff, X } from 'lucide-react'
+import { Trash2, Eye, EyeOff, Square, Eraser, Download, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { PackageBatchAction } from '@/lib/types'
 
@@ -8,6 +8,9 @@ interface BatchBarProps {
   onUninstall: () => void
   onEnable: () => void
   onDisable: () => void
+  onForceStop: () => void
+  onClearData: () => void
+  onExportApk: () => void
   onClear: () => void
 }
 
@@ -17,12 +20,15 @@ export function BatchBar({
   onUninstall,
   onEnable,
   onDisable,
+  onForceStop,
+  onClearData,
+  onExportApk,
   onClear,
 }: BatchBarProps) {
   if (count === 0) return null
 
   return (
-    <div className="fixed bottom-16 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-border bg-background/95 px-4 py-2 shadow-lg backdrop-blur-sm">
+    <div className="fixed bottom-16 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-lg border border-border bg-background/95 px-4 py-2 shadow-lg backdrop-blur-sm">
       <span className="text-sm font-medium text-foreground">
         {count} selected
       </span>
@@ -35,7 +41,7 @@ export function BatchBar({
         onClick={onEnable}
         disabled={busyAction !== null}
       >
-        <Eye className="mr-1.5 h-3.5 w-3.5" />
+        <Eye className="mr-1 h-3.5 w-3.5" />
         Enable
       </Button>
 
@@ -45,8 +51,38 @@ export function BatchBar({
         onClick={onDisable}
         disabled={busyAction !== null}
       >
-        <EyeOff className="mr-1.5 h-3.5 w-3.5" />
+        <EyeOff className="mr-1 h-3.5 w-3.5" />
         Disable
+      </Button>
+
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onForceStop}
+        disabled={busyAction !== null}
+      >
+        <Square className="mr-1 h-3.5 w-3.5" />
+        Stop
+      </Button>
+
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onClearData}
+        disabled={busyAction !== null}
+      >
+        <Eraser className="mr-1 h-3.5 w-3.5" />
+        Clear
+      </Button>
+
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onExportApk}
+        disabled={busyAction !== null}
+      >
+        <Download className="mr-1 h-3.5 w-3.5" />
+        Export
       </Button>
 
       <Button
@@ -55,7 +91,7 @@ export function BatchBar({
         onClick={onUninstall}
         disabled={busyAction !== null}
       >
-        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+        <Trash2 className="mr-1 h-3.5 w-3.5" />
         Uninstall
       </Button>
 

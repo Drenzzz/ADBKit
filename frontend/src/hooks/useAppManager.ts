@@ -238,6 +238,81 @@ export function useAppManager() {
     }
   }, [fetchPackages])
 
+  const forceStopBatch = useCallback(async () => {
+    const names = store.selectedPackages
+    if (names.length === 0) return
+
+    store.setBusyBatchAction('force-stop')
+    let successCount = 0
+    const failures: string[] = []
+    for (const name of names) {
+      try {
+        await svcForceStop(name)
+        successCount++
+      } catch (err) {
+        failures.push(`${name}: ${getErrorMessage(err)}`)
+      }
+    }
+    store.setBusyBatchAction(null)
+
+    if (failures.length === 0) {
+      toast.success(`Successfully stopped ${successCount} package(s)`)
+    } else {
+      toast.success(`Stopped ${successCount}. Failed: ${failures.length}`)
+    }
+    store.clearSelection()
+  }, [])
+
+  const clearDataBatch = useCallback(async () => {
+    const names = store.selectedPackages
+    if (names.length === 0) return
+
+    store.setBusyBatchAction('clear-data')
+    let successCount = 0
+    const failures: string[] = []
+    for (const name of names) {
+      try {
+        await svcClearData(name)
+        successCount++
+      } catch (err) {
+        failures.push(`${name}: ${getErrorMessage(err)}`)
+      }
+    }
+    store.setBusyBatchAction(null)
+
+    if (failures.length === 0) {
+      toast.success(`Successfully cleared data for ${successCount} package(s)`)
+    } else {
+      toast.success(`Cleared ${successCount}. Failed: ${failures.length}`)
+    }
+    store.clearSelection()
+  }, [])
+
+  const exportApkBatch = useCallback(async () => {
+    const names = store.selectedPackages
+    if (names.length === 0) return
+
+    store.setBusyBatchAction('pull-apk')
+    let successCount = 0
+    const failures: string[] = []
+    for (const name of names) {
+      try {
+        await svcPullApk(name)
+        successCount++
+      } catch (err) {
+        failures.push(`${name}: ${getErrorMessage(err)}`)
+      }
+    }
+    store.setBusyBatchAction(null)
+
+    if (failures.length === 0) {
+      toast.success(`Successfully exported ${successCount} APK(s)`)
+    } else {
+      toast.success(`Exported ${successCount}. Failed: ${failures.length}`)
+    }
+    store.clearSelection()
+  }, [])
+
   const clearData = useCallback(
     async (packageName: string) => {
       store.setBusyPackageName(packageName)
@@ -340,6 +415,9 @@ export function useAppManager() {
     enableBatch,
     disableSingle,
     disableBatch,
+    forceStopBatch,
+    clearDataBatch,
+    exportApkBatch,
     clearData,
     pullApk,
     launch,
