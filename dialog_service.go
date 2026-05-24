@@ -102,3 +102,42 @@ func (s *DialogService) SelectSaveFile(defaultFilename string) (string, error) {
 	}
 	return path, nil
 }
+
+func (s *DialogService) SelectFile() (string, error) {
+	if s.ctx == nil {
+		return "", NewOperationError("select_file", "application context is not initialized", "", true)
+	}
+	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+		Title: "Select file",
+	})
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+func (s *DialogService) SelectDirectory() (string, error) {
+	if s.ctx == nil {
+		return "", NewOperationError("select_directory", "application context is not initialized", "", true)
+	}
+	dir, err := wailsruntime.OpenDirectoryDialog(s.ctx, wailsruntime.OpenDialogOptions{
+		Title: "Select directory",
+	})
+	if err != nil {
+		return "", err
+	}
+	return dir, nil
+}
+
+func (s *DialogService) SelectMultipleFiles() ([]string, error) {
+	if s.ctx == nil {
+		return nil, NewOperationError("select_multiple_files", "application context is not initialized", "", true)
+	}
+	files, err := wailsruntime.OpenMultipleFilesDialog(s.ctx, wailsruntime.OpenDialogOptions{
+		Title: "Select files",
+	})
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
+}

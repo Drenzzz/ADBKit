@@ -18,6 +18,7 @@ type App struct {
 	wirelessService *WirelessService
 	monitorService  *MonitorService
 	packageService  *PackageService
+	fileService     *FileService
 	dialogService   *DialogService
 	config          *AppConfig
 	dataDir         string
@@ -54,6 +55,7 @@ func (a *App) startup(ctx context.Context) {
 	a.monitorService = NewMonitorService(a.dataDir)
 	a.dialogService = NewDialogService(ctx)
 	a.packageService = NewPackageService(a.resolveActiveSerial, a.dialogService.SelectSaveFile)
+	a.fileService = NewFileService(ctx, a.resolveActiveSerial)
 
 	al, err := NewAuditLog(a.dataDir)
 	if err != nil {
@@ -371,4 +373,60 @@ func (a *App) GetPackageDetails(packageName string) (PackageDetails, error) {
 
 func (a *App) SelectApkFile() (string, error) {
 	return a.dialogService.SelectApkFile()
+}
+
+func (a *App) ListFiles(remotePath string, showHidden bool) ([]FileEntry, error) {
+	return a.fileService.ListFiles(a.ctx, remotePath, showHidden)
+}
+
+func (a *App) GetDirectorySize(remotePath string) (string, error) {
+	return a.fileService.GetDirectorySize(a.ctx, remotePath)
+}
+
+func (a *App) GetStorageInfo() (StorageInfo, error) {
+	return a.fileService.GetStorageInfo(a.ctx)
+}
+
+func (a *App) PullFile(remotePath string, localPath string) (string, error) {
+	return a.fileService.PullFile(a.ctx, remotePath, localPath)
+}
+
+func (a *App) PullMultipleFiles(remotePaths []string, localDirectory string) (string, error) {
+	return a.fileService.PullMultipleFiles(a.ctx, remotePaths, localDirectory)
+}
+
+func (a *App) PushFile(localPath string, remotePath string) (string, error) {
+	return a.fileService.PushFile(a.ctx, localPath, remotePath)
+}
+
+func (a *App) PushMultipleFiles(localPaths []string, remoteDirectory string) (string, error) {
+	return a.fileService.PushMultipleFiles(a.ctx, localPaths, remoteDirectory)
+}
+
+func (a *App) DeleteFile(remotePath string) (string, error) {
+	return a.fileService.DeleteFile(a.ctx, remotePath)
+}
+
+func (a *App) DeleteMultipleFiles(remotePaths []string) (string, error) {
+	return a.fileService.DeleteMultipleFiles(a.ctx, remotePaths)
+}
+
+func (a *App) CreateDirectory(remotePath string) (string, error) {
+	return a.fileService.CreateDirectory(a.ctx, remotePath)
+}
+
+func (a *App) RenameFile(oldRemotePath string, newRemotePath string) (string, error) {
+	return a.fileService.RenameFile(a.ctx, oldRemotePath, newRemotePath)
+}
+
+func (a *App) SelectFile() (string, error) {
+	return a.dialogService.SelectFile()
+}
+
+func (a *App) SelectDirectory() (string, error) {
+	return a.dialogService.SelectDirectory()
+}
+
+func (a *App) SelectMultipleFiles() ([]string, error) {
+	return a.dialogService.SelectMultipleFiles()
 }
