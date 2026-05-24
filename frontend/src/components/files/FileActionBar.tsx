@@ -1,4 +1,4 @@
-import { RefreshCw, Search, Eye, EyeOff, FolderPlus, Upload, ArrowUpAZ, ArrowDownAZ } from 'lucide-react'
+import { RefreshCw, Search, Eye, EyeOff, FolderPlus, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { FileSortField, FileSortDirection } from '@/lib/types'
