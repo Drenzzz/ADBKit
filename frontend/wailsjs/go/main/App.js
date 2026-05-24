@@ -22,6 +22,18 @@ export function ConnectWireless(arg1) {
   return window['go']['main']['App']['ConnectWireless'](arg1);
 }
 
+export function CreateDirectory(arg1) {
+  return window['go']['main']['App']['CreateDirectory'](arg1);
+}
+
+export function DeleteFile(arg1) {
+  return window['go']['main']['App']['DeleteFile'](arg1);
+}
+
+export function DeleteMultipleFiles(arg1) {
+  return window['go']['main']['App']['DeleteMultipleFiles'](arg1);
+}
+
 export function DisableMultiplePackages(arg1) {
   return window['go']['main']['App']['DisableMultiplePackages'](arg1);
 }
@@ -78,6 +90,10 @@ export function GetDevices() {
   return window['go']['main']['App']['GetDevices']();
 }
 
+export function GetDirectorySize(arg1) {
+  return window['go']['main']['App']['GetDirectorySize'](arg1);
+}
+
 export function GetManagedBinaryDir() {
   return window['go']['main']['App']['GetManagedBinaryDir']();
 }
@@ -94,6 +110,10 @@ export function GetSetupState() {
   return window['go']['main']['App']['GetSetupState']();
 }
 
+export function GetStorageInfo() {
+  return window['go']['main']['App']['GetStorageInfo']();
+}
+
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
@@ -106,6 +126,10 @@ export function LaunchPackage(arg1) {
   return window['go']['main']['App']['LaunchPackage'](arg1);
 }
 
+export function ListFiles(arg1, arg2) {
+  return window['go']['main']['App']['ListFiles'](arg1, arg2);
+}
+
 export function ListManagedBinaries() {
   return window['go']['main']['App']['ListManagedBinaries']();
 }
@@ -114,12 +138,32 @@ export function ListPackages(arg1) {
   return window['go']['main']['App']['ListPackages'](arg1);
 }
 
+export function PullFile(arg1, arg2) {
+  return window['go']['main']['App']['PullFile'](arg1, arg2);
+}
+
+export function PullMultipleFiles(arg1, arg2) {
+  return window['go']['main']['App']['PullMultipleFiles'](arg1, arg2);
+}
+
 export function PullPackageApk(arg1) {
   return window['go']['main']['App']['PullPackageApk'](arg1);
 }
 
+export function PushFile(arg1, arg2) {
+  return window['go']['main']['App']['PushFile'](arg1, arg2);
+}
+
+export function PushMultipleFiles(arg1, arg2) {
+  return window['go']['main']['App']['PushMultipleFiles'](arg1, arg2);
+}
+
 export function RebootDevice(arg1, arg2) {
   return window['go']['main']['App']['RebootDevice'](arg1, arg2);
+}
+
+export function RenameFile(arg1, arg2) {
+  return window['go']['main']['App']['RenameFile'](arg1, arg2);
 }
 
 export function RetryBinaryDetection() {
@@ -132,6 +176,18 @@ export function SelectApkFile() {
 
 export function SelectBinaryFile(arg1) {
   return window['go']['main']['App']['SelectBinaryFile'](arg1);
+}
+
+export function SelectDirectory() {
+  return window['go']['main']['App']['SelectDirectory']();
+}
+
+export function SelectFile() {
+  return window['go']['main']['App']['SelectFile']();
+}
+
+export function SelectMultipleFiles() {
+  return window['go']['main']['App']['SelectMultipleFiles']();
 }
 
 export function SelectPlatformToolsDirectory() {

@@ -134,6 +134,32 @@ export namespace main {
 	        this.transportId = source["transportId"];
 	    }
 	}
+	export class FileEntry {
+	    name: string;
+	    path: string;
+	    type: string;
+	    size: number;
+	    sizeHuman: string;
+	    permissions: string;
+	    modifiedAt: string;
+	    isHidden: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new FileEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.type = source["type"];
+	        this.size = source["size"];
+	        this.sizeHuman = source["sizeHuman"];
+	        this.permissions = source["permissions"];
+	        this.modifiedAt = source["modifiedAt"];
+	        this.isHidden = source["isHidden"];
+	    }
+	}
 	export class PackageDetails {
 	    packageName: string;
 	    versionName: string;
@@ -259,6 +285,26 @@ export namespace main {
 		    }
 		    return a;
 		}
+	}
+	export class StorageInfo {
+	    mountPoint: string;
+	    totalBytes: number;
+	    usedBytes: number;
+	    freeBytes: number;
+	    usedPct: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new StorageInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.mountPoint = source["mountPoint"];
+	        this.totalBytes = source["totalBytes"];
+	        this.usedBytes = source["usedBytes"];
+	        this.freeBytes = source["freeBytes"];
+	        this.usedPct = source["usedPct"];
+	    }
 	}
 
 }

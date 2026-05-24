@@ -144,3 +144,26 @@ export interface PackageDetails {
   dataSizeBytes: number
   totalSizeBytes: number
 }
+
+export interface FileEntry {
+  name: string
+  path: string
+  type: 'directory' | 'file' | 'symlink' | 'other'
+  size: number
+  sizeHuman: string
+  permissions: string
+  modifiedAt: string
+  isHidden: boolean
+}
+
+export interface StorageInfo {
+  mountPoint: string
+  totalBytes: number
+  usedBytes: number
+  freeBytes: number
+  usedPct: number
+}
+
+export type FileSortField = 'name' | 'size' | 'date'
+
+export type FileSortDirection = 'asc' | 'desc'

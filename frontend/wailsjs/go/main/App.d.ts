@@ -12,6 +12,12 @@ export function CompleteSetup():Promise<main.SetupState>;
 
 export function ConnectWireless(arg1:string):Promise<string>;
 
+export function CreateDirectory(arg1:string):Promise<string>;
+
+export function DeleteFile(arg1:string):Promise<string>;
+
+export function DeleteMultipleFiles(arg1:Array<string>):Promise<string>;
+
 export function DisableMultiplePackages(arg1:Array<string>):Promise<string>;
 
 export function DisablePackage(arg1:string):Promise<string>;
@@ -40,6 +46,8 @@ export function GetDeviceNicknames():Promise<Record<string, string>>;
 
 export function GetDevices():Promise<Array<main.DeviceSummary>>;
 
+export function GetDirectorySize(arg1:string):Promise<string>;
+
 export function GetManagedBinaryDir():Promise<string>;
 
 export function GetPackageDetails(arg1:string):Promise<main.PackageDetails>;
@@ -48,25 +56,45 @@ export function GetPerformanceSnapshot(arg1:string):Promise<main.PerformanceSnap
 
 export function GetSetupState():Promise<main.SetupState>;
 
+export function GetStorageInfo():Promise<main.StorageInfo>;
+
 export function Greet(arg1:string):Promise<string>;
 
 export function InstallPackage(arg1:string):Promise<string>;
 
 export function LaunchPackage(arg1:string):Promise<string>;
 
+export function ListFiles(arg1:string,arg2:boolean):Promise<Array<main.FileEntry>>;
+
 export function ListManagedBinaries():Promise<Array<string>>;
 
 export function ListPackages(arg1:string):Promise<Array<main.PackageInfo>>;
 
+export function PullFile(arg1:string,arg2:string):Promise<string>;
+
+export function PullMultipleFiles(arg1:Array<string>,arg2:string):Promise<string>;
+
 export function PullPackageApk(arg1:string):Promise<string>;
 
+export function PushFile(arg1:string,arg2:string):Promise<string>;
+
+export function PushMultipleFiles(arg1:Array<string>,arg2:string):Promise<string>;
+
 export function RebootDevice(arg1:string,arg2:string):Promise<string>;
+
+export function RenameFile(arg1:string,arg2:string):Promise<string>;
 
 export function RetryBinaryDetection():Promise<main.BinarySetupResult>;
 
 export function SelectApkFile():Promise<string>;
 
 export function SelectBinaryFile(arg1:string):Promise<string>;
+
+export function SelectDirectory():Promise<string>;
+
+export function SelectFile():Promise<string>;
+
+export function SelectMultipleFiles():Promise<Array<string>>;
 
 export function SelectPlatformToolsDirectory():Promise<main.PlatformToolsSelection>;
 
