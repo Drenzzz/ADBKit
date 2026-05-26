@@ -110,9 +110,9 @@ export default function FilesPage() {
             const { toast } = await import('sonner')
             try {
               await toast.promise(pushMultipleFiles(paths, remoteDir), {
-                loading: `Pushing ${paths.length} file(s)...`,
+                loading: `Importing ${paths.length} file(s)...`,
                 success: (msg) => msg,
-                error: (err) => err instanceof Error ? err.message : 'Failed to push files',
+                error: (err) => err instanceof Error ? err.message : 'Failed to import files',
               })
             } catch {}
           }}
@@ -150,7 +150,7 @@ export default function FilesPage() {
             className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
             onClick={fe.openBatchPullDialog}
           >
-            Pull
+            Export
           </button>
           <button
             className="text-xs text-destructive hover:text-destructive/80 transition-colors px-2 py-1"

@@ -60,17 +60,17 @@ export function FileActions({
         )}
         <DropdownMenuItem onClick={() => onPull(file)}>
           <Download className="mr-2 h-4 w-4" />
-          Pull to PC
+          Export to PC
         </DropdownMenuItem>
         {file.type === 'directory' && (
           <>
             <DropdownMenuItem onClick={() => onPush(file)}>
               <Files className="mr-2 h-4 w-4" />
-              Push files to here
+              Import files here
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onPushFolder(file)}>
               <FolderUp className="mr-2 h-4 w-4" />
-              Push folder to here
+              Import folder here
             </DropdownMenuItem>
           </>
         )}

@@ -94,9 +94,9 @@ export function FileActionDialogs({
       <Dialog open={isPullDialogOpen} onOpenChange={setIsPullDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Pull File</DialogTitle>
+            <DialogTitle>Export File</DialogTitle>
             <DialogDescription>
-              Save <span className="font-mono text-sm">{dialogTargetFile?.name}</span> to your computer.
+              Export this file from device to PC.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -112,9 +112,9 @@ export function FileActionDialogs({
       <Dialog open={isPushDialogOpen} onOpenChange={setIsPushDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Push File</DialogTitle>
+            <DialogTitle>Import File</DialogTitle>
             <DialogDescription>
-              Upload a file to <span className="font-mono text-sm">{dialogTargetFile?.path}</span>
+              Import a file to <span className="font-mono text-sm">{dialogTargetFile?.path}</span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -130,9 +130,9 @@ export function FileActionDialogs({
       <Dialog open={isPushFolderDialogOpen} onOpenChange={setIsPushFolderDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Push Folder</DialogTitle>
+            <DialogTitle>Import Folder</DialogTitle>
             <DialogDescription>
-              Select a folder from your computer to push to the current device directory.
+              Import a folder from PC to this device directory.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -223,7 +223,7 @@ export function FileActionDialogs({
       <Dialog open={isBatchPullDialogOpen} onOpenChange={setIsBatchPullDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Pull {selectedCount} File(s)</DialogTitle>
+            <DialogTitle>Export {selectedCount} File(s)</DialogTitle>
             <DialogDescription>Choose a directory on your computer to save the selected files.</DialogDescription>
           </DialogHeader>
           <DialogFooter>

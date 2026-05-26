@@ -96,15 +96,15 @@ export function FileActionBar({
         <FolderPlus className="h-3.5 w-3.5" />
       </Button>
 
-      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFile} title="Push single file">
+      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFile} title="Import file">
         <Upload className="h-3.5 w-3.5" />
       </Button>
 
-      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFiles} title="Push multiple files">
+      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFiles} title="Import files">
         <Files className="h-3.5 w-3.5" />
       </Button>
 
-      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFolder} title="Push folder">
+      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFolder} title="Import folder">
         <FolderUp className="h-3.5 w-3.5" />
       </Button>
 
