@@ -1,10 +1,5 @@
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { useRef } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FileRow } from './FileRow'
@@ -18,22 +13,23 @@ interface SortHeaderProps {
   currentField: FileSortField
   direction: FileSortDirection
   onSort: (field: FileSortField) => void
-  className?: string
 }
 
-function SortHeader({ label, field, currentField, direction, onSort, className }: SortHeaderProps) {
+function SortHeader({ label, field, currentField, direction, onSort }: SortHeaderProps) {
   const isActive = field === currentField
   return (
-    <TableHead className={className} onClick={() => onSort(field)} role="button">
-      <span className="inline-flex items-center gap-1 cursor-pointer select-none hover:text-foreground transition-colors">
-        {label}
-        {isActive && (
-          direction === 'asc'
-            ? <ArrowUp className="h-3 w-3" />
-            : <ArrowDown className="h-3 w-3" />
-        )}
-      </span>
-    </TableHead>
+    <span
+      className="inline-flex items-center gap-1 cursor-pointer select-none text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+      onClick={() => onSort(field)}
+      role="button"
+    >
+      {label}
+      {isActive && (
+        direction === 'asc'
+          ? <ArrowUp className="h-3 w-3" />
+          : <ArrowDown className="h-3 w-3" />
+      )}
+    </span>
   )
 }
 
@@ -78,6 +74,15 @@ export function FileTable({
   onDelete,
   onGetSize,
 }: FileTableProps) {
+  const parentRef = useRef<HTMLDivElement>(null)
+  
+  const rowVirtualizer = useVirtualizer({
+    count: files.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 40,
+    overscan: 10,
+  })
+
   const allPaths = files.map((f) => f.path)
   const allSelected = allPaths.length > 0 && allPaths.every((p) => selectedFiles.includes(p))
 
@@ -98,41 +103,70 @@ export function FileTable({
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-10 px-3">
-            <Checkbox
-              checked={allSelected}
-              onCheckedChange={() => onSelectAll(allPaths)}
-            />
-          </TableHead>
-          <SortHeader label="Name" field="name" currentField={sortField} direction={sortDirection} onSort={onSort} className="px-3" />
-          <SortHeader label="Size" field="size" currentField={sortField} direction={sortDirection} onSort={onSort} className="w-24 px-3 text-right" />
-          <TableHead className="w-32 px-3 hidden md:table-cell">Permissions</TableHead>
-          <SortHeader label="Modified" field="date" currentField={sortField} direction={sortDirection} onSort={onSort} className="w-36 px-3 hidden lg:table-cell" />
-          <TableHead className="w-10 px-2" />
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {files.map((file) => (
-          <FileRow
-            key={file.path}
-            file={file}
-            isSelected={selectedFiles.includes(file.path)}
-            isBusy={busyFilePath === file.path}
-            onSelect={onSelect}
-            onOpen={onOpen}
-            onPull={onPull}
-            onPush={onPush}
-            onPushFolder={onPushFolder}
-            onMove={onMove}
-            onRename={onRename}
-            onDelete={onDelete}
-            onGetSize={onGetSize}
+    <div className="flex flex-col h-[calc(100vh-280px)]">
+      <div className="grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border bg-background sticky top-0 z-10 h-10">
+        <div className="px-3">
+          <Checkbox
+            checked={allSelected}
+            onCheckedChange={() => onSelectAll(allPaths)}
           />
-        ))}
-      </TableBody>
-    </Table>
+        </div>
+        <div className="px-3">
+          <SortHeader label="Name" field="name" currentField={sortField} direction={sortDirection} onSort={onSort} />
+        </div>
+        <div className="px-3 text-right">
+          <SortHeader label="Size" field="size" currentField={sortField} direction={sortDirection} onSort={onSort} />
+        </div>
+        <div className="px-3 hidden md:block">
+          <span className="text-xs font-medium text-muted-foreground">Permissions</span>
+        </div>
+        <div className="px-3 hidden lg:block">
+          <SortHeader label="Modified" field="date" currentField={sortField} direction={sortDirection} onSort={onSort} />
+        </div>
+        <div className="px-2" />
+      </div>
+      
+      <div ref={parentRef} className="flex-1 overflow-auto">
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const file = files[virtualRow.index]
+            return (
+              <div
+                key={file.path}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: `${virtualRow.size}px`,
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <FileRow
+                  file={file}
+                  isSelected={selectedFiles.includes(file.path)}
+                  isBusy={busyFilePath === file.path}
+                  onSelect={onSelect}
+                  onOpen={onOpen}
+                  onPull={onPull}
+                  onPush={onPush}
+                  onPushFolder={onPushFolder}
+                  onMove={onMove}
+                  onRename={onRename}
+                  onDelete={onDelete}
+                  onGetSize={onGetSize}
+                />
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
   )
 }

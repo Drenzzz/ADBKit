@@ -39,35 +39,35 @@ export function FileRow({
   onGetSize,
 }: FileRowProps) {
   return (
-    <tr
-      className="group border-b border-border/50 transition-colors hover:bg-muted/50"
+    <div
+      className="group grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border/50 transition-colors hover:bg-muted/50 h-full"
       onDoubleClick={() => {
         if (file.type === 'directory') onOpen(file)
       }}
     >
-      <td className="w-10 px-3 py-2">
+      <div className="px-3">
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => onSelect(file.path)}
           disabled={isBusy}
         />
-      </td>
-      <td className="px-3 py-2">
+      </div>
+      <div className="px-3 min-w-0">
         <div className="flex items-center gap-2 min-w-0">
           <FileIcon type={file.type} />
           <span className="text-sm truncate">{file.name}</span>
         </div>
-      </td>
-      <td className="w-24 px-3 py-2 text-right text-xs text-muted-foreground tabular-nums">
+      </div>
+      <div className="px-3 text-right text-xs text-muted-foreground tabular-nums">
         {file.sizeHuman}
-      </td>
-      <td className="w-32 px-3 py-2 text-xs text-muted-foreground hidden md:table-cell">
+      </div>
+      <div className="px-3 text-xs text-muted-foreground hidden md:block">
         {file.permissions}
-      </td>
-      <td className="w-36 px-3 py-2 text-xs text-muted-foreground hidden lg:table-cell">
+      </div>
+      <div className="px-3 text-xs text-muted-foreground hidden lg:block">
         {file.modifiedAt}
-      </td>
-      <td className="w-10 px-2 py-2">
+      </div>
+      <div className="px-2">
         <FileActions
           file={file}
           isBusy={isBusy}
@@ -80,7 +80,7 @@ export function FileRow({
           onDelete={onDelete}
           onGetSize={onGetSize}
         />
-      </td>
-    </tr>
+      </div>
+    </div>
   )
 }
