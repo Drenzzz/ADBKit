@@ -1,6 +1,13 @@
 import { RefreshCw, Search, Eye, EyeOff, FolderPlus, Upload, FolderUp, Files } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { FileSortField, FileSortDirection } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -12,7 +19,8 @@ interface FileActionBarProps {
   refreshing: boolean
   onSearchChange: (term: string) => void
   onToggleHidden: () => void
-  onSort: (field: FileSortField) => void
+  onSetSortField: (field: FileSortField) => void
+  onSetSortDirection: (dir: FileSortDirection) => void
   onRefresh: () => void
   onNewFolder: () => void
   onPushFile: () => void
@@ -20,12 +28,20 @@ interface FileActionBarProps {
   onPushFolder: () => void
 }
 
+function sortFieldValue(field: FileSortField, dir: FileSortDirection): string {
+  return `${field}-${dir}`
+}
+
 export function FileActionBar({
   searchTerm,
   showHidden,
+  sortField,
+  sortDirection,
   refreshing,
   onSearchChange,
   onToggleHidden,
+  onSetSortField,
+  onSetSortDirection,
   onRefresh,
   onNewFolder,
   onPushFile,
@@ -43,6 +59,28 @@ export function FileActionBar({
           className="h-8 pl-8 text-sm"
         />
       </div>
+
+      <Select
+        value={sortFieldValue(sortField, sortDirection)}
+        onValueChange={(val) => {
+          if (!val) return
+          const [field, dir] = val.split('-') as [FileSortField, FileSortDirection]
+          onSetSortField(field)
+          onSetSortDirection(dir)
+        }}
+      >
+        <SelectTrigger className="h-8 w-32 text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="name-asc">Name A → Z</SelectItem>
+          <SelectItem value="name-desc">Name Z → A</SelectItem>
+          <SelectItem value="size-desc">Largest</SelectItem>
+          <SelectItem value="size-asc">Smallest</SelectItem>
+          <SelectItem value="date-desc">Newest</SelectItem>
+          <SelectItem value="date-asc">Oldest</SelectItem>
+        </SelectContent>
+      </Select>
 
       <Button
         variant="outline"

@@ -67,7 +67,8 @@ export default function FilesPage() {
         refreshing={fe.refreshing}
         onSearchChange={fe.setSearchTerm}
         onToggleHidden={() => fe.setShowHidden(!fe.showHidden)}
-        onSort={fe.setSort}
+        onSetSortField={(field) => fe.setSort(field)}
+        onSetSortDirection={(dir) => fe.setSortDirection(dir)}
         onRefresh={fe.refreshFiles}
         onNewFolder={fe.openNewFolderDialog}
         onPushFile={async () => {

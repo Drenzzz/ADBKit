@@ -529,6 +529,7 @@ export function useFileExplorer() {
     setSearchTerm: store.setSearchTerm,
     setShowHidden: store.setShowHidden,
     setSort,
+    setSortDirection: store.setSortDirection,
     dismissError,
     toggleFileSelection: store.toggleFileSelection,
     toggleVisibleSelection: () => store.toggleVisibleSelection(visiblePaths),
