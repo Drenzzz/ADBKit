@@ -11,6 +11,7 @@ interface FileRowProps {
   onOpen: (file: FileEntry) => void
   onPull: (file: FileEntry) => void
   onPush: (file: FileEntry) => void
+  onPushFolder: (file: FileEntry) => void
   onMove: (file: FileEntry) => void
   onRename: (file: FileEntry) => void
   onDelete: (file: FileEntry) => void
@@ -31,6 +32,7 @@ export function FileRow({
   onOpen,
   onPull,
   onPush,
+  onPushFolder,
   onMove,
   onRename,
   onDelete,
@@ -72,6 +74,7 @@ export function FileRow({
           onOpen={onOpen}
           onPull={onPull}
           onPush={onPush}
+          onPushFolder={onPushFolder}
           onMove={onMove}
           onRename={onRename}
           onDelete={onDelete}

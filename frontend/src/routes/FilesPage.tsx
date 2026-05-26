@@ -102,7 +102,27 @@ export default function FilesPage() {
           onSort={fe.setSort}
           onOpen={fe.openDirectory}
           onPull={fe.openPullDialog}
-          onPush={fe.openPushDialog}
+          onPush={async (targetDir) => {
+            const paths = await fe.chooseMultipleLocalFiles()
+            if (paths.length === 0) return
+            const remoteDir = `${targetDir.path}`
+            const { pushMultipleFiles } = await import('@/services/fileService')
+            const { toast } = await import('sonner')
+            try {
+              await toast.promise(pushMultipleFiles(paths, remoteDir), {
+                loading: `Pushing ${paths.length} file(s)...`,
+                success: (msg) => msg,
+                error: (err) => err instanceof Error ? err.message : 'Failed to push files',
+              })
+            } catch {}
+          }}
+          onPushFolder={async (targetDir) => {
+            const localPath = await fe.chooseLocalDirectory()
+            if (localPath) {
+              const folderName = localPath.split(/[/\\]/).pop() ?? localPath
+              await fe.pushSingleFile(localPath, `${targetDir.path}/${folderName}`)
+            }
+          }}
           onMove={async (file) => {
             const dir = await fe.chooseLocalDirectory()
             if (dir) await fe.moveFile(file.path, dir)

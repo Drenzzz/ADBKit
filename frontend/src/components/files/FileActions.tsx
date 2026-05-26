@@ -2,11 +2,12 @@ import {
   MoreHorizontal,
   FolderOpen,
   Download,
-  Upload,
   Pencil,
   Trash2,
   HardDrive,
   FolderInput,
+  FolderUp,
+  Files,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -23,6 +24,7 @@ interface FileActionsProps {
   onOpen: (file: FileEntry) => void
   onPull: (file: FileEntry) => void
   onPush: (file: FileEntry) => void
+  onPushFolder: (file: FileEntry) => void
   onRename: (file: FileEntry) => void
   onMove: (file: FileEntry) => void
   onDelete: (file: FileEntry) => void
@@ -35,6 +37,7 @@ export function FileActions({
   onOpen,
   onPull,
   onPush,
+  onPushFolder,
   onRename,
   onMove,
   onDelete,
@@ -48,7 +51,7 @@ export function FileActions({
       >
         <MoreHorizontal className="h-4 w-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
+      <DropdownMenuContent align="end" className="w-48">
         {file.type === 'directory' && (
           <DropdownMenuItem onClick={() => onOpen(file)}>
             <FolderOpen className="mr-2 h-4 w-4" />
@@ -60,10 +63,16 @@ export function FileActions({
           Pull to PC
         </DropdownMenuItem>
         {file.type === 'directory' && (
-          <DropdownMenuItem onClick={() => onPush(file)}>
-            <Upload className="mr-2 h-4 w-4" />
-            Push to here
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem onClick={() => onPush(file)}>
+              <Files className="mr-2 h-4 w-4" />
+              Push files to here
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onPushFolder(file)}>
+              <FolderUp className="mr-2 h-4 w-4" />
+              Push folder to here
+            </DropdownMenuItem>
+          </>
         )}
         {file.type === 'directory' && (
           <DropdownMenuItem onClick={() => onGetSize(file)}>
