@@ -77,6 +77,8 @@ export default function FilesPage() {
             await fe.pushSingleFile(path, `${fe.currentPath}/${name}`)
           }
         }}
+        onPushFiles={fe.handlePushFilesToCurrentDirectory}
+        onPushFolder={fe.openPushFolderDialog}
       />
 
       {fe.error && (
@@ -146,6 +148,7 @@ export default function FilesPage() {
         selectedCount={fe.selectedCount}
         isPullDialogOpen={fe.isPullDialogOpen}
         isPushDialogOpen={fe.isPushDialogOpen}
+        isPushFolderDialogOpen={fe.isPushFolderDialogOpen}
         isRenameDialogOpen={fe.isRenameDialogOpen}
         isDeleteDialogOpen={fe.isDeleteDialogOpen}
         isNewFolderDialogOpen={fe.isNewFolderDialogOpen}
@@ -153,6 +156,7 @@ export default function FilesPage() {
         isBatchDeleteDialogOpen={fe.isBatchDeleteDialogOpen}
         setIsPullDialogOpen={fe.setIsPullDialogOpen}
         setIsPushDialogOpen={fe.setIsPushDialogOpen}
+        setIsPushFolderDialogOpen={fe.setIsPushFolderDialogOpen}
         setIsRenameDialogOpen={fe.setIsRenameDialogOpen}
         setIsDeleteDialogOpen={fe.setIsDeleteDialogOpen}
         setIsNewFolderDialogOpen={fe.setIsNewFolderDialogOpen}
@@ -160,6 +164,7 @@ export default function FilesPage() {
         setIsBatchDeleteDialogOpen={fe.setIsBatchDeleteDialogOpen}
         onPullConfirm={fe.handlePullConfirm}
         onPushConfirm={fe.handlePushConfirm}
+        onPushFolderConfirm={fe.handlePushFolderConfirm}
         onRenameConfirm={fe.handleRenameConfirm}
         onDeleteConfirm={fe.handleDeleteConfirm}
         onNewFolderConfirm={fe.handleNewFolderConfirm}

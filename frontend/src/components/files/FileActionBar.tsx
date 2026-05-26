@@ -1,4 +1,4 @@
-import { RefreshCw, Search, Eye, EyeOff, FolderPlus, Upload } from 'lucide-react'
+import { RefreshCw, Search, Eye, EyeOff, FolderPlus, Upload, FolderUp, Files } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { FileSortField, FileSortDirection } from '@/lib/types'
@@ -16,6 +16,8 @@ interface FileActionBarProps {
   onRefresh: () => void
   onNewFolder: () => void
   onPushFile: () => void
+  onPushFiles: () => void
+  onPushFolder: () => void
 }
 
 export function FileActionBar({
@@ -27,6 +29,8 @@ export function FileActionBar({
   onRefresh,
   onNewFolder,
   onPushFile,
+  onPushFiles,
+  onPushFolder,
 }: FileActionBarProps) {
   return (
     <div className="flex items-center gap-2">
@@ -54,8 +58,16 @@ export function FileActionBar({
         <FolderPlus className="h-3.5 w-3.5" />
       </Button>
 
-      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFile} title="Push file to device">
+      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFile} title="Push single file">
         <Upload className="h-3.5 w-3.5" />
+      </Button>
+
+      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFiles} title="Push multiple files">
+        <Files className="h-3.5 w-3.5" />
+      </Button>
+
+      <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPushFolder} title="Push folder">
+        <FolderUp className="h-3.5 w-3.5" />
       </Button>
 
       <Button

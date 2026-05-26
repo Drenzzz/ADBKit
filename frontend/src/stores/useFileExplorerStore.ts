@@ -13,6 +13,7 @@ interface FileExplorerState {
   dialogTargetFile: FileEntry | null
   isPullDialogOpen: boolean
   isPushDialogOpen: boolean
+  isPushFolderDialogOpen: boolean
   isRenameDialogOpen: boolean
   isDeleteDialogOpen: boolean
   isNewFolderDialogOpen: boolean
@@ -39,6 +40,7 @@ interface FileExplorerActions {
   setDialogTargetFile: (file: FileEntry | null) => void
   setIsPullDialogOpen: (open: boolean) => void
   setIsPushDialogOpen: (open: boolean) => void
+  setIsPushFolderDialogOpen: (open: boolean) => void
   setIsRenameDialogOpen: (open: boolean) => void
   setIsDeleteDialogOpen: (open: boolean) => void
   setIsNewFolderDialogOpen: (open: boolean) => void
@@ -71,6 +73,7 @@ const initialState: FileExplorerState = {
   dialogTargetFile: null,
   isPullDialogOpen: false,
   isPushDialogOpen: false,
+  isPushFolderDialogOpen: false,
   isRenameDialogOpen: false,
   isDeleteDialogOpen: false,
   isNewFolderDialogOpen: false,
@@ -129,6 +132,7 @@ export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
   setDialogTargetFile: (dialogTargetFile) => set({ dialogTargetFile }),
   setIsPullDialogOpen: (isPullDialogOpen) => set({ isPullDialogOpen }),
   setIsPushDialogOpen: (isPushDialogOpen) => set({ isPushDialogOpen }),
+  setIsPushFolderDialogOpen: (isPushFolderDialogOpen) => set({ isPushFolderDialogOpen }),
   setIsRenameDialogOpen: (isRenameDialogOpen) => set({ isRenameDialogOpen }),
   setIsDeleteDialogOpen: (isDeleteDialogOpen) => set({ isDeleteDialogOpen }),
   setIsNewFolderDialogOpen: (isNewFolderDialogOpen) => set({ isNewFolderDialogOpen }),

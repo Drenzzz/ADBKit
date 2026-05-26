@@ -27,6 +27,7 @@ interface FileActionDialogsProps {
 
   isPullDialogOpen: boolean
   isPushDialogOpen: boolean
+  isPushFolderDialogOpen: boolean
   isRenameDialogOpen: boolean
   isDeleteDialogOpen: boolean
   isNewFolderDialogOpen: boolean
@@ -35,6 +36,7 @@ interface FileActionDialogsProps {
 
   setIsPullDialogOpen: (open: boolean) => void
   setIsPushDialogOpen: (open: boolean) => void
+  setIsPushFolderDialogOpen: (open: boolean) => void
   setIsRenameDialogOpen: (open: boolean) => void
   setIsDeleteDialogOpen: (open: boolean) => void
   setIsNewFolderDialogOpen: (open: boolean) => void
@@ -43,6 +45,7 @@ interface FileActionDialogsProps {
 
   onPullConfirm: (localPath: string) => void
   onPushConfirm: (localPath: string) => void
+  onPushFolderConfirm: (localPath: string) => void
   onRenameConfirm: (newName: string) => void
   onDeleteConfirm: () => void
   onNewFolderConfirm: (folderName: string) => void
@@ -58,6 +61,7 @@ export function FileActionDialogs({
   selectedCount,
   isPullDialogOpen,
   isPushDialogOpen,
+  isPushFolderDialogOpen,
   isRenameDialogOpen,
   isDeleteDialogOpen,
   isNewFolderDialogOpen,
@@ -65,6 +69,7 @@ export function FileActionDialogs({
   isBatchDeleteDialogOpen,
   setIsPullDialogOpen,
   setIsPushDialogOpen,
+  setIsPushFolderDialogOpen,
   setIsRenameDialogOpen,
   setIsDeleteDialogOpen,
   setIsNewFolderDialogOpen,
@@ -72,6 +77,7 @@ export function FileActionDialogs({
   setIsBatchDeleteDialogOpen,
   onPullConfirm,
   onPushConfirm,
+  onPushFolderConfirm,
   onRenameConfirm,
   onDeleteConfirm,
   onNewFolderConfirm,
@@ -117,6 +123,24 @@ export function FileActionDialogs({
               const path = await chooseLocalFile()
               if (path) { onPushConfirm(path); setIsPushDialogOpen(false) }
             }}>Choose File</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isPushFolderDialogOpen} onOpenChange={setIsPushFolderDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Push Folder</DialogTitle>
+            <DialogDescription>
+              Select a folder from your computer to push to the current device directory.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPushFolderDialogOpen(false)}>Cancel</Button>
+            <Button onClick={async () => {
+              const path = await chooseLocalDirectory()
+              if (path) { onPushFolderConfirm(path); setIsPushFolderDialogOpen(false) }
+            }}>Choose Folder</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

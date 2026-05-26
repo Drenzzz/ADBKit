@@ -446,6 +446,7 @@ export function useFileExplorer() {
     store.setIsDeleteDialogOpen(true)
   }
   function openNewFolderDialog() { store.setIsNewFolderDialogOpen(true) }
+  function openPushFolderDialog() { store.setIsPushFolderDialogOpen(true) }
   function openBatchPullDialog() { store.setIsBatchPullDialogOpen(true) }
   function openBatchDeleteDialog() { store.setIsBatchDeleteDialogOpen(true) }
 
@@ -456,6 +457,16 @@ export function useFileExplorer() {
   async function handlePushConfirm(localPath: string) {
     if (!store.dialogTargetFile) return
     await pushSingleFile(localPath, store.dialogTargetFile.path)
+  }
+  async function handlePushFolderConfirm(localPath: string) {
+    const remoteDir = normalizePath(store.currentPath)
+    const name = localPath.split(/[/\\]/).pop() ?? localPath
+    await pushSingleFile(localPath, `${remoteDir}/${name}`)
+  }
+  async function handlePushFilesToCurrentDirectory() {
+    const paths = await chooseMultipleLocalFiles()
+    if (paths.length === 0) return
+    await pushMultipleToCurrentDir(paths)
   }
   async function handleRenameConfirm(newName: string) {
     if (!store.dialogTargetFile) return
@@ -518,6 +529,7 @@ export function useFileExplorer() {
 
     isPullDialogOpen: store.isPullDialogOpen,
     isPushDialogOpen: store.isPushDialogOpen,
+    isPushFolderDialogOpen: store.isPushFolderDialogOpen,
     isRenameDialogOpen: store.isRenameDialogOpen,
     isDeleteDialogOpen: store.isDeleteDialogOpen,
     isNewFolderDialogOpen: store.isNewFolderDialogOpen,
@@ -527,6 +539,7 @@ export function useFileExplorer() {
 
     setIsPullDialogOpen: store.setIsPullDialogOpen,
     setIsPushDialogOpen: store.setIsPushDialogOpen,
+    setIsPushFolderDialogOpen: store.setIsPushFolderDialogOpen,
     setIsRenameDialogOpen: store.setIsRenameDialogOpen,
     setIsDeleteDialogOpen: store.setIsDeleteDialogOpen,
     setIsNewFolderDialogOpen: store.setIsNewFolderDialogOpen,
@@ -535,6 +548,7 @@ export function useFileExplorer() {
 
     openPullDialog,
     openPushDialog,
+    openPushFolderDialog,
     openRenameDialog,
     openDeleteDialog,
     openNewFolderDialog,
@@ -542,6 +556,8 @@ export function useFileExplorer() {
     openBatchDeleteDialog,
     handlePullConfirm,
     handlePushConfirm,
+    handlePushFolderConfirm,
+    handlePushFilesToCurrentDirectory,
     handleRenameConfirm,
     handleDeleteConfirm,
     handleNewFolderConfirm,
