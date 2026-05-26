@@ -354,6 +354,29 @@ export function useFileExplorer() {
     }
   }
 
+  async function moveFile(sourcePath: string, targetDirectory: string) {
+    const name = sourcePath.split('/').pop() ?? sourcePath
+    const newPath = `${targetDirectory.replace(/\/$/, '')}/${name}`
+    if (newPath === sourcePath) return false
+
+    store.setBusyFilePath(sourcePath)
+    store.setError(null)
+    try {
+      await toast.promise(renameFile(sourcePath, newPath), {
+        loading: `Moving ${name}...`,
+        success: (msg) => msg,
+        error: (err) => getErrorMessage(err, 'Failed to move file'),
+      })
+      await loadFiles(store.currentPath, { background: true, force: true })
+      return true
+    } catch (err) {
+      store.setError(getErrorMessage(err, 'Failed to move file'))
+      return false
+    } finally {
+      store.setBusyFilePath(null)
+    }
+  }
+
   async function pullSelectedFiles(localDir: string) {
     const trimmed = localDir.trim()
     if (store.selectedFiles.length === 0) { toast.error('No files selected'); return false }
@@ -524,6 +547,7 @@ export function useFileExplorer() {
     removeFile,
     createFolder,
     renameExistingFile,
+    moveFile,
     pullSelectedFiles,
     deleteSelectedFiles,
 

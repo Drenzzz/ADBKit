@@ -6,6 +6,7 @@ import {
   Pencil,
   Trash2,
   HardDrive,
+  FolderInput,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -23,6 +24,7 @@ interface FileActionsProps {
   onPull: (file: FileEntry) => void
   onPush: (file: FileEntry) => void
   onRename: (file: FileEntry) => void
+  onMove: (file: FileEntry) => void
   onDelete: (file: FileEntry) => void
   onGetSize: (file: FileEntry) => void
 }
@@ -34,6 +36,7 @@ export function FileActions({
   onPull,
   onPush,
   onRename,
+  onMove,
   onDelete,
   onGetSize,
 }: FileActionsProps) {
@@ -69,6 +72,10 @@ export function FileActions({
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => onMove(file)}>
+          <FolderInput className="mr-2 h-4 w-4" />
+          Move to...
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onRename(file)}>
           <Pencil className="mr-2 h-4 w-4" />
           Rename

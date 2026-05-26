@@ -102,6 +102,10 @@ export default function FilesPage() {
           onOpen={fe.openDirectory}
           onPull={fe.openPullDialog}
           onPush={fe.openPushDialog}
+          onMove={async (file) => {
+            const dir = await fe.chooseLocalDirectory()
+            if (dir) await fe.moveFile(file.path, dir)
+          }}
           onRename={fe.openRenameDialog}
           onDelete={fe.openDeleteDialog}
           onGetSize={async (file) => {

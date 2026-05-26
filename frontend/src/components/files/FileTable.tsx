@@ -51,6 +51,7 @@ interface FileTableProps {
   onOpen: (file: FileEntry) => void
   onPull: (file: FileEntry) => void
   onPush: (file: FileEntry) => void
+  onMove: (file: FileEntry) => void
   onRename: (file: FileEntry) => void
   onDelete: (file: FileEntry) => void
   onGetSize: (file: FileEntry) => void
@@ -70,6 +71,7 @@ export function FileTable({
   onOpen,
   onPull,
   onPush,
+  onMove,
   onRename,
   onDelete,
   onGetSize,
@@ -121,6 +123,7 @@ export function FileTable({
             onOpen={onOpen}
             onPull={onPull}
             onPush={onPush}
+            onMove={onMove}
             onRename={onRename}
             onDelete={onDelete}
             onGetSize={onGetSize}
