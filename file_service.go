@@ -228,8 +228,10 @@ func (s *FileService) PushFile(ctx context.Context, localPath string, remotePath
 	if trimmedLocalPath == "" {
 		return "", NewOperationError("push_file", "Local file path is required", "local file path is empty", false)
 	}
-	if err := validateReadableHostFile("push_file", trimmedLocalPath); err != nil {
-		return "", err
+
+	localInfo, statErr := os.Stat(trimmedLocalPath)
+	if statErr != nil {
+		return "", NewOperationError("push_file", "Local path could not be accessed", statErr.Error(), false)
 	}
 
 	normalizedRemotePath, err := normalizeRemotePath(remotePath)
@@ -240,7 +242,7 @@ func (s *FileService) PushFile(ctx context.Context, localPath string, remotePath
 		return "", err
 	}
 
-	fileName := filepath.Base(trimmedLocalPath)
+	fileName := localInfo.Name()
 	var result *ExecResult
 	for attempt := 1; attempt <= fileTransferRetries; attempt++ {
 		result, err = RunCommand(ctx, ExecRequest{
@@ -250,7 +252,7 @@ func (s *FileService) PushFile(ctx context.Context, localPath string, remotePath
 		})
 		if err == nil {
 			s.emitTransferProgress(fileName, "push", 100)
-			return fallbackMessage(result.Stdout, fmt.Sprintf("Copied file to %s", normalizedRemotePath)), nil
+			return fallbackMessage(result.Stdout, fmt.Sprintf("Pushed to %s", normalizedRemotePath)), nil
 		}
 
 		if !isTransientADBError(err.Error()) || attempt == fileTransferRetries {
