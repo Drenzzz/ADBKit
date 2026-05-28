@@ -14,6 +14,10 @@ export function ClearPackageData(arg1) {
   return window['go']['main']['App']['ClearPackageData'](arg1);
 }
 
+export function CloseTerminal(arg1) {
+  return window['go']['main']['App']['CloseTerminal'](arg1);
+}
+
 export function CompleteSetup() {
   return window['go']['main']['App']['CompleteSetup']();
 }
@@ -194,6 +198,10 @@ export function SelectPlatformToolsDirectory() {
   return window['go']['main']['App']['SelectPlatformToolsDirectory']();
 }
 
+export function SendTerminalInput(arg1, arg2) {
+  return window['go']['main']['App']['SendTerminalInput'](arg1, arg2);
+}
+
 export function SetActiveSerial(arg1) {
   return window['go']['main']['App']['SetActiveSerial'](arg1);
 }
@@ -204,6 +212,22 @@ export function SetCustomBinary(arg1, arg2) {
 
 export function SetDeviceNickname(arg1, arg2) {
   return window['go']['main']['App']['SetDeviceNickname'](arg1, arg2);
+}
+
+export function StartLogcat(arg1, arg2, arg3) {
+  return window['go']['main']['App']['StartLogcat'](arg1, arg2, arg3);
+}
+
+export function StartTerminal(arg1) {
+  return window['go']['main']['App']['StartTerminal'](arg1);
+}
+
+export function StartTerminalSession(arg1, arg2, arg3) {
+  return window['go']['main']['App']['StartTerminalSession'](arg1, arg2, arg3);
+}
+
+export function StopLogcat(arg1) {
+  return window['go']['main']['App']['StopLogcat'](arg1);
 }
 
 export function UninstallMultiplePackages(arg1) {

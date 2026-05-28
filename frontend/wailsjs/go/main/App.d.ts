@@ -8,6 +8,8 @@ export function ClearDeviceNickname(arg1:string):Promise<void>;
 
 export function ClearPackageData(arg1:string):Promise<string>;
 
+export function CloseTerminal(arg1:string):Promise<void>;
+
 export function CompleteSetup():Promise<main.SetupState>;
 
 export function ConnectWireless(arg1:string):Promise<string>;
@@ -98,11 +100,21 @@ export function SelectMultipleFiles():Promise<Array<string>>;
 
 export function SelectPlatformToolsDirectory():Promise<main.PlatformToolsSelection>;
 
+export function SendTerminalInput(arg1:string,arg2:string):Promise<void>;
+
 export function SetActiveSerial(arg1:string):Promise<void>;
 
 export function SetCustomBinary(arg1:string,arg2:string):Promise<void>;
 
 export function SetDeviceNickname(arg1:string,arg2:string):Promise<void>;
+
+export function StartLogcat(arg1:string,arg2:string,arg3:string):Promise<void>;
+
+export function StartTerminal(arg1:string):Promise<main.TerminalSession>;
+
+export function StartTerminalSession(arg1:string,arg2:string,arg3:string):Promise<main.TerminalSession>;
+
+export function StopLogcat(arg1:string):Promise<void>;
 
 export function UninstallMultiplePackages(arg1:Array<string>):Promise<string>;
 

@@ -306,6 +306,22 @@ export namespace main {
 	        this.usedPct = source["usedPct"];
 	    }
 	}
+	export class TerminalSession {
+	    id: string;
+	    serial: string;
+	    mode: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new TerminalSession(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.serial = source["serial"];
+	        this.mode = source["mode"];
+	    }
+	}
 
 }
 

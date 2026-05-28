@@ -20,6 +20,8 @@ type App struct {
 	packageService  *PackageService
 	fileService     *FileService
 	dialogService   *DialogService
+	terminalService *TerminalService
+	logcatService   *LogcatService
 	config          *AppConfig
 	dataDir         string
 	activeSerial    string
@@ -56,6 +58,8 @@ func (a *App) startup(ctx context.Context) {
 	a.dialogService = NewDialogService(ctx)
 	a.packageService = NewPackageService(a.resolveActiveSerial, a.dialogService.SelectSaveFile)
 	a.fileService = NewFileService(ctx, a.resolveActiveSerial)
+	a.terminalService = NewTerminalService(ctx, a.binaryService, a.resolveActiveSerial)
+	a.logcatService = NewLogcatService(ctx, a.binaryService)
 
 	al, err := NewAuditLog(a.dataDir)
 	if err != nil {
@@ -98,6 +102,35 @@ func appDataDir() (string, error) {
 
 func (a *App) Greet(name string) string {
 	return "Hello " + name + ", It's show time!"
+}
+
+func (a *App) shutdown(ctx context.Context) {
+	a.logcatService.Shutdown()
+	a.terminalService.Shutdown()
+}
+
+func (a *App) StartTerminal(serial string) (*TerminalSession, error) {
+	return a.terminalService.StartSession(a.ctx, serial)
+}
+
+func (a *App) StartTerminalSession(mode string, serial string, initialArgs string) (*TerminalSession, error) {
+	return a.terminalService.StartSessionWithMode(a.ctx, mode, serial, initialArgs)
+}
+
+func (a *App) SendTerminalInput(sessionID string, input string) error {
+	return a.terminalService.SendInput(sessionID, input)
+}
+
+func (a *App) CloseTerminal(sessionID string) error {
+	return a.terminalService.CloseSession(sessionID)
+}
+
+func (a *App) StartLogcat(serial string, levels string, tagFilter string) error {
+	return a.logcatService.StartStream(a.ctx, serial, levels, tagFilter)
+}
+
+func (a *App) StopLogcat(serial string) error {
+	return a.logcatService.StopStream(serial)
 }
 
 func (a *App) GetBinaryStatus() *BinarySetupResult {
