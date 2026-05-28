@@ -167,3 +167,77 @@ export interface StorageInfo {
 export type FileSortField = 'name' | 'size' | 'date'
 
 export type FileSortDirection = 'asc' | 'desc'
+
+export type TerminalMode = 'adb-shell' | 'adb-host' | 'fastboot-host'
+
+export interface TerminalSession {
+  id: string
+  serial: string
+  mode: TerminalMode
+}
+
+export interface TerminalOutputEvent {
+  sessionId: string
+  serial: string
+  data: string
+}
+
+export interface TerminalClosedEvent {
+  sessionId: string
+  serial: string
+}
+
+export interface TerminalHistoryEntry {
+  id: string
+  command: string
+  serial: string
+  mode: TerminalMode
+  timestamp: number
+}
+
+export interface TerminalState {
+  session: TerminalSession | null
+  history: TerminalHistoryEntry[]
+  output: string
+  mode: TerminalMode
+  connecting: boolean
+  connected: boolean
+  error: string | null
+}
+
+export type LogcatLevel = 'V' | 'D' | 'I' | 'W' | 'E' | 'F'
+
+export interface LogcatEntry {
+  id: string
+  serial: string
+  date: string
+  time: string
+  pid: string
+  tid: string
+  level: LogcatLevel
+  tag: string
+  message: string
+  raw: string
+  timestamp: string
+}
+
+export interface LogcatStatusEvent {
+  serial: string
+  status: 'started' | 'stopped' | 'error'
+}
+
+export interface LogcatFilter {
+  levels: LogcatLevel[]
+  tag: string
+  text: string
+}
+
+export interface LogcatState {
+  logs: LogcatEntry[]
+  streamingSerial: string
+  isStreaming: boolean
+  autoScroll: boolean
+  filter: LogcatFilter
+  error: string | null
+  lastUpdatedAt: number | null
+}
