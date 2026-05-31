@@ -174,6 +174,10 @@ export function RetryBinaryDetection() {
   return window['go']['main']['App']['RetryBinaryDetection']();
 }
 
+export function SaveLogcatToFile(arg1, arg2) {
+  return window['go']['main']['App']['SaveLogcatToFile'](arg1, arg2);
+}
+
 export function SelectApkFile() {
   return window['go']['main']['App']['SelectApkFile']();
 }

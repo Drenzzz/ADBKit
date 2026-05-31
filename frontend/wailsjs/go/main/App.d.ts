@@ -88,6 +88,8 @@ export function RenameFile(arg1:string,arg2:string):Promise<string>;
 
 export function RetryBinaryDetection():Promise<main.BinarySetupResult>;
 
+export function SaveLogcatToFile(arg1:string,arg2:string):Promise<void>;
+
 export function SelectApkFile():Promise<string>;
 
 export function SelectBinaryFile(arg1:string):Promise<string>;

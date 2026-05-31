@@ -133,6 +133,17 @@ func (a *App) StopLogcat(serial string) error {
 	return a.logcatService.StopStream(serial)
 }
 
+func (a *App) SaveLogcatToFile(content string, defaultFilename string) error {
+	path, err := a.dialogService.SelectSaveFile(defaultFilename)
+	if err != nil {
+		return err
+	}
+	if path == "" {
+		return nil
+	}
+	return os.WriteFile(path, []byte(content), 0o600)
+}
+
 func (a *App) GetBinaryStatus() *BinarySetupResult {
 	a.mu.Lock()
 	defer a.mu.Unlock()

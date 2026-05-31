@@ -1,5 +1,5 @@
 import type { LogcatEntry, LogcatStatusEvent } from '@/lib/types'
-import { StartLogcat, StopLogcat } from '../../wailsjs/go/main/App'
+import { StartLogcat, StopLogcat, SaveLogcatToFile } from '../../wailsjs/go/main/App'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 
 export const LOGCAT_LINE_EVENT = 'logcat_line'
@@ -15,6 +15,13 @@ export async function startLogcat(
 
 export async function stopLogcat(serial?: string): Promise<void> {
   return StopLogcat(serial ?? '')
+}
+
+export async function saveLogcatToFile(
+  content: string,
+  defaultFilename: string,
+): Promise<void> {
+  return SaveLogcatToFile(content, defaultFilename)
 }
 
 export function onLogcatLine(

@@ -6,6 +6,7 @@ import { useDeviceStore } from '@/stores/useDeviceStore'
 import {
   startLogcat,
   stopLogcat,
+  saveLogcatToFile,
   onLogcatLine,
   onLogcatStatus,
 } from '@/services/logcatService'
@@ -70,7 +71,7 @@ export function useLogcat() {
     toast.info('Logcat cleared')
   }, [clearLogs])
 
-  const exportAsText = useCallback(() => {
+  const exportAsText = useCallback(async () => {
     const logs = useLogcatStore.getState().logs
     const serial = streamingSerialRef.current
 
@@ -80,17 +81,16 @@ export function useLogcat() {
     }
 
     const content = logs.map((entry) => entry.raw).join('\n')
-    const blob = new Blob([content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `logcat-${serial || 'export'}-${Date.now()}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-    toast.success(`Exported ${logs.length} log entries as text`)
+    const filename = `logcat-${serial || 'export'}-${Date.now()}.txt`
+    try {
+      await saveLogcatToFile(content, filename)
+      toast.success(`Exported ${logs.length} log entries`)
+    } catch {
+      toast.error('Export cancelled or failed')
+    }
   }, [])
 
-  const exportAsJson = useCallback(() => {
+  const exportAsJson = useCallback(async () => {
     const logs = useLogcatStore.getState().logs
     const serial = streamingSerialRef.current
 
@@ -100,14 +100,13 @@ export function useLogcat() {
     }
 
     const content = JSON.stringify(logs, null, 2)
-    const blob = new Blob([content], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `logcat-${serial || 'export'}-${Date.now()}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-    toast.success(`Exported ${logs.length} log entries as JSON`)
+    const filename = `logcat-${serial || 'export'}-${Date.now()}.json`
+    try {
+      await saveLogcatToFile(content, filename)
+      toast.success(`Exported ${logs.length} log entries`)
+    } catch {
+      toast.error('Export cancelled or failed')
+    }
   }, [])
 
   useEffect(() => {
