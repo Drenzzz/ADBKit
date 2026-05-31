@@ -7,7 +7,7 @@ import type {
   LogcatStatusEvent,
 } from '@/lib/types'
 
-const DEFAULT_LOGCAT_BUFFER_LIMIT = 10000
+const DEFAULT_LOGCAT_BUFFER_LIMIT = 30000
 const LOGCAT_FLUSH_INTERVAL = 100
 
 let currentBufferLimit = DEFAULT_LOGCAT_BUFFER_LIMIT

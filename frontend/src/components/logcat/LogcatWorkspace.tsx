@@ -42,6 +42,7 @@ export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
   const logCount = useLogcatStore((state) => state.logs.length)
   const bufferFull = useLogcatStore((state) => state.bufferFull)
   const bufferLimit = useLogcatStore((state) => state.bufferLimit)
+  const setBufferLimit = useLogcatStore((state) => state.setBufferLimit)
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
@@ -156,12 +157,28 @@ export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
         <div className="flex items-center gap-2">
           {bufferFull && (
             <span className="text-[10px] text-amber-500">
-              Buffer full - oldest entries dropped
+              Buffer full
             </span>
           )}
-          <span className="text-xs text-muted-foreground tabular-nums">
-            {logCount.toLocaleString()}/{bufferLimit.toLocaleString()}
-          </span>
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              min={1000}
+              max={500000}
+              step={1000}
+              value={bufferLimit}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10)
+                if (!isNaN(val) && val >= 1000) {
+                  setBufferLimit(val)
+                }
+              }}
+              className="h-5 w-20 rounded border border-border/40 bg-muted/30 px-1.5 text-[10px] tabular-nums text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/20"
+            />
+            <span className="text-[10px] text-muted-foreground tabular-nums">
+              / {logCount.toLocaleString()}
+            </span>
+          </div>
         </div>
       </div>
 
