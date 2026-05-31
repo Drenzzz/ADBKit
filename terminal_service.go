@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"os/exec"
 	"strings"
@@ -32,11 +30,10 @@ type TerminalSession struct {
 }
 
 type terminalProcess struct {
-	session   TerminalSession
-	cmd       *exec.Cmd
-	stdinPipe io.WriteCloser
-	binary    string
-	once      sync.Once
+	session TerminalSession
+	cmd     *exec.Cmd
+	binary  string
+	once    sync.Once
 }
 
 type TerminalService struct {
@@ -85,16 +82,6 @@ func (s *TerminalService) StartSessionWithMode(ctx context.Context, mode string,
 		)
 	}
 
-	trimmedInitialArgs := strings.TrimSpace(initialArgs)
-	if trimmedMode == TerminalModeShell && trimmedInitialArgs != "" {
-		return nil, NewOperationError(
-			"start_terminal_session",
-			"Initial terminal arguments are not supported for shell sessions",
-			"initialArgs must be empty for adb shell mode",
-			false,
-		)
-	}
-
 	if resolvedSerial == "" {
 		var err error
 		resolvedSerial, err = s.resolveActiveSerial(ctx)
@@ -110,93 +97,34 @@ func (s *TerminalService) StartSessionWithMode(ctx context.Context, mode string,
 		return nil, err
 	}
 
+	binaryPath := adbPath
+	if trimmedMode == TerminalModeFastboot {
+		binaryPath, err = s.resolveBinaryPath(BinaryNameFastboot)
+		if err != nil {
+			log.Printf("terminal: resolveBinaryPath fastboot failed: %v", err)
+			return nil, err
+		}
+	}
+
 	session := TerminalSession{
 		ID:     uuid.NewString(),
 		Serial: resolvedSerial,
 		Mode:   trimmedMode,
 	}
 
-	commandArgs := []string{"-s", resolvedSerial, "shell"}
-	isInteractiveShell := trimmedMode == TerminalModeShell
-	if trimmedMode == TerminalModeADBHost {
-		commandArgs = nil
-	} else if trimmedMode == TerminalModeFastboot {
-		adbPath, err = s.resolveBinaryPath(BinaryNameFastboot)
-		if err != nil {
-			log.Printf("terminal: resolveBinaryPath fastboot failed: %v", err)
-			return nil, err
-		}
-		commandArgs = nil
-	}
-
-	cmd := exec.CommandContext(ctx, adbPath, commandArgs...)
-
 	process := &terminalProcess{
 		session: session,
-		binary:  adbPath,
-		cmd:     cmd,
+		binary:  binaryPath,
 	}
-
-	if isInteractiveShell {
-		log.Printf("terminal: creating interactive shell command=%q args=%v", adbPath, commandArgs)
-		stdinPipe, stdinErr := cmd.StdinPipe()
-		if stdinErr != nil {
-			log.Printf("terminal: stdin pipe failed: %v", stdinErr)
-			return nil, NewOperationError(
-				"start_terminal_session",
-				"Failed to create stdin pipe",
-				stdinErr.Error(),
-				true,
-			)
-		}
-		process.stdinPipe = stdinPipe
-
-		stdoutPipe, stdoutErr := cmd.StdoutPipe()
-		if stdoutErr != nil {
-			log.Printf("terminal: stdout pipe failed: %v", stdoutErr)
-			return nil, NewOperationError(
-				"start_terminal_session",
-				"Failed to create stdout pipe",
-				stdoutErr.Error(),
-				true,
-			)
-		}
-
-		stderrPipe, stderrErr := cmd.StderrPipe()
-		if stderrErr != nil {
-			log.Printf("terminal: stderr pipe failed: %v", stderrErr)
-			return nil, NewOperationError(
-				"start_terminal_session",
-				"Failed to create stderr pipe",
-				stderrErr.Error(),
-				true,
-			)
-		}
-
-		if startErr := cmd.Start(); startErr != nil {
-			log.Printf("terminal: cmd.Start failed: %v", startErr)
-			return nil, NewOperationError(
-				"start_terminal_session",
-				"Failed to start terminal session",
-				startErr.Error(),
-				true,
-			)
-		}
-
-		go s.streamReader(session, stdoutPipe)
-		go s.streamReader(session, stderrPipe)
-		go s.waitForSessionExit(process)
-	}
-
-	log.Printf("terminal: session created id=%q mode=%q interactive=%t", session.ID, session.Mode, isInteractiveShell)
 
 	s.mu.Lock()
 	s.sessions[session.ID] = process
 	s.mu.Unlock()
 
-	if !isInteractiveShell {
-		s.emitSessionOutput(session, fmt.Sprintf("[%s] Ready for commands\r\n", session.Mode))
-	}
+	log.Printf("terminal: session created id=%q mode=%q serial=%q", session.ID, session.Mode, resolvedSerial)
+
+	prompt := s.buildPrompt(resolvedSerial, trimmedMode)
+	s.emitSessionOutput(session, prompt+"Ready for commands\r\n\r\n")
 
 	return &session, nil
 }
@@ -207,28 +135,12 @@ func (s *TerminalService) SendInput(sessionID string, input string) error {
 		return err
 	}
 
-	if process.session.Mode == TerminalModeShell {
-		if process.stdinPipe == nil {
-			return NewOperationError("send_terminal_input", "Terminal stdin is not available", "", false)
-		}
-		if _, err := io.WriteString(process.stdinPipe, input); err != nil {
-			s.closeSession(process, true)
-			return NewOperationError(
-				"send_terminal_input",
-				"Failed to write terminal input",
-				err.Error(),
-				true,
-			)
-		}
-		return nil
-	}
-
 	trimmedInput := strings.TrimSpace(input)
 	if trimmedInput == "" {
 		return nil
 	}
 
-	go s.runHostCommand(process, trimmedInput)
+	go s.runCommand(process, trimmedInput)
 	return nil
 }
 
@@ -255,41 +167,82 @@ func (s *TerminalService) Shutdown() {
 	}
 }
 
-func (s *TerminalService) streamReader(session TerminalSession, reader io.ReadCloser) {
-	defer reader.Close()
-
-	scanner := bufio.NewScanner(reader)
-	buf := make([]byte, 0, 64*1024)
-	scanner.Buffer(buf, 1024*1024)
-
-	for scanner.Scan() {
-		wailsruntime.EventsEmit(s.ctx, TerminalEventOutput, map[string]string{
-			"sessionId": session.ID,
-			"serial":    session.Serial,
-			"data":      scanner.Text() + "\r\n",
-		})
+func (s *TerminalService) runCommand(process *terminalProcess, input string) {
+	args := splitTerminalArgs(input)
+	if len(args) == 0 {
+		return
 	}
 
-	if err := scanner.Err(); err != nil && err != io.EOF {
-		wailsruntime.EventsEmit(s.ctx, TerminalEventOutput, map[string]string{
-			"sessionId": session.ID,
-			"serial":    session.Serial,
-			"data":      fmt.Sprintf("\r\n[terminal-error] %s\r\n", err.Error()),
-		})
+	var commandArgs []string
+
+	switch process.session.Mode {
+	case TerminalModeShell:
+		commandArgs = append([]string{"-s", process.session.Serial, "shell"}, args...)
+	case TerminalModeADBHost:
+		commandArgs = append([]string{"-s", process.session.Serial}, args...)
+	case TerminalModeFastboot:
+		commandArgs = args
+	}
+
+	s.emitSessionOutput(process.session, fmt.Sprintf("$ %s\r\n", input))
+
+	result, err := RunCommand(context.Background(), ExecRequest{
+		Command: process.binary,
+		Args:    commandArgs,
+	})
+	if err != nil {
+		s.emitSessionOutput(process.session, fmt.Sprintf("%s\r\n\r\n", err.Error()))
+		return
+	}
+
+	output := strings.TrimSpace(strings.Join([]string{result.Stdout, result.Stderr}, "\n"))
+	if output == "" {
+		output = "Command completed"
+	}
+
+	s.emitSessionOutput(process.session, output+"\r\n\r\n")
+}
+
+func (s *TerminalService) buildPrompt(serial string, mode string) string {
+	switch mode {
+	case TerminalModeShell:
+		codename := s.resolveCodename(serial)
+		return fmt.Sprintf("%s:/ $ ", codename)
+	case TerminalModeADBHost:
+		return "$ "
+	case TerminalModeFastboot:
+		return "fastboot> "
+	default:
+		return "$ "
 	}
 }
 
-func (s *TerminalService) waitForSessionExit(process *terminalProcess) {
-	err := process.cmd.Wait()
-	if err != nil {
-		wailsruntime.EventsEmit(s.ctx, TerminalEventOutput, map[string]string{
-			"sessionId": process.session.ID,
-			"serial":    process.session.Serial,
-			"data":      fmt.Sprintf("\r\n[terminal-exit] %s\r\n", err.Error()),
-		})
+func (s *TerminalService) resolveCodename(serial string) string {
+	if serial == "" {
+		return "device"
 	}
 
-	s.closeSession(process, true)
+	result, err := RunCommand(context.Background(), ExecRequest{
+		Command: s.binaryService.GetBinaryStatus(s.getConfig()).Adb.Path,
+		Args:    []string{"-s", serial, "shell", "getprop", "ro.product.device"},
+	})
+	if err != nil {
+		return serial
+	}
+
+	codename := strings.TrimSpace(result.Stdout)
+	if codename == "" {
+		return serial
+	}
+	return codename
+}
+
+func (s *TerminalService) emitSessionOutput(session TerminalSession, data string) {
+	wailsruntime.EventsEmit(s.ctx, TerminalEventOutput, map[string]string{
+		"sessionId": session.ID,
+		"serial":    session.Serial,
+		"data":      data,
+	})
 }
 
 func (s *TerminalService) closeSession(process *terminalProcess, emitEvent bool) {
@@ -298,9 +251,6 @@ func (s *TerminalService) closeSession(process *terminalProcess, emitEvent bool)
 		delete(s.sessions, process.session.ID)
 		s.mu.Unlock()
 
-		if process.stdinPipe != nil {
-			_ = process.stdinPipe.Close()
-		}
 		if process.cmd != nil && process.cmd.Process != nil {
 			_ = process.cmd.Process.Kill()
 		}
@@ -311,43 +261,6 @@ func (s *TerminalService) closeSession(process *terminalProcess, emitEvent bool)
 				"serial":    process.session.Serial,
 			})
 		}
-	})
-}
-
-func (s *TerminalService) runHostCommand(process *terminalProcess, input string) {
-	args := splitTerminalArgs(input)
-	if len(args) == 0 {
-		return
-	}
-
-	commandArgs := append([]string{"-s", process.session.Serial}, args...)
-	s.emitSessionOutput(process.session, fmt.Sprintf("$ %s\r\n", input))
-
-	result, err := RunCommand(context.Background(), ExecRequest{
-		Command: process.binary,
-		Args:    commandArgs,
-	})
-	if err != nil {
-		s.emitSessionOutput(process.session, fmt.Sprintf("%s\r\n", err.Error()))
-		return
-	}
-
-	combined := strings.TrimSpace(strings.Join([]string{result.Stdout, result.Stderr}, "\n"))
-	if combined == "" {
-		combined = "Command completed"
-	}
-	if !strings.HasSuffix(combined, "\n") {
-		combined += "\r\n"
-	}
-
-	s.emitSessionOutput(process.session, combined)
-}
-
-func (s *TerminalService) emitSessionOutput(session TerminalSession, data string) {
-	wailsruntime.EventsEmit(s.ctx, TerminalEventOutput, map[string]string{
-		"sessionId": session.ID,
-		"serial":    session.Serial,
-		"data":      data,
 	})
 }
 
