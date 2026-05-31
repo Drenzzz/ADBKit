@@ -129,3 +129,104 @@ func TestParentDir(t *testing.T) {
 		t.Errorf("expected /a/b/c, got %q", got)
 	}
 }
+
+func TestValidateFlashPartition_Empty(t *testing.T) {
+	if err := ValidateFlashPartition(""); err == nil {
+		t.Fatal("expected error for empty partition")
+	}
+}
+
+func TestValidateFlashPartition_Disallowed(t *testing.T) {
+	if err := ValidateFlashPartition("modem"); err == nil {
+		t.Fatal("expected error for disallowed partition")
+	}
+}
+
+func TestValidateFlashPartition_Allowed(t *testing.T) {
+	for _, p := range []string{"boot", "system", "vendor", "vbmeta", "super", "userdata", "boot_a", "init_boot"} {
+		if err := ValidateFlashPartition(p); err != nil {
+			t.Errorf("ValidateFlashPartition(%q) unexpected error: %v", p, err)
+		}
+	}
+}
+
+func TestValidateFlashPartition_CaseInsensitive(t *testing.T) {
+	if err := ValidateFlashPartition("BOOT"); err != nil {
+		t.Errorf("expected partition names to be case-insensitive, got: %v", err)
+	}
+}
+
+func TestValidateFlashFile_Empty(t *testing.T) {
+	if err := ValidateFlashFile(""); err == nil {
+		t.Fatal("expected error for empty path")
+	}
+}
+
+func TestValidateFlashFile_WrongExtension(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "test.zip")
+	os.WriteFile(f, []byte("data"), 0o644)
+	if err := ValidateFlashFile(f); err == nil {
+		t.Fatal("expected error for .zip file")
+	}
+}
+
+func TestValidateFlashFile_IsDir(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "boot.img")
+	os.Mkdir(f, 0o755)
+	if err := ValidateFlashFile(f); err == nil {
+		t.Fatal("expected error for directory")
+	}
+}
+
+func TestValidateFlashFile_OK(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "boot.img")
+	os.WriteFile(f, []byte("fake image"), 0o644)
+	if err := ValidateFlashFile(f); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateFlashFile_BinExtension(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "modem.bin")
+	os.WriteFile(f, []byte("fake binary"), 0o644)
+	if err := ValidateFlashFile(f); err != nil {
+		t.Fatalf("unexpected error for .bin: %v", err)
+	}
+}
+
+func TestValidateSideloadFile_Empty(t *testing.T) {
+	if err := ValidateSideloadFile(""); err == nil {
+		t.Fatal("expected error for empty path")
+	}
+}
+
+func TestValidateSideloadFile_WrongExtension(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "test.img")
+	os.WriteFile(f, []byte("data"), 0o644)
+	if err := ValidateSideloadFile(f); err == nil {
+		t.Fatal("expected error for .img file")
+	}
+}
+
+func TestValidateSideloadFile_IsDir(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "rom.zip")
+	os.Mkdir(f, 0o755)
+	if err := ValidateSideloadFile(f); err == nil {
+		t.Fatal("expected error for directory")
+	}
+}
+
+func TestValidateSideloadFile_OK(t *testing.T) {
+	dir := t.TempDir()
+	f := filepath.Join(dir, "update.zip")
+	os.WriteFile(f, []byte("fake zip"), 0o644)
+	if err := ValidateSideloadFile(f); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

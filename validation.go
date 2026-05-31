@@ -80,6 +80,90 @@ func ValidateAPKFile(filePath string) error {
 	return nil
 }
 
+var allowedFlashPartitions = map[string]struct{}{
+	"boot":          {},
+	"boot_a":        {},
+	"boot_b":        {},
+	"init_boot":     {},
+	"init_boot_a":   {},
+	"init_boot_b":   {},
+	"vendor_boot":   {},
+	"vendor_boot_a": {},
+	"vendor_boot_b": {},
+	"dtbo":          {},
+	"vbmeta":        {},
+	"vbmeta_system": {},
+	"vbmeta_vendor": {},
+	"recovery":      {},
+	"recovery_a":    {},
+	"recovery_b":    {},
+	"system":        {},
+	"system_ext":    {},
+	"vendor":        {},
+	"product":       {},
+	"odm":           {},
+	"super":         {},
+	"userdata":      {},
+}
+
+var allowedFlashExtensions = map[string]struct{}{
+	".img": {},
+	".bin": {},
+}
+
+var allowedSideloadExtensions = map[string]struct{}{
+	".zip": {},
+}
+
+func ValidateFlashPartition(partition string) error {
+	trimmed := strings.ToLower(strings.TrimSpace(partition))
+	if trimmed == "" {
+		return NewOperationError("validate_flash_partition", "partition name is required", "", false)
+	}
+	if _, ok := allowedFlashPartitions[trimmed]; !ok {
+		return NewOperationError("validate_flash_partition", "partition is not allowed", trimmed, false)
+	}
+	return nil
+}
+
+func ValidateFlashFile(filePath string) error {
+	trimmed := strings.TrimSpace(filePath)
+	if trimmed == "" {
+		return NewOperationError("validate_flash_file", "image file path is required", "", false)
+	}
+	extension := strings.ToLower(filepath.Ext(trimmed))
+	if _, ok := allowedFlashExtensions[extension]; !ok {
+		return NewOperationError("validate_flash_file", "file type is not allowed for flashing", "only .img and .bin files are allowed", false)
+	}
+	info, err := os.Stat(trimmed)
+	if err != nil {
+		return NewOperationError("validate_flash_file", "file could not be accessed", err.Error(), false)
+	}
+	if info.IsDir() {
+		return NewOperationError("validate_flash_file", "path points to a directory", "expected a regular file", false)
+	}
+	return nil
+}
+
+func ValidateSideloadFile(filePath string) error {
+	trimmed := strings.TrimSpace(filePath)
+	if trimmed == "" {
+		return NewOperationError("validate_sideload_file", "zip file path is required", "", false)
+	}
+	extension := strings.ToLower(filepath.Ext(trimmed))
+	if _, ok := allowedSideloadExtensions[extension]; !ok {
+		return NewOperationError("validate_sideload_file", "file type is not allowed for sideloading", "only .zip files are allowed", false)
+	}
+	info, err := os.Stat(trimmed)
+	if err != nil {
+		return NewOperationError("validate_sideload_file", "file could not be accessed", err.Error(), false)
+	}
+	if info.IsDir() {
+		return NewOperationError("validate_sideload_file", "path points to a directory", "expected a regular file", false)
+	}
+	return nil
+}
+
 // EnsureDir creates a directory and all parents if it doesn't exist.
 func EnsureDir(path string) error {
 	return os.MkdirAll(path, 0o755)
