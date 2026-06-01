@@ -58,8 +58,8 @@ func (a *App) startup(ctx context.Context) {
 	a.dialogService = NewDialogService(ctx)
 	a.packageService = NewPackageService(a.resolveActiveSerial, a.dialogService.SelectSaveFile)
 	a.fileService = NewFileService(ctx, a.resolveActiveSerial)
-	a.terminalService = NewTerminalService(ctx, a.binaryService, a.resolveActiveSerial)
-	a.logcatService = NewLogcatService(ctx, a.binaryService)
+	a.terminalService = NewTerminalService(ctx, a.binaryService, a.currentConfig, a.resolveActiveSerial)
+	a.logcatService = NewLogcatService(ctx, a.binaryService, a.currentConfig)
 
 	al, err := NewAuditLog(a.dataDir)
 	if err != nil {
@@ -350,6 +350,12 @@ func (a *App) resolveActiveSerial(ctx context.Context) (string, error) {
 	}
 
 	return "", NewOperationError("resolve_active_serial", "No active device is available", "no ready ADB device found", true)
+}
+
+func (a *App) currentConfig() *AppConfig {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.config
 }
 
 func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {

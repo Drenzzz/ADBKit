@@ -51,15 +51,17 @@ type logcatStream struct {
 type LogcatService struct {
 	ctx           context.Context
 	binaryService *BinaryService
+	getConfig     func() *AppConfig
 
 	mu      sync.Mutex
 	streams map[string]*logcatStream
 }
 
-func NewLogcatService(ctx context.Context, binaryService *BinaryService) *LogcatService {
+func NewLogcatService(ctx context.Context, binaryService *BinaryService, getConfig func() *AppConfig) *LogcatService {
 	return &LogcatService{
 		ctx:           ctx,
 		binaryService: binaryService,
+		getConfig:     getConfig,
 		streams:       make(map[string]*logcatStream),
 	}
 }
@@ -254,7 +256,15 @@ func (s *LogcatService) resolveADBPath() (string, error) {
 		)
 	}
 
-	status := s.binaryService.GetBinaryStatus(nil)
+	if s.getConfig == nil {
+		return "", NewOperationError(
+			"resolve_logcat_binary",
+			"Application config is unavailable",
+			"config getter is nil",
+			false,
+		)
+	}
+	status := s.binaryService.GetBinaryStatus(s.getConfig())
 	if status.Adb == nil || status.Adb.Status != BinaryReady || status.Adb.Path == "" {
 		return "", NewOperationError(
 			"resolve_logcat_binary",
