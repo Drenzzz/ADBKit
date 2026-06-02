@@ -1,6 +1,5 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { CheckCircle, XCircle } from 'lucide-react'
 import type { FlashPlanStepStatus } from '@/lib/types'
@@ -32,7 +31,6 @@ export function RomPartitionList({
   onDeselectAll,
   disabled,
 }: RomPartitionListProps) {
-  const allSelected = steps.length > 0 && selectedPartitions.length === steps.length
   const noneSelected = selectedPartitions.length === 0
 
   return (

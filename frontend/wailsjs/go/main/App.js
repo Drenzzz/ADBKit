@@ -62,12 +62,24 @@ export function EnableWirelessTCPIP(arg1, arg2) {
   return window['go']['main']['App']['EnableWirelessTCPIP'](arg1, arg2);
 }
 
+export function FlashPartition(arg1, arg2, arg3) {
+  return window['go']['main']['App']['FlashPartition'](arg1, arg2, arg3);
+}
+
+export function FlashRomFolder(arg1, arg2, arg3) {
+  return window['go']['main']['App']['FlashRomFolder'](arg1, arg2, arg3);
+}
+
 export function ForceStopPackage(arg1) {
   return window['go']['main']['App']['ForceStopPackage'](arg1);
 }
 
 export function GetActiveSerial() {
   return window['go']['main']['App']['GetActiveSerial']();
+}
+
+export function GetActiveSlot(arg1) {
+  return window['go']['main']['App']['GetActiveSlot'](arg1);
 }
 
 export function GetBinaryStatus() {
@@ -98,6 +110,10 @@ export function GetDirectorySize(arg1) {
   return window['go']['main']['App']['GetDirectorySize'](arg1);
 }
 
+export function GetFastbootDevices() {
+  return window['go']['main']['App']['GetFastbootDevices']();
+}
+
 export function GetManagedBinaryDir() {
   return window['go']['main']['App']['GetManagedBinaryDir']();
 }
@@ -124,6 +140,10 @@ export function Greet(arg1) {
 
 export function InstallPackage(arg1) {
   return window['go']['main']['App']['InstallPackage'](arg1);
+}
+
+export function IsUserspaceFastboot(arg1) {
+  return window['go']['main']['App']['IsUserspaceFastboot'](arg1);
 }
 
 export function LaunchPackage(arg1) {
@@ -174,8 +194,16 @@ export function RetryBinaryDetection() {
   return window['go']['main']['App']['RetryBinaryDetection']();
 }
 
+export function RunCustomFastbootCommand(arg1, arg2) {
+  return window['go']['main']['App']['RunCustomFastbootCommand'](arg1, arg2);
+}
+
 export function SaveLogcatToFile(arg1, arg2) {
   return window['go']['main']['App']['SaveLogcatToFile'](arg1, arg2);
+}
+
+export function ScanRomFolder(arg1) {
+  return window['go']['main']['App']['ScanRomFolder'](arg1);
 }
 
 export function SelectApkFile() {
@@ -194,12 +222,20 @@ export function SelectFile() {
   return window['go']['main']['App']['SelectFile']();
 }
 
+export function SelectFlashImageFile() {
+  return window['go']['main']['App']['SelectFlashImageFile']();
+}
+
 export function SelectMultipleFiles() {
   return window['go']['main']['App']['SelectMultipleFiles']();
 }
 
 export function SelectPlatformToolsDirectory() {
   return window['go']['main']['App']['SelectPlatformToolsDirectory']();
+}
+
+export function SelectSideloadFile() {
+  return window['go']['main']['App']['SelectSideloadFile']();
 }
 
 export function SendTerminalInput(arg1, arg2) {
@@ -210,12 +246,20 @@ export function SetActiveSerial(arg1) {
   return window['go']['main']['App']['SetActiveSerial'](arg1);
 }
 
+export function SetActiveSlot(arg1, arg2) {
+  return window['go']['main']['App']['SetActiveSlot'](arg1, arg2);
+}
+
 export function SetCustomBinary(arg1, arg2) {
   return window['go']['main']['App']['SetCustomBinary'](arg1, arg2);
 }
 
 export function SetDeviceNickname(arg1, arg2) {
   return window['go']['main']['App']['SetDeviceNickname'](arg1, arg2);
+}
+
+export function SideloadPackage(arg1, arg2) {
+  return window['go']['main']['App']['SideloadPackage'](arg1, arg2);
 }
 
 export function StartLogcat(arg1, arg2, arg3) {
@@ -240,4 +284,8 @@ export function UninstallMultiplePackages(arg1) {
 
 export function UninstallPackage(arg1) {
   return window['go']['main']['App']['UninstallPackage'](arg1);
+}
+
+export function WipeData(arg1) {
+  return window['go']['main']['App']['WipeData'](arg1);
 }

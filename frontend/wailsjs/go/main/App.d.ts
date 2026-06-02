@@ -32,9 +32,15 @@ export function EnablePackage(arg1:string):Promise<string>;
 
 export function EnableWirelessTCPIP(arg1:string,arg2:string):Promise<string>;
 
+export function FlashPartition(arg1:string,arg2:string,arg3:string):Promise<string>;
+
+export function FlashRomFolder(arg1:string,arg2:string,arg3:main.FlashPlan):Promise<string>;
+
 export function ForceStopPackage(arg1:string):Promise<string>;
 
 export function GetActiveSerial():Promise<string>;
+
+export function GetActiveSlot(arg1:string):Promise<string>;
 
 export function GetBinaryStatus():Promise<main.BinarySetupResult>;
 
@@ -50,6 +56,8 @@ export function GetDevices():Promise<Array<main.DeviceSummary>>;
 
 export function GetDirectorySize(arg1:string):Promise<string>;
 
+export function GetFastbootDevices():Promise<Array<main.FastbootDeviceInfo>>;
+
 export function GetManagedBinaryDir():Promise<string>;
 
 export function GetPackageDetails(arg1:string):Promise<main.PackageDetails>;
@@ -63,6 +71,8 @@ export function GetStorageInfo():Promise<main.StorageInfo>;
 export function Greet(arg1:string):Promise<string>;
 
 export function InstallPackage(arg1:string):Promise<string>;
+
+export function IsUserspaceFastboot(arg1:string):Promise<boolean>;
 
 export function LaunchPackage(arg1:string):Promise<string>;
 
@@ -88,7 +98,11 @@ export function RenameFile(arg1:string,arg2:string):Promise<string>;
 
 export function RetryBinaryDetection():Promise<main.BinarySetupResult>;
 
+export function RunCustomFastbootCommand(arg1:string,arg2:string):Promise<string>;
+
 export function SaveLogcatToFile(arg1:string,arg2:string):Promise<void>;
+
+export function ScanRomFolder(arg1:string):Promise<main.FlashPlan>;
 
 export function SelectApkFile():Promise<string>;
 
@@ -98,17 +112,25 @@ export function SelectDirectory():Promise<string>;
 
 export function SelectFile():Promise<string>;
 
+export function SelectFlashImageFile():Promise<string>;
+
 export function SelectMultipleFiles():Promise<Array<string>>;
 
 export function SelectPlatformToolsDirectory():Promise<main.PlatformToolsSelection>;
+
+export function SelectSideloadFile():Promise<string>;
 
 export function SendTerminalInput(arg1:string,arg2:string):Promise<void>;
 
 export function SetActiveSerial(arg1:string):Promise<void>;
 
+export function SetActiveSlot(arg1:string,arg2:string):Promise<string>;
+
 export function SetCustomBinary(arg1:string,arg2:string):Promise<void>;
 
 export function SetDeviceNickname(arg1:string,arg2:string):Promise<void>;
+
+export function SideloadPackage(arg1:string,arg2:string):Promise<string>;
 
 export function StartLogcat(arg1:string,arg2:string,arg3:string):Promise<void>;
 
@@ -121,3 +143,5 @@ export function StopLogcat(arg1:string):Promise<void>;
 export function UninstallMultiplePackages(arg1:Array<string>):Promise<string>;
 
 export function UninstallPackage(arg1:string):Promise<string>;
+
+export function WipeData(arg1:string):Promise<string>;

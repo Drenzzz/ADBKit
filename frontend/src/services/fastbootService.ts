@@ -86,5 +86,5 @@ export async function flashRomFolder(
       image_file: s.image_file,
     })),
   }
-  return FlashRomFolder(serial, folderPath, backendPlan)
+  return FlashRomFolder(serial, folderPath, backendPlan as any)
 }

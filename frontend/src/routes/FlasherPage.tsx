@@ -1,10 +1,5 @@
-import { PagePlaceholder } from '@/components/layout/PagePlaceholder'
+import { FlasherBento } from '@/components/flasher/FlasherBento'
 
 export default function FlasherPage() {
-  return (
-    <PagePlaceholder
-      title="Flasher"
-      description="Flash partitions, ROM folders, A/B slot management, and wipe operations."
-    />
-  )
+  return <FlasherBento />
 }
