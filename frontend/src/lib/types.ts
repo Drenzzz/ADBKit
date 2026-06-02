@@ -241,3 +241,86 @@ export interface LogcatState {
   error: string | null
   lastUpdatedAt: number | null
 }
+
+export interface FastbootDeviceInfo {
+  serial: string
+  state: DeviceState
+  mode: DeviceMode
+}
+
+export interface FlashStep {
+  partition: string
+  image_file: string
+}
+
+export interface FlashPlan {
+  steps: FlashStep[]
+}
+
+export type OperationStatus = 'idle' | 'pending' | 'running' | 'success' | 'error' | 'cancelled'
+
+export interface FlashPlanStepStatus {
+  partition: string
+  imageFile: string
+  status: OperationStatus
+  detail: string | null
+}
+
+export type FlasherMode = 'fastboot' | 'fastbootd' | 'sideload'
+
+export interface FlasherState {
+  fastbootDevices: FastbootDeviceInfo[]
+  activeFastbootSerial: string
+  isUserspace: boolean
+  selectedPartition: string
+  selectedImagePath: string
+  romFolderPath: string
+  flashPlan: FlashPlan | null
+  flashPlanSteps: FlashPlanStepStatus[]
+  selectedPartitions: string[]
+  currentSlot: string
+  customCommand: string
+  customCommandOutput: string
+  sideloadFilePath: string
+  loadingDevices: boolean
+  refreshingDevices: boolean
+  scanningPlan: boolean
+  runningFlash: boolean
+  runningBatchFlash: boolean
+  runningWipe: boolean
+  runningSideload: boolean
+  runningSlotChange: boolean
+  runningCommand: boolean
+  error: string | null
+  lastUpdatedAt: number | null
+}
+
+export interface FlasherActions {
+  setFastbootDevices: (devices: FastbootDeviceInfo[]) => void
+  setActiveFastbootSerial: (serial: string) => void
+  setIsUserspace: (isUserspace: boolean) => void
+  setSelectedPartition: (partition: string) => void
+  setSelectedImagePath: (path: string) => void
+  setRomFolderPath: (path: string) => void
+  setFlashPlan: (plan: FlashPlan | null) => void
+  setFlashPlanStepStatus: (partition: string, status: OperationStatus, detail?: string | null) => void
+  togglePartitionSelection: (partition: string) => void
+  selectAllPartitions: () => void
+  deselectAllPartitions: () => void
+  setCurrentSlot: (slot: string) => void
+  setCustomCommand: (command: string) => void
+  setCustomCommandOutput: (output: string) => void
+  setSideloadFilePath: (path: string) => void
+  setLoadingDevices: (loading: boolean) => void
+  setRefreshingDevices: (refreshing: boolean) => void
+  setScanningPlan: (scanning: boolean) => void
+  setRunningFlash: (running: boolean) => void
+  setRunningBatchFlash: (running: boolean) => void
+  setRunningWipe: (running: boolean) => void
+  setRunningSideload: (running: boolean) => void
+  setRunningSlotChange: (running: boolean) => void
+  setRunningCommand: (running: boolean) => void
+  setError: (error: string | null) => void
+  setLastUpdatedAt: (time: number | null) => void
+  reset: () => void
+}
