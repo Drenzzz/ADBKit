@@ -11,21 +11,23 @@ import (
 )
 
 type App struct {
-	ctx             context.Context
-	auditLog        *AuditLog
-	binaryService   *BinaryService
-	deviceService   *DeviceService
-	wirelessService *WirelessService
-	monitorService  *MonitorService
-	packageService  *PackageService
-	fileService     *FileService
-	dialogService   *DialogService
-	terminalService *TerminalService
-	logcatService   *LogcatService
-	config          *AppConfig
-	dataDir         string
-	activeSerial    string
-	mu              sync.Mutex
+	ctx               context.Context
+	auditLog          *AuditLog
+	binaryService     *BinaryService
+	deviceService     *DeviceService
+	wirelessService   *WirelessService
+	monitorService    *MonitorService
+	packageService    *PackageService
+	fileService       *FileService
+	dialogService     *DialogService
+	terminalService   *TerminalService
+	logcatService     *LogcatService
+	fastbootService   *FastbootService
+	flashPlanService  *FlashPlanService
+	config            *AppConfig
+	dataDir           string
+	activeSerial      string
+	mu                sync.Mutex
 }
 
 func NewApp() *App {
@@ -60,6 +62,8 @@ func (a *App) startup(ctx context.Context) {
 	a.fileService = NewFileService(ctx, a.resolveActiveSerial)
 	a.terminalService = NewTerminalService(ctx, a.binaryService, a.currentConfig, a.resolveActiveSerial)
 	a.logcatService = NewLogcatService(ctx, a.binaryService, a.currentConfig)
+	a.fastbootService = NewFastbootService(a.binaryService, a.currentConfig, a.resolveActiveSerial)
+	a.flashPlanService = NewFlashPlanService(a.fastbootService)
 
 	al, err := NewAuditLog(a.dataDir)
 	if err != nil {
@@ -479,4 +483,115 @@ func (a *App) SelectDirectory() (string, error) {
 
 func (a *App) SelectMultipleFiles() ([]string, error) {
 	return a.dialogService.SelectMultipleFiles()
+}
+
+func (a *App) SelectFlashImageFile() (string, error) {
+	return a.dialogService.SelectFlashImageFile()
+}
+
+func (a *App) SelectSideloadFile() (string, error) {
+	return a.dialogService.SelectSideloadFile()
+}
+
+func (a *App) GetFastbootDevices() ([]FastbootDeviceInfo, error) {
+	return a.fastbootService.ListDevices(a.ctx)
+}
+
+func (a *App) FlashPartition(serial string, partition string, filePath string) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	if a.auditLog != nil {
+		a.auditLog.Log(AuditEntry{Operation: "flash_partition", Command: fmt.Sprintf("partition=%s file=%s", partition, filePath)})
+	}
+	return a.fastbootService.FlashPartition(a.ctx, resolved, partition, filePath)
+}
+
+func (a *App) WipeData(serial string) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	if a.auditLog != nil {
+		a.auditLog.Log(AuditEntry{Operation: "wipe_data", Command: fmt.Sprintf("serial=%s", resolved)})
+	}
+	return a.fastbootService.WipeData(a.ctx, resolved)
+}
+
+func (a *App) GetActiveSlot(serial string) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	return a.fastbootService.GetActiveSlot(a.ctx, resolved)
+}
+
+func (a *App) SetActiveSlot(serial string, slot string) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	if a.auditLog != nil {
+		a.auditLog.Log(AuditEntry{Operation: "set_active_slot", Command: fmt.Sprintf("serial=%s slot=%s", resolved, slot)})
+	}
+	return a.fastbootService.SetActiveSlot(a.ctx, resolved, slot)
+}
+
+func (a *App) RunCustomFastbootCommand(serial string, args string) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	if a.auditLog != nil {
+		a.auditLog.Log(AuditEntry{Operation: "run_fastboot_command", Command: args})
+	}
+	return a.fastbootService.RunCustomCommand(a.ctx, resolved, args)
+}
+
+func (a *App) SideloadPackage(serial string, zipPath string) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	if a.auditLog != nil {
+		a.auditLog.Log(AuditEntry{Operation: "sideload_package", Command: fmt.Sprintf("serial=%s zip=%s", resolved, zipPath)})
+	}
+	return a.fastbootService.SideloadPackage(a.ctx, resolved, zipPath)
+}
+
+func (a *App) IsUserspaceFastboot(serial string) (bool, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	return a.fastbootService.IsUserspace(a.ctx, resolved)
+}
+
+func (a *App) ScanRomFolder(folderPath string) (*FlashPlan, error) {
+	return a.flashPlanService.ScanRomFolder(folderPath)
+}
+
+func (a *App) FlashRomFolder(serial string, folderPath string, plan FlashPlan) (string, error) {
+	resolved := serial
+	if resolved == "" {
+		a.mu.Lock()
+		resolved = a.activeSerial
+		a.mu.Unlock()
+	}
+	return a.flashPlanService.FlashRomFolder(a.ctx, resolved, folderPath, plan)
 }

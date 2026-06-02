@@ -141,3 +141,37 @@ func (s *DialogService) SelectMultipleFiles() ([]string, error) {
 	}
 	return files, nil
 }
+
+func (s *DialogService) SelectFlashImageFile() (string, error) {
+	if s.ctx == nil {
+		return "", NewOperationError("select_flash_image_file", "application context is not initialized", "", true)
+	}
+	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+		Title:           "Select flash image file",
+		ShowHiddenFiles: false,
+		Filters: []wailsruntime.FileFilter{
+			{DisplayName: "Flash images", Pattern: "*.img;*.bin"},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
+func (s *DialogService) SelectSideloadFile() (string, error) {
+	if s.ctx == nil {
+		return "", NewOperationError("select_sideload_file", "application context is not initialized", "", true)
+	}
+	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+		Title:           "Select package for sideload",
+		ShowHiddenFiles: false,
+		Filters: []wailsruntime.FileFilter{
+			{DisplayName: "ZIP packages", Pattern: "*.zip"},
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
