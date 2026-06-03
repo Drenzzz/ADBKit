@@ -11,13 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { RefreshCw, ChevronDown } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { useFlasher } from '@/hooks/useFlasher'
 
 function timeAgo(timestamp: number | null): string {
@@ -28,13 +22,19 @@ function timeAgo(timestamp: number | null): string {
   return `${Math.floor(seconds / 60)}m ago`
 }
 
+function getModeBadge(mode: import('@/lib/types').FlasherMode | null) {
+  if (mode === 'fastbootd') return { label: 'Fastbootd', variant: 'default' as const }
+  if (mode === 'fastboot') return { label: 'Fastboot', variant: 'secondary' as const }
+  if (mode === 'sideload') return { label: 'Sideload', variant: 'destructive' as const }
+  return null
+}
+
 export function FlasherHeader() {
   const {
     fastbootDevices,
     activeFastbootSerial,
-    setActiveFastbootSerial,
+    deviceMode,
     currentSlot,
-    isUserspace,
     loadingDevices,
     refreshingDevices,
     lastUpdatedAt,
@@ -46,9 +46,10 @@ export function FlasherHeader() {
   const [slotDialogOpen, setSlotDialogOpen] = useState(false)
   const [pendingSlot, setPendingSlot] = useState('')
 
-  const hasDevice = fastbootDevices.length > 0
-  const hasSlot = currentSlot === 'a' || currentSlot === 'b'
-  const modeLabel = isUserspace ? 'Fastbootd' : 'Fastboot'
+  const hasDevice = fastbootDevices.length > 0 || deviceMode === 'sideload'
+  const hasSlot = (deviceMode === 'fastboot' || deviceMode === 'fastbootd') && (currentSlot === 'a' || currentSlot === 'b')
+  const modeBadge = getModeBadge(deviceMode)
+  const isSideload = deviceMode === 'sideload'
 
   function handleSlotSwitch(slot: string) {
     setPendingSlot(slot)
@@ -60,35 +61,26 @@ export function FlasherHeader() {
       <div className="space-y-1">
         <h2 className="text-lg font-semibold tracking-tight">ROM Flasher</h2>
         <p className="text-sm text-muted-foreground">
-          Flash partitions, ROM folders, A/B slot management, and wipe operations.
+          {isSideload
+            ? 'Device is in sideload mode. Sideload a ZIP package to install.'
+            : 'Flash partitions, ROM folders, A/B slot management, and wipe operations.'}
         </p>
       </div>
 
       <div className="flex items-center gap-3">
         {hasDevice && (
           <>
-            {fastbootDevices.length > 1 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-sm">
-                  {activeFastbootSerial}
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {fastbootDevices.map((d) => (
-                    <DropdownMenuItem
-                      key={d.serial}
-                      onClick={() => setActiveFastbootSerial(d.serial)}
-                    >
-                      {d.serial}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {hasDevice && activeFastbootSerial && (
+              <span className="text-sm font-mono text-muted-foreground">
+                {activeFastbootSerial}
+              </span>
             )}
 
-            <Badge variant="secondary" className="text-xs">
-              {modeLabel}
-            </Badge>
+            {modeBadge && (
+              <Badge variant={modeBadge.variant} className="text-xs">
+                {modeBadge.label}
+              </Badge>
+            )}
 
             {hasSlot && (
               <Button

@@ -13,12 +13,11 @@ import {
 } from '@/components/ui/alert-dialog'
 import { FilePicker } from '@/components/flasher/shared/FilePicker'
 import { useFlasher } from '@/hooks/useFlasher'
-import { useDevices } from '@/hooks/useDevices'
 import { Package, Loader2 } from 'lucide-react'
 
 export function SideloadCard() {
-  const { deviceMode } = useDevices()
   const {
+    deviceMode,
     activeFastbootSerial,
     sideloadFilePath,
     runningSideload,
@@ -27,7 +26,7 @@ export function SideloadCard() {
   } = useFlasher()
 
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const isSideloadMode = deviceMode === 'adb'
+  const isSideloadMode = deviceMode === 'sideload'
   const hasDevice = !!activeFastbootSerial
   const hasFile = !!sideloadFilePath
 
@@ -43,7 +42,7 @@ export function SideloadCard() {
         <div className="flex items-center gap-2">
           <div className={`h-2 w-2 rounded-full ${isSideloadMode ? 'bg-green-500' : 'bg-muted'}`} />
           <span className="text-xs text-muted-foreground">
-            {isSideloadMode ? 'Ready' : 'Not in sideload mode'}
+            {isSideloadMode ? 'Ready' : 'Device not in sideload mode'}
           </span>
         </div>
 
@@ -58,7 +57,7 @@ export function SideloadCard() {
         <Button
           className="w-full"
           onClick={() => setConfirmOpen(true)}
-          disabled={!hasDevice || !hasFile || runningSideload}
+          disabled={!hasDevice || !hasFile || runningSideload || !isSideloadMode}
         >
           {runningSideload ? (
             <>

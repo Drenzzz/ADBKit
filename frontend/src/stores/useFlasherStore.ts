@@ -10,6 +10,7 @@ import type {
 const initialState: FlasherState = {
   fastbootDevices: [],
   activeFastbootSerial: '',
+  deviceMode: null,
   isUserspace: false,
   selectedPartition: '',
   selectedImagePath: '',
@@ -48,6 +49,7 @@ export const useFlasherStore = create<FlasherState & FlasherActions>()((set, get
 
   setFastbootDevices: (devices) => set({ fastbootDevices: devices }),
   setActiveFastbootSerial: (serial) => set({ activeFastbootSerial: serial }),
+  setDeviceMode: (mode) => set({ deviceMode: mode }),
   setIsUserspace: (isUserspace) => set({ isUserspace }),
   setSelectedPartition: (partition) => set({ selectedPartition: partition }),
   setSelectedImagePath: (path) => set({ selectedImagePath: path }),

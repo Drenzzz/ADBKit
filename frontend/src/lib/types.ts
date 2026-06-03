@@ -271,6 +271,7 @@ export type FlasherMode = 'fastboot' | 'fastbootd' | 'sideload'
 export interface FlasherState {
   fastbootDevices: FastbootDeviceInfo[]
   activeFastbootSerial: string
+  deviceMode: FlasherMode | null
   isUserspace: boolean
   selectedPartition: string
   selectedImagePath: string
@@ -298,6 +299,7 @@ export interface FlasherState {
 export interface FlasherActions {
   setFastbootDevices: (devices: FastbootDeviceInfo[]) => void
   setActiveFastbootSerial: (serial: string) => void
+  setDeviceMode: (mode: FlasherMode | null) => void
   setIsUserspace: (isUserspace: boolean) => void
   setSelectedPartition: (partition: string) => void
   setSelectedImagePath: (path: string) => void

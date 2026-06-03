@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import * as fastbootSvc from '@/services/fastbootService'
+import * as deviceSvc from '@/services/deviceService'
 import { useFlasherStore } from '@/stores/useFlasherStore'
-import type { FlashPlanStepStatus } from '@/lib/types'
+import type { FlashPlanStepStatus, FlasherMode } from '@/lib/types'
 
-const FASTBOOT_POLL_INTERVAL = 4000
+const POLL_INTERVAL = 4000
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'An unexpected error occurred'
@@ -22,23 +23,51 @@ export function useFlasher() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const slotLoadedRef = useRef<string>('')
 
-  const syncFastbootDevices = useCallback(
+  const syncDevices = useCallback(
     async (isBackground = false) => {
       if (isBackground) {
         store.setRefreshingDevices(true)
       } else {
         store.setLoadingDevices(true)
       }
-      try {
-        const devices = await fastbootSvc.getFastbootDevices()
-        store.setFastbootDevices(devices)
 
+      try {
+        // Poll both fastboot and ADB devices in parallel
+        const [fbDevices, adbDevices] = await Promise.allSettled([
+          fastbootSvc.getFastbootDevices(),
+          deviceSvc.getDevices(),
+        ])
+
+        const fastbootList = fbDevices.status === 'fulfilled' ? fbDevices.value : []
+        const adbList = adbDevices.status === 'fulfilled' ? adbDevices.value : []
+
+        store.setFastbootDevices(fastbootList)
+
+        // Determine active device and mode
         const currentSerial = store.activeFastbootSerial
-        if (currentSerial && devices.some((d) => d.serial === currentSerial)) {
-          // Keep current selection
-        } else if (devices.length > 0) {
-          store.setActiveFastbootSerial(devices[0].serial)
+
+        // Check for fastboot device first
+        if (fastbootList.length > 0) {
+          const stillConnected = currentSerial && fastbootList.some((d) => d.serial === currentSerial)
+          if (!stillConnected) {
+            store.setActiveFastbootSerial(fastbootList[0].serial)
+          }
+          const mode: FlasherMode = store.isUserspace ? 'fastbootd' : 'fastboot'
+          store.setDeviceMode(mode)
+        } else if (adbList.length > 0) {
+          // Check for sideload device in ADB list
+          const sideloadDevice = adbList.find((d) => d.state === 'sideload')
+          if (sideloadDevice) {
+            store.setActiveFastbootSerial(sideloadDevice.serial)
+            store.setDeviceMode('sideload')
+          } else {
+            // ADB device present but not in sideload — not relevant for flasher
+            store.setDeviceMode(null)
+            // Keep current serial if it was a sideload device
+          }
         } else {
+          // No devices at all
+          store.setDeviceMode(null)
           store.setActiveFastbootSerial('')
         }
 
@@ -51,7 +80,7 @@ export function useFlasher() {
         store.setRefreshingDevices(false)
       }
     },
-    [store.activeFastbootSerial],
+    [store.activeFastbootSerial, store.isUserspace],
   )
 
   useEffect(() => {
@@ -59,13 +88,13 @@ export function useFlasher() {
 
     async function poll() {
       if (!active) return
-      await syncFastbootDevices(false)
+      await syncDevices(false)
     }
 
     poll()
     pollRef.current = setInterval(() => {
-      if (active) syncFastbootDevices(true)
-    }, FASTBOOT_POLL_INTERVAL)
+      if (active) syncDevices(true)
+    }, POLL_INTERVAL)
 
     return () => {
       active = false
@@ -74,11 +103,16 @@ export function useFlasher() {
         pollRef.current = null
       }
     }
-  }, [syncFastbootDevices])
+  }, [syncDevices])
 
+  // Load slot and userspace status when a fastboot device is connected
   useEffect(() => {
     const serial = store.activeFastbootSerial
-    if (!serial) return
+    const mode = store.deviceMode
+    if (!serial || mode === 'sideload') {
+      slotLoadedRef.current = ''
+      return
+    }
     if (slotLoadedRef.current === serial) return
 
     slotLoadedRef.current = serial
@@ -89,9 +123,13 @@ export function useFlasher() {
 
     fastbootSvc
       .isUserspaceFastboot(serial)
-      .then((isU) => store.setIsUserspace(isU))
+      .then((isU) => {
+        store.setIsUserspace(isU)
+        if (isU) store.setDeviceMode('fastbootd')
+        else store.setDeviceMode('fastboot')
+      })
       .catch(() => store.setIsUserspace(false))
-  }, [store.activeFastbootSerial])
+  }, [store.activeFastbootSerial, store.deviceMode])
 
   const chooseImageFile = useCallback(async () => {
     try {
@@ -322,7 +360,7 @@ export function useFlasher() {
 
   return {
     ...store,
-    syncFastbootDevices,
+    syncFastbootDevices: syncDevices,
     chooseImageFile,
     chooseSideloadFile,
     chooseRomFolder,
