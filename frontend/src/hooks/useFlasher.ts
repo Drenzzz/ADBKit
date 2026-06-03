@@ -22,9 +22,24 @@ export function useFlasher() {
   const store = useFlasherStore()
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const slotLoadedRef = useRef<string>('')
+  // Prevents polling from changing mode or showing error toasts during active operations
+  const operationInProgressRef = useRef(false)
+
+  const isAnyOperationRunning =
+    store.runningFlash ||
+    store.runningBatchFlash ||
+    store.runningWipe ||
+    store.runningSideload ||
+    store.runningSlotChange
+
+  useEffect(() => {
+    operationInProgressRef.current = isAnyOperationRunning
+  }, [isAnyOperationRunning])
 
   const syncDevices = useCallback(
     async (isBackground = false) => {
+      if (operationInProgressRef.current) return
+
       if (isBackground) {
         store.setRefreshingDevices(true)
       } else {
@@ -32,7 +47,6 @@ export function useFlasher() {
       }
 
       try {
-        // Poll both fastboot and ADB devices in parallel
         const [fbDevices, adbDevices] = await Promise.allSettled([
           fastbootSvc.getFastbootDevices(),
           deviceSvc.getDevices(),
@@ -43,10 +57,8 @@ export function useFlasher() {
 
         store.setFastbootDevices(fastbootList)
 
-        // Determine active device and mode
         const currentSerial = store.activeFastbootSerial
 
-        // Check for fastboot device first
         if (fastbootList.length > 0) {
           const stillConnected = currentSerial && fastbootList.some((d) => d.serial === currentSerial)
           if (!stillConnected) {
@@ -55,18 +67,14 @@ export function useFlasher() {
           const mode: FlasherMode = store.isUserspace ? 'fastbootd' : 'fastboot'
           store.setDeviceMode(mode)
         } else if (adbList.length > 0) {
-          // Check for sideload device in ADB list
           const sideloadDevice = adbList.find((d) => d.state === 'sideload')
           if (sideloadDevice) {
             store.setActiveFastbootSerial(sideloadDevice.serial)
             store.setDeviceMode('sideload')
           } else {
-            // ADB device present but not in sideload — not relevant for flasher
             store.setDeviceMode(null)
-            // Keep current serial if it was a sideload device
           }
         } else {
-          // No devices at all
           store.setDeviceMode(null)
           store.setActiveFastbootSerial('')
         }
@@ -74,7 +82,10 @@ export function useFlasher() {
         store.setLastUpdatedAt(Date.now())
         store.setError(null)
       } catch (err) {
-        store.setError(getErrorMessage(err))
+        // Suppress error state updates during active operations to avoid toast spam
+        if (!operationInProgressRef.current) {
+          store.setError(getErrorMessage(err))
+        }
       } finally {
         store.setLoadingDevices(false)
         store.setRefreshingDevices(false)
@@ -105,7 +116,6 @@ export function useFlasher() {
     }
   }, [syncDevices])
 
-  // Load slot and userspace status when a fastboot device is connected
   useEffect(() => {
     const serial = store.activeFastbootSerial
     const mode = store.deviceMode
@@ -173,6 +183,7 @@ export function useFlasher() {
     async (slot: string) => {
       const serial = store.activeFastbootSerial
       if (!serial) return
+      if (operationInProgressRef.current) return
       store.setRunningSlotChange(true)
       try {
         await fastbootSvc.setActiveSlot(serial, slot)
@@ -211,6 +222,7 @@ export function useFlasher() {
     const partition = store.selectedPartition
     const filePath = store.selectedImagePath
 
+    if (operationInProgressRef.current) return
     if (!serial) {
       toast.error('No fastboot device connected')
       return
@@ -247,6 +259,7 @@ export function useFlasher() {
     const selected = store.selectedPartitions
     const steps = store.flashPlanSteps
 
+    if (operationInProgressRef.current) return
     if (!serial || !plan || selected.length === 0) {
       toast.error('No device or no partitions selected')
       return
@@ -294,6 +307,7 @@ export function useFlasher() {
 
   const executeWipeData = useCallback(async () => {
     const serial = store.activeFastbootSerial
+    if (operationInProgressRef.current) return
     if (!serial) {
       toast.error('No fastboot device connected')
       return
@@ -312,6 +326,7 @@ export function useFlasher() {
   const executeSideload = useCallback(async () => {
     const serial = store.activeFastbootSerial
     const zipPath = store.sideloadFilePath
+    if (operationInProgressRef.current) return
     if (!serial) {
       toast.error('No device connected')
       return
