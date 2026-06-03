@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import {
   AlertDialog,
@@ -18,7 +19,11 @@ import { RomPartitionList } from '@/components/flasher/shared/RomPartitionList'
 import { useFlasher } from '@/hooks/useFlasher'
 import { FolderSearch, Loader2 } from 'lucide-react'
 
-export function RomFlashCard() {
+interface RomFlashCardProps {
+  disabled?: boolean
+}
+
+export function RomFlashCard({ disabled }: RomFlashCardProps) {
   const {
     activeFastbootSerial,
     romFolderPath,
@@ -36,7 +41,7 @@ export function RomFlashCard() {
   } = useFlasher()
 
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const hasDevice = !!activeFastbootSerial
+  const hasDevice = !!activeFastbootSerial && !disabled
   const hasPlan = flashPlan && flashPlanSteps.length > 0
   const selectedCount = selectedPartitions.length
   const completedCount = flashPlanSteps.filter((s) => s.status === 'success').length
@@ -48,11 +53,16 @@ export function RomFlashCard() {
   }
 
   return (
-    <Card>
+    <Card className={disabled ? 'opacity-60' : ''}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <FolderSearch className="h-4 w-4" />
           Flash ROM Folder
+          {disabled && (
+            <Badge variant="outline" className="ml-auto text-[10px] text-muted-foreground">
+              Requires fastboot
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -61,14 +71,14 @@ export function RomFlashCard() {
           placeholder="Select ROM folder..."
           variant="folder"
           onBrowse={chooseRomFolder}
-          disabled={runningBatchFlash}
+          disabled={disabled || runningBatchFlash}
         />
 
         <Button
           variant="outline"
           className="w-full"
           onClick={scanSelectedRomFolder}
-          disabled={!romFolderPath || scanningPlan || runningBatchFlash}
+          disabled={disabled || !romFolderPath || scanningPlan || runningBatchFlash}
         >
           {scanningPlan ? (
             <>
@@ -89,7 +99,7 @@ export function RomFlashCard() {
               onToggle={togglePartitionSelection}
               onSelectAll={selectAllPartitions}
               onDeselectAll={deselectAllPartitions}
-              disabled={runningBatchFlash}
+              disabled={disabled || runningBatchFlash}
             />
           </>
         )}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,17 +15,26 @@ import {
 import { useFlasher } from '@/hooks/useFlasher'
 import { Trash2, Loader2 } from 'lucide-react'
 
-export function WipeDataCard() {
+interface WipeDataCardProps {
+  disabled?: boolean
+}
+
+export function WipeDataCard({ disabled }: WipeDataCardProps) {
   const { activeFastbootSerial, runningWipe, executeWipeData } = useFlasher()
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const hasDevice = !!activeFastbootSerial
+  const hasDevice = !!activeFastbootSerial && !disabled
 
   return (
-    <Card>
+    <Card className={disabled ? 'opacity-60' : ''}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Trash2 className="h-4 w-4" />
           Wipe Data
+          {disabled && (
+            <Badge variant="outline" className="ml-auto text-[10px] text-muted-foreground">
+              Requires fastboot
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

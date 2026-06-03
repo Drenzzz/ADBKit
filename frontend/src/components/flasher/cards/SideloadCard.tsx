@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +16,11 @@ import { FilePicker } from '@/components/flasher/shared/FilePicker'
 import { useFlasher } from '@/hooks/useFlasher'
 import { Package, Loader2 } from 'lucide-react'
 
-export function SideloadCard() {
+interface SideloadCardProps {
+  disabled?: boolean
+}
+
+export function SideloadCard({ disabled }: SideloadCardProps) {
   const {
     deviceMode,
     activeFastbootSerial,
@@ -31,18 +36,31 @@ export function SideloadCard() {
   const hasFile = !!sideloadFilePath
 
   return (
-    <Card>
+    <Card className={disabled ? 'opacity-60' : ''}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Package className="h-4 w-4" />
           Sideload
+          {disabled && (
+            <Badge variant="outline" className="ml-auto text-[10px] text-muted-foreground">
+              Requires sideload
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2">
-          <div className={`h-2 w-2 rounded-full ${isSideloadMode ? 'bg-green-500' : 'bg-muted'}`} />
+          <div
+            className={`h-2 w-2 rounded-full ${
+              isSideloadMode ? 'bg-green-500' : disabled ? 'bg-muted' : 'bg-yellow-500'
+            }`}
+          />
           <span className="text-xs text-muted-foreground">
-            {isSideloadMode ? 'Ready' : 'Device not in sideload mode'}
+            {isSideloadMode
+              ? 'Ready'
+              : disabled
+                ? 'Device must be in sideload mode'
+                : 'No device in sideload mode'}
           </span>
         </div>
 
@@ -51,13 +69,13 @@ export function SideloadCard() {
           placeholder="Select .zip file for sideload..."
           variant="file"
           onBrowse={chooseSideloadFile}
-          disabled={runningSideload}
+          disabled={disabled || runningSideload}
         />
 
         <Button
           className="w-full"
           onClick={() => setConfirmOpen(true)}
-          disabled={!hasDevice || !hasFile || runningSideload || !isSideloadMode}
+          disabled={disabled || !hasDevice || !hasFile || runningSideload}
         >
           {runningSideload ? (
             <>
