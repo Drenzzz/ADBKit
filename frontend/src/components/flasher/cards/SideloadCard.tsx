@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,31 +36,29 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
   const hasFile = !!sideloadFilePath
 
   return (
-    <Card className={disabled ? 'opacity-60' : ''}>
+    <Card className={`relative overflow-hidden ${disabled ? 'opacity-60' : ''}`}>
+      {disabled && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[1px]">
+          <p className="text-center text-xs text-muted-foreground">
+            Device must be in<br />sideload mode
+          </p>
+        </div>
+      )}
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Package className="h-4 w-4" />
           Sideload
-          {disabled && (
-            <Badge variant="outline" className="ml-auto text-[10px] text-muted-foreground">
-              Requires sideload
-            </Badge>
-          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2">
           <div
             className={`h-2 w-2 rounded-full ${
-              isSideloadMode ? 'bg-green-500' : disabled ? 'bg-muted' : 'bg-yellow-500'
+              isSideloadMode ? 'bg-green-500' : 'bg-muted'
             }`}
           />
           <span className="text-xs text-muted-foreground">
-            {isSideloadMode
-              ? 'Ready'
-              : disabled
-                ? 'Device must be in sideload mode'
-                : 'No device in sideload mode'}
+            {isSideloadMode ? 'Ready' : 'No device in sideload mode'}
           </span>
         </div>
 
@@ -71,6 +69,15 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
           onBrowse={chooseSideloadFile}
           disabled={disabled || runningSideload}
         />
+
+        {runningSideload && (
+          <div className="space-y-2">
+            <Progress value={undefined} className="h-2 animate-pulse" />
+            <p className="text-center text-xs text-muted-foreground">
+              Sideload in progress... Do not disconnect the device.
+            </p>
+          </div>
+        )}
 
         <Button
           className="w-full"

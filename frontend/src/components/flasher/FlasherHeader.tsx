@@ -71,7 +71,10 @@ export function FlasherHeader() {
         {hasDevice && (
           <>
             {hasDevice && activeFastbootSerial && (
-              <span className="text-sm font-mono text-muted-foreground">
+              <span
+                className="max-w-[80px] truncate text-sm font-mono text-muted-foreground"
+                title={activeFastbootSerial}
+              >
                 {activeFastbootSerial}
               </span>
             )}

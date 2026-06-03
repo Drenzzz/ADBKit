@@ -33,7 +33,14 @@ export function PartitionFlashCard({ disabled }: PartitionFlashCardProps) {
     !!activeFastbootSerial && !!selectedPartition && !!selectedImagePath && !needsUserspace && !disabled
 
   return (
-    <Card className={disabled ? 'opacity-60' : ''}>
+    <Card className={`relative overflow-hidden ${disabled ? 'opacity-60' : ''}`}>
+      {disabled && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[1px]">
+          <p className="text-center text-xs text-muted-foreground">
+            Connect a fastboot device<br />to use this feature
+          </p>
+        </div>
+      )}
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <Zap className="h-4 w-4" />
