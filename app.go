@@ -1,6 +1,15 @@
 package main
 
 import (
+	"ADBKit/internal/audit"
+	"ADBKit/internal/binary"
+	"ADBKit/internal/core"
+	"ADBKit/internal/device"
+	"ADBKit/internal/dialog"
+	"ADBKit/internal/file"
+	"ADBKit/internal/flasher"
+	packagemgr "ADBKit/internal/package_mgr"
+	"ADBKit/internal/shell"
 	"context"
 	"fmt"
 	"log"
@@ -11,23 +20,24 @@ import (
 )
 
 type App struct {
-	ctx               context.Context
-	auditLog          *AuditLog
-	binaryService     *BinaryService
-	deviceService     *DeviceService
-	wirelessService   *WirelessService
-	monitorService    *MonitorService
-	packageService    *PackageService
-	fileService       *FileService
-	dialogService     *DialogService
-	terminalService   *TerminalService
-	logcatService     *LogcatService
-	fastbootService   *FastbootService
-	flashPlanService  *FlashPlanService
-	config            *AppConfig
-	dataDir           string
-	activeSerial      string
-	mu                sync.Mutex
+	ctx          context.Context
+	dataDir      string
+	activeSerial string
+	mu           sync.Mutex
+
+	binSvc     *binary.Service
+	devSvc     *device.Service
+	wireSvc    *device.WirelessService
+	monSvc     *device.MonitorService
+	diaSvc     *dialog.Service
+	pkgSvc     *packagemgr.Service
+	fileSvc    *file.Service
+	termSvc    *shell.TerminalService
+	logSvc     *shell.LogcatService
+	fbSvc      *flasher.FastbootService
+	fpSvc      *flasher.PlanService
+	auditLog   *audit.Log
+	cfg        *core.AppConfig
 }
 
 func NewApp() *App {
@@ -47,29 +57,70 @@ func (a *App) startup(ctx context.Context) {
 		log.Printf("failed to create app data dir: %v", err)
 	}
 
-	config, err := LoadConfig(a.dataDir)
+	config, err := core.LoadConfig(a.dataDir)
 	if err != nil {
 		log.Printf("failed to load config: %v", err)
-		config = DefaultConfig()
+		config = core.DefaultConfig()
 	}
-	a.config = config
-	a.binaryService = NewBinaryService(a.dataDir)
-	a.deviceService = NewDeviceService(a.dataDir)
-	a.wirelessService = NewWirelessService(a.dataDir)
-	a.monitorService = NewMonitorService(a.dataDir)
-	a.dialogService = NewDialogService(ctx)
-	a.packageService = NewPackageService(a.resolveActiveSerial, a.dialogService.SelectSaveFile)
-	a.fileService = NewFileService(ctx, a.resolveActiveSerial)
-	a.terminalService = NewTerminalService(ctx, a.binaryService, a.currentConfig, a.resolveActiveSerial)
-	a.logcatService = NewLogcatService(ctx, a.binaryService, a.currentConfig)
-	a.fastbootService = NewFastbootService(a.binaryService, a.currentConfig, a.resolveActiveSerial)
-	a.flashPlanService = NewFlashPlanService(a.fastbootService)
+	a.cfg = config
+	a.binSvc = binary.NewService(a.dataDir)
+	a.devSvc = device.NewService(a.dataDir)
+	a.wireSvc = device.NewWirelessService(a.dataDir)
+	a.monSvc = device.NewMonitorService(a.dataDir)
+	a.diaSvc = dialog.New(ctx)
+	a.pkgSvc = packagemgr.NewService(a.resolveActiveSerial, a.diaSvc.SelectSaveFile)
+	a.fileSvc = file.NewService(ctx, a.resolveActiveSerial)
+	a.termSvc = shell.NewTerminalService(ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial)
+	a.logSvc = shell.NewLogcatService(ctx, a.binSvc, a.currentConfig)
+	a.fbSvc = flasher.NewFastbootService(a.currentConfig, a.resolveActiveSerial)
+	a.fpSvc = flasher.NewPlanService(a.fbSvc)
 
-	al, err := NewAuditLog(a.dataDir)
+	al, err := audit.New(a.dataDir)
 	if err != nil {
 		log.Printf("failed to init audit log: %v", err)
 	}
 	a.auditLog = al
+}
+
+func (a *App) shutdown(ctx context.Context) {
+	if a.logSvc != nil {
+		a.logSvc.Shutdown()
+	}
+	if a.termSvc != nil {
+		a.termSvc.Shutdown()
+	}
+}
+
+func (a *App) resolveActiveSerial(ctx context.Context) (string, error) {
+	a.mu.Lock()
+	serial := a.activeSerial
+	a.mu.Unlock()
+
+	if serial != "" {
+		return serial, nil
+	}
+
+	devices, err := a.devSvc.ListDevices(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	for _, d := range devices {
+		if d.Mode == device.ModeADB && d.State == device.StateReady {
+			a.mu.Lock()
+			a.activeSerial = d.Serial
+			a.mu.Unlock()
+			return d.Serial, nil
+		}
+	}
+
+	return "", core.NewOperationError("resolve_active_serial", "No active device is available", "no ready ADB device found", true)
+}
+
+func (a *App) currentConfig() *core.AppConfig {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.cfg
 }
 
 func appDataDir() (string, error) {
@@ -108,37 +159,32 @@ func (a *App) Greet(name string) string {
 	return "Hello " + name + ", It's show time!"
 }
 
-func (a *App) shutdown(ctx context.Context) {
-	a.logcatService.Shutdown()
-	a.terminalService.Shutdown()
+func (a *App) StartTerminal(serial string) (*shell.Session, error) {
+	return a.termSvc.StartSession(a.ctx, serial)
 }
 
-func (a *App) StartTerminal(serial string) (*TerminalSession, error) {
-	return a.terminalService.StartSession(a.ctx, serial)
-}
-
-func (a *App) StartTerminalSession(mode string, serial string, initialArgs string) (*TerminalSession, error) {
-	return a.terminalService.StartSessionWithMode(a.ctx, mode, serial, initialArgs)
+func (a *App) StartTerminalSession(mode string, serial string, initialArgs string) (*shell.Session, error) {
+	return a.termSvc.StartSessionWithMode(a.ctx, mode, serial, initialArgs)
 }
 
 func (a *App) SendTerminalInput(sessionID string, input string) error {
-	return a.terminalService.SendInput(sessionID, input)
+	return a.termSvc.SendInput(sessionID, input)
 }
 
 func (a *App) CloseTerminal(sessionID string) error {
-	return a.terminalService.CloseSession(sessionID)
+	return a.termSvc.CloseSession(sessionID)
 }
 
 func (a *App) StartLogcat(serial string, levels string, tagFilter string) error {
-	return a.logcatService.StartStream(a.ctx, serial, levels, tagFilter)
+	return a.logSvc.StartStream(a.ctx, serial, levels, tagFilter)
 }
 
 func (a *App) StopLogcat(serial string) error {
-	return a.logcatService.StopStream(serial)
+	return a.logSvc.StopStream(serial)
 }
 
 func (a *App) SaveLogcatToFile(content string, defaultFilename string) error {
-	path, err := a.dialogService.SelectSaveFile(defaultFilename)
+	path, err := a.diaSvc.SelectSaveFile(defaultFilename)
 	if err != nil {
 		return err
 	}
@@ -148,24 +194,20 @@ func (a *App) SaveLogcatToFile(content string, defaultFilename string) error {
 	return os.WriteFile(path, []byte(content), 0o600)
 }
 
-func (a *App) GetBinaryStatus() *BinarySetupResult {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return a.binaryService.GetBinaryStatus(a.config)
+func (a *App) GetBinaryStatus() *binary.BinarySetupResult {
+	return a.binSvc.GetBinaryStatus(a.cfg)
 }
 
-func (a *App) GetSetupState() *SetupState {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return a.binaryService.GetSetupState(a.config)
+func (a *App) GetSetupState() *binary.SetupState {
+	return a.binSvc.GetSetupState(a.cfg)
 }
 
-func (a *App) RetryBinaryDetection() (*BinarySetupResult, error) {
+func (a *App) RetryBinaryDetection() (*binary.BinarySetupResult, error) {
 	a.mu.Lock()
-	defer a.mu.Unlock()
-	result := a.binaryService.RevalidateConfig(a.config)
+	result := a.binSvc.RevalidateConfig(a.cfg)
+	a.mu.Unlock()
 	if result.Changed {
-		if err := SaveConfig(a.dataDir, a.config); err != nil {
+		if err := core.SaveConfig(a.dataDir, a.cfg); err != nil {
 			return nil, err
 		}
 	}
@@ -175,67 +217,67 @@ func (a *App) RetryBinaryDetection() (*BinarySetupResult, error) {
 func (a *App) SetCustomBinary(name string, path string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if err := a.binaryService.SetCustomBinary(a.config, name, path); err != nil {
+	if err := a.binSvc.SetCustomBinary(a.cfg, name, path); err != nil {
 		return err
 	}
-	return SaveConfig(a.dataDir, a.config)
+	return core.SaveConfig(a.dataDir, a.cfg)
 }
 
 func (a *App) ClearCustomBinary(name string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if err := a.binaryService.ClearCustomBinary(a.config, name); err != nil {
+	if err := a.binSvc.ClearCustomBinary(a.cfg, name); err != nil {
 		return err
 	}
-	return SaveConfig(a.dataDir, a.config)
+	return core.SaveConfig(a.dataDir, a.cfg)
 }
 
-func (a *App) CompleteSetup() (*SetupState, error) {
+func (a *App) CompleteSetup() (*binary.SetupState, error) {
 	a.mu.Lock()
-	defer a.mu.Unlock()
-	state, err := a.binaryService.CompleteSetup(a.config)
+	state, err := a.binSvc.CompleteSetup(a.cfg)
+	a.mu.Unlock()
 	if err != nil {
 		return nil, err
 	}
-	if err := SaveConfig(a.dataDir, a.config); err != nil {
+	if err := core.SaveConfig(a.dataDir, a.cfg); err != nil {
 		return nil, err
 	}
 	return state, nil
 }
 
 func (a *App) GetManagedBinaryDir() string {
-	return a.binaryService.GetManagedBinaryDir()
+	return a.binSvc.GetManagedBinaryDir()
 }
 
 func (a *App) ListManagedBinaries() ([]string, error) {
-	return a.binaryService.ListManagedBinaries()
+	return a.binSvc.ListManagedBinaries()
 }
 
 func (a *App) GetCapabilities() map[string]bool {
 	a.mu.Lock()
-	defer a.mu.Unlock()
-	status := a.binaryService.GetBinaryStatus(a.config)
+	status := a.binSvc.GetBinaryStatus(a.cfg)
+	a.mu.Unlock()
 	return map[string]bool{
-		"adbAvailable":             status.Adb.Status == BinaryReady,
-		"fastbootAvailable":        status.Fastboot.Status == BinaryReady,
-		"scrcpyAvailable":          status.Scrcpy.Status == BinaryReady,
-		"setupCompleted":           a.config.SetupCompleted && status.Ready,
-		"wirelessPairingSupported": status.Adb.Status == BinaryReady,
-		"audioCaptureSupported":    status.Scrcpy.Status == BinaryReady,
-		"clipboardSyncSupported":   status.Scrcpy.Status == BinaryReady,
+		"adbAvailable":             status.Adb.Status == core.BinaryReady,
+		"fastbootAvailable":        status.Fastboot.Status == core.BinaryReady,
+		"scrcpyAvailable":          status.Scrcpy.Status == core.BinaryReady,
+		"setupCompleted":           a.cfg.SetupCompleted && status.Ready,
+		"wirelessPairingSupported": status.Adb.Status == core.BinaryReady,
+		"audioCaptureSupported":    status.Scrcpy.Status == core.BinaryReady,
+		"clipboardSyncSupported":   status.Scrcpy.Status == core.BinaryReady,
 	}
 }
 
 func (a *App) SelectBinaryFile(name string) (string, error) {
-	return a.dialogService.SelectBinaryFile(name)
+	return a.diaSvc.SelectBinaryFile(name)
 }
 
-func (a *App) SelectPlatformToolsDirectory() (*PlatformToolsSelection, error) {
-	return a.dialogService.SelectPlatformToolsDirectory()
+func (a *App) SelectPlatformToolsDirectory() (*dialog.PlatformToolsSelection, error) {
+	return a.diaSvc.SelectPlatformToolsDirectory()
 }
 
-func (a *App) GetDevices() ([]DeviceSummary, error) {
-	return a.deviceService.ListDevices(a.ctx)
+func (a *App) GetDevices() ([]device.Summary, error) {
+	return a.devSvc.ListDevices(a.ctx)
 }
 
 func (a *App) GetActiveSerial() string {
@@ -248,7 +290,7 @@ func (a *App) SetActiveSerial(serial string) error {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
-	devices, err := a.deviceService.ListDevices(a.ctx)
+	devices, err := a.devSvc.ListDevices(a.ctx)
 	if err != nil {
 		return err
 	}
@@ -260,27 +302,27 @@ func (a *App) SetActiveSerial(serial string) error {
 		}
 	}
 
-	return NewOperationError("set_active_serial", "device not found", fmt.Sprintf("serial '%s' is not connected", serial), true)
+	return core.NewOperationError("set_active_serial", "device not found", fmt.Sprintf("serial '%s' is not connected", serial), true)
 }
 
-func (a *App) GetDeviceInfo(serial string) (*DeviceInfo, error) {
+func (a *App) GetDeviceInfo(serial string) (*device.Info, error) {
 	resolved := serial
 	if resolved == "" {
 		a.mu.Lock()
 		resolved = a.activeSerial
 		a.mu.Unlock()
 	}
-	return a.deviceService.GetDeviceInfo(a.ctx, resolved)
+	return a.devSvc.GetDeviceInfo(a.ctx, resolved)
 }
 
-func (a *App) GetDeviceMode(serial string) (DeviceMode, error) {
+func (a *App) GetDeviceMode(serial string) (device.Mode, error) {
 	resolved := serial
 	if resolved == "" {
 		a.mu.Lock()
 		resolved = a.activeSerial
 		a.mu.Unlock()
 	}
-	return a.deviceService.DetectDeviceMode(a.ctx, resolved)
+	return a.devSvc.DetectDeviceMode(a.ctx, resolved)
 }
 
 func (a *App) RebootDevice(serial string, mode string) (string, error) {
@@ -290,11 +332,11 @@ func (a *App) RebootDevice(serial string, mode string) (string, error) {
 		resolved = a.activeSerial
 		a.mu.Unlock()
 	}
-	return a.deviceService.RebootDevice(a.ctx, resolved, mode)
+	return a.devSvc.RebootDevice(a.ctx, resolved, mode)
 }
 
 func (a *App) ConnectWireless(address string) (string, error) {
-	return a.wirelessService.Connect(a.ctx, address)
+	return a.wireSvc.Connect(a.ctx, address)
 }
 
 func (a *App) EnableWirelessTCPIP(port string, serial string) (string, error) {
@@ -304,197 +346,163 @@ func (a *App) EnableWirelessTCPIP(port string, serial string) (string, error) {
 		resolved = a.activeSerial
 		a.mu.Unlock()
 	}
-	return a.wirelessService.EnableTCPIP(a.ctx, resolved, port)
+	return a.wireSvc.EnableTCPIP(a.ctx, resolved, port)
 }
 
 func (a *App) DisconnectWireless(address string) (string, error) {
-	return a.wirelessService.Disconnect(a.ctx, address)
+	return a.wireSvc.Disconnect(a.ctx, address)
 }
 
-func (a *App) GetPerformanceSnapshot(serial string) (PerformanceSnapshot, error) {
+func (a *App) GetPerformanceSnapshot(serial string) (device.PerformanceSnapshot, error) {
 	resolved := serial
 	if resolved == "" {
 		a.mu.Lock()
 		resolved = a.activeSerial
 		a.mu.Unlock()
 	}
-	return a.monitorService.GetSnapshot(a.ctx, resolved)
+	return a.monSvc.GetSnapshot(a.ctx, resolved)
 }
 
 func (a *App) GetDeviceNicknames() map[string]string {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return a.config.DeviceNicknames
+	return a.cfg.DeviceNicknames
 }
 
 func (a *App) SetDeviceNickname(serial string, nickname string) error {
 	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.config.DeviceNicknames[serial] = nickname
-	return SaveConfig(a.dataDir, a.config)
+	a.cfg.DeviceNicknames[serial] = nickname
+	a.mu.Unlock()
+	return core.SaveConfig(a.dataDir, a.cfg)
 }
 
 func (a *App) ClearDeviceNickname(serial string) error {
 	a.mu.Lock()
-	defer a.mu.Unlock()
-	delete(a.config.DeviceNicknames, serial)
-	return SaveConfig(a.dataDir, a.config)
-}
-
-func (a *App) resolveActiveSerial(ctx context.Context) (string, error) {
-	a.mu.Lock()
-	serial := a.activeSerial
+	delete(a.cfg.DeviceNicknames, serial)
 	a.mu.Unlock()
-
-	if serial != "" {
-		return serial, nil
-	}
-
-	devices, err := a.deviceService.ListDevices(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	for _, d := range devices {
-		if d.Mode == DeviceModeADB && d.State == DeviceStateReady {
-			a.mu.Lock()
-			a.activeSerial = d.Serial
-			a.mu.Unlock()
-			return d.Serial, nil
-		}
-	}
-
-	return "", NewOperationError("resolve_active_serial", "No active device is available", "no ready ADB device found", true)
+	return core.SaveConfig(a.dataDir, a.cfg)
 }
 
-func (a *App) currentConfig() *AppConfig {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return a.config
-}
-
-func (a *App) ListPackages(filterType string) ([]PackageInfo, error) {
-	return a.packageService.ListPackages(a.ctx, filterType)
+func (a *App) ListPackages(filterType string) ([]packagemgr.Info, error) {
+	return a.pkgSvc.ListPackages(a.ctx, filterType)
 }
 
 func (a *App) InstallPackage(filePath string) (string, error) {
-	return a.packageService.InstallPackage(a.ctx, filePath)
+	return a.pkgSvc.InstallPackage(a.ctx, filePath)
 }
 
 func (a *App) UninstallPackage(packageName string) (string, error) {
-	return a.packageService.UninstallPackage(a.ctx, packageName)
+	return a.pkgSvc.UninstallPackage(a.ctx, packageName)
 }
 
 func (a *App) UninstallMultiplePackages(packageNames []string) (string, error) {
-	return a.packageService.UninstallMultiplePackages(a.ctx, packageNames)
+	return a.pkgSvc.UninstallMultiplePackages(a.ctx, packageNames)
 }
 
 func (a *App) EnablePackage(packageName string) (string, error) {
-	return a.packageService.EnablePackage(a.ctx, packageName)
+	return a.pkgSvc.EnablePackage(a.ctx, packageName)
 }
 
 func (a *App) EnableMultiplePackages(packageNames []string) (string, error) {
-	return a.packageService.EnableMultiplePackages(a.ctx, packageNames)
+	return a.pkgSvc.EnableMultiplePackages(a.ctx, packageNames)
 }
 
 func (a *App) DisablePackage(packageName string) (string, error) {
-	return a.packageService.DisablePackage(a.ctx, packageName)
+	return a.pkgSvc.DisablePackage(a.ctx, packageName)
 }
 
 func (a *App) DisableMultiplePackages(packageNames []string) (string, error) {
-	return a.packageService.DisableMultiplePackages(a.ctx, packageNames)
+	return a.pkgSvc.DisableMultiplePackages(a.ctx, packageNames)
 }
 
 func (a *App) ClearPackageData(packageName string) (string, error) {
-	return a.packageService.ClearPackageData(a.ctx, packageName)
+	return a.pkgSvc.ClearPackageData(a.ctx, packageName)
 }
 
 func (a *App) PullPackageApk(packageName string) (string, error) {
-	return a.packageService.PullPackageApk(a.ctx, packageName)
+	return a.pkgSvc.PullPackageApk(a.ctx, packageName)
 }
 
 func (a *App) LaunchPackage(packageName string) (string, error) {
-	return a.packageService.LaunchPackage(a.ctx, packageName)
+	return a.pkgSvc.LaunchPackage(a.ctx, packageName)
 }
 
 func (a *App) ForceStopPackage(packageName string) (string, error) {
-	return a.packageService.ForceStopPackage(a.ctx, packageName)
+	return a.pkgSvc.ForceStopPackage(a.ctx, packageName)
 }
 
-func (a *App) GetPackageDetails(packageName string) (PackageDetails, error) {
-	return a.packageService.GetPackageDetails(a.ctx, packageName)
+func (a *App) GetPackageDetails(packageName string) (packagemgr.Details, error) {
+	return a.pkgSvc.GetPackageDetails(a.ctx, packageName)
 }
 
 func (a *App) SelectApkFile() (string, error) {
-	return a.dialogService.SelectApkFile()
+	return a.diaSvc.SelectApkFile()
 }
 
-func (a *App) ListFiles(remotePath string, showHidden bool) ([]FileEntry, error) {
-	return a.fileService.ListFiles(a.ctx, remotePath, showHidden)
+func (a *App) ListFiles(remotePath string, showHidden bool) ([]file.Entry, error) {
+	return a.fileSvc.ListFiles(a.ctx, remotePath, showHidden)
 }
 
 func (a *App) GetDirectorySize(remotePath string) (string, error) {
-	return a.fileService.GetDirectorySize(a.ctx, remotePath)
+	return a.fileSvc.GetDirectorySize(a.ctx, remotePath)
 }
 
-func (a *App) GetStorageInfo() (StorageInfo, error) {
-	return a.fileService.GetStorageInfo(a.ctx)
+func (a *App) GetStorageInfo() (file.StorageInfo, error) {
+	return a.fileSvc.GetStorageInfo(a.ctx)
 }
 
 func (a *App) PullFile(remotePath string, localPath string) (string, error) {
-	return a.fileService.PullFile(a.ctx, remotePath, localPath)
+	return a.fileSvc.PullFile(a.ctx, remotePath, localPath)
 }
 
 func (a *App) PullMultipleFiles(remotePaths []string, localDirectory string) (string, error) {
-	return a.fileService.PullMultipleFiles(a.ctx, remotePaths, localDirectory)
+	return a.fileSvc.PullMultipleFiles(a.ctx, remotePaths, localDirectory)
 }
 
 func (a *App) PushFile(localPath string, remotePath string) (string, error) {
-	return a.fileService.PushFile(a.ctx, localPath, remotePath)
+	return a.fileSvc.PushFile(a.ctx, localPath, remotePath)
 }
 
 func (a *App) PushMultipleFiles(localPaths []string, remoteDirectory string) (string, error) {
-	return a.fileService.PushMultipleFiles(a.ctx, localPaths, remoteDirectory)
+	return a.fileSvc.PushMultipleFiles(a.ctx, localPaths, remoteDirectory)
 }
 
 func (a *App) DeleteFile(remotePath string) (string, error) {
-	return a.fileService.DeleteFile(a.ctx, remotePath)
+	return a.fileSvc.DeleteFile(a.ctx, remotePath)
 }
 
 func (a *App) DeleteMultipleFiles(remotePaths []string) (string, error) {
-	return a.fileService.DeleteMultipleFiles(a.ctx, remotePaths)
+	return a.fileSvc.DeleteMultipleFiles(a.ctx, remotePaths)
 }
 
 func (a *App) CreateDirectory(remotePath string) (string, error) {
-	return a.fileService.CreateDirectory(a.ctx, remotePath)
+	return a.fileSvc.CreateDirectory(a.ctx, remotePath)
 }
 
 func (a *App) RenameFile(oldRemotePath string, newRemotePath string) (string, error) {
-	return a.fileService.RenameFile(a.ctx, oldRemotePath, newRemotePath)
+	return a.fileSvc.RenameFile(a.ctx, oldRemotePath, newRemotePath)
 }
 
 func (a *App) SelectFile() (string, error) {
-	return a.dialogService.SelectFile()
+	return a.diaSvc.SelectFile()
 }
 
 func (a *App) SelectDirectory() (string, error) {
-	return a.dialogService.SelectDirectory()
+	return a.diaSvc.SelectDirectory()
 }
 
 func (a *App) SelectMultipleFiles() ([]string, error) {
-	return a.dialogService.SelectMultipleFiles()
+	return a.diaSvc.SelectMultipleFiles()
 }
 
 func (a *App) SelectFlashImageFile() (string, error) {
-	return a.dialogService.SelectFlashImageFile()
+	return a.diaSvc.SelectFlashImageFile()
 }
 
 func (a *App) SelectSideloadFile() (string, error) {
-	return a.dialogService.SelectSideloadFile()
+	return a.diaSvc.SelectSideloadFile()
 }
 
-func (a *App) GetFastbootDevices() ([]FastbootDeviceInfo, error) {
-	return a.fastbootService.ListDevices(a.ctx)
+func (a *App) GetFastbootDevices() ([]flasher.FastbootDeviceInfo, error) {
+	return a.fbSvc.ListDevices(a.ctx)
 }
 
 func (a *App) FlashPartition(serial string, partition string, filePath string) (string, error) {
@@ -505,9 +513,9 @@ func (a *App) FlashPartition(serial string, partition string, filePath string) (
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(AuditEntry{Operation: "flash_partition", Command: fmt.Sprintf("partition=%s file=%s", partition, filePath)})
+		a.auditLog.Log(audit.Entry{Operation: "flash_partition", Command: fmt.Sprintf("partition=%s file=%s", partition, filePath)})
 	}
-	return a.fastbootService.FlashPartition(a.ctx, resolved, partition, filePath)
+	return a.fbSvc.FlashPartition(a.ctx, resolved, partition, filePath)
 }
 
 func (a *App) WipeData(serial string) (string, error) {
@@ -518,9 +526,9 @@ func (a *App) WipeData(serial string) (string, error) {
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(AuditEntry{Operation: "wipe_data", Command: fmt.Sprintf("serial=%s", resolved)})
+		a.auditLog.Log(audit.Entry{Operation: "wipe_data", Command: fmt.Sprintf("serial=%s", resolved)})
 	}
-	return a.fastbootService.WipeData(a.ctx, resolved)
+	return a.fbSvc.WipeData(a.ctx, resolved)
 }
 
 func (a *App) GetActiveSlot(serial string) (string, error) {
@@ -530,7 +538,7 @@ func (a *App) GetActiveSlot(serial string) (string, error) {
 		resolved = a.activeSerial
 		a.mu.Unlock()
 	}
-	return a.fastbootService.GetActiveSlot(a.ctx, resolved)
+	return a.fbSvc.GetActiveSlot(a.ctx, resolved)
 }
 
 func (a *App) SetActiveSlot(serial string, slot string) (string, error) {
@@ -541,9 +549,9 @@ func (a *App) SetActiveSlot(serial string, slot string) (string, error) {
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(AuditEntry{Operation: "set_active_slot", Command: fmt.Sprintf("serial=%s slot=%s", resolved, slot)})
+		a.auditLog.Log(audit.Entry{Operation: "set_active_slot", Command: fmt.Sprintf("serial=%s slot=%s", resolved, slot)})
 	}
-	return a.fastbootService.SetActiveSlot(a.ctx, resolved, slot)
+	return a.fbSvc.SetActiveSlot(a.ctx, resolved, slot)
 }
 
 func (a *App) RunCustomFastbootCommand(serial string, args string) (string, error) {
@@ -554,9 +562,9 @@ func (a *App) RunCustomFastbootCommand(serial string, args string) (string, erro
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(AuditEntry{Operation: "run_fastboot_command", Command: args})
+		a.auditLog.Log(audit.Entry{Operation: "run_fastboot_command", Command: args})
 	}
-	return a.fastbootService.RunCustomCommand(a.ctx, resolved, args)
+	return a.fbSvc.RunCustomCommand(a.ctx, resolved, args)
 }
 
 func (a *App) SideloadPackage(serial string, zipPath string) (string, error) {
@@ -567,9 +575,9 @@ func (a *App) SideloadPackage(serial string, zipPath string) (string, error) {
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(AuditEntry{Operation: "sideload_package", Command: fmt.Sprintf("serial=%s zip=%s", resolved, zipPath)})
+		a.auditLog.Log(audit.Entry{Operation: "sideload_package", Command: fmt.Sprintf("serial=%s zip=%s", resolved, zipPath)})
 	}
-	return a.fastbootService.SideloadPackage(a.ctx, resolved, zipPath)
+	return a.fbSvc.SideloadPackage(a.ctx, resolved, zipPath)
 }
 
 func (a *App) IsUserspaceFastboot(serial string) (bool, error) {
@@ -579,19 +587,19 @@ func (a *App) IsUserspaceFastboot(serial string) (bool, error) {
 		resolved = a.activeSerial
 		a.mu.Unlock()
 	}
-	return a.fastbootService.IsUserspace(a.ctx, resolved)
+	return a.fbSvc.IsUserspace(a.ctx, resolved)
 }
 
-func (a *App) ScanRomFolder(folderPath string) (*FlashPlan, error) {
-	return a.flashPlanService.ScanRomFolder(folderPath)
+func (a *App) ScanRomFolder(folderPath string) (*flasher.Plan, error) {
+	return a.fpSvc.ScanRomFolder(folderPath)
 }
 
-func (a *App) FlashRomFolder(serial string, folderPath string, plan FlashPlan) (string, error) {
+func (a *App) FlashRomFolder(serial string, folderPath string, plan flasher.Plan) (string, error) {
 	resolved := serial
 	if resolved == "" {
 		a.mu.Lock()
 		resolved = a.activeSerial
 		a.mu.Unlock()
 	}
-	return a.flashPlanService.FlashRomFolder(a.ctx, resolved, folderPath, plan)
+	return a.fpSvc.FlashRomFolder(a.ctx, resolved, folderPath, plan)
 }

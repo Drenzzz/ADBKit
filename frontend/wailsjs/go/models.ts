@@ -1,4 +1,79 @@
-export namespace main {
+export namespace binary {
+	
+	export class BinarySetupResult {
+	    adb?: core.BinaryInfo;
+	    fastboot?: core.BinaryInfo;
+	    scrcpy?: core.BinaryInfo;
+	    ready: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new BinarySetupResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.adb = this.convertValues(source["adb"], core.BinaryInfo);
+	        this.fastboot = this.convertValues(source["fastboot"], core.BinaryInfo);
+	        this.scrcpy = this.convertValues(source["scrcpy"], core.BinaryInfo);
+	        this.ready = source["ready"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class SetupState {
+	    status?: BinarySetupResult;
+	    setupCompleted: boolean;
+	    canFinish: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SetupState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.status = this.convertValues(source["status"], BinarySetupResult);
+	        this.setupCompleted = source["setupCompleted"];
+	        this.canFinish = source["canFinish"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace core {
 	
 	export class BinaryInfo {
 	    name: string;
@@ -22,43 +97,12 @@ export namespace main {
 	        this.reason = source["reason"];
 	    }
 	}
-	export class BinarySetupResult {
-	    adb?: BinaryInfo;
-	    fastboot?: BinaryInfo;
-	    scrcpy?: BinaryInfo;
-	    ready: boolean;
+
+}
+
+export namespace device {
 	
-	    static createFrom(source: any = {}) {
-	        return new BinarySetupResult(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.adb = this.convertValues(source["adb"], BinaryInfo);
-	        this.fastboot = this.convertValues(source["fastboot"], BinaryInfo);
-	        this.scrcpy = this.convertValues(source["scrcpy"], BinaryInfo);
-	        this.ready = source["ready"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	export class DeviceInfo {
+	export class Info {
 	    serial: string;
 	    state: string;
 	    mode: string;
@@ -82,7 +126,7 @@ export namespace main {
 	    ramTotal?: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new DeviceInfo(source);
+	        return new Info(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -108,155 +152,6 @@ export namespace main {
 	        this.batteryLevel = source["batteryLevel"];
 	        this.storageInfo = source["storageInfo"];
 	        this.ramTotal = source["ramTotal"];
-	    }
-	}
-	export class DeviceSummary {
-	    serial: string;
-	    state: string;
-	    mode: string;
-	    product?: string;
-	    model?: string;
-	    device?: string;
-	    transportId?: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new DeviceSummary(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.serial = source["serial"];
-	        this.state = source["state"];
-	        this.mode = source["mode"];
-	        this.product = source["product"];
-	        this.model = source["model"];
-	        this.device = source["device"];
-	        this.transportId = source["transportId"];
-	    }
-	}
-	export class FastbootDeviceInfo {
-	    serial: string;
-	    state: string;
-	    mode: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new FastbootDeviceInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.serial = source["serial"];
-	        this.state = source["state"];
-	        this.mode = source["mode"];
-	    }
-	}
-	export class FileEntry {
-	    name: string;
-	    path: string;
-	    type: string;
-	    size: number;
-	    sizeHuman: string;
-	    permissions: string;
-	    modifiedAt: string;
-	    isHidden: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new FileEntry(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.path = source["path"];
-	        this.type = source["type"];
-	        this.size = source["size"];
-	        this.sizeHuman = source["sizeHuman"];
-	        this.permissions = source["permissions"];
-	        this.modifiedAt = source["modifiedAt"];
-	        this.isHidden = source["isHidden"];
-	    }
-	}
-	export class FlashStep {
-	    partition: string;
-	    image_file: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new FlashStep(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.partition = source["partition"];
-	        this.image_file = source["image_file"];
-	    }
-	}
-	export class FlashPlan {
-	    steps: FlashStep[];
-	
-	    static createFrom(source: any = {}) {
-	        return new FlashPlan(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.steps = this.convertValues(source["steps"], FlashStep);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-	
-	export class PackageDetails {
-	    packageName: string;
-	    versionName: string;
-	    versionCode: string;
-	    apkSizeBytes: number;
-	    dataSizeBytes: number;
-	    totalSizeBytes: number;
-	
-	    static createFrom(source: any = {}) {
-	        return new PackageDetails(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.packageName = source["packageName"];
-	        this.versionName = source["versionName"];
-	        this.versionCode = source["versionCode"];
-	        this.apkSizeBytes = source["apkSizeBytes"];
-	        this.dataSizeBytes = source["dataSizeBytes"];
-	        this.totalSizeBytes = source["totalSizeBytes"];
-	    }
-	}
-	export class PackageInfo {
-	    packageName: string;
-	    isEnabled: boolean;
-	    isSystemApp: boolean;
-	
-	    static createFrom(source: any = {}) {
-	        return new PackageInfo(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.packageName = source["packageName"];
-	        this.isEnabled = source["isEnabled"];
-	        this.isSystemApp = source["isSystemApp"];
 	    }
 	}
 	export class PerformanceSnapshot {
@@ -297,6 +192,35 @@ export namespace main {
 	        this.uptimeSeconds = source["uptimeSeconds"];
 	    }
 	}
+	export class Summary {
+	    serial: string;
+	    state: string;
+	    mode: string;
+	    product?: string;
+	    model?: string;
+	    device?: string;
+	    transportId?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Summary(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.state = source["state"];
+	        this.mode = source["mode"];
+	        this.product = source["product"];
+	        this.model = source["model"];
+	        this.device = source["device"];
+	        this.transportId = source["transportId"];
+	    }
+	}
+
+}
+
+export namespace dialog {
+	
 	export class PlatformToolsSelection {
 	    directory: string;
 	    adbPath: string;
@@ -313,39 +237,36 @@ export namespace main {
 	        this.fastbootPath = source["fastbootPath"];
 	    }
 	}
-	export class SetupState {
-	    status?: BinarySetupResult;
-	    setupCompleted: boolean;
-	    canFinish: boolean;
+
+}
+
+export namespace file {
+	
+	export class Entry {
+	    name: string;
+	    path: string;
+	    type: string;
+	    size: number;
+	    sizeHuman: string;
+	    permissions: string;
+	    modifiedAt: string;
+	    isHidden: boolean;
 	
 	    static createFrom(source: any = {}) {
-	        return new SetupState(source);
+	        return new Entry(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.status = this.convertValues(source["status"], BinarySetupResult);
-	        this.setupCompleted = source["setupCompleted"];
-	        this.canFinish = source["canFinish"];
+	        this.name = source["name"];
+	        this.path = source["path"];
+	        this.type = source["type"];
+	        this.size = source["size"];
+	        this.sizeHuman = source["sizeHuman"];
+	        this.permissions = source["permissions"];
+	        this.modifiedAt = source["modifiedAt"];
+	        this.isHidden = source["isHidden"];
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 	export class StorageInfo {
 	    mountPoint: string;
@@ -367,13 +288,126 @@ export namespace main {
 	        this.usedPct = source["usedPct"];
 	    }
 	}
-	export class TerminalSession {
+
+}
+
+export namespace flasher {
+	
+	export class FastbootDeviceInfo {
+	    serial: string;
+	    state: string;
+	    mode: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FastbootDeviceInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.state = source["state"];
+	        this.mode = source["mode"];
+	    }
+	}
+	export class Step {
+	    partition: string;
+	    image_file: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Step(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.partition = source["partition"];
+	        this.image_file = source["image_file"];
+	    }
+	}
+	export class Plan {
+	    steps: Step[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Plan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.steps = this.convertValues(source["steps"], Step);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace packagemgr {
+	
+	export class Details {
+	    packageName: string;
+	    versionName: string;
+	    versionCode: string;
+	    apkSizeBytes: number;
+	    dataSizeBytes: number;
+	    totalSizeBytes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Details(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.packageName = source["packageName"];
+	        this.versionName = source["versionName"];
+	        this.versionCode = source["versionCode"];
+	        this.apkSizeBytes = source["apkSizeBytes"];
+	        this.dataSizeBytes = source["dataSizeBytes"];
+	        this.totalSizeBytes = source["totalSizeBytes"];
+	    }
+	}
+	export class Info {
+	    packageName: string;
+	    isEnabled: boolean;
+	    isSystemApp: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Info(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.packageName = source["packageName"];
+	        this.isEnabled = source["isEnabled"];
+	        this.isSystemApp = source["isSystemApp"];
+	    }
+	}
+
+}
+
+export namespace shell {
+	
+	export class Session {
 	    id: string;
 	    serial: string;
 	    mode: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new TerminalSession(source);
+	        return new Session(source);
 	    }
 	
 	    constructor(source: any = {}) {
