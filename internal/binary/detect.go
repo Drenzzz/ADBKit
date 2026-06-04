@@ -1,0 +1,124 @@
+package binary
+
+import (
+	"ADBKit/internal/core"
+	"context"
+	"errors"
+	"os/exec"
+	"strings"
+	"time"
+)
+
+func (bs *Service) Detect(name string, configPath string) *BinaryInfo {
+	info := &BinaryInfo{Name: name, Status: BinaryMissing}
+	if !core.IsSupportedBinaryName(name) {
+		info.Status = BinaryInvalid
+		info.Reason = "unsupported binary name"
+		return info
+	}
+
+	if configPath != "" {
+		resolved := bs.resolveCandidate(name, configPath, "config", true)
+		if resolved.Status == BinaryReady {
+			return resolved
+		}
+		info = resolved
+	}
+
+	if path, err := exec.LookPath(core.BinaryExecutableName(name)); err == nil {
+		resolved := bs.resolveCandidate(name, path, "system-path", false)
+		if resolved.Status == BinaryReady {
+			return resolved
+		}
+	}
+
+	managedPath := joinManagedPath(bs.dataDir, name)
+	resolved := bs.resolveCandidate(name, managedPath, "app-data", false)
+	if resolved.Status == BinaryReady {
+		return resolved
+	}
+
+	for _, candidate := range bs.commonPaths(name) {
+		resolved := bs.resolveCandidate(name, candidate, "common-path", false)
+		if resolved.Status == BinaryReady {
+			return resolved
+		}
+	}
+
+	return info
+}
+
+func (bs *Service) resolveCandidate(name, path, source string, explicit bool) *BinaryInfo {
+	info := &BinaryInfo{Name: name, Path: path, Source: source, Status: BinaryMissing}
+	if err := core.ValidateBinaryExecutable(name, path); err != nil {
+		if explicit {
+			info.Status = BinaryInvalid
+			info.Reason = err.Error()
+		}
+		return info
+	}
+	version, err := bs.getVersion(name, path)
+	if err != nil {
+		info.Status = BinaryInvalid
+		info.Reason = err.Error()
+		return info
+	}
+	info.Status = BinaryReady
+	info.Version = version
+	return info
+}
+
+func (bs *Service) getVersion(name, path string) (string, error) {
+	var lastErr error
+	for _, args := range versionCommands(name) {
+		ctx := context.Background()
+		result, err := core.RunCommand(ctx, core.ExecRequest{
+			Command: path,
+			Args:    args,
+			Timeout: 5 * time.Second,
+		})
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		if result.ExitCode != 0 {
+			lastErr = errors.New(strings.TrimSpace(result.Stderr))
+			continue
+		}
+		version := parseVersion(result.Stdout)
+		if version == "" {
+			version = parseVersion(result.Stderr)
+		}
+		if version != "" {
+			return version, nil
+		}
+		lastErr = errors.New("version output is empty")
+	}
+	if lastErr != nil {
+		return "", lastErr
+	}
+	return "", errors.New("version command is unavailable")
+}
+
+func versionCommands(name string) [][]string {
+	switch name {
+	case BinaryNameAdb:
+		return [][]string{{"version"}}
+	case BinaryNameFastboot:
+		return [][]string{{"--version"}, {"version"}}
+	case BinaryNameScrcpy:
+		return [][]string{{"--version"}}
+	default:
+		return [][]string{{"--version"}}
+	}
+}
+
+func parseVersion(output string) string {
+	for _, line := range strings.Split(output, "\n") {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			return line
+		}
+	}
+	return ""
+}
