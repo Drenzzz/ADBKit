@@ -326,3 +326,82 @@ export interface FlasherActions {
   setLastUpdatedAt: (time: number | null) => void
   reset: () => void
 }
+
+export type ScrcpySessionStatus =
+  | 'starting'
+  | 'running'
+  | 'stopping'
+  | 'stopped'
+  | 'error'
+
+export interface ScrcpyOptions {
+  max_size: number
+  bit_rate: number
+  max_fps: number
+  audio_bit_rate: number
+  audio_codec: string
+  video_codec: string
+  show_touches: boolean
+  no_audio: boolean
+  no_control: boolean
+  stay_awake: boolean
+  turn_screen_off: boolean
+  power_off_on_close: boolean
+  fullscreen: boolean
+  always_on_top: boolean
+  disable_screensaver: boolean
+  rotation: number
+  display_id: number
+  time_limit: number
+}
+
+export interface ScrcpySession {
+  id: string
+  serial: string
+  status: ScrcpySessionStatus
+  pid: number
+  startedAt: number
+}
+
+export interface ScrcpySessionEvent {
+  sessionId: string
+  serial: string
+  status: ScrcpySessionStatus
+  pid?: number
+  message?: string
+}
+
+export interface ScrcpyCodecSupport {
+  codec: string
+  encoderName: string
+  hardware: boolean
+  vendor: boolean
+  softwareOnly: boolean
+}
+
+export interface ScrcpyEncoderSupport {
+  serial: string
+  videoCodecs: ScrcpyCodecSupport[]
+  audioCodecs: ScrcpyCodecSupport[]
+}
+
+export interface ScrcpyPreset {
+  id: string
+  name: string
+  options: ScrcpyOptions
+  createdAt: number
+}
+
+export interface ScrcpyState {
+  session: ScrcpySession | null
+  options: ScrcpyOptions
+  encoderSupport: ScrcpyEncoderSupport | null
+  presets: ScrcpyPreset[]
+  isStarting: boolean
+  isStopping: boolean
+  isRecording: boolean
+  recordingStartedAt: number | null
+  isFetchingEncoder: boolean
+  error: string | null
+  lastEventAt: number | null
+}

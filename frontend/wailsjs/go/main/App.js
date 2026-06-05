@@ -74,6 +74,10 @@ export function ForceStopPackage(arg1) {
   return window['go']['main']['App']['ForceStopPackage'](arg1);
 }
 
+export function GetActiveScrcpySession() {
+  return window['go']['main']['App']['GetActiveScrcpySession']();
+}
+
 export function GetActiveSerial() {
   return window['go']['main']['App']['GetActiveSerial']();
 }
@@ -124,6 +128,14 @@ export function GetPackageDetails(arg1) {
 
 export function GetPerformanceSnapshot(arg1) {
   return window['go']['main']['App']['GetPerformanceSnapshot'](arg1);
+}
+
+export function GetScrcpyClipboard(arg1) {
+  return window['go']['main']['App']['GetScrcpyClipboard'](arg1);
+}
+
+export function GetScrcpyEncoderSupport(arg1) {
+  return window['go']['main']['App']['GetScrcpyEncoderSupport'](arg1);
 }
 
 export function GetSetupState() {
@@ -182,6 +194,10 @@ export function PushMultipleFiles(arg1, arg2) {
   return window['go']['main']['App']['PushMultipleFiles'](arg1, arg2);
 }
 
+export function PushScrcpyClipboard(arg1, arg2) {
+  return window['go']['main']['App']['PushScrcpyClipboard'](arg1, arg2);
+}
+
 export function RebootDevice(arg1, arg2) {
   return window['go']['main']['App']['RebootDevice'](arg1, arg2);
 }
@@ -234,6 +250,10 @@ export function SelectPlatformToolsDirectory() {
   return window['go']['main']['App']['SelectPlatformToolsDirectory']();
 }
 
+export function SelectSavePath(arg1) {
+  return window['go']['main']['App']['SelectSavePath'](arg1);
+}
+
 export function SelectSideloadFile() {
   return window['go']['main']['App']['SelectSideloadFile']();
 }
@@ -266,6 +286,14 @@ export function StartLogcat(arg1, arg2, arg3) {
   return window['go']['main']['App']['StartLogcat'](arg1, arg2, arg3);
 }
 
+export function StartScrcpyRecording(arg1, arg2, arg3) {
+  return window['go']['main']['App']['StartScrcpyRecording'](arg1, arg2, arg3);
+}
+
+export function StartScrcpySession(arg1, arg2) {
+  return window['go']['main']['App']['StartScrcpySession'](arg1, arg2);
+}
+
 export function StartTerminal(arg1) {
   return window['go']['main']['App']['StartTerminal'](arg1);
 }
@@ -276,6 +304,18 @@ export function StartTerminalSession(arg1, arg2, arg3) {
 
 export function StopLogcat(arg1) {
   return window['go']['main']['App']['StopLogcat'](arg1);
+}
+
+export function StopScrcpyRecording() {
+  return window['go']['main']['App']['StopScrcpyRecording']();
+}
+
+export function StopScrcpySession(arg1) {
+  return window['go']['main']['App']['StopScrcpySession'](arg1);
+}
+
+export function TakeScrcpyScreenshot(arg1, arg2) {
+  return window['go']['main']['App']['TakeScrcpyScreenshot'](arg1, arg2);
 }
 
 export function UninstallMultiplePackages(arg1) {

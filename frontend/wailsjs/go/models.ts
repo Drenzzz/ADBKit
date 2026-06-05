@@ -399,6 +399,131 @@ export namespace packagemgr {
 
 }
 
+export namespace scrcpy {
+	
+	export class CodecSupport {
+	    codec: string;
+	    encoderName: string;
+	    hardware: boolean;
+	    vendor: boolean;
+	    softwareOnly: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new CodecSupport(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.codec = source["codec"];
+	        this.encoderName = source["encoderName"];
+	        this.hardware = source["hardware"];
+	        this.vendor = source["vendor"];
+	        this.softwareOnly = source["softwareOnly"];
+	    }
+	}
+	export class EncoderSupport {
+	    serial: string;
+	    videoCodecs: CodecSupport[];
+	    audioCodecs: CodecSupport[];
+	
+	    static createFrom(source: any = {}) {
+	        return new EncoderSupport(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.serial = source["serial"];
+	        this.videoCodecs = this.convertValues(source["videoCodecs"], CodecSupport);
+	        this.audioCodecs = this.convertValues(source["audioCodecs"], CodecSupport);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Options {
+	    max_size: number;
+	    bit_rate: number;
+	    max_fps: number;
+	    audio_bit_rate: number;
+	    audio_codec: string;
+	    video_codec: string;
+	    show_touches: boolean;
+	    no_audio: boolean;
+	    no_control: boolean;
+	    stay_awake: boolean;
+	    turn_screen_off: boolean;
+	    power_off_on_close: boolean;
+	    fullscreen: boolean;
+	    always_on_top: boolean;
+	    disable_screensaver: boolean;
+	    rotation: number;
+	    display_id: number;
+	    time_limit: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Options(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.max_size = source["max_size"];
+	        this.bit_rate = source["bit_rate"];
+	        this.max_fps = source["max_fps"];
+	        this.audio_bit_rate = source["audio_bit_rate"];
+	        this.audio_codec = source["audio_codec"];
+	        this.video_codec = source["video_codec"];
+	        this.show_touches = source["show_touches"];
+	        this.no_audio = source["no_audio"];
+	        this.no_control = source["no_control"];
+	        this.stay_awake = source["stay_awake"];
+	        this.turn_screen_off = source["turn_screen_off"];
+	        this.power_off_on_close = source["power_off_on_close"];
+	        this.fullscreen = source["fullscreen"];
+	        this.always_on_top = source["always_on_top"];
+	        this.disable_screensaver = source["disable_screensaver"];
+	        this.rotation = source["rotation"];
+	        this.display_id = source["display_id"];
+	        this.time_limit = source["time_limit"];
+	    }
+	}
+	export class Session {
+	    id: string;
+	    serial: string;
+	    status: string;
+	    pid: number;
+	    startedAt: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Session(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.serial = source["serial"];
+	        this.status = source["status"];
+	        this.pid = source["pid"];
+	        this.startedAt = source["startedAt"];
+	    }
+	}
+
+}
+
 export namespace shell {
 	
 	export class Session {

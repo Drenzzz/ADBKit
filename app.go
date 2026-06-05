@@ -9,6 +9,7 @@ import (
 	"ADBKit/internal/file"
 	"ADBKit/internal/flasher"
 	packagemgr "ADBKit/internal/package_mgr"
+	"ADBKit/internal/scrcpy"
 	"ADBKit/internal/shell"
 	"context"
 	"fmt"
@@ -36,6 +37,7 @@ type App struct {
 	logSvc     *shell.LogcatService
 	fbSvc      *flasher.FastbootService
 	fpSvc      *flasher.PlanService
+	scrSvc     *scrcpy.Service
 	auditLog   *audit.Log
 	cfg        *core.AppConfig
 }
@@ -74,6 +76,7 @@ func (a *App) startup(ctx context.Context) {
 	a.logSvc = shell.NewLogcatService(ctx, a.binSvc, a.currentConfig)
 	a.fbSvc = flasher.NewFastbootService(a.currentConfig, a.resolveActiveSerial)
 	a.fpSvc = flasher.NewPlanService(a.fbSvc)
+	a.scrSvc = scrcpy.New(a.ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial, a.diaSvc, a.auditLog)
 
 	al, err := audit.New(a.dataDir)
 	if err != nil {
@@ -88,6 +91,9 @@ func (a *App) shutdown(ctx context.Context) {
 	}
 	if a.termSvc != nil {
 		a.termSvc.Shutdown()
+	}
+	if a.scrSvc != nil {
+		a.scrSvc.Shutdown()
 	}
 }
 
@@ -602,4 +608,44 @@ func (a *App) FlashRomFolder(serial string, folderPath string, plan flasher.Plan
 		a.mu.Unlock()
 	}
 	return a.fpSvc.FlashRomFolder(a.ctx, resolved, folderPath, plan)
+}
+
+func (a *App) StartScrcpySession(serial string, opts scrcpy.Options) (*scrcpy.Session, error) {
+	return a.scrSvc.StartSession(a.ctx, serial, opts)
+}
+
+func (a *App) StopScrcpySession(sessionID string) error {
+	return a.scrSvc.StopSession(sessionID)
+}
+
+func (a *App) GetActiveScrcpySession() *scrcpy.Session {
+	return a.scrSvc.GetActiveSession()
+}
+
+func (a *App) StartScrcpyRecording(serial string, outputPath string, opts scrcpy.Options) error {
+	return a.scrSvc.StartRecording(serial, outputPath, opts)
+}
+
+func (a *App) StopScrcpyRecording() (string, error) {
+	return a.scrSvc.StopRecording()
+}
+
+func (a *App) TakeScrcpyScreenshot(sessionID string, outputPath string) (string, error) {
+	return a.scrSvc.TakeScreenshot(sessionID, outputPath)
+}
+
+func (a *App) GetScrcpyEncoderSupport(serial string) (*scrcpy.EncoderSupport, error) {
+	return a.scrSvc.GetEncoderSupport(a.ctx, serial)
+}
+
+func (a *App) PushScrcpyClipboard(serial string, text string) error {
+	return a.scrSvc.PushClipboard(serial, text)
+}
+
+func (a *App) GetScrcpyClipboard(serial string) (string, error) {
+	return a.scrSvc.GetClipboard(serial)
+}
+
+func (a *App) SelectSavePath(defaultFilename string) (string, error) {
+	return a.diaSvc.SelectSaveFile(defaultFilename)
 }
