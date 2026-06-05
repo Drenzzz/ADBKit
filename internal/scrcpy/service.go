@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -33,6 +34,20 @@ const (
 	StatusStopped  SessionStatus = "stopped"
 	StatusError    SessionStatus = "error"
 )
+
+type CodecSupport struct {
+	Codec        string `json:"codec"`
+	EncoderName  string `json:"encoderName"`
+	Hardware     bool   `json:"hardware"`
+	Vendor       bool   `json:"vendor"`
+	SoftwareOnly bool   `json:"softwareOnly"`
+}
+
+type EncoderSupport struct {
+	Serial      string         `json:"serial"`
+	VideoCodecs []CodecSupport `json:"videoCodecs"`
+	AudioCodecs []CodecSupport `json:"audioCodecs"`
+}
 
 type Options struct {
 	MaxSize            int    `json:"max_size"`
@@ -595,4 +610,254 @@ func (s *Service) StopRecording() (string, error) {
 
 	s.logAudit("stop_scrcpy_recording", "", true, fmt.Sprintf("path=%s size=%d", outputPath, info.Size()))
 	return outputPath, nil
+}
+
+func (s *Service) TakeScreenshot(sessionID, outputPath string) (string, error) {
+	process, err := s.getSession(sessionID)
+	if err != nil {
+		return "", err
+	}
+
+	trimmedPath := strings.TrimSpace(outputPath)
+	if trimmedPath == "" {
+		return "", core.NewOperationError(
+			"take_scrcpy_screenshot",
+			"Output file path is required",
+			"output path must not be empty",
+			false,
+		)
+	}
+
+	adbPath, err := s.resolveADBPath()
+	if err != nil {
+		return "", err
+	}
+
+	cmd := exec.CommandContext(s.ctx, adbPath, "-s", process.session.Serial, "exec-out", "screencap", "-p")
+	outFile, createErr := os.Create(trimmedPath)
+	if createErr != nil {
+		return "", core.NewOperationError(
+			"take_scrcpy_screenshot",
+			"Failed to create screenshot file",
+			createErr.Error(),
+			true,
+		)
+	}
+	defer outFile.Close()
+
+	cmd.Stdout = outFile
+	if runErr := cmd.Run(); runErr != nil {
+		return "", core.NewOperationError(
+			"take_scrcpy_screenshot",
+			"Failed to capture screenshot",
+			runErr.Error(),
+			true,
+		)
+	}
+
+	s.logAudit("take_scrcpy_screenshot", process.session.Serial, true, fmt.Sprintf("path=%s", trimmedPath))
+	return trimmedPath, nil
+}
+
+func (s *Service) GetEncoderSupport(ctx context.Context, serial string) (*EncoderSupport, error) {
+	resolvedSerial, err := s.resolveSerial(ctx, serial)
+	if err != nil {
+		return nil, err
+	}
+
+	scrcpyPath, err := s.resolveBinaryPath()
+	if err != nil {
+		return nil, err
+	}
+
+	cmd := exec.CommandContext(ctx, scrcpyPath, "--serial", resolvedSerial, "--list-encoders")
+	out, runErr := cmd.CombinedOutput()
+	if runErr != nil {
+		return nil, core.NewOperationError(
+			"get_scrcpy_encoder_support",
+			"Failed to inspect scrcpy encoder support",
+			strings.TrimSpace(string(out)),
+			true,
+		)
+	}
+
+	videoCodecs, audioCodecs := parseEncoderList(string(out))
+	return &EncoderSupport{
+		Serial:      resolvedSerial,
+		VideoCodecs: videoCodecs,
+		AudioCodecs: audioCodecs,
+	}, nil
+}
+
+func parseEncoderList(output string) ([]CodecSupport, []CodecSupport) {
+	videoMap := map[string]CodecSupport{}
+	audioMap := map[string]CodecSupport{}
+	section := ""
+
+	for _, raw := range strings.Split(output, "\n") {
+		line := strings.TrimSpace(raw)
+		switch line {
+		case "[server] INFO: List of video encoders:":
+			section = "video"
+			continue
+		case "[server] INFO: List of audio encoders:":
+			section = "audio"
+			continue
+		}
+		if !strings.HasPrefix(line, "--") {
+			continue
+		}
+		codec, encoderName, support, ok := parseEncoderLine(line)
+		if !ok {
+			continue
+		}
+		switch section {
+		case "video":
+			current, exists := videoMap[codec]
+			if !exists || shouldReplaceCodec(current, support) {
+				videoMap[codec] = support
+			}
+		case "audio":
+			current, exists := audioMap[codec]
+			if !exists || shouldReplaceCodec(current, support) {
+				audioMap[codec] = support
+			}
+		}
+		_ = encoderName
+	}
+
+	return sortCodecs(videoMap), sortCodecs(audioMap)
+}
+
+func parseEncoderLine(line string) (string, string, CodecSupport, bool) {
+	parts := strings.Fields(line)
+	var codec, encoderName string
+	for _, part := range parts {
+		switch {
+		case strings.HasPrefix(part, "--video-codec="):
+			codec = strings.TrimPrefix(part, "--video-codec=")
+		case strings.HasPrefix(part, "--audio-codec="):
+			codec = strings.TrimPrefix(part, "--audio-codec=")
+		case strings.HasPrefix(part, "--video-encoder="):
+			encoderName = strings.TrimPrefix(part, "--video-encoder=")
+		case strings.HasPrefix(part, "--audio-encoder="):
+			encoderName = strings.TrimPrefix(part, "--audio-encoder=")
+		}
+	}
+	if codec == "" || encoderName == "" {
+		return "", "", CodecSupport{}, false
+	}
+	hardware := strings.Contains(line, "(hw)")
+	vendor := strings.Contains(line, "[vendor]")
+	softwareOnly := strings.Contains(line, "(sw)") && !hardware
+	return codec, encoderName, CodecSupport{
+		Codec:        codec,
+		EncoderName:  encoderName,
+		Hardware:     hardware,
+		Vendor:       vendor,
+		SoftwareOnly: softwareOnly,
+	}, true
+}
+
+func codecScore(s CodecSupport) int {
+	score := 0
+	if s.Hardware {
+		score += 4
+	}
+	if s.Vendor {
+		score += 2
+	}
+	if !s.SoftwareOnly {
+		score += 1
+	}
+	return score
+}
+
+func shouldReplaceCodec(current, candidate CodecSupport) bool {
+	if codecScore(candidate) != codecScore(current) {
+		return codecScore(candidate) > codecScore(current)
+	}
+	return candidate.EncoderName < current.EncoderName
+}
+
+func sortCodecs(entries map[string]CodecSupport) []CodecSupport {
+	out := make([]CodecSupport, 0, len(entries))
+	for _, entry := range entries {
+		out = append(out, entry)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if codecScore(out[i]) != codecScore(out[j]) {
+			return codecScore(out[i]) > codecScore(out[j])
+		}
+		return out[i].Codec < out[j].Codec
+	})
+	return out
+}
+
+func (s *Service) PushClipboard(serial, text string) error {
+	trimmedSerial := strings.TrimSpace(serial)
+	if trimmedSerial == "" {
+		return core.NewOperationError(
+			"push_scrcpy_clipboard",
+			"Device serial is required",
+			"serial must not be empty",
+			false,
+		)
+	}
+	if text == "" {
+		return core.NewOperationError(
+			"push_scrcpy_clipboard",
+			"Clipboard text is required",
+			"text must not be empty",
+			false,
+		)
+	}
+
+	adbPath, err := s.resolveADBPath()
+	if err != nil {
+		return err
+	}
+
+	cmd := exec.CommandContext(s.ctx, adbPath, "-s", trimmedSerial, "shell", "cmd", "clipboard", "set", text)
+	if out, runErr := cmd.CombinedOutput(); runErr != nil {
+		return core.NewOperationError(
+			"push_scrcpy_clipboard",
+			"Failed to push clipboard to device",
+			strings.TrimSpace(string(out)),
+			true,
+		)
+	}
+
+	s.logAudit("push_scrcpy_clipboard", trimmedSerial, true, "")
+	return nil
+}
+
+func (s *Service) GetClipboard(serial string) (string, error) {
+	trimmedSerial := strings.TrimSpace(serial)
+	if trimmedSerial == "" {
+		return "", core.NewOperationError(
+			"get_scrcpy_clipboard",
+			"Device serial is required",
+			"serial must not be empty",
+			false,
+		)
+	}
+
+	adbPath, err := s.resolveADBPath()
+	if err != nil {
+		return "", err
+	}
+
+	cmd := exec.CommandContext(s.ctx, adbPath, "-s", trimmedSerial, "shell", "cmd", "clipboard", "get")
+	out, runErr := cmd.CombinedOutput()
+	if runErr != nil {
+		return "", core.NewOperationError(
+			"get_scrcpy_clipboard",
+			"Failed to read clipboard from device",
+			strings.TrimSpace(string(out)),
+			true,
+		)
+	}
+	s.logAudit("get_scrcpy_clipboard", trimmedSerial, true, "")
+	return strings.TrimRight(string(out), "\r\n"), nil
 }
