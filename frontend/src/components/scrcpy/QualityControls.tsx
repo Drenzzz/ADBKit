@@ -2,6 +2,13 @@ import type { ScrcpyOptions } from '@/lib/types'
 import { Slider } from '@/components/ui/slider'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface QualityControlsProps {
   options: ScrcpyOptions
@@ -11,6 +18,25 @@ interface QualityControlsProps {
 export function QualityControls({ options, onOptionChange }: QualityControlsProps) {
   return (
     <div className="space-y-5">
+      <div className="space-y-2">
+        <Label htmlFor="video-codec" className="text-sm">
+          Video codec
+        </Label>
+        <Select
+          value={options.video_codec || 'h264'}
+          onValueChange={(value) => onOptionChange('video_codec', String(value ?? 'h264'))}
+        >
+          <SelectTrigger id="video-codec">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="h264">h264 — universal, best compatibility</SelectItem>
+            <SelectItem value="h265">h265 — better compression, smaller files</SelectItem>
+            <SelectItem value="av1">av1 — best compression, newer devices only</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="max-size" className="text-sm">

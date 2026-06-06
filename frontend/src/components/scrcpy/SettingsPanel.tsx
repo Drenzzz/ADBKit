@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface SettingsPanelProps {
   encoderSupport: ScrcpyEncoderSupport | null
@@ -16,6 +17,48 @@ interface SettingsPanelProps {
   onPushClipboard: (text: string) => void
   onPullClipboard: () => void
   isConnected: boolean
+}
+
+function encoderTooltip(codec: { hardware: boolean; vendor: boolean; softwareOnly: boolean; encoderName: string }): string {
+  if (codec.hardware && codec.vendor) {
+    return `Vendor-specific hardware encoder (${codec.encoderName}). Best performance and power efficiency.`
+  }
+  if (codec.hardware) {
+    return `Hardware-accelerated encoder (${codec.encoderName}). Good performance.`
+  }
+  return `Software encoder (${codec.encoderName}). CPU-based, works on all devices.`
+}
+
+function EncoderBadge({ codec }: { codec: { codec: string; encoderName: string; hardware: boolean; vendor: boolean; softwareOnly: boolean; recommended: boolean } }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={(props) => (
+          <Badge
+            {...props}
+            variant={codec.recommended ? 'default' : 'secondary'}
+            className={`gap-1 ${codec.recommended ? 'border-primary/50' : ''}`}
+          >
+            <span className="font-mono">{codec.codec}</span>
+            <span className="text-muted-foreground">
+              ({codec.encoderName})
+            </span>
+            {codec.hardware && (
+              <span className="rounded bg-emerald-500/20 px-1 text-[10px] text-emerald-400">
+                HW
+              </span>
+            )}
+            {codec.recommended && (
+              <span className="rounded bg-primary/20 px-1 text-[10px] text-primary-foreground">
+                ★
+              </span>
+            )}
+          </Badge>
+        )}
+      />
+      <TooltipContent>{encoderTooltip(codec)}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 export function SettingsPanel({
@@ -74,21 +117,10 @@ export function SettingsPanel({
                   </span>
                 ) : (
                   encoderSupport.videoCodecs.map((codec) => (
-                    <Badge
+                    <EncoderBadge
                       key={`v-${codec.codec}-${codec.encoderName}`}
-                      variant="secondary"
-                      className="gap-1"
-                    >
-                      <span className="font-mono">{codec.codec}</span>
-                      <span className="text-muted-foreground">
-                        ({codec.encoderName})
-                      </span>
-                      {codec.hardware && (
-                        <span className="rounded bg-emerald-500/20 px-1 text-[10px] text-emerald-400">
-                          HW
-                        </span>
-                      )}
-                    </Badge>
+                      codec={codec}
+                    />
                   ))
                 )}
               </div>
@@ -105,16 +137,10 @@ export function SettingsPanel({
                   </span>
                 ) : (
                   encoderSupport.audioCodecs.map((codec) => (
-                    <Badge
+                    <EncoderBadge
                       key={`a-${codec.codec}-${codec.encoderName}`}
-                      variant="secondary"
-                      className="gap-1"
-                    >
-                      <span className="font-mono">{codec.codec}</span>
-                      <span className="text-muted-foreground">
-                        ({codec.encoderName})
-                      </span>
-                    </Badge>
+                      codec={codec}
+                    />
                   ))
                 )}
               </div>
