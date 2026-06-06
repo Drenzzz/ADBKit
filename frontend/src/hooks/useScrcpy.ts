@@ -70,12 +70,12 @@ export function useScrcpy() {
   const setRecordingStartedAt = useScrcpyStore((state) => state.setRecordingStartedAt)
   const setEncoderSupport = useScrcpyStore((state) => state.setEncoderSupport)
   const setIsFetchingEncoder = useScrcpyStore((state) => state.setIsFetchingEncoder)
+  const setError = useScrcpyStore((state) => state.setError)
   const applyStartedEvent = useScrcpyStore((state) => state.applyStartedEvent)
   const applyStoppedEvent = useScrcpyStore((state) => state.applyStoppedEvent)
   const applyErrorEvent = useScrcpyStore((state) => state.applyErrorEvent)
   const addPreset = useScrcpyStore((state) => state.addPreset)
   const removePreset = useScrcpyStore((state) => state.removePreset)
-  const reset = useScrcpyStore((state) => state.reset)
 
   const activeSerial = useDeviceStore((state) => state.activeSerial)
 
@@ -161,8 +161,8 @@ export function useScrcpy() {
         })
         return
       }
-      reset()
       setIsStarting(true)
+      setError(null)
       try {
         const next = await startScrcpySession(serial, nextOptions)
         setSession(next)
@@ -172,7 +172,7 @@ export function useScrcpy() {
         setIsStarting(false)
       }
     },
-    [reset, setIsStarting, setSession],
+    [setIsStarting, setError, setSession],
   )
 
   const handleStop = useCallback(async () => {

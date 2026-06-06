@@ -24,7 +24,8 @@ export function AudioControls({ options, onOptionChange }: AudioControlsProps) {
             Disable audio
           </Label>
           <p className="text-xs text-muted-foreground">
-            Mute audio capture during mirroring.
+            Mute audio capture during mirroring. Your device will still play
+            sounds on its own.
           </p>
         </div>
         <Switch
