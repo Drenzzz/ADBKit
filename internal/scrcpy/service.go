@@ -41,6 +41,7 @@ type CodecSupport struct {
 	Hardware     bool   `json:"hardware"`
 	Vendor       bool   `json:"vendor"`
 	SoftwareOnly bool   `json:"softwareOnly"`
+	Recommended  bool   `json:"recommended"`
 }
 
 type EncoderSupport struct {
@@ -791,6 +792,10 @@ func sortCodecs(entries map[string]CodecSupport) []CodecSupport {
 		}
 		return out[i].Codec < out[j].Codec
 	})
+	// First entry after sort has the highest score — mark as recommended.
+	if len(out) > 0 {
+		out[0].Recommended = true
+	}
 	return out
 }
 

@@ -407,6 +407,7 @@ export namespace scrcpy {
 	    hardware: boolean;
 	    vendor: boolean;
 	    softwareOnly: boolean;
+	    recommended: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new CodecSupport(source);
@@ -419,6 +420,7 @@ export namespace scrcpy {
 	        this.hardware = source["hardware"];
 	        this.vendor = source["vendor"];
 	        this.softwareOnly = source["softwareOnly"];
+	        this.recommended = source["recommended"];
 	    }
 	}
 	export class EncoderSupport {

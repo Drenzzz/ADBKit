@@ -62,8 +62,14 @@ func TestParseEncoderListSections(t *testing.T) {
 	if video[0].EncoderName != "OMX.beta" {
 		t.Fatalf("expected hardware h264 to win, got %s", video[0].EncoderName)
 	}
+	if !video[0].Recommended {
+		t.Fatalf("expected best video encoder to be marked recommended")
+	}
 	if len(audio) != 1 {
 		t.Fatalf("expected single audio codec, got %d", len(audio))
+	}
+	if !audio[0].Recommended {
+		t.Fatalf("expected best audio encoder to be marked recommended")
 	}
 }
 
