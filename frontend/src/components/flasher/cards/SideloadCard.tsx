@@ -72,7 +72,7 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
 
         {runningSideload && (
           <div className="space-y-2">
-            <Progress value={undefined} className="h-2 animate-pulse" />
+            <Progress value={null} className="h-2 animate-pulse" />
             <p className="text-center text-xs text-muted-foreground">
               Sideload in progress... Do not disconnect the device.
             </p>
