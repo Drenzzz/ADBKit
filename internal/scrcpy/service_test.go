@@ -91,3 +91,51 @@ func TestOptionsToArgsSkipsDefaults(t *testing.T) {
 		t.Fatalf("unexpected bitrate arg pair: %v", args[2:4])
 	}
 }
+
+func TestParseEncoderLineExtractsAlias(t *testing.T) {
+	line := "--video-codec=h264 --video-encoder=OMX.google.h264.encoder        (sw) (alias for c2.android.avc.encoder)"
+	_, _, support, ok := parseEncoderLine(line)
+	if !ok {
+		t.Fatalf("expected line to parse")
+	}
+	if support.AliasOf != "c2.android.avc.encoder" {
+		t.Fatalf("expected aliasOf to be c2.android.avc.encoder, got %q", support.AliasOf)
+	}
+}
+
+func TestParseEncoderLineNoAliasForCanonical(t *testing.T) {
+	line := "--video-codec=h264 --video-encoder=c2.qti.avc.encoder             (hw) [vendor]"
+	_, _, support, ok := parseEncoderLine(line)
+	if !ok {
+		t.Fatalf("expected line to parse")
+	}
+	if support.AliasOf != "" {
+		t.Fatalf("expected empty aliasOf for canonical encoder, got %q", support.AliasOf)
+	}
+}
+
+func TestCodecScoreDemotesAliasBelowCanonical(t *testing.T) {
+	alias := CodecSupport{Hardware: true, Vendor: true, AliasOf: "c2.qti.avc.encoder"}
+	canonical := CodecSupport{Hardware: true, Vendor: true}
+	if codecScore(alias) >= codecScore(canonical) {
+		t.Fatalf("expected alias score %d to be lower than canonical score %d", codecScore(alias), codecScore(canonical))
+	}
+}
+
+func TestParseEncoderListPrefersCanonicalOverOMXAlias(t *testing.T) {
+	output := `[server] INFO: List of video encoders:
+--video-codec=h264 --video-encoder=c2.qti.avc.encoder             (hw) [vendor]
+--video-codec=h264 --video-encoder=OMX.qcom.video.encoder.avc     (hw) [vendor] (alias for c2.qti.avc.encoder)
+--video-codec=h264 --video-encoder=c2.android.avc.encoder         (sw)
+`
+	video, _ := parseEncoderList(output)
+	if len(video) != 1 {
+		t.Fatalf("expected single h264 entry after dedup, got %d", len(video))
+	}
+	if video[0].EncoderName != "c2.qti.avc.encoder" {
+		t.Fatalf("expected canonical C2 to win, got %s", video[0].EncoderName)
+	}
+	if !video[0].Recommended {
+		t.Fatalf("expected canonical C2 to be marked recommended")
+	}
+}

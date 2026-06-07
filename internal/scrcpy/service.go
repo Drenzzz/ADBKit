@@ -42,6 +42,7 @@ type CodecSupport struct {
 	Vendor       bool   `json:"vendor"`
 	SoftwareOnly bool   `json:"softwareOnly"`
 	Recommended  bool   `json:"recommended"`
+	AliasOf      string `json:"aliasOf"`
 }
 
 type EncoderSupport struct {
@@ -751,13 +752,32 @@ func parseEncoderLine(line string) (string, string, CodecSupport, bool) {
 	hardware := strings.Contains(line, "(hw)")
 	vendor := strings.Contains(line, "[vendor]")
 	softwareOnly := strings.Contains(line, "(sw)") && !hardware
+	aliasOf := extractAliasTarget(line)
 	return codec, encoderName, CodecSupport{
 		Codec:        codec,
 		EncoderName:  encoderName,
 		Hardware:     hardware,
 		Vendor:       vendor,
 		SoftwareOnly: softwareOnly,
+		AliasOf:      aliasOf,
 	}, true
+}
+
+// extractAliasTarget pulls the canonical encoder name out of a line that
+// scrcpy annotated with "(alias for X)". The annotation is appended by
+// scrcpy itself so the OMX entries never have to be hard-coded here.
+func extractAliasTarget(line string) string {
+	const marker = "(alias for "
+	idx := strings.Index(line, marker)
+	if idx < 0 {
+		return ""
+	}
+	rest := line[idx+len(marker):]
+	end := strings.Index(rest, ")")
+	if end < 0 {
+		return ""
+	}
+	return strings.TrimSpace(rest[:end])
 }
 
 func codecScore(s CodecSupport) int {
@@ -770,6 +790,11 @@ func codecScore(s CodecSupport) int {
 	}
 	if !s.SoftwareOnly {
 		score += 1
+	}
+	// OMX aliases are wrappers over the canonical C2 encoder; demote them
+	// so the encoder they route to always wins the recommendation slot.
+	if s.AliasOf != "" {
+		score -= 1
 	}
 	return score
 }

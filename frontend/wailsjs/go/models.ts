@@ -408,6 +408,7 @@ export namespace scrcpy {
 	    vendor: boolean;
 	    softwareOnly: boolean;
 	    recommended: boolean;
+	    aliasOf: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new CodecSupport(source);
@@ -421,6 +422,7 @@ export namespace scrcpy {
 	        this.vendor = source["vendor"];
 	        this.softwareOnly = source["softwareOnly"];
 	        this.recommended = source["recommended"];
+	        this.aliasOf = source["aliasOf"];
 	    }
 	}
 	export class EncoderSupport {
