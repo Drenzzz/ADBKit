@@ -58,3 +58,38 @@ export function EncoderBadge({ codec }: { codec: ScrcpyCodecSupport }) {
     </Tooltip>
   )
 }
+
+interface LegendChipProps {
+  label: string
+  className: string
+}
+
+function LegendChip({ label, className }: LegendChipProps) {
+  return (
+    <span
+      className={`rounded px-1 text-[10px] font-mono ${className}`}
+    >
+      {label}
+    </span>
+  )
+}
+
+export function EncoderLegend() {
+  return (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+      <span className="flex items-center gap-1">
+        <LegendChip label="HW" className="bg-emerald-500/20 text-emerald-400" />
+        hardware
+      </span>
+      <span className="flex items-center gap-1">
+        <LegendChip label="SW" className="bg-zinc-500/20 text-muted-foreground" />
+        software
+      </span>
+      <span className="flex items-center gap-1">
+        <LegendChip label="★" className="bg-primary/20 text-primary-foreground" />
+        recommended
+      </span>
+      <span>strikethrough = OMX alias (auto-routed)</span>
+    </p>
+  )
+}

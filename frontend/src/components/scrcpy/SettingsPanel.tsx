@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
-import { EncoderBadge } from '@/components/scrcpy/EncoderBadge'
+import { EncoderBadge, EncoderLegend } from '@/components/scrcpy/EncoderBadge'
 
 interface SettingsPanelProps {
   encoderSupport: ScrcpyEncoderSupport | null
@@ -102,6 +102,7 @@ export function SettingsPanel({
                 )}
               </div>
             </div>
+            <EncoderLegend />
           </div>
         )}
       </Card>

@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { QualityControls } from '@/components/scrcpy/QualityControls'
 import { AudioControls } from '@/components/scrcpy/AudioControls'
 import { DeviceOptionsControls } from '@/components/scrcpy/DeviceOptionsControls'
-import { EncoderBadge } from '@/components/scrcpy/EncoderBadge'
+import { EncoderBadge, EncoderLegend } from '@/components/scrcpy/EncoderBadge'
 
 interface ScrcpyIdleDashboardProps {
   options: ScrcpyOptions
@@ -212,6 +212,7 @@ export function ScrcpyIdleDashboard({
                         )}
                       </div>
                     </div>
+                    <EncoderLegend />
                   </div>
                 )}
               </Card>
