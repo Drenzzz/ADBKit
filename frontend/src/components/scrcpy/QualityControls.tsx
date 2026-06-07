@@ -15,6 +15,18 @@ interface QualityControlsProps {
   onOptionChange: (key: string, value: number | string | boolean) => void
 }
 
+interface CodecChoice {
+  value: string
+  name: string
+  description: string
+}
+
+const VIDEO_CODECS: CodecChoice[] = [
+  { value: 'h264', name: 'h264', description: 'Universal, best compatibility' },
+  { value: 'h265', name: 'h265', description: 'Better compression, smaller files' },
+  { value: 'av1', name: 'av1', description: 'Best compression, newer devices only' },
+]
+
 export function QualityControls({ options, onOptionChange }: QualityControlsProps) {
   return (
     <div className="space-y-5">
@@ -29,10 +41,17 @@ export function QualityControls({ options, onOptionChange }: QualityControlsProp
           <SelectTrigger id="video-codec">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="h264">h264 — universal, best compatibility</SelectItem>
-            <SelectItem value="h265">h265 — better compression, smaller files</SelectItem>
-            <SelectItem value="av1">av1 — best compression, newer devices only</SelectItem>
+          <SelectContent className="min-w-[280px]">
+            {VIDEO_CODECS.map((codec) => (
+              <SelectItem key={codec.value} value={codec.value} className="py-2">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-mono text-sm font-medium">{codec.name}</span>
+                  <span className="text-xs text-muted-foreground whitespace-normal">
+                    {codec.description}
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

@@ -15,6 +15,19 @@ interface AudioControlsProps {
   onOptionChange: (key: string, value: number | string | boolean) => void
 }
 
+interface AudioChoice {
+  value: string
+  name: string
+  description: string
+}
+
+const AUDIO_CODECS: AudioChoice[] = [
+  { value: 'opus', name: 'opus', description: 'Default, low latency' },
+  { value: 'aac', name: 'aac', description: 'Wide device support' },
+  { value: 'flac', name: 'flac', description: 'Lossless, large files' },
+  { value: 'raw', name: 'raw', description: 'Uncompressed PCM' },
+]
+
 export function AudioControls({ options, onOptionChange }: AudioControlsProps) {
   return (
     <div className="space-y-5">
@@ -47,11 +60,17 @@ export function AudioControls({ options, onOptionChange }: AudioControlsProps) {
           <SelectTrigger id="audio-codec">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="opus">opus (default)</SelectItem>
-            <SelectItem value="aac">aac</SelectItem>
-            <SelectItem value="flac">flac</SelectItem>
-            <SelectItem value="raw">raw</SelectItem>
+          <SelectContent className="min-w-[240px]">
+            {AUDIO_CODECS.map((codec) => (
+              <SelectItem key={codec.value} value={codec.value} className="py-2">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-mono text-sm font-medium">{codec.name}</span>
+                  <span className="text-xs text-muted-foreground whitespace-normal">
+                    {codec.description}
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
