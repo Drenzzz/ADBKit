@@ -378,6 +378,7 @@ export interface ScrcpyCodecSupport {
   vendor: boolean
   softwareOnly: boolean
   recommended: boolean
+  aliasOf: string
 }
 
 export interface ScrcpyEncoderSupport {

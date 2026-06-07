@@ -220,7 +220,9 @@ export default function ScrcpyPage() {
                 <ScrcpyIdleDashboard
                   options={scrcpyOptions}
                   encoderSupport={encoderSupport}
+                  isFetchingEncoder={isFetchingEncoder}
                   onOptionsChange={setScrcpyOptions}
+                  onRefreshEncoder={handleRefreshEncoder}
                   onStart={() => handleStart(scrcpyOptions)}
                   isStarting={isStarting || sessionStatus === 'starting'}
                   activeSerial={activeSerial ?? undefined}

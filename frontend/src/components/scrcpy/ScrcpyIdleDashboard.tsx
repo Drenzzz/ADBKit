@@ -7,14 +7,19 @@ import type {
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { QualityControls } from '@/components/scrcpy/QualityControls'
 import { AudioControls } from '@/components/scrcpy/AudioControls'
 import { DeviceOptionsControls } from '@/components/scrcpy/DeviceOptionsControls'
+import { EncoderBadge } from '@/components/scrcpy/EncoderBadge'
 
 interface ScrcpyIdleDashboardProps {
   options: ScrcpyOptions
   encoderSupport: ScrcpyEncoderSupport | null
+  isFetchingEncoder: boolean
   onOptionsChange: (options: ScrcpyOptions) => void
+  onRefreshEncoder: () => void
   onStart: () => void
   isStarting: boolean
   activeSerial?: string
@@ -24,7 +29,9 @@ interface ScrcpyIdleDashboardProps {
 export function ScrcpyIdleDashboard({
   options,
   encoderSupport,
+  isFetchingEncoder,
   onOptionsChange,
+  onRefreshEncoder,
   onStart,
   isStarting,
   activeSerial,
@@ -74,12 +81,6 @@ export function ScrcpyIdleDashboard({
             </div>
           )}
 
-          {encoderSupport && (
-            <p className="mt-3 text-xs text-muted-foreground">
-              Video codecs: {encoderSupport.videoCodecs.map((c) => c.codec).join(', ') || 'none'}
-            </p>
-          )}
-
           <Button
             size="lg"
             className="mt-8 w-60 gap-2 rounded-full"
@@ -112,10 +113,11 @@ export function ScrcpyIdleDashboard({
           <h3 className="mb-4 text-lg font-semibold">Configuration</h3>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-4 grid w-full grid-cols-3">
+            <TabsList className="mb-4 grid w-full grid-cols-4">
               <TabsTrigger value="quality">Quality</TabsTrigger>
               <TabsTrigger value="audio">Audio</TabsTrigger>
               <TabsTrigger value="device">Device</TabsTrigger>
+              <TabsTrigger value="encoders">Encoders</TabsTrigger>
             </TabsList>
 
             <TabsContent value="quality" className="space-y-4">
@@ -142,6 +144,76 @@ export function ScrcpyIdleDashboard({
                   options={options}
                   onOptionChange={handleOptionChange}
                 />
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="encoders" className="space-y-4">
+              <Card className="border-border/50 bg-background/50 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <h4 className="text-sm font-semibold">Available encoders</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Reported by scrcpy --list-encoders.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={onRefreshEncoder}
+                    disabled={isFetchingEncoder || !activeSerial}
+                  >
+                    Refresh
+                  </Button>
+                </div>
+                {isFetchingEncoder && !encoderSupport && (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-48" />
+                  </div>
+                )}
+                {encoderSupport && (
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Video
+                      </Label>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {encoderSupport.videoCodecs.length === 0 ? (
+                          <span className="text-xs text-muted-foreground">
+                            No video encoders reported
+                          </span>
+                        ) : (
+                          encoderSupport.videoCodecs.map((codec) => (
+                            <EncoderBadge
+                              key={`v-idle-${codec.codec}-${codec.encoderName}`}
+                              codec={codec}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                        Audio
+                      </Label>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {encoderSupport.audioCodecs.length === 0 ? (
+                          <span className="text-xs text-muted-foreground">
+                            No audio encoders reported
+                          </span>
+                        ) : (
+                          encoderSupport.audioCodecs.map((codec) => (
+                            <EncoderBadge
+                              key={`a-idle-${codec.codec}-${codec.encoderName}`}
+                              codec={codec}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </Card>
             </TabsContent>
           </Tabs>
