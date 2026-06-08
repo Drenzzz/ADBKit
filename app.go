@@ -65,6 +65,13 @@ func (a *App) startup(ctx context.Context) {
 		config = core.DefaultConfig()
 	}
 	a.cfg = config
+
+	al, err := audit.New(a.dataDir)
+	if err != nil {
+		log.Printf("failed to init audit log: %v", err)
+	}
+	a.auditLog = al
+
 	a.binSvc = binary.NewService(a.dataDir)
 	a.devSvc = device.NewService(a.dataDir)
 	a.wireSvc = device.NewWirelessService(a.dataDir)
@@ -77,12 +84,6 @@ func (a *App) startup(ctx context.Context) {
 	a.fbSvc = flasher.NewFastbootService(a.currentConfig, a.resolveActiveSerial)
 	a.fpSvc = flasher.NewPlanService(a.fbSvc)
 	a.scrSvc = scrcpy.New(a.ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial, a.diaSvc, a.auditLog)
-
-	al, err := audit.New(a.dataDir)
-	if err != nil {
-		log.Printf("failed to init audit log: %v", err)
-	}
-	a.auditLog = al
 }
 
 func (a *App) shutdown(ctx context.Context) {

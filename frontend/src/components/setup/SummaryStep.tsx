@@ -30,7 +30,6 @@ export function SummaryStep() {
     setSubmitting(true)
     setError(null)
     try {
-      await completeSetup()
       const state = await completeSetup()
       setSetupState(state)
       setDone(true)
