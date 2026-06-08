@@ -520,7 +520,13 @@ func (a *App) FlashPartition(serial string, partition string, filePath string) (
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(audit.Entry{Operation: "flash_partition", Command: fmt.Sprintf("partition=%s file=%s", partition, filePath)})
+		a.auditLog.LogOperationWithDetails(
+			"flash_partition",
+			fmt.Sprintf("Flashed %s on %s", partition, resolved),
+			fmt.Sprintf("partition=%s file=%s", partition, filePath),
+			"",
+			true,
+		)
 	}
 	return a.fbSvc.FlashPartition(a.ctx, resolved, partition, filePath)
 }
@@ -533,7 +539,13 @@ func (a *App) WipeData(serial string) (string, error) {
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(audit.Entry{Operation: "wipe_data", Command: fmt.Sprintf("serial=%s", resolved)})
+		a.auditLog.LogOperationWithDetails(
+			"wipe_data",
+			fmt.Sprintf("Wiped data on %s", resolved),
+			fmt.Sprintf("serial=%s", resolved),
+			"",
+			true,
+		)
 	}
 	return a.fbSvc.WipeData(a.ctx, resolved)
 }
@@ -556,7 +568,13 @@ func (a *App) SetActiveSlot(serial string, slot string) (string, error) {
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(audit.Entry{Operation: "set_active_slot", Command: fmt.Sprintf("serial=%s slot=%s", resolved, slot)})
+		a.auditLog.LogOperationWithDetails(
+			"set_active_slot",
+			fmt.Sprintf("Set active slot to %s on %s", slot, resolved),
+			fmt.Sprintf("serial=%s slot=%s", resolved, slot),
+			"",
+			true,
+		)
 	}
 	return a.fbSvc.SetActiveSlot(a.ctx, resolved, slot)
 }
@@ -569,7 +587,13 @@ func (a *App) RunCustomFastbootCommand(serial string, args string) (string, erro
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(audit.Entry{Operation: "run_fastboot_command", Command: args})
+		a.auditLog.LogOperationWithDetails(
+			"run_fastboot_command",
+			fmt.Sprintf("Ran custom fastboot command on %s", resolved),
+			args,
+			"",
+			true,
+		)
 	}
 	return a.fbSvc.RunCustomCommand(a.ctx, resolved, args)
 }
@@ -582,7 +606,13 @@ func (a *App) SideloadPackage(serial string, zipPath string) (string, error) {
 		a.mu.Unlock()
 	}
 	if a.auditLog != nil {
-		a.auditLog.Log(audit.Entry{Operation: "sideload_package", Command: fmt.Sprintf("serial=%s zip=%s", resolved, zipPath)})
+		a.auditLog.LogOperationWithDetails(
+			"sideload_package",
+			fmt.Sprintf("Sideloaded %s on %s", filepath.Base(zipPath), resolved),
+			fmt.Sprintf("serial=%s zip=%s", resolved, zipPath),
+			"",
+			true,
+		)
 	}
 	return a.fbSvc.SideloadPackage(a.ctx, resolved, zipPath)
 }

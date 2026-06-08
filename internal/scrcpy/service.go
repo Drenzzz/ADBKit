@@ -442,12 +442,12 @@ func (s *Service) logAudit(operation, serial string, success bool, errMsg string
 	if s.auditLog == nil {
 		return
 	}
-	_ = s.auditLog.Log(audit.Entry{
-		Operation: operation,
-		Command:   fmt.Sprintf("serial=%s", serial),
-		Success:   success,
-		Error:     errMsg,
-	})
+	s.auditLog.LogOperation(
+		operation,
+		fmt.Sprintf("serial=%s", serial),
+		"",
+		success,
+	)
 }
 
 func (s *Service) StartRecording(serial, outputPath string, opts Options) error {
