@@ -162,43 +162,53 @@ func appDataDir() (string, error) {
 	return filepath.Join(dir, "adbkit"), nil
 }
 
-func (a *App) Greet(name string) string {
-	return "Hello " + name + ", It's show time!"
-}
-
 func (a *App) StartTerminal(serial string) (*shell.Session, error) {
-	return a.termSvc.StartSession(a.ctx, serial)
+	return auditAction(a, "start_terminal_session", func() (*shell.Session, error) {
+		return a.termSvc.StartSession(a.ctx, serial)
+	})
 }
 
 func (a *App) StartTerminalSession(mode string, serial string, initialArgs string) (*shell.Session, error) {
-	return a.termSvc.StartSessionWithMode(a.ctx, mode, serial, initialArgs)
+	return auditAction(a, "start_terminal_session", func() (*shell.Session, error) {
+		return a.termSvc.StartSessionWithMode(a.ctx, mode, serial, initialArgs)
+	})
 }
 
 func (a *App) SendTerminalInput(sessionID string, input string) error {
-	return a.termSvc.SendInput(sessionID, input)
+	return auditVoidAction(a, "send_terminal_input", func() error {
+		return a.termSvc.SendInput(sessionID, input)
+	})
 }
 
 func (a *App) CloseTerminal(sessionID string) error {
-	return a.termSvc.CloseSession(sessionID)
+	return auditVoidAction(a, "close_terminal_session", func() error {
+		return a.termSvc.CloseSession(sessionID)
+	})
 }
 
 func (a *App) StartLogcat(serial string, levels string, tagFilter string) error {
-	return a.logSvc.StartStream(a.ctx, serial, levels, tagFilter)
+	return auditVoidAction(a, "start_logcat_stream", func() error {
+		return a.logSvc.StartStream(a.ctx, serial, levels, tagFilter)
+	})
 }
 
 func (a *App) StopLogcat(serial string) error {
-	return a.logSvc.StopStream(serial)
+	return auditVoidAction(a, "stop_logcat_stream", func() error {
+		return a.logSvc.StopStream(serial)
+	})
 }
 
 func (a *App) SaveLogcatToFile(content string, defaultFilename string) error {
-	path, err := a.diaSvc.SelectSaveFile(defaultFilename)
-	if err != nil {
-		return err
-	}
-	if path == "" {
-		return nil
-	}
-	return os.WriteFile(path, []byte(content), 0o600)
+	return auditVoidAction(a, "save_logcat_to_file", func() error {
+		path, err := a.diaSvc.SelectSaveFile(defaultFilename)
+		if err != nil {
+			return err
+		}
+		if path == "" {
+			return nil
+		}
+		return os.WriteFile(path, []byte(content), 0o600)
+	})
 }
 
 func (a *App) GetBinaryStatus() *binary.BinarySetupResult {
@@ -210,46 +220,54 @@ func (a *App) GetSetupState() *binary.SetupState {
 }
 
 func (a *App) RetryBinaryDetection() (*binary.BinarySetupResult, error) {
-	a.mu.Lock()
-	result := a.binSvc.RevalidateConfig(a.cfg)
-	a.mu.Unlock()
-	if result.Changed {
-		if err := core.SaveConfig(a.dataDir, a.cfg); err != nil {
-			return nil, err
+	return auditAction(a, "retry_binary_detection", func() (*binary.BinarySetupResult, error) {
+		a.mu.Lock()
+		result := a.binSvc.RevalidateConfig(a.cfg)
+		a.mu.Unlock()
+		if result.Changed {
+			if err := core.SaveConfig(a.dataDir, a.cfg); err != nil {
+				return nil, err
+			}
 		}
-	}
-	return result.Status, nil
+		return result.Status, nil
+	})
 }
 
 func (a *App) SetCustomBinary(name string, path string) error {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	if err := a.binSvc.SetCustomBinary(a.cfg, name, path); err != nil {
-		return err
-	}
-	return core.SaveConfig(a.dataDir, a.cfg)
+	return auditVoidAction(a, "set_custom_binary", func() error {
+		a.mu.Lock()
+		defer a.mu.Unlock()
+		if err := a.binSvc.SetCustomBinary(a.cfg, name, path); err != nil {
+			return err
+		}
+		return core.SaveConfig(a.dataDir, a.cfg)
+	})
 }
 
 func (a *App) ClearCustomBinary(name string) error {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	if err := a.binSvc.ClearCustomBinary(a.cfg, name); err != nil {
-		return err
-	}
-	return core.SaveConfig(a.dataDir, a.cfg)
+	return auditVoidAction(a, "clear_custom_binary", func() error {
+		a.mu.Lock()
+		defer a.mu.Unlock()
+		if err := a.binSvc.ClearCustomBinary(a.cfg, name); err != nil {
+			return err
+		}
+		return core.SaveConfig(a.dataDir, a.cfg)
+	})
 }
 
 func (a *App) CompleteSetup() (*binary.SetupState, error) {
-	a.mu.Lock()
-	state, err := a.binSvc.CompleteSetup(a.cfg)
-	a.mu.Unlock()
-	if err != nil {
-		return nil, err
-	}
-	if err := core.SaveConfig(a.dataDir, a.cfg); err != nil {
-		return nil, err
-	}
-	return state, nil
+	return auditAction(a, "complete_setup", func() (*binary.SetupState, error) {
+		a.mu.Lock()
+		state, err := a.binSvc.CompleteSetup(a.cfg)
+		a.mu.Unlock()
+		if err != nil {
+			return nil, err
+		}
+		if err := core.SaveConfig(a.dataDir, a.cfg); err != nil {
+			return nil, err
+		}
+		return state, nil
+	})
 }
 
 func (a *App) GetManagedBinaryDir() string {
@@ -294,22 +312,24 @@ func (a *App) GetActiveSerial() string {
 }
 
 func (a *App) SetActiveSerial(serial string) error {
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	return auditVoidAction(a, "set_active_serial", func() error {
+		a.mu.Lock()
+		defer a.mu.Unlock()
 
-	devices, err := a.devSvc.ListDevices(a.ctx)
-	if err != nil {
-		return err
-	}
-
-	for _, device := range devices {
-		if device.Serial == serial {
-			a.activeSerial = serial
-			return nil
+		devices, err := a.devSvc.ListDevices(a.ctx)
+		if err != nil {
+			return err
 		}
-	}
 
-	return core.NewOperationError("set_active_serial", "device not found", fmt.Sprintf("serial '%s' is not connected", serial), true)
+		for _, d := range devices {
+			if d.Serial == serial {
+				a.activeSerial = serial
+				return nil
+			}
+		}
+
+		return core.NewOperationError("set_active_serial", "device not found", fmt.Sprintf("serial '%s' is not connected", serial), true)
+	})
 }
 
 func (a *App) GetDeviceInfo(serial string) (*device.Info, error) {
@@ -333,31 +353,39 @@ func (a *App) GetDeviceMode(serial string) (device.Mode, error) {
 }
 
 func (a *App) RebootDevice(serial string, mode string) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	return a.devSvc.RebootDevice(a.ctx, resolved, mode)
+	return auditAction(a, "reboot_device", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.devSvc.RebootDevice(a.ctx, resolved, mode)
+	})
 }
 
 func (a *App) ConnectWireless(address string) (string, error) {
-	return a.wireSvc.Connect(a.ctx, address)
+	return auditAction(a, "connect_wireless", func() (string, error) {
+		return a.wireSvc.Connect(a.ctx, address)
+	})
 }
 
 func (a *App) EnableWirelessTCPIP(port string, serial string) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	return a.wireSvc.EnableTCPIP(a.ctx, resolved, port)
+	return auditAction(a, "enable_wireless_tcpip", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.wireSvc.EnableTCPIP(a.ctx, resolved, port)
+	})
 }
 
 func (a *App) DisconnectWireless(address string) (string, error) {
-	return a.wireSvc.Disconnect(a.ctx, address)
+	return auditAction(a, "disconnect_wireless", func() (string, error) {
+		return a.wireSvc.Disconnect(a.ctx, address)
+	})
 }
 
 func (a *App) GetPerformanceSnapshot(serial string) (device.PerformanceSnapshot, error) {
@@ -375,69 +403,99 @@ func (a *App) GetDeviceNicknames() map[string]string {
 }
 
 func (a *App) SetDeviceNickname(serial string, nickname string) error {
-	a.mu.Lock()
-	a.cfg.DeviceNicknames[serial] = nickname
-	a.mu.Unlock()
-	return core.SaveConfig(a.dataDir, a.cfg)
+	return auditVoidAction(a, "set_device_nickname", func() error {
+		a.mu.Lock()
+		a.cfg.DeviceNicknames[serial] = nickname
+		a.mu.Unlock()
+		return core.SaveConfig(a.dataDir, a.cfg)
+	})
 }
 
 func (a *App) ClearDeviceNickname(serial string) error {
-	a.mu.Lock()
-	delete(a.cfg.DeviceNicknames, serial)
-	a.mu.Unlock()
-	return core.SaveConfig(a.dataDir, a.cfg)
+	return auditVoidAction(a, "clear_device_nickname", func() error {
+		a.mu.Lock()
+		delete(a.cfg.DeviceNicknames, serial)
+		a.mu.Unlock()
+		return core.SaveConfig(a.dataDir, a.cfg)
+	})
 }
 
 func (a *App) ListPackages(filterType string) ([]packagemgr.Info, error) {
-	return a.pkgSvc.ListPackages(a.ctx, filterType)
+	return auditAction(a, "list_packages", func() ([]packagemgr.Info, error) {
+		return a.pkgSvc.ListPackages(a.ctx, filterType)
+	})
 }
 
 func (a *App) InstallPackage(filePath string) (string, error) {
-	return a.pkgSvc.InstallPackage(a.ctx, filePath)
+	return auditAction(a, "install_package", func() (string, error) {
+		return a.pkgSvc.InstallPackage(a.ctx, filePath)
+	})
 }
 
 func (a *App) UninstallPackage(packageName string) (string, error) {
-	return a.pkgSvc.UninstallPackage(a.ctx, packageName)
+	return auditAction(a, "uninstall_package", func() (string, error) {
+		return a.pkgSvc.UninstallPackage(a.ctx, packageName)
+	})
 }
 
 func (a *App) UninstallMultiplePackages(packageNames []string) (string, error) {
-	return a.pkgSvc.UninstallMultiplePackages(a.ctx, packageNames)
+	return auditAction(a, "uninstall_packages", func() (string, error) {
+		return a.pkgSvc.UninstallMultiplePackages(a.ctx, packageNames)
+	})
 }
 
 func (a *App) EnablePackage(packageName string) (string, error) {
-	return a.pkgSvc.EnablePackage(a.ctx, packageName)
+	return auditAction(a, "enable_package", func() (string, error) {
+		return a.pkgSvc.EnablePackage(a.ctx, packageName)
+	})
 }
 
 func (a *App) EnableMultiplePackages(packageNames []string) (string, error) {
-	return a.pkgSvc.EnableMultiplePackages(a.ctx, packageNames)
+	return auditAction(a, "enable_packages", func() (string, error) {
+		return a.pkgSvc.EnableMultiplePackages(a.ctx, packageNames)
+	})
 }
 
 func (a *App) DisablePackage(packageName string) (string, error) {
-	return a.pkgSvc.DisablePackage(a.ctx, packageName)
+	return auditAction(a, "disable_package", func() (string, error) {
+		return a.pkgSvc.DisablePackage(a.ctx, packageName)
+	})
 }
 
 func (a *App) DisableMultiplePackages(packageNames []string) (string, error) {
-	return a.pkgSvc.DisableMultiplePackages(a.ctx, packageNames)
+	return auditAction(a, "disable_packages", func() (string, error) {
+		return a.pkgSvc.DisableMultiplePackages(a.ctx, packageNames)
+	})
 }
 
 func (a *App) ClearPackageData(packageName string) (string, error) {
-	return a.pkgSvc.ClearPackageData(a.ctx, packageName)
+	return auditAction(a, "clear_package_data", func() (string, error) {
+		return a.pkgSvc.ClearPackageData(a.ctx, packageName)
+	})
 }
 
 func (a *App) PullPackageApk(packageName string) (string, error) {
-	return a.pkgSvc.PullPackageApk(a.ctx, packageName)
+	return auditAction(a, "pull_package_apk", func() (string, error) {
+		return a.pkgSvc.PullPackageApk(a.ctx, packageName)
+	})
 }
 
 func (a *App) LaunchPackage(packageName string) (string, error) {
-	return a.pkgSvc.LaunchPackage(a.ctx, packageName)
+	return auditAction(a, "launch_package", func() (string, error) {
+		return a.pkgSvc.LaunchPackage(a.ctx, packageName)
+	})
 }
 
 func (a *App) ForceStopPackage(packageName string) (string, error) {
-	return a.pkgSvc.ForceStopPackage(a.ctx, packageName)
+	return auditAction(a, "force_stop_package", func() (string, error) {
+		return a.pkgSvc.ForceStopPackage(a.ctx, packageName)
+	})
 }
 
 func (a *App) GetPackageDetails(packageName string) (packagemgr.Details, error) {
-	return a.pkgSvc.GetPackageDetails(a.ctx, packageName)
+	return auditAction(a, "get_package_details", func() (packagemgr.Details, error) {
+		return a.pkgSvc.GetPackageDetails(a.ctx, packageName)
+	})
 }
 
 func (a *App) SelectApkFile() (string, error) {
@@ -445,47 +503,69 @@ func (a *App) SelectApkFile() (string, error) {
 }
 
 func (a *App) ListFiles(remotePath string, showHidden bool) ([]file.Entry, error) {
-	return a.fileSvc.ListFiles(a.ctx, remotePath, showHidden)
+	return auditAction(a, "list_files", func() ([]file.Entry, error) {
+		return a.fileSvc.ListFiles(a.ctx, remotePath, showHidden)
+	})
 }
 
 func (a *App) GetDirectorySize(remotePath string) (string, error) {
-	return a.fileSvc.GetDirectorySize(a.ctx, remotePath)
+	return auditAction(a, "get_directory_size", func() (string, error) {
+		return a.fileSvc.GetDirectorySize(a.ctx, remotePath)
+	})
 }
 
 func (a *App) GetStorageInfo() (file.StorageInfo, error) {
-	return a.fileSvc.GetStorageInfo(a.ctx)
+	return auditAction(a, "get_storage_info", func() (file.StorageInfo, error) {
+		return a.fileSvc.GetStorageInfo(a.ctx)
+	})
 }
 
 func (a *App) PullFile(remotePath string, localPath string) (string, error) {
-	return a.fileSvc.PullFile(a.ctx, remotePath, localPath)
+	return auditAction(a, "pull_file", func() (string, error) {
+		return a.fileSvc.PullFile(a.ctx, remotePath, localPath)
+	})
 }
 
 func (a *App) PullMultipleFiles(remotePaths []string, localDirectory string) (string, error) {
-	return a.fileSvc.PullMultipleFiles(a.ctx, remotePaths, localDirectory)
+	return auditAction(a, "pull_multiple_files", func() (string, error) {
+		return a.fileSvc.PullMultipleFiles(a.ctx, remotePaths, localDirectory)
+	})
 }
 
 func (a *App) PushFile(localPath string, remotePath string) (string, error) {
-	return a.fileSvc.PushFile(a.ctx, localPath, remotePath)
+	return auditAction(a, "push_file", func() (string, error) {
+		return a.fileSvc.PushFile(a.ctx, localPath, remotePath)
+	})
 }
 
 func (a *App) PushMultipleFiles(localPaths []string, remoteDirectory string) (string, error) {
-	return a.fileSvc.PushMultipleFiles(a.ctx, localPaths, remoteDirectory)
+	return auditAction(a, "push_multiple_files", func() (string, error) {
+		return a.fileSvc.PushMultipleFiles(a.ctx, localPaths, remoteDirectory)
+	})
 }
 
 func (a *App) DeleteFile(remotePath string) (string, error) {
-	return a.fileSvc.DeleteFile(a.ctx, remotePath)
+	return auditAction(a, "delete_file", func() (string, error) {
+		return a.fileSvc.DeleteFile(a.ctx, remotePath)
+	})
 }
 
 func (a *App) DeleteMultipleFiles(remotePaths []string) (string, error) {
-	return a.fileSvc.DeleteMultipleFiles(a.ctx, remotePaths)
+	return auditAction(a, "delete_multiple_files", func() (string, error) {
+		return a.fileSvc.DeleteMultipleFiles(a.ctx, remotePaths)
+	})
 }
 
 func (a *App) CreateDirectory(remotePath string) (string, error) {
-	return a.fileSvc.CreateDirectory(a.ctx, remotePath)
+	return auditAction(a, "create_directory", func() (string, error) {
+		return a.fileSvc.CreateDirectory(a.ctx, remotePath)
+	})
 }
 
 func (a *App) RenameFile(oldRemotePath string, newRemotePath string) (string, error) {
-	return a.fileSvc.RenameFile(a.ctx, oldRemotePath, newRemotePath)
+	return auditAction(a, "rename_file", func() (string, error) {
+		return a.fileSvc.RenameFile(a.ctx, oldRemotePath, newRemotePath)
+	})
 }
 
 func (a *App) SelectFile() (string, error) {
@@ -509,144 +589,123 @@ func (a *App) SelectSideloadFile() (string, error) {
 }
 
 func (a *App) GetFastbootDevices() ([]flasher.FastbootDeviceInfo, error) {
-	return a.fbSvc.ListDevices(a.ctx)
+	return auditAction(a, "list_fastboot_devices", func() ([]flasher.FastbootDeviceInfo, error) {
+		return a.fbSvc.ListDevices(a.ctx)
+	})
 }
 
 func (a *App) FlashPartition(serial string, partition string, filePath string) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	if a.auditLog != nil {
-		a.auditLog.LogOperationWithDetails(
-			"flash_partition",
-			fmt.Sprintf("Flashed %s on %s", partition, resolved),
-			fmt.Sprintf("partition=%s file=%s", partition, filePath),
-			"",
-			true,
-		)
-	}
-	return a.fbSvc.FlashPartition(a.ctx, resolved, partition, filePath)
+	return auditAction(a, "flash_partition", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.FlashPartition(a.ctx, resolved, partition, filePath)
+	})
 }
 
 func (a *App) WipeData(serial string) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	if a.auditLog != nil {
-		a.auditLog.LogOperationWithDetails(
-			"wipe_data",
-			fmt.Sprintf("Wiped data on %s", resolved),
-			fmt.Sprintf("serial=%s", resolved),
-			"",
-			true,
-		)
-	}
-	return a.fbSvc.WipeData(a.ctx, resolved)
+	return auditAction(a, "wipe_data", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.WipeData(a.ctx, resolved)
+	})
 }
 
 func (a *App) GetActiveSlot(serial string) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	return a.fbSvc.GetActiveSlot(a.ctx, resolved)
+	return auditAction(a, "get_active_slot", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.GetActiveSlot(a.ctx, resolved)
+	})
 }
 
 func (a *App) SetActiveSlot(serial string, slot string) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	if a.auditLog != nil {
-		a.auditLog.LogOperationWithDetails(
-			"set_active_slot",
-			fmt.Sprintf("Set active slot to %s on %s", slot, resolved),
-			fmt.Sprintf("serial=%s slot=%s", resolved, slot),
-			"",
-			true,
-		)
-	}
-	return a.fbSvc.SetActiveSlot(a.ctx, resolved, slot)
+	return auditAction(a, "set_active_slot", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.SetActiveSlot(a.ctx, resolved, slot)
+	})
 }
 
 func (a *App) RunCustomFastbootCommand(serial string, args string) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	if a.auditLog != nil {
-		a.auditLog.LogOperationWithDetails(
-			"run_fastboot_command",
-			fmt.Sprintf("Ran custom fastboot command on %s", resolved),
-			args,
-			"",
-			true,
-		)
-	}
-	return a.fbSvc.RunCustomCommand(a.ctx, resolved, args)
+	return auditAction(a, "run_fastboot_command", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.RunCustomCommand(a.ctx, resolved, args)
+	})
 }
 
 func (a *App) SideloadPackage(serial string, zipPath string) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	if a.auditLog != nil {
-		a.auditLog.LogOperationWithDetails(
-			"sideload_package",
-			fmt.Sprintf("Sideloaded %s on %s", filepath.Base(zipPath), resolved),
-			fmt.Sprintf("serial=%s zip=%s", resolved, zipPath),
-			"",
-			true,
-		)
-	}
-	return a.fbSvc.SideloadPackage(a.ctx, resolved, zipPath)
+	return auditAction(a, "sideload_package", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.SideloadPackage(a.ctx, resolved, zipPath)
+	})
 }
 
 func (a *App) IsUserspaceFastboot(serial string) (bool, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	return a.fbSvc.IsUserspace(a.ctx, resolved)
+	return auditAction(a, "check_userspace_fastboot", func() (bool, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.IsUserspace(a.ctx, resolved)
+	})
 }
 
 func (a *App) ScanRomFolder(folderPath string) (*flasher.Plan, error) {
-	return a.fpSvc.ScanRomFolder(folderPath)
+	return auditAction(a, "scan_rom_folder", func() (*flasher.Plan, error) {
+		return a.fpSvc.ScanRomFolder(folderPath)
+	})
 }
 
 func (a *App) FlashRomFolder(serial string, folderPath string, plan flasher.Plan) (string, error) {
-	resolved := serial
-	if resolved == "" {
-		a.mu.Lock()
-		resolved = a.activeSerial
-		a.mu.Unlock()
-	}
-	return a.fpSvc.FlashRomFolder(a.ctx, resolved, folderPath, plan)
+	return auditAction(a, "flash_rom_folder", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fpSvc.FlashRomFolder(a.ctx, resolved, folderPath, plan)
+	})
 }
 
 func (a *App) StartScrcpySession(serial string, opts scrcpy.Options) (*scrcpy.Session, error) {
-	return a.scrSvc.StartSession(a.ctx, serial, opts)
+	return auditAction(a, "start_scrcpy_session", func() (*scrcpy.Session, error) {
+		return a.scrSvc.StartSession(a.ctx, serial, opts)
+	})
 }
 
 func (a *App) StopScrcpySession(sessionID string) error {
-	return a.scrSvc.StopSession(sessionID)
+	return auditVoidAction(a, "stop_scrcpy_session", func() error {
+		return a.scrSvc.StopSession(sessionID)
+	})
 }
 
 func (a *App) GetActiveScrcpySession() *scrcpy.Session {
@@ -654,27 +713,39 @@ func (a *App) GetActiveScrcpySession() *scrcpy.Session {
 }
 
 func (a *App) StartScrcpyRecording(serial string, outputPath string, opts scrcpy.Options) error {
-	return a.scrSvc.StartRecording(serial, outputPath, opts)
+	return auditVoidAction(a, "start_scrcpy_recording", func() error {
+		return a.scrSvc.StartRecording(serial, outputPath, opts)
+	})
 }
 
 func (a *App) StopScrcpyRecording() (string, error) {
-	return a.scrSvc.StopRecording()
+	return auditAction(a, "stop_scrcpy_recording", func() (string, error) {
+		return a.scrSvc.StopRecording()
+	})
 }
 
 func (a *App) TakeScrcpyScreenshot(sessionID string, outputPath string) (string, error) {
-	return a.scrSvc.TakeScreenshot(sessionID, outputPath)
+	return auditAction(a, "take_scrcpy_screenshot", func() (string, error) {
+		return a.scrSvc.TakeScreenshot(sessionID, outputPath)
+	})
 }
 
 func (a *App) GetScrcpyEncoderSupport(serial string) (*scrcpy.EncoderSupport, error) {
-	return a.scrSvc.GetEncoderSupport(a.ctx, serial)
+	return auditAction(a, "get_scrcpy_encoder_support", func() (*scrcpy.EncoderSupport, error) {
+		return a.scrSvc.GetEncoderSupport(a.ctx, serial)
+	})
 }
 
 func (a *App) PushScrcpyClipboard(serial string, text string) error {
-	return a.scrSvc.PushClipboard(serial, text)
+	return auditVoidAction(a, "push_scrcpy_clipboard", func() error {
+		return a.scrSvc.PushClipboard(serial, text)
+	})
 }
 
 func (a *App) GetScrcpyClipboard(serial string) (string, error) {
-	return a.scrSvc.GetClipboard(serial)
+	return auditAction(a, "get_scrcpy_clipboard", func() (string, error) {
+		return a.scrSvc.GetClipboard(serial)
+	})
 }
 
 func (a *App) SelectSavePath(defaultFilename string) (string, error) {

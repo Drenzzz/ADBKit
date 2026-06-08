@@ -1,3 +1,53 @@
+export namespace audit {
+	
+	export class Entry {
+	    id: number;
+	    // Go type: time
+	    timestamp: any;
+	    level: string;
+	    operation: string;
+	    message: string;
+	    details?: string;
+	    duration?: string;
+	    success: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Entry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.timestamp = this.convertValues(source["timestamp"], null);
+	        this.level = source["level"];
+	        this.operation = source["operation"];
+	        this.message = source["message"];
+	        this.details = source["details"];
+	        this.duration = source["duration"];
+	        this.success = source["success"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
 export namespace binary {
 	
 	export class BinarySetupResult {
@@ -75,6 +125,130 @@ export namespace binary {
 
 export namespace core {
 	
+	export class ScrcpyOptions {
+	    max_size: number;
+	    bit_rate: number;
+	    max_fps: number;
+	    audio_bit_rate: number;
+	    audio_codec: string;
+	    video_codec: string;
+	    show_touches: boolean;
+	    no_audio: boolean;
+	    no_control: boolean;
+	    stay_awake: boolean;
+	    turn_screen_off: boolean;
+	    power_off_on_close: boolean;
+	    fullscreen: boolean;
+	    always_on_top: boolean;
+	    disable_screensaver: boolean;
+	    rotation: number;
+	    display_id: number;
+	    time_limit: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ScrcpyOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.max_size = source["max_size"];
+	        this.bit_rate = source["bit_rate"];
+	        this.max_fps = source["max_fps"];
+	        this.audio_bit_rate = source["audio_bit_rate"];
+	        this.audio_codec = source["audio_codec"];
+	        this.video_codec = source["video_codec"];
+	        this.show_touches = source["show_touches"];
+	        this.no_audio = source["no_audio"];
+	        this.no_control = source["no_control"];
+	        this.stay_awake = source["stay_awake"];
+	        this.turn_screen_off = source["turn_screen_off"];
+	        this.power_off_on_close = source["power_off_on_close"];
+	        this.fullscreen = source["fullscreen"];
+	        this.always_on_top = source["always_on_top"];
+	        this.disable_screensaver = source["disable_screensaver"];
+	        this.rotation = source["rotation"];
+	        this.display_id = source["display_id"];
+	        this.time_limit = source["time_limit"];
+	    }
+	}
+	export class ScrcpyPreset {
+	    name: string;
+	    options: ScrcpyOptions;
+	
+	    static createFrom(source: any = {}) {
+	        return new ScrcpyPreset(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.options = this.convertValues(source["options"], ScrcpyOptions);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class AppConfigSnapshot {
+	    adb_path: string;
+	    fastboot_path: string;
+	    scrcpy_path: string;
+	    setup_completed: boolean;
+	    theme: string;
+	    binary_versions: Record<string, string>;
+	    device_nicknames: Record<string, string>;
+	    logcat_buffer_limit: number;
+	    scrcpy_presets: ScrcpyPreset[];
+	
+	    static createFrom(source: any = {}) {
+	        return new AppConfigSnapshot(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.adb_path = source["adb_path"];
+	        this.fastboot_path = source["fastboot_path"];
+	        this.scrcpy_path = source["scrcpy_path"];
+	        this.setup_completed = source["setup_completed"];
+	        this.theme = source["theme"];
+	        this.binary_versions = source["binary_versions"];
+	        this.device_nicknames = source["device_nicknames"];
+	        this.logcat_buffer_limit = source["logcat_buffer_limit"];
+	        this.scrcpy_presets = this.convertValues(source["scrcpy_presets"], ScrcpyPreset);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class BinaryInfo {
 	    name: string;
 	    path: string;
@@ -97,6 +271,71 @@ export namespace core {
 	        this.reason = source["reason"];
 	    }
 	}
+	export class PreferencesPayload {
+	    theme: string;
+	    device_nicknames: Record<string, string>;
+	    logcat_buffer_limit: number;
+	    scrcpy_presets: ScrcpyPreset[];
+	
+	    static createFrom(source: any = {}) {
+	        return new PreferencesPayload(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.theme = source["theme"];
+	        this.device_nicknames = source["device_nicknames"];
+	        this.logcat_buffer_limit = source["logcat_buffer_limit"];
+	        this.scrcpy_presets = this.convertValues(source["scrcpy_presets"], ScrcpyPreset);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class RuntimeDiagnostics {
+	    os: string;
+	    arch: string;
+	    data_dir: string;
+	    config_path: string;
+	    managed_binary_dir: string;
+	    setup_completed: boolean;
+	    theme: string;
+	    binary_versions: Record<string, string>;
+	    capabilities: Record<string, boolean>;
+	
+	    static createFrom(source: any = {}) {
+	        return new RuntimeDiagnostics(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.os = source["os"];
+	        this.arch = source["arch"];
+	        this.data_dir = source["data_dir"];
+	        this.config_path = source["config_path"];
+	        this.managed_binary_dir = source["managed_binary_dir"];
+	        this.setup_completed = source["setup_completed"];
+	        this.theme = source["theme"];
+	        this.binary_versions = source["binary_versions"];
+	        this.capabilities = source["capabilities"];
+	    }
+	}
+	
 
 }
 

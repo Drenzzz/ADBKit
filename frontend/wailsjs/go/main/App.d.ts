@@ -3,11 +3,15 @@
 import {binary} from '../models';
 import {flasher} from '../models';
 import {scrcpy} from '../models';
+import {core} from '../models';
+import {audit} from '../models';
 import {device} from '../models';
 import {packagemgr} from '../models';
 import {file} from '../models';
 import {dialog} from '../models';
 import {shell} from '../models';
+
+export function ClearAuditLogs():Promise<void>;
 
 export function ClearCustomBinary(arg1:string):Promise<void>;
 
@@ -51,6 +55,10 @@ export function GetActiveSerial():Promise<string>;
 
 export function GetActiveSlot(arg1:string):Promise<string>;
 
+export function GetAppConfig():Promise<core.AppConfigSnapshot>;
+
+export function GetAuditLogs(arg1:number):Promise<Array<audit.Entry>>;
+
 export function GetBinaryStatus():Promise<binary.BinarySetupResult>;
 
 export function GetCapabilities():Promise<Record<string, boolean>>;
@@ -73,6 +81,8 @@ export function GetPackageDetails(arg1:string):Promise<packagemgr.Details>;
 
 export function GetPerformanceSnapshot(arg1:string):Promise<device.PerformanceSnapshot>;
 
+export function GetRuntimeDiagnostics():Promise<core.RuntimeDiagnostics>;
+
 export function GetScrcpyClipboard(arg1:string):Promise<string>;
 
 export function GetScrcpyEncoderSupport(arg1:string):Promise<scrcpy.EncoderSupport>;
@@ -80,8 +90,6 @@ export function GetScrcpyEncoderSupport(arg1:string):Promise<scrcpy.EncoderSuppo
 export function GetSetupState():Promise<binary.SetupState>;
 
 export function GetStorageInfo():Promise<file.StorageInfo>;
-
-export function Greet(arg1:string):Promise<string>;
 
 export function InstallPackage(arg1:string):Promise<string>;
 
@@ -170,5 +178,7 @@ export function TakeScrcpyScreenshot(arg1:string,arg2:string):Promise<string>;
 export function UninstallMultiplePackages(arg1:Array<string>):Promise<string>;
 
 export function UninstallPackage(arg1:string):Promise<string>;
+
+export function UpdatePreferences(arg1:core.PreferencesPayload):Promise<core.AppConfigSnapshot>;
 
 export function WipeData(arg1:string):Promise<string>;
