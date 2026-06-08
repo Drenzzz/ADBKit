@@ -8,19 +8,32 @@ import (
 
 // AppConfig holds the persistent configuration for ADBKit.
 type AppConfig struct {
-	AdbPath         string            `json:"adb_path"`
-	FastbootPath    string            `json:"fastboot_path"`
-	ScrcpyPath      string            `json:"scrcpy_path"`
-	SetupCompleted  bool              `json:"setup_completed"`
-	BinaryVersions  map[string]string `json:"binary_versions"`
-	DeviceNicknames map[string]string `json:"device_nicknames"`
+	AdbPath           string            `json:"adb_path"`
+	FastbootPath      string            `json:"fastboot_path"`
+	ScrcpyPath        string            `json:"scrcpy_path"`
+	SetupCompleted    bool              `json:"setup_completed"`
+	Theme             string            `json:"theme"`
+	BinaryVersions    map[string]string `json:"binary_versions"`
+	DeviceNicknames   map[string]string `json:"device_nicknames"`
+	LogcatBufferLimit int               `json:"logcat_buffer_limit"`
+	ScrcpyPresets     []ScrcpyPreset    `json:"scrcpy_presets"`
 }
+
+const (
+	ThemeDark  = "dark"
+	ThemeLight = "light"
+
+	DefaultLogcatBufferLimit = 5000
+)
 
 // DefaultConfig returns a fresh config with empty paths.
 func DefaultConfig() *AppConfig {
 	return &AppConfig{
-		BinaryVersions:  make(map[string]string),
-		DeviceNicknames: make(map[string]string),
+		Theme:             ThemeDark,
+		BinaryVersions:    make(map[string]string),
+		DeviceNicknames:   make(map[string]string),
+		LogcatBufferLimit: DefaultLogcatBufferLimit,
+		ScrcpyPresets:     []ScrcpyPreset{},
 	}
 }
 
@@ -39,11 +52,20 @@ func LoadConfig(dataDir string) (*AppConfig, error) {
 	if err := json.Unmarshal(data, cfg); err != nil {
 		return nil, NewOperationError("config", "failed to parse config", err.Error(), false)
 	}
+	if cfg.Theme == "" {
+		cfg.Theme = ThemeDark
+	}
 	if cfg.BinaryVersions == nil {
 		cfg.BinaryVersions = make(map[string]string)
 	}
 	if cfg.DeviceNicknames == nil {
 		cfg.DeviceNicknames = make(map[string]string)
+	}
+	if cfg.LogcatBufferLimit <= 0 {
+		cfg.LogcatBufferLimit = DefaultLogcatBufferLimit
+	}
+	if cfg.ScrcpyPresets == nil {
+		cfg.ScrcpyPresets = []ScrcpyPreset{}
 	}
 	return cfg, nil
 }
