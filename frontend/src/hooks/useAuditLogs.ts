@@ -57,6 +57,9 @@ export function useAuditLogs() {
   const clearingAuditLogs = useSettingsStore((state) => state.clearingAuditLogs)
   const error = useSettingsStore((state) => state.auditLogsError)
   const setAuditLogs = useSettingsStore((state) => state.setAuditLogs)
+  const setAuditLogFilters = useSettingsStore(
+    (state) => state.setAuditLogFilters,
+  )
   const setSelectedAuditLogId = useSettingsStore(
     (state) => state.setSelectedAuditLogId,
   )
@@ -169,6 +172,7 @@ export function useAuditLogs() {
     clearingAuditLogs,
     error,
     availableOperations,
+    setAuditLogFilters,
     setSelectedAuditLogId,
     loadAuditLogs: () =>
       queryClient.invalidateQueries({ queryKey: auditLogQueryKey(auditLogLimit) }),

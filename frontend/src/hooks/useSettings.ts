@@ -95,6 +95,20 @@ export function useSettings() {
     hydratePreferencesDraft(appConfig)
   }
 
+  async function setTheme(theme: 'dark' | 'light') {
+    if (!appConfig || appConfig.theme === theme) {
+      setPreferencesDraft({ theme })
+      return
+    }
+    setPreferencesError(null)
+    const nextConfig = await preferencesMutation
+      .mutateAsync({ ...preferencesDraft, theme })
+      .catch(() => null)
+    if (nextConfig) {
+      hydratePreferencesDraft(nextConfig)
+    }
+  }
+
   const hasPreferenceChanges = useMemo(() => {
     if (!appConfig) return false
     return !configsAreEqual(preferencesDraft, appConfig)
@@ -111,5 +125,6 @@ export function useSettings() {
     loadConfig: () => queryClient.invalidateQueries({ queryKey: settingsQueryKeys.config }),
     savePreferences,
     resetPreferencesDraft,
+    setTheme,
   }
 }

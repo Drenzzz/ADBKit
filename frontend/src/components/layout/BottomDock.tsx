@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -12,6 +13,7 @@ import {
   Moon,
 } from 'lucide-react'
 import { useUIStore } from '@/stores/useUIStore'
+import { useSettings } from '@/hooks/useSettings'
 import { DeviceModeBadge } from '@/components/devices/DeviceModeBadge'
 import { ActiveDeviceSelector } from '@/components/devices/ActiveDeviceSelector'
 
@@ -26,8 +28,29 @@ const navItems = [
   { to: '/settings', icon: Settings, label: 'Settings' },
 ]
 
+function applyThemeClass(theme: 'dark' | 'light') {
+  document.documentElement.classList.toggle('dark', theme === 'dark')
+}
+
 export function BottomDock() {
-  const { theme, toggleTheme } = useUIStore()
+  const { theme, setTheme: setLocalTheme } = useUIStore()
+  const { appConfig, setTheme: persistTheme } = useSettings()
+
+  useEffect(() => {
+    if (!appConfig) return
+    const next = appConfig.theme === 'light' ? 'light' : 'dark'
+    if (next !== theme) {
+      setLocalTheme(next)
+      applyThemeClass(next)
+    }
+  }, [appConfig, theme, setLocalTheme])
+
+  function handleToggleTheme() {
+    const next: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark'
+    setLocalTheme(next)
+    applyThemeClass(next)
+    void persistTheme(next)
+  }
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border/50 bg-background/80 backdrop-blur-md">
@@ -65,7 +88,7 @@ export function BottomDock() {
         <ActiveDeviceSelector />
 
         <button
-          onClick={toggleTheme}
+          onClick={handleToggleTheme}
           title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           className="flex flex-col items-center gap-0.5 rounded-md px-3 py-1.5 text-muted-foreground transition-all duration-150 hover:bg-accent/40 hover:text-foreground"
         >
