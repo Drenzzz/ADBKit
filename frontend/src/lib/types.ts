@@ -407,3 +407,75 @@ export interface ScrcpyState {
   error: string | null
   lastEventAt: number | null
 }
+
+export type AuditLogLevel = 'info' | 'warning' | 'error' | 'debug' | 'success'
+
+export interface AuditLogEntry {
+  id: number
+  timestamp: string
+  level: AuditLogLevel
+  operation: string
+  message: string
+  details?: string
+  duration?: string
+  success: boolean
+}
+
+export interface AuditLogFilters {
+  levels: AuditLogLevel[]
+  operation: string
+  text: string
+  success: 'all' | 'success' | 'failed'
+}
+
+export interface ScrcpyPresetSnapshot {
+  name: string
+  options: ScrcpyOptions
+}
+
+export interface PreferencesPayload {
+  theme: 'dark' | 'light'
+  device_nicknames?: Record<string, string>
+  logcat_buffer_limit?: number
+  scrcpy_presets?: ScrcpyPresetSnapshot[]
+}
+
+export interface AppConfigSnapshot {
+  adb_path: string
+  fastboot_path: string
+  scrcpy_path: string
+  setup_completed: boolean
+  theme: string
+  binary_versions: Record<string, string>
+  device_nicknames: Record<string, string>
+  logcat_buffer_limit: number
+  scrcpy_presets: ScrcpyPresetSnapshot[]
+}
+
+export interface RuntimeDiagnostics {
+  os: string
+  arch: string
+  data_dir: string
+  config_path: string
+  managed_binary_dir: string
+  setup_completed: boolean
+  theme: string
+  binary_versions: Record<string, string>
+  capabilities: Record<string, boolean>
+}
+
+export interface SettingsState {
+  appConfig: AppConfigSnapshot | null
+  preferencesDraft: PreferencesPayload
+  auditLogs: AuditLogEntry[]
+  auditLogLimit: number
+  auditLogFilters: AuditLogFilters
+  selectedAuditLogId: number | null
+  loadingConfig: boolean
+  savingPreferences: boolean
+  loadingAuditLogs: boolean
+  clearingAuditLogs: boolean
+  preferencesError: string | null
+  auditLogsError: string | null
+  auditLogsLoadedAt: number | null
+}
