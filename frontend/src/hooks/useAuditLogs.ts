@@ -1,6 +1,11 @@
 import { useEffect, useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { clearAuditLogs, getAuditLogs } from '@/services/settingsService'
+import {
+  clearAuditLogs as clearAuditLogsService,
+  exportAuditLogs as exportAuditLogsService,
+  getAuditLogs,
+  importAuditLogs as importAuditLogsService,
+} from '@/services/settingsService'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import type { AuditLogEntry, AuditLogFilters } from '@/lib/types'
 
@@ -57,6 +62,7 @@ export function useAuditLogs() {
   const clearingAuditLogs = useSettingsStore((state) => state.clearingAuditLogs)
   const error = useSettingsStore((state) => state.auditLogsError)
   const setAuditLogs = useSettingsStore((state) => state.setAuditLogs)
+  const setAuditLogLimit = useSettingsStore((state) => state.setAuditLogLimit)
   const setAuditLogFilters = useSettingsStore(
     (state) => state.setAuditLogFilters,
   )
@@ -111,7 +117,7 @@ export function useAuditLogs() {
   ])
 
   const clearLogsMutation = useMutation({
-    mutationFn: clearAuditLogs,
+    mutationFn: clearAuditLogsService,
     onSuccess: () => {
       queryClient.setQueryData(auditLogQueryKey(auditLogLimit), [])
       setAuditLogs([])
@@ -121,6 +127,19 @@ export function useAuditLogs() {
     },
     onError: (clearError) => {
       setAuditLogsError(getErrorMessage(clearError, 'Failed to clear audit logs'))
+    },
+  })
+
+  const exportLogsMutation = useMutation({
+    mutationFn: exportAuditLogsService,
+  })
+
+  const importLogsMutation = useMutation({
+    mutationFn: importAuditLogsService,
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: auditLogQueryKey(auditLogLimit) })
+      setAuditLogsLoadedAt(Date.now())
+      return count
     },
   })
 
@@ -134,6 +153,31 @@ export function useAuditLogs() {
       .mutateAsync()
       .then(() => true)
       .catch(() => false)
+  }
+
+  async function exportLogs(path: string) {
+    try {
+      await exportLogsMutation.mutateAsync(path)
+      return true
+    } catch (error) {
+      setAuditLogsError(getErrorMessage(error, 'Failed to export audit logs'))
+      return false
+    }
+  }
+
+  async function importLogs(path: string): Promise<number | null> {
+    try {
+      const count = await importLogsMutation.mutateAsync(path)
+      return count
+    } catch (error) {
+      setAuditLogsError(getErrorMessage(error, 'Failed to import audit logs'))
+      return null
+    }
+  }
+
+  function changeLimit(limit: number) {
+    setAuditLogLimit(limit)
+    queryClient.invalidateQueries({ queryKey: auditLogQueryKey(limit) })
   }
 
   const filteredLogs = useMemo(() => {
@@ -178,5 +222,8 @@ export function useAuditLogs() {
     loadAuditLogs: () =>
       queryClient.invalidateQueries({ queryKey: auditLogQueryKey(auditLogLimit) }),
     clearLogs,
+    exportLogs,
+    importLogs,
+    changeLimit,
   }
 }

@@ -66,6 +66,10 @@ export function EnableWirelessTCPIP(arg1, arg2) {
   return window['go']['main']['App']['EnableWirelessTCPIP'](arg1, arg2);
 }
 
+export function ExportAuditLogs(arg1) {
+  return window['go']['main']['App']['ExportAuditLogs'](arg1);
+}
+
 export function FlashPartition(arg1, arg2, arg3) {
   return window['go']['main']['App']['FlashPartition'](arg1, arg2, arg3);
 }
@@ -160,6 +164,10 @@ export function GetSetupState() {
 
 export function GetStorageInfo() {
   return window['go']['main']['App']['GetStorageInfo']();
+}
+
+export function ImportAuditLogs(arg1) {
+  return window['go']['main']['App']['ImportAuditLogs'](arg1);
 }
 
 export function InstallPackage(arg1) {

@@ -3,6 +3,9 @@ package main
 import (
 	"ADBKit/internal/audit"
 	"ADBKit/internal/core"
+	"encoding/json"
+	"fmt"
+	"os"
 	"runtime"
 	"strings"
 )
@@ -11,7 +14,7 @@ func (a *App) GetAuditLogs(limit int) []audit.Entry {
 	if a.auditLog == nil {
 		return []audit.Entry{}
 	}
-	return a.auditLog.Entries()
+	return a.auditLog.EntriesWithLimit(limit)
 }
 
 func (a *App) ClearAuditLogs() {
@@ -20,6 +23,47 @@ func (a *App) ClearAuditLogs() {
 	}
 	a.auditLog.Clear()
 	a.auditLog.Log(audit.LogLevelInfo, "audit_logs", "Audit logs cleared")
+}
+
+func (a *App) ExportAuditLogs(path string) error {
+	if a.auditLog == nil {
+		return core.NewOperationError("export_audit_logs", "audit log is not available", "", false)
+	}
+	if strings.TrimSpace(path) == "" {
+		return core.NewOperationError("export_audit_logs", "export path is required", "", false)
+	}
+	entries := a.auditLog.EntriesWithLimit(0)
+	data, err := json.MarshalIndent(entries, "", "  ")
+	if err != nil {
+		return core.NewOperationError("export_audit_logs", "failed to marshal audit entries", err.Error(), true)
+	}
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		return core.NewOperationError("export_audit_logs", "failed to write export file", err.Error(), true)
+	}
+	a.auditLog.Log(audit.LogLevelInfo, "audit_logs", fmt.Sprintf("Audit logs exported to %s", path))
+	return nil
+}
+
+func (a *App) ImportAuditLogs(path string) (int, error) {
+	if a.auditLog == nil {
+		return 0, core.NewOperationError("import_audit_logs", "audit log is not available", "", false)
+	}
+	if strings.TrimSpace(path) == "" {
+		return 0, core.NewOperationError("import_audit_logs", "import path is required", "", false)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0, core.NewOperationError("import_audit_logs", "failed to read import file", err.Error(), true)
+	}
+	var entries []audit.Entry
+	if err := json.Unmarshal(data, &entries); err != nil {
+		return 0, core.NewOperationError("import_audit_logs", "import file is not a valid audit log", err.Error(), false)
+	}
+	if err := a.auditLog.ReplaceAll(entries); err != nil {
+		return 0, core.NewOperationError("import_audit_logs", "failed to apply import", err.Error(), true)
+	}
+	a.auditLog.Log(audit.LogLevelInfo, "audit_logs", fmt.Sprintf("Audit logs imported from %s", path))
+	return len(entries), nil
 }
 
 func (a *App) GetAppConfig() core.AppConfigSnapshot {

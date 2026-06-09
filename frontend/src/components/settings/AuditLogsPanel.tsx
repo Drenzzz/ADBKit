@@ -22,15 +22,20 @@ import {
 } from '@/components/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 import type { AuditLogEntry, AuditLogLevel } from '@/lib/types'
+import { AUDIT_LOG_LIMIT_OPTIONS } from '@/services/settingsService'
+import { selectSaveFile, selectFile } from '@/services/binaryService'
+import { toast } from 'sonner'
 import {
   AlertTriangle,
   CheckCircle2,
   ChevronDown,
+  Download,
   FileText,
   Filter,
   Info,
   RefreshCw,
   Trash2,
+  Upload,
   XCircle,
 } from 'lucide-react'
 
@@ -169,15 +174,20 @@ export function AuditLogsPanel() {
     error,
     auditLogFilters,
     auditLogs,
+    auditLogLimit,
     selectedAuditLogId,
     availableOperations,
     setAuditLogFilters,
     setSelectedAuditLogId,
     loadAuditLogs,
     clearLogs,
+    exportLogs,
+    importLogs,
+    changeLimit,
   } = useAuditLogs()
 
   const [showClearDialog, setShowClearDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
 
   function toggleLevel(level: AuditLogLevel) {
     const current = auditLogFilters.levels
@@ -191,6 +201,38 @@ export function AuditLogsPanel() {
     clearLogs().then((ok) => {
       if (ok) setShowClearDialog(false)
     })
+  }
+
+  async function handleExport() {
+    try {
+      const path = await selectSaveFile('adbkit-audit-logs.json')
+      if (!path) return
+      const ok = await exportLogs(path)
+      if (ok) {
+        toast.success('Audit logs exported', { description: path })
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Export failed',
+      )
+    }
+  }
+
+  async function handleImport() {
+    try {
+      const path = await selectFile()
+      if (!path) return
+      setShowImportDialog(false)
+      const count = await importLogs(path)
+      if (count !== null) {
+        toast.success(`Imported ${count} entries`, { description: path })
+        void loadAuditLogs()
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Import failed',
+      )
+    }
   }
 
   return (
@@ -313,7 +355,42 @@ export function AuditLogsPanel() {
           })}
         </div>
 
+        <Select
+          value={String(auditLogLimit)}
+          onValueChange={(value) => changeLimit(Number(value))}
+        >
+          <SelectTrigger className="h-8 w-auto min-w-[110px] text-xs">
+            <SelectValue placeholder="Fetch limit" />
+          </SelectTrigger>
+          <SelectContent>
+            {AUDIT_LOG_LIMIT_OPTIONS.map((value) => (
+              <SelectItem key={value} value={String(value)}>
+                {value} entries
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <div className="ml-auto flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExport}
+            disabled={auditLogs.length === 0}
+            className="h-8"
+          >
+            <Download className="mr-1.5 h-3 w-3" />
+            Export
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setShowImportDialog(true)}
+            className="h-8"
+          >
+            <Upload className="mr-1.5 h-3 w-3" />
+            Import
+          </Button>
           <Button
             size="sm"
             variant="outline"
@@ -395,9 +472,9 @@ export function AuditLogsPanel() {
 
       <div className="flex items-center justify-between text-[11px] text-muted-foreground/50">
         <span>
-          {filteredLogs.length} of {auditLogs.length} entries
+          Showing {filteredLogs.length} of {auditLogs.length} entries (limit {auditLogLimit})
         </span>
-        <span>Limit {auditLogs.length} per fetch</span>
+        <span>Backend buffer max 1000 entries — use Export to back up history</span>
       </div>
 
       <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
@@ -413,6 +490,25 @@ export function AuditLogsPanel() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleClear}>
               Clear logs
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Import audit logs?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace the current audit log with the contents of
+              the selected JSON file. The backend keeps at most 1000
+              entries — anything beyond that will be dropped.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleImport}>
+              Select file and import
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

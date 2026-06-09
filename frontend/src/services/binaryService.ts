@@ -10,6 +10,8 @@ import {
   GetCapabilities,
   SelectBinaryFile,
   SelectPlatformToolsDirectory,
+  SelectSavePath,
+  SelectFile,
 } from '../../wailsjs/go/main/App'
 import type {
   BinaryName,
@@ -72,4 +74,12 @@ export async function selectBinaryFile(
 export async function selectPlatformToolsDirectory(): Promise<PlatformToolsSelection> {
   const raw = await SelectPlatformToolsDirectory()
   return raw as unknown as PlatformToolsSelection
+}
+
+export async function selectSaveFile(defaultFilename: string): Promise<string> {
+  return SelectSavePath(defaultFilename)
+}
+
+export async function selectFile(): Promise<string> {
+  return SelectFile()
 }

@@ -118,12 +118,42 @@ func (l *Log) append(level LogLevel, operation, message, details, duration strin
 }
 
 func (l *Log) Entries() []Entry {
+	return l.EntriesWithLimit(0)
+}
+
+func (l *Log) EntriesWithLimit(limit int) []Entry {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	out := make([]Entry, len(l.entries))
-	copy(out, l.entries)
+	total := len(l.entries)
+	if limit <= 0 || limit >= total {
+		out := make([]Entry, total)
+		copy(out, l.entries)
+		return out
+	}
+
+	start := total - limit
+	if start < 0 {
+		start = 0
+	}
+	out := make([]Entry, total-start)
+	copy(out, l.entries[start:])
 	return out
+}
+
+func (l *Log) ReplaceAll(entries []Entry) error {
+	sorted := make([]Entry, len(entries))
+	copy(sorted, entries)
+
+	l.mu.Lock()
+	l.entries = sorted
+	if len(l.entries) > l.maxEntries {
+		l.entries = l.entries[len(l.entries)-l.maxEntries:]
+	}
+	l.mu.Unlock()
+
+	l.saveNow()
+	return nil
 }
 
 func (l *Log) Clear() {

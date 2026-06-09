@@ -43,6 +43,8 @@ export function EnablePackage(arg1:string):Promise<string>;
 
 export function EnableWirelessTCPIP(arg1:string,arg2:string):Promise<string>;
 
+export function ExportAuditLogs(arg1:string):Promise<void>;
+
 export function FlashPartition(arg1:string,arg2:string,arg3:string):Promise<string>;
 
 export function FlashRomFolder(arg1:string,arg2:string,arg3:flasher.Plan):Promise<string>;
@@ -90,6 +92,8 @@ export function GetScrcpyEncoderSupport(arg1:string):Promise<scrcpy.EncoderSuppo
 export function GetSetupState():Promise<binary.SetupState>;
 
 export function GetStorageInfo():Promise<file.StorageInfo>;
+
+export function ImportAuditLogs(arg1:string):Promise<number>;
 
 export function InstallPackage(arg1:string):Promise<string>;
 
