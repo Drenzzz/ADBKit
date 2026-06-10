@@ -4,34 +4,44 @@ import { BottomDock } from './BottomDock'
 import { CommandPalette } from '@/components/common/CommandPalette'
 import { SetupWizard } from '@/components/setup/SetupWizard'
 import { getSetupState } from '@/services/binaryService'
+import { getAppConfig } from '@/services/settingsService'
 import { useUIStore } from '@/stores/useUIStore'
+
+function applyThemeClass(theme: 'dark' | 'light') {
+  document.documentElement.classList.toggle('dark', theme === 'dark')
+}
 
 export function AppShell() {
   const [setupChecked, setSetupChecked] = useState(false)
   const [setupComplete, setSetupComplete] = useState(false)
   const setStartupLoading = useUIStore((s) => s.setStartupLoading)
+  const setUiTheme = useUIStore((s) => s.setTheme)
+  const currentTheme = useUIStore((s) => s.theme)
 
   useEffect(() => {
     let cancelled = false
-    getSetupState()
-      .then((state) => {
-        if (!cancelled) {
-          setSetupComplete(state.setupCompleted)
-          setSetupChecked(true)
-          setStartupLoading(false)
+    Promise.all([getSetupState(), getAppConfig()])
+      .then(([state, config]) => {
+        if (cancelled) return
+        const nextTheme = config.theme === 'light' ? 'light' : 'dark'
+        if (nextTheme !== currentTheme) {
+          setUiTheme(nextTheme)
+          applyThemeClass(nextTheme)
         }
+        setSetupComplete(state.setupCompleted)
+        setSetupChecked(true)
+        setStartupLoading(false)
       })
       .catch(() => {
-        if (!cancelled) {
-          setSetupComplete(false)
-          setSetupChecked(true)
-          setStartupLoading(false)
-        }
+        if (cancelled) return
+        setSetupComplete(false)
+        setSetupChecked(true)
+        setStartupLoading(false)
       })
     return () => {
       cancelled = true
     }
-  }, [setStartupLoading])
+  }, [setStartupLoading, setUiTheme, currentTheme])
 
   if (!setupChecked) return null
 
