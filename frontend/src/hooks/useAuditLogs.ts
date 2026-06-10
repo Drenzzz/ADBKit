@@ -84,12 +84,11 @@ export function useAuditLogs() {
     if (auditLogQuery.data) {
       setAuditLogs(auditLogQuery.data)
       setAuditLogsLoadedAt(Date.now())
-      if (auditLogQuery.data.length === 0) {
-        setSelectedAuditLogId(null)
-      } else if (
+      if (
+        selectedAuditLogId !== null &&
         !auditLogQuery.data.some((entry) => entry.id === selectedAuditLogId)
       ) {
-        setSelectedAuditLogId(auditLogQuery.data[0]?.id ?? null)
+        setSelectedAuditLogId(null)
       }
       setAuditLogsError(null)
     }
