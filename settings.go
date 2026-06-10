@@ -24,24 +24,8 @@ func (a *App) ClearAuditLogs() {
 
 func (a *App) GetAppConfig() core.AppConfigSnapshot {
 	a.mu.Lock()
-	cfg := a.cfg
-	a.mu.Unlock()
-
-	if cfg == nil {
-		return core.AppConfigSnapshot{}
-	}
-
-	return core.AppConfigSnapshot{
-		AdbPath:           cfg.AdbPath,
-		FastbootPath:      cfg.FastbootPath,
-		ScrcpyPath:        cfg.ScrcpyPath,
-		SetupCompleted:    cfg.SetupCompleted,
-		Theme:             cfg.Theme,
-		BinaryVersions:    cloneStringMap(cfg.BinaryVersions),
-		DeviceNicknames:   cloneStringMap(cfg.DeviceNicknames),
-		LogcatBufferLimit: cfg.LogcatBufferLimit,
-		ScrcpyPresets:     cloneScrcpyPresets(cfg.ScrcpyPresets),
-	}
+	defer a.mu.Unlock()
+	return a.snapshotConfigLocked()
 }
 
 func (a *App) UpdatePreferences(payload core.PreferencesPayload) (core.AppConfigSnapshot, error) {
@@ -76,16 +60,17 @@ func (a *App) UpdatePreferences(payload core.PreferencesPayload) (core.AppConfig
 		a.auditLog.Log(audit.LogLevelInfo, "preferences_update", "Preferences updated")
 	}
 
-	return a.GetAppConfig(), nil
+	return a.snapshotConfigLocked(), nil
 }
 
 func (a *App) GetRuntimeDiagnostics() core.RuntimeDiagnostics {
-	a.mu.Lock()
 	managedBinaryDir := ""
 	if a.binSvc != nil {
 		managedBinaryDir = a.binSvc.GetManagedBinaryDir()
 	}
-	snapshot := a.GetAppConfig()
+
+	a.mu.Lock()
+	snapshot := a.snapshotConfigLocked()
 	a.mu.Unlock()
 
 	return core.RuntimeDiagnostics{
@@ -98,6 +83,23 @@ func (a *App) GetRuntimeDiagnostics() core.RuntimeDiagnostics {
 		Theme:            snapshot.Theme,
 		BinaryVersions:   cloneStringMap(snapshot.BinaryVersions),
 		Capabilities:     a.GetCapabilities(),
+	}
+}
+
+func (a *App) snapshotConfigLocked() core.AppConfigSnapshot {
+	if a.cfg == nil {
+		return core.AppConfigSnapshot{}
+	}
+	return core.AppConfigSnapshot{
+		AdbPath:           a.cfg.AdbPath,
+		FastbootPath:      a.cfg.FastbootPath,
+		ScrcpyPath:        a.cfg.ScrcpyPath,
+		SetupCompleted:    a.cfg.SetupCompleted,
+		Theme:             a.cfg.Theme,
+		BinaryVersions:    cloneStringMap(a.cfg.BinaryVersions),
+		DeviceNicknames:   cloneStringMap(a.cfg.DeviceNicknames),
+		LogcatBufferLimit: a.cfg.LogcatBufferLimit,
+		ScrcpyPresets:     cloneScrcpyPresets(a.cfg.ScrcpyPresets),
 	}
 }
 
