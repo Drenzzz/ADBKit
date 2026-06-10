@@ -11,7 +11,8 @@ const initialFilters: AuditLogFilters = {
   levels: ['info', 'warning', 'error', 'debug', 'success'],
   operation: '',
   text: '',
-  success: 'all',
+  outcome: 'all',
+  sort: 'newest',
 }
 
 const initialPreferencesDraft: PreferencesPayload = {

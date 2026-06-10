@@ -410,6 +410,10 @@ export interface ScrcpyState {
 
 export type AuditLogLevel = 'info' | 'warning' | 'error' | 'debug' | 'success'
 
+export type AuditLogOutcome = 'all' | 'succeeded' | 'failed'
+
+export type AuditLogSort = 'newest' | 'oldest'
+
 export interface AuditLogEntry {
   id: number
   timestamp: string
@@ -425,7 +429,8 @@ export interface AuditLogFilters {
   levels: AuditLogLevel[]
   operation: string
   text: string
-  success: 'all' | 'success' | 'failed'
+  outcome: AuditLogOutcome
+  sort: AuditLogSort
 }
 
 export interface ScrcpyPresetSnapshot {

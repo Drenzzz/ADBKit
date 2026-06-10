@@ -200,6 +200,10 @@ export function AuditLogsPanel() {
       )}
 
       <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+          Filter
+        </span>
+
         <div className="flex flex-wrap items-center gap-1 rounded-md border border-border/40 p-1">
           {ALL_LEVELS.map((level) => {
             const isActive = auditLogFilters.levels.includes(level)
@@ -230,20 +234,20 @@ export function AuditLogsPanel() {
         </div>
 
         <Select
-          value={auditLogFilters.success}
+          value={auditLogFilters.outcome}
           onValueChange={(value) =>
             setAuditLogFilters({
-              success: value as 'all' | 'success' | 'failed',
+              outcome: value as 'all' | 'succeeded' | 'failed',
             })
           }
         >
-          <SelectTrigger className="h-8 w-auto min-w-[120px] text-xs">
+          <SelectTrigger className="h-8 w-auto min-w-[130px] text-xs">
             <SelectValue placeholder="All outcomes" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All outcomes</SelectItem>
-            <SelectItem value="success">Success only</SelectItem>
-            <SelectItem value="failed">Failed only</SelectItem>
+            <SelectItem value="succeeded">Succeeded</SelectItem>
+            <SelectItem value="failed">Failed</SelectItem>
           </SelectContent>
         </Select>
 
@@ -276,6 +280,38 @@ export function AuditLogsPanel() {
           }
           className="h-8 min-w-[180px] flex-1 font-mono text-xs"
         />
+
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+          Sort
+        </span>
+
+        <div className="flex items-center gap-1 rounded-md border border-border/40 p-1">
+          {(
+            [
+              { value: 'newest', label: 'Newest first' },
+              { value: 'oldest', label: 'Oldest first' },
+            ] as const
+          ).map((option) => {
+            const isActive = auditLogFilters.sort === option.value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() =>
+                  setAuditLogFilters({ sort: option.value })
+                }
+                className={cn(
+                  'rounded px-2 py-1 text-[11px] font-medium transition-colors',
+                  isActive
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground/60 hover:bg-accent/40 hover:text-foreground',
+                )}
+              >
+                {option.label}
+              </button>
+            )
+          })}
+        </div>
 
         <div className="ml-auto flex items-center gap-2">
           <Button
@@ -334,7 +370,8 @@ export function AuditLogsPanel() {
                 {auditLogFilters.levels.length < ALL_LEVELS.length ||
                 auditLogFilters.operation ||
                 auditLogFilters.text ||
-                auditLogFilters.success !== 'all'
+                auditLogFilters.outcome !== 'all' ||
+                auditLogFilters.sort !== 'newest'
                   ? 'Try adjusting the filters above.'
                   : 'Audit logs will appear here as operations run.'}
               </span>

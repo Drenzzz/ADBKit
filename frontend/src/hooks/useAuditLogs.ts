@@ -18,10 +18,10 @@ function matchesFilters(
   if (!filters.levels.includes(entry.level)) {
     return false
   }
-  if (filters.success === 'success' && !entry.success) {
+  if (filters.outcome === 'succeeded' && !entry.success) {
     return false
   }
-  if (filters.success === 'failed' && entry.success) {
+  if (filters.outcome === 'failed' && entry.success) {
     return false
   }
   if (
@@ -138,9 +138,11 @@ export function useAuditLogs() {
 
   const filteredLogs = useMemo(() => {
     const nextLogs = auditLogs.filter((entry) => matchesFilters(entry, auditLogFilters))
+    const direction = auditLogFilters.sort === 'newest' ? -1 : 1
     return [...nextLogs].sort(
       (left, right) =>
-        new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime(),
+        direction *
+        (new Date(left.timestamp).getTime() - new Date(right.timestamp).getTime()),
     )
   }, [auditLogs, auditLogFilters])
 
