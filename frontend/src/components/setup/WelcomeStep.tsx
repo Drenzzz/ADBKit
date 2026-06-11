@@ -6,10 +6,10 @@ export function WelcomeStep() {
 
   return (
     <div className="flex flex-col items-center gap-6 text-center">
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Welcome to ADBKit</h1>
         <p className="max-w-sm text-sm text-muted-foreground">
-          ADBKit needs ADB, Fastboot, and scrcpy to work. Let's set them up.
+          ADB, Fastboot, and scrcpy are all required for ADBKit to function. The wizard will walk you through detecting or installing each one.
         </p>
       </div>
       <Button onClick={nextStep} size="lg">

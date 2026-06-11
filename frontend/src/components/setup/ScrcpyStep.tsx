@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react'
-import { RefreshCw, FileSearch } from 'lucide-react'
+import { RefreshCw, FileSearch, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -69,9 +69,14 @@ export function ScrcpyStep() {
   return (
     <div className="flex flex-col gap-5">
       <div className="text-center">
-        <h2 className="text-lg font-semibold">Scrcpy</h2>
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="text-lg font-semibold">Scrcpy</h2>
+          <Badge variant="destructive" className="text-[10px] uppercase tracking-wider">
+            Required
+          </Badge>
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          Required for screen mirroring, recording, and clipboard sync.
+          Screen mirroring, recording, and clipboard sync need scrcpy. The wizard cannot continue without it.
         </p>
       </div>
 
@@ -97,6 +102,13 @@ export function ScrcpyStep() {
 
       {error && (
         <p className="text-center text-sm text-destructive">{error}</p>
+      )}
+
+      {!loading && !scrcpyReady && (
+        <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-400">
+          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>scrcpy was not found on your system. Select the binary manually or install it and retry detection.</span>
+        </div>
       )}
 
       <div className="flex flex-wrap items-center justify-center gap-2">

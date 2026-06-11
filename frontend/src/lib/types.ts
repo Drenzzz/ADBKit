@@ -28,6 +28,7 @@ export interface BinarySetupResult {
 export interface SetupState {
   status: BinarySetupResult
   setupCompleted: boolean
+  /** True when adb, fastboot, and scrcpy are all ready. */
   canFinish: boolean
 }
 

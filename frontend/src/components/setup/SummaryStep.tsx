@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, ArrowLeft } from 'lucide-react'
+import { Check, ArrowLeft, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
@@ -57,6 +57,8 @@ export function SummaryStep() {
     )
   }
 
+  const scrcpyMissing = setupState?.status?.scrcpy?.status !== 'ready'
+
   return (
     <div className="flex flex-col gap-5">
       <div className="text-center">
@@ -71,6 +73,13 @@ export function SummaryStep() {
         <BinarySummary label="Fastboot" info={setupState?.status?.fastboot} />
         <BinarySummary label="Scrcpy" info={setupState?.status?.scrcpy} />
       </div>
+
+      {scrcpyMissing && (
+        <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-400">
+          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>scrcpy is missing — go back to the previous step and provide a valid scrcpy binary before finishing setup.</span>
+        </div>
+      )}
 
       <div className="flex justify-between">
         <Button variant="ghost" onClick={prevStep} disabled={submitting}>
