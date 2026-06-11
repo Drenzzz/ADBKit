@@ -61,7 +61,11 @@ function StepContent({ step }: { step: SetupWizardStep }) {
   }
 }
 
-export function SetupWizard() {
+interface SetupWizardProps {
+  onSkipToApp?: () => void
+}
+
+export function SetupWizard({ onSkipToApp }: SetupWizardProps) {
   const currentStep = useSetupWizardStore((s) => s.currentStep)
 
   return (
@@ -71,6 +75,17 @@ export function SetupWizard() {
           <StepIndicator current={currentStep} />
         </div>
         <StepContent step={currentStep} />
+        {onSkipToApp && (
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={onSkipToApp}
+              className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition-colors underline underline-offset-2"
+            >
+              Skip to app — I'll set up binaries later
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
