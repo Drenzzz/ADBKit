@@ -8,6 +8,50 @@ import type {
 
 const STEPS: SetupWizardStep[] = ['welcome', 'platform-tools', 'scrcpy', 'summary']
 
+const DRAFT_KEY = 'adbkit-setup-draft'
+
+interface DraftPayload {
+  selectedPaths: Partial<Record<BinaryName, string>>
+  currentStep: SetupWizardStep
+}
+
+function readDraft(): DraftPayload | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (parsed && typeof parsed === 'object') return parsed as DraftPayload
+  } catch {
+    // corrupted draft — ignore
+  }
+  return null
+}
+
+function writeDraft(payload: DraftPayload) {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(payload))
+  } catch {
+    // localStorage full or blocked — silent
+  }
+}
+
+function clearDraft() {
+  try {
+    localStorage.removeItem(DRAFT_KEY)
+  } catch {
+    // ignore
+  }
+}
+
+function restoreDraft(): Partial<SetupWizardState> {
+  const draft = readDraft()
+  if (!draft) return {}
+  return {
+    selectedPaths: draft.selectedPaths ?? {},
+    currentStep: draft.currentStep ?? 'welcome',
+  }
+}
+
 interface SetupWizardActions {
   setCurrentStep: (step: SetupWizardStep) => void
   nextStep: () => void
@@ -35,22 +79,30 @@ const initialState: SetupWizardState = {
 
 export const useSetupWizardStore = create<SetupWizardStore>()((set, get) => ({
   ...initialState,
+  ...restoreDraft(),
 
-  setCurrentStep: (step) => set({ currentStep: step, error: null }),
+  setCurrentStep: (step) => {
+    set({ currentStep: step, error: null })
+    writeDraft({ selectedPaths: get().selectedPaths, currentStep: step })
+  },
 
   nextStep: () => {
-    const { currentStep } = get()
+    const { currentStep, selectedPaths } = get()
     const idx = STEPS.indexOf(currentStep)
     if (idx < STEPS.length - 1) {
-      set({ currentStep: STEPS[idx + 1], error: null })
+      const next = STEPS[idx + 1]
+      set({ currentStep: next, error: null })
+      writeDraft({ selectedPaths, currentStep: next })
     }
   },
 
   prevStep: () => {
-    const { currentStep } = get()
+    const { currentStep, selectedPaths } = get()
     const idx = STEPS.indexOf(currentStep)
     if (idx > 0) {
-      set({ currentStep: STEPS[idx - 1], error: null })
+      const prev = STEPS[idx - 1]
+      set({ currentStep: prev, error: null })
+      writeDraft({ selectedPaths, currentStep: prev })
     }
   },
 
@@ -62,27 +114,34 @@ export const useSetupWizardStore = create<SetupWizardStore>()((set, get) => ({
 
   setError: (error) => set({ error, submitting: false }),
 
-  setSelectedPath: (name, path) =>
-    set((state) => ({
-      selectedPaths: { ...state.selectedPaths, [name]: path },
-    })),
+  setSelectedPath: (name, path) => {
+    const next = { ...get().selectedPaths, [name]: path }
+    set({ selectedPaths: next })
+    writeDraft({ selectedPaths: next, currentStep: get().currentStep })
+  },
 
-  clearSelectedPath: (name) =>
-    set((state) => {
-      const next = { ...state.selectedPaths }
-      delete next[name]
-      return { selectedPaths: next }
-    }),
+  clearSelectedPath: (name) => {
+    const next = { ...get().selectedPaths }
+    delete next[name]
+    set({ selectedPaths: next })
+    writeDraft({ selectedPaths: next, currentStep: get().currentStep })
+  },
 
-  hydrateFromSetupState: (setupState) =>
+  hydrateFromSetupState: (setupState) => {
+    const paths: Partial<Record<BinaryName, string>> = {
+      adb: setupState.status?.adb?.path ?? '',
+      fastboot: setupState.status?.fastboot?.path ?? '',
+      scrcpy: setupState.status?.scrcpy?.path ?? '',
+    }
     set({
       setupState,
-      selectedPaths: {
-        adb: setupState.status?.adb?.path ?? '',
-        fastboot: setupState.status?.fastboot?.path ?? '',
-        scrcpy: setupState.status?.scrcpy?.path ?? '',
-      },
-    }),
+      selectedPaths: paths,
+    })
+    writeDraft({ selectedPaths: paths, currentStep: get().currentStep })
+  },
 
-  reset: () => set(initialState),
+  reset: () => {
+    clearDraft()
+    set(initialState)
+  },
 }))
