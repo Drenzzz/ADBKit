@@ -6,29 +6,42 @@ import { ScrcpyStep } from './ScrcpyStep'
 import { SummaryStep } from './SummaryStep'
 import type { SetupWizardStep } from '@/lib/types'
 
-const STEP_META: Record<SetupWizardStep, { label: string; index: number }> = {
-  welcome: { label: 'Welcome', index: 0 },
-  'platform-tools': { label: 'Platform Tools', index: 1 },
-  scrcpy: { label: 'Scrcpy', index: 2 },
-  summary: { label: 'Summary', index: 3 },
-}
+const STEPS: { key: SetupWizardStep; label: string }[] = [
+  { key: 'welcome', label: 'Welcome' },
+  { key: 'platform-tools', label: 'Platform Tools' },
+  { key: 'scrcpy', label: 'Scrcpy' },
+  { key: 'summary', label: 'Summary' },
+]
 
 function StepIndicator({ current }: { current: SetupWizardStep }) {
-  const currentIdx = STEP_META[current].index
+  const currentIdx = STEPS.findIndex((s) => s.key === current)
 
   return (
-    <div className="flex items-center gap-1.5">
-      {(['welcome', 'platform-tools', 'scrcpy', 'summary'] as const).map((step, i) => {
+    <div className="flex items-center gap-2">
+      {STEPS.map((step, i) => {
         const active = i === currentIdx
         const done = i < currentIdx
         return (
-          <div
-            key={step}
-            className={cn(
-              'h-1.5 rounded-full transition-all',
-              active ? 'w-6 bg-foreground' : done ? 'w-1.5 bg-foreground/60' : 'w-1.5 bg-border',
-            )}
-          />
+          <div key={step.key} className="flex flex-col items-center gap-1">
+            <div
+              className={cn(
+                'h-1.5 w-6 rounded-full transition-all',
+                active ? 'bg-foreground' : done ? 'bg-foreground/60' : 'bg-border',
+              )}
+            />
+            <span
+              className={cn(
+                'text-[9px] uppercase tracking-wider transition-colors select-none',
+                active
+                  ? 'text-foreground font-semibold'
+                  : done
+                    ? 'text-foreground/50 font-medium'
+                    : 'text-muted-foreground/40',
+              )}
+            >
+              {step.label}
+            </span>
+          </div>
         )
       })}
     </div>
