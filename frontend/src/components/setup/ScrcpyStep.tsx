@@ -1,9 +1,11 @@
 import { useEffect, useCallback } from 'react'
-import { RefreshCw, FileSearch, AlertTriangle } from 'lucide-react'
+import { RefreshCw, FileSearch, Download, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
+import { useBinaryDownload } from '@/hooks/useBinaryDownload'
 import {
   getSetupState,
   retryBinaryDetection,
@@ -18,6 +20,7 @@ function LoadingSkeleton() {
 export function ScrcpyStep() {
   const { setupState, loading, error, nextStep, prevStep, setSetupState, setLoading, setError } =
     useSetupWizardStore()
+  const { getState, download } = useBinaryDownload()
 
   const detect = useCallback(async () => {
     setLoading(true)
@@ -63,8 +66,15 @@ export function ScrcpyStep() {
     }
   }
 
+  const handleDownloadScrcpy = async () => {
+    await download('scrcpy')
+    const state = await getSetupState()
+    setSetupState(state)
+  }
+
   const scrcpyInfo = setupState?.status?.scrcpy
   const scrcpyReady = scrcpyInfo?.status === 'ready'
+  const scrcpyDownload = getState('scrcpy')
 
   return (
     <div className="flex flex-col gap-5">
@@ -83,19 +93,55 @@ export function ScrcpyStep() {
       {loading ? (
         <LoadingSkeleton />
       ) : (
-        <div className="flex items-center justify-between rounded-md border border-border/50 px-3 py-2">
-          <span className="text-sm font-medium">scrcpy</span>
-          {scrcpyInfo ? (
-            <Badge
-              variant={scrcpyReady ? 'default' : scrcpyInfo.status === 'invalid_path' ? 'destructive' : 'secondary'}
-              className="text-[10px]"
-            >
-              {scrcpyReady ? scrcpyInfo.version ?? 'ready' : scrcpyInfo.status}
-            </Badge>
-          ) : (
-            <Badge variant="secondary" className="text-[10px]">
-              missing
-            </Badge>
+        <div className="flex flex-col gap-1.5 rounded-md border border-border/50 px-3 py-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">scrcpy</span>
+            {scrcpyInfo ? (
+              <Badge
+                variant={scrcpyReady ? 'default' : scrcpyInfo.status === 'invalid_path' ? 'destructive' : 'secondary'}
+                className="text-[10px]"
+              >
+                {scrcpyReady ? scrcpyInfo.version ?? 'ready' : scrcpyInfo.status}
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="text-[10px]">
+                missing
+              </Badge>
+            )}
+          </div>
+
+          {scrcpyDownload.downloading && (
+            <div className="flex flex-col gap-1">
+              <Progress value={scrcpyDownload.percent} className="h-1.5" />
+              <span className="text-[10px] text-muted-foreground">
+                Downloading... {Math.round(scrcpyDownload.percent)}%
+              </span>
+            </div>
+          )}
+
+          {!scrcpyReady && !scrcpyDownload.downloading && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadScrcpy}
+                disabled={loading}
+                className="h-7 text-xs"
+              >
+                <Download className="h-3 w-3 mr-1" />
+                Download scrcpy
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSelectFile}
+                disabled={loading}
+                className="h-7 text-xs"
+              >
+                <FileSearch className="h-3 w-3 mr-1" />
+                Select file
+              </Button>
+            </div>
           )}
         </div>
       )}
@@ -116,17 +162,13 @@ export function ScrcpyStep() {
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
         </Button>
-        <Button variant="outline" size="sm" onClick={handleSelectFile} disabled={loading}>
-          <FileSearch className="h-3.5 w-3.5" />
-          Select scrcpy
-        </Button>
       </div>
 
       <div className="flex justify-between">
         <Button variant="ghost" onClick={prevStep}>
           Back
         </Button>
-        <Button onClick={nextStep} disabled={!scrcpyReady || loading}>
+        <Button onClick={nextStep} disabled={!scrcpyReady || loading || scrcpyDownload.downloading}>
           Continue
         </Button>
       </div>

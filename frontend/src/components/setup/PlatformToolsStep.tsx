@@ -1,9 +1,11 @@
 import { useEffect, useCallback } from 'react'
-import { RefreshCw, FolderOpen, FileSearch } from 'lucide-react'
+import { RefreshCw, FolderOpen, FileSearch, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
+import { useBinaryDownload } from '@/hooks/useBinaryDownload'
 import {
   getSetupState,
   retryBinaryDetection,
@@ -13,26 +15,69 @@ import {
 } from '@/services/binaryService'
 import type { BinaryInfo } from '@/lib/types'
 
-function BinaryRow({ label, info }: { label: string; info?: BinaryInfo }) {
+function BinaryRow({
+  label,
+  info,
+  downloadState,
+  onDownload,
+  onSelectFile,
+  loading,
+}: {
+  label: string
+  info?: BinaryInfo
+  downloadState: { downloading: boolean; percent: number }
+  onDownload: () => void
+  onSelectFile: () => void
+  loading: boolean
+}) {
   const status = info?.status ?? 'missing'
-  const variant =
-    status === 'ready'
-      ? 'default'
-      : status === 'invalid_path'
-        ? 'destructive'
-        : 'secondary'
+  const ready = status === 'ready'
+  const missing = status === 'missing' || status === 'invalid_path'
 
   return (
-    <div className="flex items-center justify-between rounded-md border border-border/50 px-3 py-2">
-      <span className="text-sm font-medium">{label}</span>
-      {info ? (
-        <Badge variant={variant} className="text-[10px]">
-          {status === 'ready' ? info.version ?? 'ready' : status}
+    <div className="flex flex-col gap-1.5 rounded-md border border-border/50 px-3 py-2">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">{label}</span>
+        <Badge
+          variant={ready ? 'default' : status === 'invalid_path' ? 'destructive' : 'secondary'}
+          className="text-[10px]"
+        >
+          {ready ? info?.version ?? 'ready' : status}
         </Badge>
-      ) : (
-        <Badge variant="secondary" className="text-[10px]">
-          missing
-        </Badge>
+      </div>
+
+      {downloadState.downloading && (
+        <div className="flex flex-col gap-1">
+          <Progress value={downloadState.percent} className="h-1.5" />
+          <span className="text-[10px] text-muted-foreground">
+            Downloading... {Math.round(downloadState.percent)}%
+          </span>
+        </div>
+      )}
+
+      {missing && !downloadState.downloading && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onDownload}
+            disabled={loading}
+            className="h-7 text-xs"
+          >
+            <Download className="h-3 w-3 mr-1" />
+            Download
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onSelectFile}
+            disabled={loading}
+            className="h-7 text-xs"
+          >
+            <FileSearch className="h-3 w-3 mr-1" />
+            Select file
+          </Button>
+        </div>
       )}
     </div>
   )
@@ -50,6 +95,7 @@ function LoadingSkeleton() {
 export function PlatformToolsStep() {
   const { setupState, loading, error, nextStep, setSetupState, setLoading, setError } =
     useSetupWizardStore()
+  const { getState, download } = useBinaryDownload()
 
   const detect = useCallback(async () => {
     setLoading(true)
@@ -109,9 +155,18 @@ export function PlatformToolsStep() {
     }
   }
 
+  const handleDownloadPlatformTools = async () => {
+    await download('platform-tools')
+    const state = await getSetupState()
+    setSetupState(state)
+  }
+
   const adbReady = setupState?.status?.adb?.status === 'ready'
   const fastbootReady = setupState?.status?.fastboot?.status === 'ready'
   const canContinue = adbReady && fastbootReady
+
+  const adbDownload = getState('adb')
+  const fastbootDownload = getState('fastboot')
 
   return (
     <div className="flex flex-col gap-5">
@@ -126,8 +181,22 @@ export function PlatformToolsStep() {
         <LoadingSkeleton />
       ) : (
         <div className="flex flex-col gap-2">
-          <BinaryRow label="ADB" info={setupState?.status?.adb} />
-          <BinaryRow label="Fastboot" info={setupState?.status?.fastboot} />
+          <BinaryRow
+            label="ADB"
+            info={setupState?.status?.adb}
+            downloadState={adbDownload}
+            onDownload={handleDownloadPlatformTools}
+            onSelectFile={() => void handleSelectFile('adb')}
+            loading={loading}
+          />
+          <BinaryRow
+            label="Fastboot"
+            info={setupState?.status?.fastboot}
+            downloadState={fastbootDownload}
+            onDownload={handleDownloadPlatformTools}
+            onSelectFile={() => void handleSelectFile('fastboot')}
+            loading={loading}
+          />
         </div>
       )}
 
@@ -140,14 +209,6 @@ export function PlatformToolsStep() {
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
         </Button>
-        <Button variant="outline" size="sm" onClick={() => handleSelectFile('adb')} disabled={loading}>
-          <FileSearch className="h-3.5 w-3.5" />
-          Select adb
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => handleSelectFile('fastboot')} disabled={loading}>
-          <FileSearch className="h-3.5 w-3.5" />
-          Select fastboot
-        </Button>
         <Button variant="outline" size="sm" onClick={handleSelectFolder} disabled={loading}>
           <FolderOpen className="h-3.5 w-3.5" />
           Select folder
@@ -155,7 +216,7 @@ export function PlatformToolsStep() {
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={nextStep} disabled={!canContinue || loading}>
+        <Button onClick={nextStep} disabled={!canContinue || loading || adbDownload.downloading || fastbootDownload.downloading}>
           Continue
         </Button>
       </div>
