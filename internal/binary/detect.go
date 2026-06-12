@@ -122,3 +122,36 @@ func parseVersion(output string) string {
 	}
 	return ""
 }
+
+func (bs *Service) DetectAllCandidates(name string, configPath string) []BinaryInfo {
+	seen := make(map[string]bool)
+	var candidates []BinaryInfo
+
+	addIfValid := func(info *BinaryInfo) {
+		if info.Status != BinaryReady {
+			return
+		}
+		if seen[info.Path] {
+			return
+		}
+		seen[info.Path] = true
+		candidates = append(candidates, *info)
+	}
+
+	if configPath != "" {
+		addIfValid(bs.resolveCandidate(name, configPath, "config", true))
+	}
+
+	if path, err := exec.LookPath(core.BinaryExecutableName(name)); err == nil {
+		addIfValid(bs.resolveCandidate(name, path, "system-path", false))
+	}
+
+	managedPath := joinManagedPath(bs.dataDir, name)
+	addIfValid(bs.resolveCandidate(name, managedPath, "app-data", false))
+
+	for _, candidatePath := range bs.commonPaths(name) {
+		addIfValid(bs.resolveCandidate(name, candidatePath, "common-path", false))
+	}
+
+	return candidates
+}

@@ -23,6 +23,9 @@ export interface BinarySetupResult {
   fastboot: BinaryInfo
   scrcpy: BinaryInfo
   ready: boolean
+  adbCandidates: BinaryInfo[]
+  fastbootCandidates: BinaryInfo[]
+  scrcpyCandidates: BinaryInfo[]
 }
 
 export interface SetupState {

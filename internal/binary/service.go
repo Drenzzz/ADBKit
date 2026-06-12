@@ -21,10 +21,13 @@ const (
 type BinaryInfo = core.BinaryInfo
 
 type BinarySetupResult struct {
-	Adb      *BinaryInfo `json:"adb"`
-	Fastboot *BinaryInfo `json:"fastboot"`
-	Scrcpy   *BinaryInfo `json:"scrcpy"`
-	Ready    bool        `json:"ready"`
+	Adb              *BinaryInfo  `json:"adb"`
+	Fastboot         *BinaryInfo  `json:"fastboot"`
+	Scrcpy           *BinaryInfo  `json:"scrcpy"`
+	Ready            bool         `json:"ready"`
+	AdbCandidates    []BinaryInfo `json:"adbCandidates"`
+	FastbootCandidates []BinaryInfo `json:"fastbootCandidates"`
+	ScrcpyCandidates   []BinaryInfo `json:"scrcpyCandidates"`
 }
 
 type SetupState struct {
@@ -60,10 +63,13 @@ func (bs *Service) GetBinaryStatus(cfg *core.AppConfig) *BinarySetupResult {
 	scrcpy := bs.Detect(BinaryNameScrcpy, cfg.ScrcpyPath)
 
 	return &BinarySetupResult{
-		Adb:      adb,
-		Fastboot: fastboot,
-		Scrcpy:   scrcpy,
-		Ready:    adb.Status == BinaryReady && fastboot.Status == BinaryReady && scrcpy.Status == BinaryReady,
+		Adb:                adb,
+		Fastboot:           fastboot,
+		Scrcpy:             scrcpy,
+		Ready:              adb.Status == BinaryReady && fastboot.Status == BinaryReady && scrcpy.Status == BinaryReady,
+		AdbCandidates:      bs.DetectAllCandidates(BinaryNameAdb, cfg.AdbPath),
+		FastbootCandidates: bs.DetectAllCandidates(BinaryNameFastboot, cfg.FastbootPath),
+		ScrcpyCandidates:   bs.DetectAllCandidates(BinaryNameScrcpy, cfg.ScrcpyPath),
 	}
 }
 
