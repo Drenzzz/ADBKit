@@ -54,6 +54,14 @@ export function DisconnectWireless(arg1) {
   return window['go']['main']['App']['DisconnectWireless'](arg1);
 }
 
+export function DownloadPlatformTools() {
+  return window['go']['main']['App']['DownloadPlatformTools']();
+}
+
+export function DownloadScrcpy() {
+  return window['go']['main']['App']['DownloadScrcpy']();
+}
+
 export function EnableMultiplePackages(arg1) {
   return window['go']['main']['App']['EnableMultiplePackages'](arg1);
 }

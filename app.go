@@ -6,6 +6,7 @@ import (
 	"ADBKit/internal/core"
 	"ADBKit/internal/device"
 	"ADBKit/internal/dialog"
+	"ADBKit/internal/download"
 	"ADBKit/internal/file"
 	"ADBKit/internal/flasher"
 	packagemgr "ADBKit/internal/package_mgr"
@@ -38,6 +39,7 @@ type App struct {
 	fbSvc      *flasher.FastbootService
 	fpSvc      *flasher.PlanService
 	scrSvc     *scrcpy.Service
+	dlSvc      *download.Service
 	auditLog   *audit.Log
 	cfg        *core.AppConfig
 }
@@ -84,6 +86,7 @@ func (a *App) startup(ctx context.Context) {
 	a.fbSvc = flasher.NewFastbootService(a.currentConfig, a.resolveActiveSerial)
 	a.fpSvc = flasher.NewPlanService(a.fbSvc)
 	a.scrSvc = scrcpy.New(a.ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial, a.diaSvc, a.auditLog)
+	a.dlSvc = download.NewService(a.ctx, a.dataDir)
 }
 
 func (a *App) shutdown(ctx context.Context) {
@@ -750,4 +753,16 @@ func (a *App) GetScrcpyClipboard(serial string) (string, error) {
 
 func (a *App) SelectSavePath(defaultFilename string) (string, error) {
 	return a.diaSvc.SelectSaveFile(defaultFilename)
+}
+
+func (a *App) DownloadPlatformTools() error {
+	return auditVoidAction(a, "download_platform_tools", func() error {
+		return a.dlSvc.DownloadPlatformTools(a.ctx)
+	})
+}
+
+func (a *App) DownloadScrcpy() error {
+	return auditVoidAction(a, "download_scrcpy", func() error {
+		return a.dlSvc.DownloadScrcpy(a.ctx)
+	})
 }

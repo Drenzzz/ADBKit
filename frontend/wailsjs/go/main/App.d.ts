@@ -37,6 +37,10 @@ export function DisablePackage(arg1:string):Promise<string>;
 
 export function DisconnectWireless(arg1:string):Promise<string>;
 
+export function DownloadPlatformTools():Promise<void>;
+
+export function DownloadScrcpy():Promise<void>;
+
 export function EnableMultiplePackages(arg1:Array<string>):Promise<string>;
 
 export function EnablePackage(arg1:string):Promise<string>;
