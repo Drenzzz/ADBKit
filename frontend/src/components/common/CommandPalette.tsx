@@ -12,8 +12,13 @@ import {
   Settings,
   Sun,
   Moon,
+  RefreshCw,
+  Camera,
 } from 'lucide-react'
 import { useUIStore } from '@/stores/useUIStore'
+import { useDeviceStore } from '@/stores/useDeviceStore'
+import { getDevices } from '@/services/deviceService'
+import { toast } from 'sonner'
 
 const routeCommands = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -29,6 +34,28 @@ const routeCommands = [
 export function CommandPalette() {
   const { commandPaletteOpen, setCommandPaletteOpen, theme, toggleTheme } = useUIStore()
   const navigate = useNavigate()
+
+  const handleRefreshDevices = useCallback(async () => {
+    setCommandPaletteOpen(false)
+    try {
+      const nextDevices = await getDevices()
+      useDeviceStore.getState().setDevices(nextDevices)
+      useDeviceStore.getState().setLastUpdatedAt(Date.now())
+      toast.success(`Found ${nextDevices.length} device(s)`)
+    } catch {
+      toast.error('Failed to refresh devices')
+    }
+  }, [setCommandPaletteOpen])
+
+  const handleScreenshot = useCallback(() => {
+    setCommandPaletteOpen(false)
+    const { activeSerial } = useDeviceStore.getState()
+    if (!activeSerial) {
+      toast.error('No active device connected')
+      return
+    }
+    navigate('/scrcpy')
+  }, [setCommandPaletteOpen, navigate])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -86,6 +113,33 @@ export function CommandPalette() {
           <Command.Separator className="my-1 h-px bg-border/50" />
 
           <Command.Group heading="Actions" className="text-xs text-muted-foreground">
+            <Command.Item
+              value="Refresh devices"
+              onSelect={() => void handleRefreshDevices()}
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"
+            >
+              <RefreshCw className="h-4 w-4 text-muted-foreground" />
+              <span>Refresh connected devices</span>
+            </Command.Item>
+            <Command.Item
+              value="Open terminal"
+              onSelect={() => {
+                navigate('/terminal')
+                setCommandPaletteOpen(false)
+              }}
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"
+            >
+              <Terminal className="h-4 w-4 text-muted-foreground" />
+              <span>Open terminal session</span>
+            </Command.Item>
+            <Command.Item
+              value="Screenshot"
+              onSelect={handleScreenshot}
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"
+            >
+              <Camera className="h-4 w-4 text-muted-foreground" />
+              <span>Open Scrcpy Hub</span>
+            </Command.Item>
             <Command.Item
               value="Toggle theme"
               onSelect={() => {
