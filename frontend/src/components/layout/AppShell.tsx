@@ -11,6 +11,17 @@ function applyThemeClass(theme: 'dark' | 'light') {
   document.documentElement.classList.toggle('dark', theme === 'dark')
 }
 
+function StartupLoader() {
+  return (
+    <div className="flex h-screen items-center justify-center bg-background text-foreground">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary" />
+        <span className="text-xs text-muted-foreground">Loading…</span>
+      </div>
+    </div>
+  )
+}
+
 export function AppShell() {
   const [setupChecked, setSetupChecked] = useState(false)
   const [setupComplete, setSetupComplete] = useState(false)
@@ -43,7 +54,7 @@ export function AppShell() {
     }
   }, [setStartupLoading, setUiTheme, currentTheme])
 
-  if (!setupChecked) return null
+  if (!setupChecked) return <StartupLoader />
 
   if (!setupComplete) {
     return (
