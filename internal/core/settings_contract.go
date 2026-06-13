@@ -27,22 +27,28 @@ type ScrcpyOptions struct {
 }
 
 type PreferencesPayload struct {
-	Theme             string            `json:"theme"`
-	DeviceNicknames   map[string]string `json:"device_nicknames"`
-	LogcatBufferLimit int               `json:"logcat_buffer_limit"`
-	ScrcpyPresets     []ScrcpyPreset    `json:"scrcpy_presets"`
+	Theme                string            `json:"theme"`
+	DeviceNicknames      map[string]string `json:"device_nicknames"`
+	LogcatBufferLimit    int               `json:"logcat_buffer_limit"`
+	ScrcpyPresets        []ScrcpyPreset    `json:"scrcpy_presets"`
+	DefaultTerminalMode  string            `json:"default_terminal_mode"`
+	AutoRefreshDevices   bool              `json:"auto_refresh_devices"`
+	DeviceRefreshSeconds int               `json:"device_refresh_seconds"`
 }
 
 type AppConfigSnapshot struct {
-	AdbPath           string            `json:"adb_path"`
-	FastbootPath      string            `json:"fastboot_path"`
-	ScrcpyPath        string            `json:"scrcpy_path"`
-	SetupCompleted    bool              `json:"setup_completed"`
-	Theme             string            `json:"theme"`
-	BinaryVersions    map[string]string `json:"binary_versions"`
-	DeviceNicknames   map[string]string `json:"device_nicknames"`
-	LogcatBufferLimit int               `json:"logcat_buffer_limit"`
-	ScrcpyPresets     []ScrcpyPreset    `json:"scrcpy_presets"`
+	AdbPath              string            `json:"adb_path"`
+	FastbootPath         string            `json:"fastboot_path"`
+	ScrcpyPath           string            `json:"scrcpy_path"`
+	SetupCompleted       bool              `json:"setup_completed"`
+	Theme                string            `json:"theme"`
+	BinaryVersions       map[string]string `json:"binary_versions"`
+	DeviceNicknames      map[string]string `json:"device_nicknames"`
+	LogcatBufferLimit    int               `json:"logcat_buffer_limit"`
+	ScrcpyPresets        []ScrcpyPreset    `json:"scrcpy_presets"`
+	DefaultTerminalMode  string            `json:"default_terminal_mode"`
+	AutoRefreshDevices   bool              `json:"auto_refresh_devices"`
+	DeviceRefreshSeconds int               `json:"device_refresh_seconds"`
 }
 
 type RuntimeDiagnostics struct {

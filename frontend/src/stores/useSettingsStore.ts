@@ -20,6 +20,9 @@ const initialPreferencesDraft: PreferencesPayload = {
   device_nicknames: {},
   logcat_buffer_limit: 5000,
   scrcpy_presets: [],
+  default_terminal_mode: 'adb-shell',
+  auto_refresh_devices: true,
+  device_refresh_seconds: 8,
 }
 
 const initialState: SettingsState = {
@@ -75,6 +78,9 @@ export const useSettingsStore = create<SettingsStore>()((set) => ({
         device_nicknames: config?.device_nicknames ?? {},
         logcat_buffer_limit: config?.logcat_buffer_limit ?? 5000,
         scrcpy_presets: config?.scrcpy_presets ?? [],
+        default_terminal_mode: config?.default_terminal_mode ?? 'adb-shell',
+        auto_refresh_devices: config?.auto_refresh_devices ?? true,
+        device_refresh_seconds: config?.device_refresh_seconds ?? 8,
       },
     }),
   setAuditLogs: (auditLogs) => set({ auditLogs }),

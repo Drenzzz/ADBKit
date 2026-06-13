@@ -23,6 +23,9 @@ function configsAreEqual(a: PreferencesPayload, b: AppConfigSnapshot): boolean {
   if ((a.logcat_buffer_limit ?? 5000) !== (b.logcat_buffer_limit ?? 5000)) return false
   if (JSON.stringify(a.device_nicknames ?? {}) !== JSON.stringify(b.device_nicknames ?? {})) return false
   if (JSON.stringify(a.scrcpy_presets ?? []) !== JSON.stringify(b.scrcpy_presets ?? [])) return false
+  if ((a.default_terminal_mode ?? 'adb-shell') !== (b.default_terminal_mode ?? 'adb-shell')) return false
+  if ((a.auto_refresh_devices ?? true) !== (b.auto_refresh_devices ?? true)) return false
+  if ((a.device_refresh_seconds ?? 8) !== (b.device_refresh_seconds ?? 8)) return false
   return true
 }
 

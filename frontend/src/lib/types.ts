@@ -447,6 +447,9 @@ export interface PreferencesPayload {
   device_nicknames?: Record<string, string>
   logcat_buffer_limit?: number
   scrcpy_presets?: ScrcpyPresetSnapshot[]
+  default_terminal_mode?: string
+  auto_refresh_devices?: boolean
+  device_refresh_seconds?: number
 }
 
 export interface AppConfigSnapshot {
@@ -459,6 +462,9 @@ export interface AppConfigSnapshot {
   device_nicknames: Record<string, string>
   logcat_buffer_limit: number
   scrcpy_presets: ScrcpyPresetSnapshot[]
+  default_terminal_mode: string
+  auto_refresh_devices: boolean
+  device_refresh_seconds: number
 }
 
 export interface RuntimeDiagnostics {

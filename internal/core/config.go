@@ -8,32 +8,40 @@ import (
 
 // AppConfig holds the persistent configuration for ADBKit.
 type AppConfig struct {
-	AdbPath           string            `json:"adb_path"`
-	FastbootPath      string            `json:"fastboot_path"`
-	ScrcpyPath        string            `json:"scrcpy_path"`
-	SetupCompleted    bool              `json:"setup_completed"`
-	Theme             string            `json:"theme"`
-	BinaryVersions    map[string]string `json:"binary_versions"`
-	DeviceNicknames   map[string]string `json:"device_nicknames"`
-	LogcatBufferLimit int               `json:"logcat_buffer_limit"`
-	ScrcpyPresets     []ScrcpyPreset    `json:"scrcpy_presets"`
+	AdbPath              string            `json:"adb_path"`
+	FastbootPath         string            `json:"fastboot_path"`
+	ScrcpyPath           string            `json:"scrcpy_path"`
+	SetupCompleted       bool              `json:"setup_completed"`
+	Theme                string            `json:"theme"`
+	BinaryVersions       map[string]string `json:"binary_versions"`
+	DeviceNicknames      map[string]string `json:"device_nicknames"`
+	LogcatBufferLimit    int               `json:"logcat_buffer_limit"`
+	ScrcpyPresets        []ScrcpyPreset    `json:"scrcpy_presets"`
+	DefaultTerminalMode  string            `json:"default_terminal_mode"`
+	AutoRefreshDevices   bool              `json:"auto_refresh_devices"`
+	DeviceRefreshSeconds int               `json:"device_refresh_seconds"`
 }
 
 const (
 	ThemeDark  = "dark"
 	ThemeLight = "light"
 
-	DefaultLogcatBufferLimit = 5000
+	DefaultLogcatBufferLimit    = 5000
+	DefaultTerminalMode         = "adb-shell"
+	DefaultDeviceRefreshSeconds = 8
 )
 
 // DefaultConfig returns a fresh config with empty paths.
 func DefaultConfig() *AppConfig {
 	return &AppConfig{
-		Theme:             ThemeDark,
-		BinaryVersions:    make(map[string]string),
-		DeviceNicknames:   make(map[string]string),
-		LogcatBufferLimit: DefaultLogcatBufferLimit,
-		ScrcpyPresets:     []ScrcpyPreset{},
+		Theme:                ThemeDark,
+		BinaryVersions:       make(map[string]string),
+		DeviceNicknames:      make(map[string]string),
+		LogcatBufferLimit:    DefaultLogcatBufferLimit,
+		ScrcpyPresets:        []ScrcpyPreset{},
+		DefaultTerminalMode:  DefaultTerminalMode,
+		AutoRefreshDevices:   true,
+		DeviceRefreshSeconds: DefaultDeviceRefreshSeconds,
 	}
 }
 
@@ -66,6 +74,12 @@ func LoadConfig(dataDir string) (*AppConfig, error) {
 	}
 	if cfg.ScrcpyPresets == nil {
 		cfg.ScrcpyPresets = []ScrcpyPreset{}
+	}
+	if cfg.DefaultTerminalMode == "" {
+		cfg.DefaultTerminalMode = DefaultTerminalMode
+	}
+	if cfg.DeviceRefreshSeconds <= 0 {
+		cfg.DeviceRefreshSeconds = DefaultDeviceRefreshSeconds
 	}
 	return cfg, nil
 }

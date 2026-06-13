@@ -1,13 +1,17 @@
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { Check, Sun, Moon, RotateCcw, Save } from 'lucide-react'
+import type { PreferencesPayload } from '@/lib/types'
 
 interface PreferencesPanelProps {
-  theme: 'dark' | 'light'
+  preferencesDraft: PreferencesPayload
   saving: boolean
   hasChanges: boolean
   errorMessage: string | null
-  onThemeChange: (theme: 'dark' | 'light') => void
+  onDraftChange: (draft: Partial<PreferencesPayload>) => void
   onSave: () => void
   onReset: () => void
 }
@@ -17,29 +21,35 @@ const THEME_OPTIONS: { value: 'dark' | 'light'; label: string; description: stri
   { value: 'light', label: 'Light', description: 'Bright environment interface', Icon: Sun },
 ]
 
+const TERMINAL_MODES = [
+  { value: 'adb-shell', label: 'ADB Shell' },
+  { value: 'adb-host', label: 'ADB Host' },
+  { value: 'fastboot-host', label: 'Fastboot Host' },
+]
+
 export function PreferencesPanel({
-  theme,
+  preferencesDraft,
   saving,
   hasChanges,
   errorMessage,
-  onThemeChange,
+  onDraftChange,
   onSave,
   onReset,
 }: PreferencesPanelProps) {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
           Appearance
         </span>
         <div className="inline-flex w-full items-center gap-1 rounded-lg border border-border/40 p-1">
           {THEME_OPTIONS.map(({ value, label, description, Icon }) => {
-            const active = theme === value
+            const active = preferencesDraft.theme === value
             return (
               <button
                 key={value}
                 type="button"
-                onClick={() => onThemeChange(value)}
+                onClick={() => onDraftChange({ theme: value })}
                 className={cn(
                   'flex flex-1 items-center gap-2 rounded-md px-3 py-2 text-left transition-colors',
                   active
@@ -67,6 +77,112 @@ export function PreferencesPanel({
               </button>
             )
           })}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
+          Terminal
+        </span>
+        <div className="flex flex-col gap-3 rounded-lg border border-border/40 p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs font-medium">Default mode</span>
+              <span className="text-[10px] text-muted-foreground/60">
+                Mode awal saat membuka terminal
+              </span>
+            </div>
+            <Select
+              value={preferencesDraft.default_terminal_mode ?? 'adb-shell'}
+              onValueChange={(v) => onDraftChange({ default_terminal_mode: v })}
+            >
+              <SelectTrigger className="w-[160px] h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TERMINAL_MODES.map(({ value, label }) => (
+                  <SelectItem key={value} value={value} className="text-xs">
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
+          Device Sync
+        </span>
+        <div className="flex flex-col gap-3 rounded-lg border border-border/40 p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs font-medium">Auto-refresh device list</span>
+              <span className="text-[10px] text-muted-foreground/60">
+                Sinkronisasi otomatis device yang terhubung
+              </span>
+            </div>
+            <Switch
+              checked={preferencesDraft.auto_refresh_devices ?? true}
+              onCheckedChange={(v) => onDraftChange({ auto_refresh_devices: v })}
+            />
+          </div>
+          {(preferencesDraft.auto_refresh_devices ?? true) && (
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-xs font-medium">Refresh interval</span>
+                <span className="text-[10px] text-muted-foreground/60">
+                  Detik antara setiap sinkronisasi
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={2}
+                  max={60}
+                  value={preferencesDraft.device_refresh_seconds ?? 8}
+                  onChange={(e) => {
+                    const v = Number.parseInt(e.target.value, 10)
+                    if (!Number.isNaN(v)) onDraftChange({ device_refresh_seconds: v })
+                  }}
+                  className="w-16 h-8 text-xs text-right"
+                />
+                <span className="text-[10px] text-muted-foreground/60">s</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
+          Logcat
+        </span>
+        <div className="flex flex-col gap-3 rounded-lg border border-border/40 p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs font-medium">Buffer limit</span>
+              <span className="text-[10px] text-muted-foreground/60">
+                Maksimal jumlah log entry yang disimpan
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={1000}
+                max={100000}
+                step={1000}
+                value={preferencesDraft.logcat_buffer_limit ?? 5000}
+                onChange={(e) => {
+                  const v = Number.parseInt(e.target.value, 10)
+                  if (!Number.isNaN(v)) onDraftChange({ logcat_buffer_limit: v })
+                }}
+                className="w-20 h-8 text-xs text-right"
+              />
+              <span className="text-[10px] text-muted-foreground/60">lines</span>
+            </div>
+          </div>
         </div>
       </div>
 

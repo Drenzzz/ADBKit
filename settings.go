@@ -95,6 +95,13 @@ func (a *App) UpdatePreferences(payload core.PreferencesPayload) (core.AppConfig
 	if payload.ScrcpyPresets != nil {
 		a.cfg.ScrcpyPresets = cloneScrcpyPresets(payload.ScrcpyPresets)
 	}
+	if trimmed := strings.TrimSpace(payload.DefaultTerminalMode); trimmed != "" {
+		a.cfg.DefaultTerminalMode = trimmed
+	}
+	a.cfg.AutoRefreshDevices = payload.AutoRefreshDevices
+	if payload.DeviceRefreshSeconds > 0 {
+		a.cfg.DeviceRefreshSeconds = payload.DeviceRefreshSeconds
+	}
 
 	if err := core.SaveConfig(a.dataDir, a.cfg); err != nil {
 		return core.AppConfigSnapshot{}, err
@@ -135,15 +142,18 @@ func (a *App) snapshotConfigLocked() core.AppConfigSnapshot {
 		return core.AppConfigSnapshot{}
 	}
 	return core.AppConfigSnapshot{
-		AdbPath:           a.cfg.AdbPath,
-		FastbootPath:      a.cfg.FastbootPath,
-		ScrcpyPath:        a.cfg.ScrcpyPath,
-		SetupCompleted:    a.cfg.SetupCompleted,
-		Theme:             a.cfg.Theme,
-		BinaryVersions:    cloneStringMap(a.cfg.BinaryVersions),
-		DeviceNicknames:   cloneStringMap(a.cfg.DeviceNicknames),
-		LogcatBufferLimit: a.cfg.LogcatBufferLimit,
-		ScrcpyPresets:     cloneScrcpyPresets(a.cfg.ScrcpyPresets),
+		AdbPath:              a.cfg.AdbPath,
+		FastbootPath:         a.cfg.FastbootPath,
+		ScrcpyPath:           a.cfg.ScrcpyPath,
+		SetupCompleted:       a.cfg.SetupCompleted,
+		Theme:                a.cfg.Theme,
+		BinaryVersions:       cloneStringMap(a.cfg.BinaryVersions),
+		DeviceNicknames:      cloneStringMap(a.cfg.DeviceNicknames),
+		LogcatBufferLimit:    a.cfg.LogcatBufferLimit,
+		ScrcpyPresets:        cloneScrcpyPresets(a.cfg.ScrcpyPresets),
+		DefaultTerminalMode:  a.cfg.DefaultTerminalMode,
+		AutoRefreshDevices:   a.cfg.AutoRefreshDevices,
+		DeviceRefreshSeconds: a.cfg.DeviceRefreshSeconds,
 	}
 }
 

@@ -66,11 +66,11 @@ export function SettingsShell() {
 
         <TabsContent value="preferences" className="mt-0">
           <PreferencesPanel
-            theme={preferencesDraft.theme}
+            preferencesDraft={preferencesDraft}
             saving={savingPreferences}
             hasChanges={hasPreferenceChanges}
             errorMessage={error}
-            onThemeChange={(theme) => setPreferencesDraft({ theme })}
+            onDraftChange={setPreferencesDraft}
             onSave={() => void savePreferences()}
             onReset={resetPreferencesDraft}
           />
