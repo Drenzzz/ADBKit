@@ -6,6 +6,13 @@ interface FileCacheEntry {
   lastUpdatedAt: number
 }
 
+interface TransferProgress {
+  fileName: string
+  direction: 'push' | 'pull'
+  percent: number
+  active: boolean
+}
+
 interface FileExplorerState {
   currentPath: string
   files: FileEntry[]
@@ -30,6 +37,7 @@ interface FileExplorerState {
   busyBatchAction: 'pull' | 'push' | 'delete' | null
   error: string | null
   lastUpdatedAt: number | null
+  transferProgress: TransferProgress | null
 }
 
 interface FileExplorerActions {
@@ -60,6 +68,7 @@ interface FileExplorerActions {
   setBusyBatchAction: (action: 'pull' | 'push' | 'delete' | null) => void
   setError: (error: string | null) => void
   setLastUpdatedAt: (timestamp: number | null) => void
+  setTransferProgress: (progress: TransferProgress | null) => void
   resetFilters: () => void
   reset: () => void
 }
@@ -90,6 +99,7 @@ const initialState: FileExplorerState = {
   busyBatchAction: null,
   error: null,
   lastUpdatedAt: null,
+  transferProgress: null,
 }
 
 export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
@@ -173,6 +183,7 @@ export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
   setBusyBatchAction: (busyBatchAction) => set({ busyBatchAction }),
   setError: (error) => set({ error }),
   setLastUpdatedAt: (lastUpdatedAt) => set({ lastUpdatedAt }),
+  setTransferProgress: (transferProgress) => set({ transferProgress }),
   resetFilters: () =>
     set({
       searchTerm: initialState.searchTerm,

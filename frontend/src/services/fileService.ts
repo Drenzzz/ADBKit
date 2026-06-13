@@ -13,6 +13,7 @@ import {
   SelectFile,
   SelectDirectory,
   SelectMultipleFiles,
+  CancelFileTransfer,
 } from '../../wailsjs/go/main/App'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 import type { FileEntry, StorageInfo } from '@/lib/types'
@@ -90,4 +91,8 @@ export async function createDirectory(remotePath: string): Promise<string> {
 
 export async function renameFile(oldRemotePath: string, newRemotePath: string): Promise<string> {
   return RenameFile(oldRemotePath, newRemotePath)
+}
+
+export function cancelFileTransfer(): void {
+  CancelFileTransfer()
 }

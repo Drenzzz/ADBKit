@@ -23,7 +23,7 @@ func (s *Service) PushFile(ctx context.Context, localPath string, remotePath str
 		return "", core.NewOperationError("push_file", "Local file path is required", "local file path is empty", false)
 	}
 
-	localInfo, statErr := validateReadableHostFile("push_file", trimmedLocalPath)
+	localInfo, statErr := validateReadableHostPath("push_file", trimmedLocalPath)
 	if statErr != nil {
 		return "", statErr
 	}
@@ -37,17 +37,39 @@ func (s *Service) PushFile(ctx context.Context, localPath string, remotePath str
 	}
 
 	fileName := localInfo.Name()
+
+	transferCtx, cancel := context.WithCancel(ctx)
+	s.setCancel(cancel)
+	defer func() {
+		cancel()
+		s.clearCancel()
+	}()
+
 	var result *core.ExecResult
 	var cmdErr error
 	for attempt := 1; attempt <= transferRetries; attempt++ {
-		result, cmdErr = core.RunCommand(ctx, core.ExecRequest{
+		result, cmdErr = core.RunCommandStreaming(transferCtx, core.StreamingExecRequest{
 			Command: core.BinaryNameAdb,
 			Args:    []string{"-s", serial, "push", trimmedLocalPath, normalizedRemotePath},
-			Timeout: 10 * time.Minute,
+			OnStderrLine: func(line string) {
+				if m := adbProgressPattern.FindStringSubmatch(line); len(m) > 1 {
+					name := fileName
+					if len(m) > 2 {
+						if base := filepath.Base(strings.TrimSpace(m[2])); base != "" && base != "." && base != "/" {
+							name = base
+						}
+					}
+					s.emitTransferProgress(name, "push", parseAdbPercent(m[1]))
+				}
+			},
 		})
 		if cmdErr == nil {
 			s.emitTransferProgress(fileName, "push", 100)
 			return fallbackMessage(result.Stdout, fmt.Sprintf("Pushed to %s", normalizedRemotePath)), nil
+		}
+
+		if transferCtx.Err() != nil {
+			return "", core.NewOperationError("push_file", "Push cancelled by user", "transfer context cancelled", false)
 		}
 
 		if !isTransientADBError(cmdErr.Error()) || attempt == transferRetries {
@@ -55,8 +77,8 @@ func (s *Service) PushFile(ctx context.Context, localPath string, remotePath str
 		}
 
 		select {
-		case <-ctx.Done():
-			return "", ctx.Err()
+		case <-transferCtx.Done():
+			return "", core.NewOperationError("push_file", "Push cancelled by user", "transfer context cancelled", false)
 		case <-time.After(transferDelay):
 		}
 	}
@@ -81,6 +103,9 @@ func (s *Service) PushMultipleFiles(ctx context.Context, localPaths []string, re
 	failures := make([]string, 0)
 
 	for _, localPath := range localPaths {
+		if ctx.Err() != nil {
+			return "", core.NewOperationError("push_multiple_files", "Push batch cancelled", "transfer context cancelled", false)
+		}
 		trimmed := strings.TrimSpace(localPath)
 		if trimmed == "" {
 			continue

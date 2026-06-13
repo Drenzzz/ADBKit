@@ -183,6 +183,15 @@ func validateReadableHostFile(operationName string, filePath string) (osFileInfo
 	return info, nil
 }
 
+// validateReadableHostPath accepts both regular files and directories.
+func validateReadableHostPath(operationName string, filePath string) (osFileInfo, error) {
+	info, err := osStat(filePath)
+	if err != nil {
+		return nil, core.NewOperationError(operationName, "Path could not be accessed", err.Error(), false)
+	}
+	return info, nil
+}
+
 func joinRemotePath(parentPath string, name string) string {
 	if strings.TrimSpace(parentPath) == "" {
 		return path.Clean("/" + strings.TrimLeft(name, "/"))

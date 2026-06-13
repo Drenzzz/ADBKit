@@ -55,6 +55,9 @@ export namespace binary {
 	    fastboot?: core.BinaryInfo;
 	    scrcpy?: core.BinaryInfo;
 	    ready: boolean;
+	    adbCandidates: core.BinaryInfo[];
+	    fastbootCandidates: core.BinaryInfo[];
+	    scrcpyCandidates: core.BinaryInfo[];
 	
 	    static createFrom(source: any = {}) {
 	        return new BinarySetupResult(source);
@@ -66,6 +69,9 @@ export namespace binary {
 	        this.fastboot = this.convertValues(source["fastboot"], core.BinaryInfo);
 	        this.scrcpy = this.convertValues(source["scrcpy"], core.BinaryInfo);
 	        this.ready = source["ready"];
+	        this.adbCandidates = this.convertValues(source["adbCandidates"], core.BinaryInfo);
+	        this.fastbootCandidates = this.convertValues(source["fastbootCandidates"], core.BinaryInfo);
+	        this.scrcpyCandidates = this.convertValues(source["scrcpyCandidates"], core.BinaryInfo);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -213,6 +219,9 @@ export namespace core {
 	    device_nicknames: Record<string, string>;
 	    logcat_buffer_limit: number;
 	    scrcpy_presets: ScrcpyPreset[];
+	    default_terminal_mode: string;
+	    auto_refresh_devices: boolean;
+	    device_refresh_seconds: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppConfigSnapshot(source);
@@ -229,6 +238,9 @@ export namespace core {
 	        this.device_nicknames = source["device_nicknames"];
 	        this.logcat_buffer_limit = source["logcat_buffer_limit"];
 	        this.scrcpy_presets = this.convertValues(source["scrcpy_presets"], ScrcpyPreset);
+	        this.default_terminal_mode = source["default_terminal_mode"];
+	        this.auto_refresh_devices = source["auto_refresh_devices"];
+	        this.device_refresh_seconds = source["device_refresh_seconds"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -276,6 +288,9 @@ export namespace core {
 	    device_nicknames: Record<string, string>;
 	    logcat_buffer_limit: number;
 	    scrcpy_presets: ScrcpyPreset[];
+	    default_terminal_mode: string;
+	    auto_refresh_devices: boolean;
+	    device_refresh_seconds: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new PreferencesPayload(source);
@@ -287,6 +302,9 @@ export namespace core {
 	        this.device_nicknames = source["device_nicknames"];
 	        this.logcat_buffer_limit = source["logcat_buffer_limit"];
 	        this.scrcpy_presets = this.convertValues(source["scrcpy_presets"], ScrcpyPreset);
+	        this.default_terminal_mode = source["default_terminal_mode"];
+	        this.auto_refresh_devices = source["auto_refresh_devices"];
+	        this.device_refresh_seconds = source["device_refresh_seconds"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

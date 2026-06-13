@@ -27,17 +27,39 @@ func (s *Service) PullFile(ctx context.Context, remotePath string, localPath str
 	}
 
 	fileName := path.Base(normalizedRemotePath)
+
+	transferCtx, cancel := context.WithCancel(ctx)
+	s.setCancel(cancel)
+	defer func() {
+		cancel()
+		s.clearCancel()
+	}()
+
 	var result *core.ExecResult
 	var cmdErr error
 	for attempt := 1; attempt <= transferRetries; attempt++ {
-		result, cmdErr = core.RunCommand(ctx, core.ExecRequest{
+		result, cmdErr = core.RunCommandStreaming(transferCtx, core.StreamingExecRequest{
 			Command: core.BinaryNameAdb,
 			Args:    []string{"-s", serial, "pull", "-a", normalizedRemotePath, trimmedLocalPath},
-			Timeout: 10 * time.Minute,
+			OnStderrLine: func(line string) {
+				if m := adbProgressPattern.FindStringSubmatch(line); len(m) > 1 {
+					name := fileName
+					if len(m) > 2 {
+						if base := path.Base(strings.TrimSpace(m[2])); base != "" && base != "." && base != "/" {
+							name = base
+						}
+					}
+					s.emitTransferProgress(name, "pull", parseAdbPercent(m[1]))
+				}
+			},
 		})
 		if cmdErr == nil {
 			s.emitTransferProgress(fileName, "pull", 100)
 			return fallbackMessage(result.Stdout, fmt.Sprintf("Saved file to %s", trimmedLocalPath)), nil
+		}
+
+		if transferCtx.Err() != nil {
+			return "", core.NewOperationError("pull_file", "Pull cancelled by user", "transfer context cancelled", false)
 		}
 
 		if !isTransientADBError(cmdErr.Error()) || attempt == transferRetries {
@@ -45,8 +67,8 @@ func (s *Service) PullFile(ctx context.Context, remotePath string, localPath str
 		}
 
 		select {
-		case <-ctx.Done():
-			return "", ctx.Err()
+		case <-transferCtx.Done():
+			return "", core.NewOperationError("pull_file", "Pull cancelled by user", "transfer context cancelled", false)
 		case <-time.After(transferDelay):
 		}
 	}
@@ -65,6 +87,9 @@ func (s *Service) PullMultipleFiles(ctx context.Context, remotePaths []string, l
 
 	completed := 0
 	for _, remotePath := range remotePaths {
+		if ctx.Err() != nil {
+			return "", core.NewOperationError("pull_multiple_files", "Pull batch cancelled", "transfer context cancelled", false)
+		}
 		name := path.Base(strings.TrimSpace(remotePath))
 		if _, err := s.PullFile(ctx, remotePath, filepath.Join(trimmedLocalDir, name)); err != nil {
 			return "", err
@@ -73,4 +98,14 @@ func (s *Service) PullMultipleFiles(ctx context.Context, remotePaths []string, l
 	}
 
 	return fmt.Sprintf("Pulled %d file(s) to %s", completed, trimmedLocalDir), nil
+}
+
+func parseAdbPercent(s string) int {
+	pct := 0
+	for _, c := range s {
+		if c >= '0' && c <= '9' {
+			pct = pct*10 + int(c-'0')
+		}
+	}
+	return pct
 }

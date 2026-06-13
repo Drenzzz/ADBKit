@@ -93,8 +93,8 @@ export function PreferencesPanel({
               </span>
             </div>
             <Select
-              value={preferencesDraft.default_terminal_mode ?? 'adb-shell'}
-              onValueChange={(v) => onDraftChange({ default_terminal_mode: v })}
+              value={preferencesDraft.default_terminal_mode || 'adb-shell'}
+              onValueChange={(v) => onDraftChange({ default_terminal_mode: v ?? undefined })}
             >
               <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue />

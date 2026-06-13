@@ -14,6 +14,7 @@ import {
   selectMultipleFiles,
   selectDirectory,
   onFileTransferProgress,
+  cancelFileTransfer,
 } from '@/services/fileService'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useFileExplorerStore } from '@/stores/useFileExplorerStore'
@@ -105,7 +106,16 @@ export function useFileExplorer() {
   )
 
   useEffect(() => {
-    const unsub = onFileTransferProgress(() => {})
+    const unsub = onFileTransferProgress((progress) => {
+      const current = useFileExplorerStore.getState().transferProgress
+      if (!current?.active) return
+      useFileExplorerStore.getState().setTransferProgress({
+        fileName: progress.fileName || current.fileName,
+        direction: progress.direction,
+        percent: progress.percent,
+        active: true,
+      })
+    })
     return unsub
   }, [])
 
@@ -258,18 +268,23 @@ export function useFileExplorer() {
     const name = remotePath.split('/').pop() ?? remotePath
     store.setBusyFilePath(remotePath)
     store.setError(null)
+    store.setTransferProgress({ fileName: name, direction: 'pull', percent: 0, active: true })
     try {
-      await toast.promise(pullFile(remotePath, localPath), {
-        loading: `Pulling ${name}...`,
-        success: (msg) => msg,
-        error: (err) => getErrorMessage(err, 'Failed to pull file'),
-      })
+      await pullFile(remotePath, localPath)
+      toast.success(`Pulled ${name}`)
       return true
     } catch (err) {
-      store.setError(getErrorMessage(err, 'Failed to pull file'))
+      const msg = getErrorMessage(err, 'Failed to pull file')
+      if (msg.includes('cancelled')) {
+        toast.info('Pull cancelled — partial data may remain on your computer')
+      } else {
+        store.setError(msg)
+        toast.error(msg)
+      }
       return false
     } finally {
       store.setBusyFilePath(null)
+      store.setTransferProgress(null)
     }
   }
 
@@ -278,19 +293,24 @@ export function useFileExplorer() {
     const name = localPath.split(/[/\\]/).pop() ?? localPath
     store.setBusyFilePath(remotePath)
     store.setError(null)
+    store.setTransferProgress({ fileName: name, direction: 'push', percent: 0, active: true })
     try {
-      await toast.promise(pushFile(localPath, remotePath), {
-        loading: `Pushing ${name}...`,
-        success: (msg) => msg,
-        error: (err) => getErrorMessage(err, 'Failed to push file'),
-      })
+      await pushFile(localPath, remotePath)
+      toast.success(`Pushed ${name}`)
       await loadFiles(store.currentPath, { background: true, force: true })
       return true
     } catch (err) {
-      store.setError(getErrorMessage(err, 'Failed to push file'))
+      const msg = getErrorMessage(err, 'Failed to push file')
+      if (msg.includes('cancelled')) {
+        toast.info('Push cancelled — partial data may remain on the device')
+      } else {
+        store.setError(msg)
+        toast.error(msg)
+      }
       return false
     } finally {
       store.setBusyFilePath(null)
+      store.setTransferProgress(null)
     }
   }
 
@@ -383,19 +403,24 @@ export function useFileExplorer() {
     if (!trimmed) { toast.error('Destination directory is required'); return false }
     store.setBusyBatchAction('pull')
     store.setError(null)
+    store.setTransferProgress({ fileName: `${store.selectedFiles.length} file(s)`, direction: 'pull', percent: 0, active: true })
     try {
-      await toast.promise(pullMultipleFiles(store.selectedFiles, trimmed), {
-        loading: `Pulling ${store.selectedFiles.length} file(s)...`,
-        success: (msg) => msg,
-        error: (err) => getErrorMessage(err, 'Failed to pull files'),
-      })
+      await pullMultipleFiles(store.selectedFiles, trimmed)
+      toast.success(`Pulled ${store.selectedFiles.length} file(s)`)
       store.clearSelection()
       return true
     } catch (err) {
-      store.setError(getErrorMessage(err, 'Failed to pull files'))
+      const msg = getErrorMessage(err, 'Failed to pull files')
+      if (msg.includes('cancelled')) {
+        toast.info('Pull batch cancelled — partial data may remain on your computer')
+      } else {
+        store.setError(msg)
+        toast.error(msg)
+      }
       return false
     } finally {
       store.setBusyBatchAction(null)
+      store.setTransferProgress(null)
     }
   }
 
@@ -425,19 +450,24 @@ export function useFileExplorer() {
     const remoteDir = normalizePath(store.currentPath)
     store.setBusyBatchAction('push')
     store.setError(null)
+    store.setTransferProgress({ fileName: `${localPaths.length} file(s)`, direction: 'push', percent: 0, active: true })
     try {
-      await toast.promise(pushMultipleFiles(localPaths, remoteDir), {
-        loading: `Pushing ${localPaths.length} file(s)...`,
-        success: (msg) => msg,
-        error: (err) => getErrorMessage(err, 'Failed to push files'),
-      })
+      await pushMultipleFiles(localPaths, remoteDir)
+      toast.success(`Pushed ${localPaths.length} file(s)`)
       await loadFiles(store.currentPath, { background: true, force: true })
       return true
     } catch (err) {
-      store.setError(getErrorMessage(err, 'Failed to push files'))
+      const msg = getErrorMessage(err, 'Failed to push files')
+      if (msg.includes('cancelled')) {
+        toast.info('Push batch cancelled — partial data may remain on the device')
+      } else {
+        store.setError(msg)
+        toast.error(msg)
+      }
       return false
     } finally {
       store.setBusyBatchAction(null)
+      store.setTransferProgress(null)
     }
   }
 
@@ -448,6 +478,11 @@ export function useFileExplorer() {
     }
     store.setSortField(field)
     store.setSortDirection('asc')
+  }
+
+  function cancelTransfer() {
+    cancelFileTransfer()
+    store.setTransferProgress(null)
   }
 
   function dismissError() { store.setError(null) }
@@ -521,6 +556,7 @@ export function useFileExplorer() {
     busyBatchAction: store.busyBatchAction,
     error: store.error,
     lastUpdatedAt: store.lastUpdatedAt,
+    transferProgress: store.transferProgress,
     totalItems: store.files.length,
     folderCount,
     fileCount,
@@ -531,6 +567,7 @@ export function useFileExplorer() {
     setSort,
     setSortDirection: store.setSortDirection,
     dismissError,
+    cancelTransfer,
     toggleFileSelection: store.toggleFileSelection,
     toggleVisibleSelection: () => store.toggleVisibleSelection(visiblePaths),
     clearSelection: store.clearSelection,

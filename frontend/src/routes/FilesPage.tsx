@@ -7,6 +7,7 @@ import { StorageBar } from '@/components/files/StorageBar'
 import { FileActionBar } from '@/components/files/FileActionBar'
 import { FileTable } from '@/components/files/FileTable'
 import { FileActionDialogs } from '@/components/files/FileActionDialogs'
+import { TransferProgressOverlay } from '@/components/files/TransferProgressOverlay'
 import { NoDeviceState } from '@/components/files/EmptyStates'
 import type { StorageInfo } from '@/lib/types'
 
@@ -198,6 +199,15 @@ export default function FilesPage() {
         chooseLocalFile={fe.chooseLocalFile}
         chooseLocalDirectory={fe.chooseLocalDirectory}
       />
+
+      {fe.transferProgress?.active && (
+        <TransferProgressOverlay
+          fileName={fe.transferProgress.fileName}
+          direction={fe.transferProgress.direction}
+          percent={fe.transferProgress.percent}
+          onCancel={fe.cancelTransfer}
+        />
+      )}
     </div>
   )
 }

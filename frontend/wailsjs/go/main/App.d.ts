@@ -11,6 +11,8 @@ import {file} from '../models';
 import {dialog} from '../models';
 import {shell} from '../models';
 
+export function CancelFileTransfer():Promise<void>;
+
 export function ClearAuditLogs():Promise<void>;
 
 export function ClearCustomBinary(arg1:string):Promise<void>;

@@ -571,6 +571,12 @@ func (a *App) RenameFile(oldRemotePath string, newRemotePath string) (string, er
 	})
 }
 
+func (a *App) CancelFileTransfer() {
+	if a.fileSvc != nil {
+		a.fileSvc.CancelTransfer()
+	}
+}
+
 func (a *App) SelectFile() (string, error) {
 	return a.diaSvc.SelectFile()
 }

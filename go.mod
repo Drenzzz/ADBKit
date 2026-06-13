@@ -3,6 +3,7 @@ module ADBKit
 go 1.23.0
 
 require (
+	github.com/creack/pty v1.1.24
 	github.com/google/uuid v1.6.0
 	github.com/wailsapp/wails/v2 v2.12.0
 )
