@@ -308,8 +308,14 @@ export function useAppManager() {
 
     if (failures.length === 0) {
       toast.success(`Successfully stopped ${successCount} package(s)`)
+    } else if (successCount === 0) {
+      toast.error(`Failed to stop ${failures.length} package(s)`, {
+        description: failures.slice(0, 3).join('\n'),
+      })
     } else {
-      toast.success(`Stopped ${successCount}. Failed: ${failures.length}`)
+      toast.warning(`Stopped ${successCount}, failed ${failures.length}`, {
+        description: failures.slice(0, 3).join('\n'),
+      })
     }
     store.clearSelection()
   }, [])
@@ -333,8 +339,14 @@ export function useAppManager() {
 
     if (failures.length === 0) {
       toast.success(`Successfully cleared data for ${successCount} package(s)`)
+    } else if (successCount === 0) {
+      toast.error(`Failed to clear data for ${failures.length} package(s)`, {
+        description: failures.slice(0, 3).join('\n'),
+      })
     } else {
-      toast.success(`Cleared ${successCount}. Failed: ${failures.length}`)
+      toast.warning(`Cleared ${successCount}, failed ${failures.length}`, {
+        description: failures.slice(0, 3).join('\n'),
+      })
     }
     store.clearSelection()
   }, [])
@@ -358,8 +370,14 @@ export function useAppManager() {
 
     if (failures.length === 0) {
       toast.success(`Successfully exported ${successCount} APK(s)`)
+    } else if (successCount === 0) {
+      toast.error(`Failed to export ${failures.length} APK(s)`, {
+        description: failures.slice(0, 3).join('\n'),
+      })
     } else {
-      toast.success(`Exported ${successCount}. Failed: ${failures.length}`)
+      toast.warning(`Exported ${successCount}, failed ${failures.length}`, {
+        description: failures.slice(0, 3).join('\n'),
+      })
     }
     store.clearSelection()
   }, [])
@@ -370,13 +388,14 @@ export function useAppManager() {
       try {
         const message = await svcClearData(packageName)
         toast.success(message)
+        void fetchPackages(true)
       } catch (err) {
         toast.error(getErrorMessage(err))
       } finally {
         store.setBusyPackageName(null)
       }
     },
-    [],
+    [fetchPackages],
   )
 
   const pullApk = useCallback(
