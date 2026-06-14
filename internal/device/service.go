@@ -3,6 +3,7 @@ package device
 import (
 	"ADBKit/internal/core"
 	"context"
+	"log"
 )
 
 type Service struct {
@@ -13,9 +14,23 @@ func NewService(dataDir string) *Service {
 	return &Service{dataDir: dataDir}
 }
 
+// ListDevices menggabungkan device ADB dan fastboot. Fastboot sering tidak
+// terpasang, jadi kegagalannya hanya dicatat selama ADB masih berhasil. Error
+// dikembalikan hanya bila kedua sumber gagal sehingga UI tidak menyembunyikan
+// masalah nyata sebagai "no devices".
 func (s *Service) ListDevices(ctx context.Context) ([]Summary, error) {
-	adbDevices, _ := s.listADBDevices(ctx)
-	fastbootDevices, _ := s.listFastbootDevices(ctx)
+	adbDevices, adbErr := s.listADBDevices(ctx)
+	fastbootDevices, fastbootErr := s.listFastbootDevices(ctx)
+
+	if adbErr != nil && fastbootErr != nil {
+		return nil, adbErr
+	}
+	if adbErr != nil {
+		log.Printf("device: adb listing failed: %v", adbErr)
+	}
+	if fastbootErr != nil {
+		log.Printf("device: fastboot listing failed: %v", fastbootErr)
+	}
 
 	devices := make([]Summary, 0, len(adbDevices)+len(fastbootDevices))
 	devices = append(devices, adbDevices...)

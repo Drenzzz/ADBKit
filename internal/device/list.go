@@ -31,10 +31,10 @@ func (s *Service) listFastbootDevices(ctx context.Context) ([]Summary, error) {
 		Timeout: 5e9,
 	})
 	if err != nil {
-		return nil, nil
+		return nil, core.NewOperationError("list_fastboot_devices", "failed to list fastboot devices", err.Error(), true)
 	}
 	if result.ExitCode != 0 {
-		return nil, nil
+		return nil, core.NewOperationError("list_fastboot_devices", "fastboot devices failed", strings.TrimSpace(result.Stderr), true)
 	}
 
 	return parseFastbootDevices(result.Stdout), nil
