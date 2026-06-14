@@ -3,19 +3,12 @@ import { toast } from 'sonner'
 import * as fastbootSvc from '@/services/fastbootService'
 import * as deviceSvc from '@/services/deviceService'
 import { useFlasherStore } from '@/stores/useFlasherStore'
-import type { FlashPlanStepStatus, FlasherMode } from '@/lib/types'
+import type { FlasherMode } from '@/lib/types'
 
 const POLL_INTERVAL = 4000
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'An unexpected error occurred'
-}
-
-function findFailedStepPartition(steps: FlashPlanStepStatus[]): string | null {
-  for (const step of steps) {
-    if (step.status === 'error') return step.partition
-  }
-  return null
 }
 
 export function useFlasher() {
@@ -35,6 +28,14 @@ export function useFlasher() {
   useEffect(() => {
     operationInProgressRef.current = isAnyOperationRunning
   }, [isAnyOperationRunning])
+
+  useEffect(() => {
+    const unsub = fastbootSvc.onFlashStepStatus((event) => {
+      const status = event.status === 'flashing' ? 'running' : event.status
+      store.setFlashPlanStepStatus(event.partition, status, event.message || null)
+    })
+    return unsub
+  }, [])
 
   const syncDevices = useCallback(
     async (isBackground = false) => {
@@ -281,17 +282,10 @@ export function useFlasher() {
     try {
       const filteredPlan = { steps: plan.steps.filter((s) => selected.includes(s.partition)) }
       await fastbootSvc.flashRomFolder(serial, folderPath, filteredPlan)
-
-      for (const step of filteredSteps) {
-        store.setFlashPlanStepStatus(step.partition, 'success', 'Flashed successfully')
-      }
       toast.success(`Batch flash completed: ${filteredSteps.length} partition(s)`)
     } catch (err) {
       const msg = getErrorMessage(err)
-      const failedPartition = findFailedStepPartition(filteredSteps)
-      if (failedPartition) {
-        store.setFlashPlanStepStatus(failedPartition, 'error', msg)
-      }
+      // Per-step error state already arrives via the flash_step_status event listener.
       store.setError(msg)
       toast.error(msg)
     } finally {

@@ -8,7 +8,17 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
+
+const FlashStepStatusEvent = "flash_step_status"
+
+type StepStatus struct {
+	Partition string `json:"partition"`
+	Status    string `json:"status"`
+	Message   string `json:"message"`
+}
 
 var priorityPartitions = []string{
 	"boot",
@@ -65,10 +75,27 @@ type Plan struct {
 
 type PlanService struct {
 	fastbootService *FastbootService
+	wailsCtx        context.Context
 }
 
 func NewPlanService(fastbootService *FastbootService) *PlanService {
 	return &PlanService{fastbootService: fastbootService}
+}
+
+// SetWailsContext wires the runtime context used to emit per-step flash events.
+func (s *PlanService) SetWailsContext(ctx context.Context) {
+	s.wailsCtx = ctx
+}
+
+func (s *PlanService) emitStepStatus(partition, status, message string) {
+	if s.wailsCtx == nil {
+		return
+	}
+	wailsruntime.EventsEmit(s.wailsCtx, FlashStepStatusEvent, StepStatus{
+		Partition: partition,
+		Status:    status,
+		Message:   message,
+	})
 }
 
 func (s *PlanService) ScanRomFolder(folderPath string) (*Plan, error) {
@@ -124,14 +151,19 @@ func (s *PlanService) FlashRomFolder(ctx context.Context, serial string, folderP
 		if _, err := os.Stat(step.ImageFile); err != nil {
 			return "", core.NewOperationError("flash_rom_folder", "flash plan references a missing image", fmt.Sprintf("step %d image does not exist: %s", i+1, step.ImageFile), false)
 		}
-		if !strings.HasPrefix(step.ImageFile, trimmed) {
+		// filepath.Rel mencegah path traversal yang lolos dari HasPrefix (mis. "/rom" vs "/rom-evil").
+		rel, relErr := filepath.Rel(trimmed, step.ImageFile)
+		if relErr != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 			return "", core.NewOperationError("flash_rom_folder", "flash plan image is outside the selected folder", fmt.Sprintf("step %d image path is outside ROM folder", i+1), false)
 		}
 	}
 	for i, step := range plan.Steps {
+		s.emitStepStatus(step.Partition, "flashing", "")
 		if _, err := s.fastbootService.FlashPartition(ctx, serial, step.Partition, step.ImageFile); err != nil {
+			s.emitStepStatus(step.Partition, "error", err.Error())
 			return "", core.NewOperationError("flash_rom_folder", "batch flash failed", fmt.Sprintf("step %d failed for partition %s: %s", i+1, step.Partition, err.Error()), true)
 		}
+		s.emitStepStatus(step.Partition, "success", "Flashed successfully")
 	}
 	return fmt.Sprintf("Flashed %d partition(s) from %s", len(plan.Steps), filepath.Base(trimmed)), nil
 }

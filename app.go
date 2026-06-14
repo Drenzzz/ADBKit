@@ -85,6 +85,7 @@ func (a *App) startup(ctx context.Context) {
 	a.logSvc = shell.NewLogcatService(ctx, a.binSvc, a.currentConfig)
 	a.fbSvc = flasher.NewFastbootService(a.currentConfig, a.resolveActiveSerial)
 	a.fpSvc = flasher.NewPlanService(a.fbSvc)
+	a.fpSvc.SetWailsContext(ctx)
 	a.scrSvc = scrcpy.New(a.ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial, a.diaSvc, a.auditLog)
 	a.dlSvc = download.NewService(a.ctx, a.dataDir)
 }

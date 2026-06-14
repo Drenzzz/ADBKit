@@ -13,7 +13,24 @@ import {
   SelectSideloadFile,
   SelectDirectory,
 } from '../../wailsjs/go/main/App'
+import { EventsOn } from '../../wailsjs/runtime/runtime'
 import type { FastbootDeviceInfo, FlashPlan } from '@/lib/types'
+
+export const FLASH_STEP_STATUS_EVENT = 'flash_step_status'
+
+export interface FlashStepStatusEvent {
+  partition: string
+  status: 'flashing' | 'success' | 'error'
+  message: string
+}
+
+export function onFlashStepStatus(
+  callback: (event: FlashStepStatusEvent) => void,
+): () => void {
+  return EventsOn(FLASH_STEP_STATUS_EVENT, (event: FlashStepStatusEvent) => {
+    callback(event)
+  })
+}
 
 export async function getFastbootDevices(): Promise<FastbootDeviceInfo[]> {
   const raw = await GetFastbootDevices()
