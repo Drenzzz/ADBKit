@@ -115,7 +115,10 @@ export default function FilesPage() {
                 success: (msg) => msg,
                 error: (err) => err instanceof Error ? err.message : 'Failed to import files',
               })
-            } catch {}
+              await fe.refreshFiles()
+            } catch {
+              // toast.promise already surfaces the error to the user
+            }
           }}
           onPushFolder={async (targetDir) => {
             const localPath = await fe.chooseLocalDirectory()
@@ -124,20 +127,10 @@ export default function FilesPage() {
               await fe.pushSingleFile(localPath, `${targetDir.path}/${folderName}`)
             }
           }}
-          onMove={async (file) => {
-            const dir = await fe.chooseLocalDirectory()
-            if (dir) await fe.moveFile(file.path, dir)
-          }}
+          onMove={fe.openMoveDialog}
           onRename={fe.openRenameDialog}
           onDelete={fe.openDeleteDialog}
-          onGetSize={async (file) => {
-            const { getDirectorySize } = await import('@/services/fileService')
-            try {
-              const size = await getDirectorySize(file.path)
-              fe.setSearchTerm('')
-              void size
-            } catch {}
-          }}
+          onGetSize={fe.getSizeForFile}
         />
       </div>
 
@@ -178,6 +171,7 @@ export default function FilesPage() {
         isRenameDialogOpen={fe.isRenameDialogOpen}
         isDeleteDialogOpen={fe.isDeleteDialogOpen}
         isNewFolderDialogOpen={fe.isNewFolderDialogOpen}
+        isMoveDialogOpen={fe.isMoveDialogOpen}
         isBatchPullDialogOpen={fe.isBatchPullDialogOpen}
         isBatchDeleteDialogOpen={fe.isBatchDeleteDialogOpen}
         setIsPullDialogOpen={fe.setIsPullDialogOpen}
@@ -186,6 +180,7 @@ export default function FilesPage() {
         setIsRenameDialogOpen={fe.setIsRenameDialogOpen}
         setIsDeleteDialogOpen={fe.setIsDeleteDialogOpen}
         setIsNewFolderDialogOpen={fe.setIsNewFolderDialogOpen}
+        setIsMoveDialogOpen={fe.setIsMoveDialogOpen}
         setIsBatchPullDialogOpen={fe.setIsBatchPullDialogOpen}
         setIsBatchDeleteDialogOpen={fe.setIsBatchDeleteDialogOpen}
         onPullConfirm={fe.handlePullConfirm}
@@ -194,6 +189,7 @@ export default function FilesPage() {
         onRenameConfirm={fe.handleRenameConfirm}
         onDeleteConfirm={fe.handleDeleteConfirm}
         onNewFolderConfirm={fe.handleNewFolderConfirm}
+        onMoveConfirm={fe.handleMoveConfirm}
         onBatchPullConfirm={fe.handleBatchPullConfirm}
         onBatchDeleteConfirm={fe.handleBatchDeleteConfirm}
         chooseLocalFile={fe.chooseLocalFile}

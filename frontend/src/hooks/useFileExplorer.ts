@@ -507,6 +507,21 @@ export function useFileExplorer() {
   function openPushFolderDialog() { store.setIsPushFolderDialogOpen(true) }
   function openBatchPullDialog() { store.setIsBatchPullDialogOpen(true) }
   function openBatchDeleteDialog() { store.setIsBatchDeleteDialogOpen(true) }
+  function openMoveDialog(file: FileEntry) {
+    store.setDialogTargetFile(file)
+    store.setIsMoveDialogOpen(true)
+  }
+
+  async function getSizeForFile(file: FileEntry) {
+    if (file.type !== 'directory') return
+    const key = cacheKey(store.currentPath, store.showHidden)
+    try {
+      const size = await getDirectorySize(file.path)
+      store.updateFileSize(file.path, size, key)
+    } catch {
+      store.updateFileSize(file.path, '--', key)
+    }
+  }
 
   async function handlePullConfirm(localPath: string) {
     if (!store.dialogTargetFile) return
@@ -536,6 +551,10 @@ export function useFileExplorer() {
     await removeFile(store.dialogTargetFile.path)
   }
   async function handleNewFolderConfirm(name: string) { await createFolder(name) }
+  async function handleMoveConfirm(destinationDir: string) {
+    if (!store.dialogTargetFile) return
+    await moveFile(store.dialogTargetFile.path, normalizePath(destinationDir))
+  }
   async function handleBatchPullConfirm(localDir: string) { await pullSelectedFiles(localDir) }
   async function handleBatchDeleteConfirm() { await deleteSelectedFiles() }
 
@@ -595,6 +614,7 @@ export function useFileExplorer() {
     isRenameDialogOpen: store.isRenameDialogOpen,
     isDeleteDialogOpen: store.isDeleteDialogOpen,
     isNewFolderDialogOpen: store.isNewFolderDialogOpen,
+    isMoveDialogOpen: store.isMoveDialogOpen,
     isBatchPullDialogOpen: store.isBatchPullDialogOpen,
     isBatchDeleteDialogOpen: store.isBatchDeleteDialogOpen,
     dialogTargetFile: store.dialogTargetFile,
@@ -605,6 +625,7 @@ export function useFileExplorer() {
     setIsRenameDialogOpen: store.setIsRenameDialogOpen,
     setIsDeleteDialogOpen: store.setIsDeleteDialogOpen,
     setIsNewFolderDialogOpen: store.setIsNewFolderDialogOpen,
+    setIsMoveDialogOpen: store.setIsMoveDialogOpen,
     setIsBatchPullDialogOpen: store.setIsBatchPullDialogOpen,
     setIsBatchDeleteDialogOpen: store.setIsBatchDeleteDialogOpen,
 
@@ -614,8 +635,10 @@ export function useFileExplorer() {
     openRenameDialog,
     openDeleteDialog,
     openNewFolderDialog,
+    openMoveDialog,
     openBatchPullDialog,
     openBatchDeleteDialog,
+    getSizeForFile,
     handlePullConfirm,
     handlePushConfirm,
     handlePushFolderConfirm,
@@ -623,6 +646,7 @@ export function useFileExplorer() {
     handleRenameConfirm,
     handleDeleteConfirm,
     handleNewFolderConfirm,
+    handleMoveConfirm,
     handleBatchPullConfirm,
     handleBatchDeleteConfirm,
   }

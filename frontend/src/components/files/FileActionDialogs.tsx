@@ -31,6 +31,7 @@ interface FileActionDialogsProps {
   isRenameDialogOpen: boolean
   isDeleteDialogOpen: boolean
   isNewFolderDialogOpen: boolean
+  isMoveDialogOpen: boolean
   isBatchPullDialogOpen: boolean
   isBatchDeleteDialogOpen: boolean
 
@@ -40,6 +41,7 @@ interface FileActionDialogsProps {
   setIsRenameDialogOpen: (open: boolean) => void
   setIsDeleteDialogOpen: (open: boolean) => void
   setIsNewFolderDialogOpen: (open: boolean) => void
+  setIsMoveDialogOpen: (open: boolean) => void
   setIsBatchPullDialogOpen: (open: boolean) => void
   setIsBatchDeleteDialogOpen: (open: boolean) => void
 
@@ -49,6 +51,7 @@ interface FileActionDialogsProps {
   onRenameConfirm: (newName: string) => void
   onDeleteConfirm: () => void
   onNewFolderConfirm: (folderName: string) => void
+  onMoveConfirm: (destinationDir: string) => void
   onBatchPullConfirm: (localDir: string) => void
   onBatchDeleteConfirm: () => void
 
@@ -65,6 +68,7 @@ export function FileActionDialogs({
   isRenameDialogOpen,
   isDeleteDialogOpen,
   isNewFolderDialogOpen,
+  isMoveDialogOpen,
   isBatchPullDialogOpen,
   isBatchDeleteDialogOpen,
   setIsPullDialogOpen,
@@ -73,6 +77,7 @@ export function FileActionDialogs({
   setIsRenameDialogOpen,
   setIsDeleteDialogOpen,
   setIsNewFolderDialogOpen,
+  setIsMoveDialogOpen,
   setIsBatchPullDialogOpen,
   setIsBatchDeleteDialogOpen,
   onPullConfirm,
@@ -81,6 +86,7 @@ export function FileActionDialogs({
   onRenameConfirm,
   onDeleteConfirm,
   onNewFolderConfirm,
+  onMoveConfirm,
   onBatchPullConfirm,
   onBatchDeleteConfirm,
   chooseLocalFile,
@@ -88,6 +94,7 @@ export function FileActionDialogs({
 }: FileActionDialogsProps) {
   const [renameValue, setRenameValue] = useState('')
   const [folderName, setFolderName] = useState('')
+  const [moveValue, setMoveValue] = useState('')
 
   return (
     <>
@@ -168,6 +175,39 @@ export function FileActionDialogs({
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>Cancel</Button>
             <Button onClick={() => { onRenameConfirm(renameValue); setIsRenameDialogOpen(false) }} disabled={!renameValue.trim()}>Rename</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isMoveDialogOpen} onOpenChange={(open) => {
+        setIsMoveDialogOpen(open)
+        if (open && dialogTargetFile) {
+          const parent = dialogTargetFile.path.slice(0, dialogTargetFile.path.lastIndexOf('/')) || '/'
+          setMoveValue(parent)
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Move</DialogTitle>
+            <DialogDescription>
+              Move <span className="font-mono text-sm">{dialogTargetFile?.name}</span> to a destination directory on the device.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={moveValue}
+            onChange={(e) => setMoveValue(e.target.value)}
+            placeholder="/sdcard/destination"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && moveValue.trim()) {
+                onMoveConfirm(moveValue)
+                setIsMoveDialogOpen(false)
+              }
+            }}
+            autoFocus
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMoveDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => { onMoveConfirm(moveValue); setIsMoveDialogOpen(false) }} disabled={!moveValue.trim()}>Move</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

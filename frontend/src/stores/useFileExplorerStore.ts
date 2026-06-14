@@ -24,6 +24,7 @@ interface FileExplorerState {
   isRenameDialogOpen: boolean
   isDeleteDialogOpen: boolean
   isNewFolderDialogOpen: boolean
+  isMoveDialogOpen: boolean
   isBatchPullDialogOpen: boolean
   isBatchDeleteDialogOpen: boolean
   searchTerm: string
@@ -52,6 +53,7 @@ interface FileExplorerActions {
   setIsRenameDialogOpen: (open: boolean) => void
   setIsDeleteDialogOpen: (open: boolean) => void
   setIsNewFolderDialogOpen: (open: boolean) => void
+  setIsMoveDialogOpen: (open: boolean) => void
   setIsBatchPullDialogOpen: (open: boolean) => void
   setIsBatchDeleteDialogOpen: (open: boolean) => void
   setSearchTerm: (term: string) => void
@@ -86,6 +88,7 @@ const initialState: FileExplorerState = {
   isRenameDialogOpen: false,
   isDeleteDialogOpen: false,
   isNewFolderDialogOpen: false,
+  isMoveDialogOpen: false,
   isBatchPullDialogOpen: false,
   isBatchDeleteDialogOpen: false,
   searchTerm: '',
@@ -146,6 +149,7 @@ export const useFileExplorerStore = create<FileExplorerStore>()((set) => ({
   setIsRenameDialogOpen: (isRenameDialogOpen) => set({ isRenameDialogOpen }),
   setIsDeleteDialogOpen: (isDeleteDialogOpen) => set({ isDeleteDialogOpen }),
   setIsNewFolderDialogOpen: (isNewFolderDialogOpen) => set({ isNewFolderDialogOpen }),
+  setIsMoveDialogOpen: (isMoveDialogOpen) => set({ isMoveDialogOpen }),
   setIsBatchPullDialogOpen: (isBatchPullDialogOpen) => set({ isBatchPullDialogOpen }),
   setIsBatchDeleteDialogOpen: (isBatchDeleteDialogOpen) => set({ isBatchDeleteDialogOpen }),
   setSearchTerm: (searchTerm) => set({ searchTerm }),
