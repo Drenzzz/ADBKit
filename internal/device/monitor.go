@@ -69,47 +69,84 @@ func (s *MonitorService) GetSnapshot(ctx context.Context, serial string) (Perfor
 	return snap, nil
 }
 
+// fetchCPUUsage membaca /proc/stat dua kali dengan jeda singkat lalu menghitung
+// utilisasi dari delta idle terhadap total. Pendekatan ini akurat lintas device
+// dan tidak bergantung pada format output `top` yang berbeda antar toolbox.
 func (s *MonitorService) fetchCPUUsage(ctx context.Context, serial string) float64 {
-	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
-		Args:    []string{"-s", serial, "shell", "top", "-bn1"},
-		Timeout: 5 * time.Second,
-	})
-	if err != nil {
+	first, ok := s.readCPUStat(ctx, serial)
+	if !ok {
 		return 0
 	}
 
+	select {
+	case <-ctx.Done():
+		return 0
+	case <-time.After(400 * time.Millisecond):
+	}
+
+	second, ok := s.readCPUStat(ctx, serial)
+	if !ok {
+		return 0
+	}
+
+	totalDelta := float64(second.total - first.total)
+	idleDelta := float64(second.idle - first.idle)
+	if totalDelta <= 0 {
+		return 0
+	}
+
+	usage := (1.0 - idleDelta/totalDelta) * 100.0
+	if usage < 0 {
+		return 0
+	}
+	if usage > 100 {
+		return 100
+	}
+	return usage
+}
+
+type cpuStat struct {
+	total int64
+	idle  int64
+}
+
+func (s *MonitorService) readCPUStat(ctx context.Context, serial string) (cpuStat, bool) {
+	result, err := core.RunCommand(ctx, core.ExecRequest{
+		Command: core.BinaryNameAdb,
+		Args:    []string{"-s", serial, "shell", "cat", "/proc/stat"},
+		Timeout: 5 * time.Second,
+	})
+	if err != nil {
+		return cpuStat{}, false
+	}
+
 	for _, rawLine := range strings.Split(result.Stdout, "\n") {
-		line := strings.ToLower(strings.TrimSpace(rawLine))
-		if !strings.Contains(line, "cpu") || !strings.Contains(line, "idle") {
+		fields := strings.Fields(strings.TrimSpace(rawLine))
+		if len(fields) < 5 || fields[0] != "cpu" {
 			continue
 		}
 
-		fields := strings.Fields(line)
-		for _, field := range fields {
-			if !strings.HasSuffix(field, "%idle") && !strings.Contains(field, "idle") {
-				continue
-			}
-
-			valStr := strings.TrimSuffix(field, "%idle")
-			valStr = strings.TrimSuffix(valStr, "idle")
-			valStr = strings.TrimRight(valStr, "%")
-			valStr = strings.TrimSpace(valStr)
-
-			idleVal, parseErr := strconv.ParseFloat(valStr, 64)
+		var total int64
+		var idle int64
+		// Kolom /proc/stat: user nice system idle iowait irq softirq steal ...
+		// idle = field index 4 (idle) + 5 (iowait) bila tersedia.
+		for i, field := range fields[1:] {
+			val, parseErr := strconv.ParseInt(field, 10, 64)
 			if parseErr != nil {
 				continue
 			}
-
-			if idleVal > 100 {
-				cores := float64(int(idleVal/100) + 1)
-				return 100.0 - ((idleVal / (cores * 100.0)) * 100.0)
+			total += val
+			if i == 3 || i == 4 {
+				idle += val
 			}
-			return 100.0 - idleVal
 		}
+		if total <= 0 {
+			return cpuStat{}, false
+		}
+		return cpuStat{total: total, idle: idle}, true
 	}
 
-	return 0
+	return cpuStat{}, false
 }
 
 func (s *MonitorService) fetchRAMUsage(ctx context.Context, serial string) (usagePercent float64, usedBytes int64, totalBytes int64) {
@@ -170,12 +207,13 @@ func (s *MonitorService) fetchNetworkBytes(ctx context.Context, serial string) (
 
 	for _, rawLine := range strings.Split(result.Stdout, "\n") {
 		line := strings.TrimSpace(rawLine)
-		if !strings.Contains(line, "wlan0:") && !strings.Contains(line, "rmnet_data") {
+		colonIdx := strings.Index(line, ":")
+		if colonIdx < 0 {
 			continue
 		}
 
-		colonIdx := strings.Index(line, ":")
-		if colonIdx < 0 {
+		iface := strings.TrimSpace(line[:colonIdx])
+		if !isMeteredInterface(iface) {
 			continue
 		}
 
@@ -195,6 +233,21 @@ func (s *MonitorService) fetchNetworkBytes(ctx context.Context, serial string) (
 	}
 
 	return rxBytes, txBytes
+}
+
+// isMeteredInterface mencakup Wi-Fi, ethernet, dan mobile data dengan penamaan
+// yang beragam antar device, sambil mengabaikan loopback dan virtual interface.
+func isMeteredInterface(iface string) bool {
+	if iface == "" || iface == "lo" {
+		return false
+	}
+	prefixes := []string{"wlan", "eth", "rmnet", "ccmni", "rmnet_data", "wwan", "usb"}
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(iface, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *MonitorService) fetchBattery(ctx context.Context, serial string) (level int, temperatureC float64) {
