@@ -83,7 +83,7 @@ func (a *App) startup(ctx context.Context) {
 	a.fileSvc = file.NewService(ctx, a.resolveActiveSerial)
 	a.termSvc = shell.NewTerminalService(ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial)
 	a.logSvc = shell.NewLogcatService(ctx, a.binSvc, a.currentConfig)
-	a.fbSvc = flasher.NewFastbootService(a.currentConfig, a.resolveActiveSerial)
+	a.fbSvc = flasher.NewFastbootService(a.binSvc, a.currentConfig, a.resolveActiveSerial)
 	a.fpSvc = flasher.NewPlanService(a.fbSvc)
 	a.fpSvc.SetWailsContext(ctx)
 	a.scrSvc = scrcpy.New(a.ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial, a.diaSvc, a.auditLog)

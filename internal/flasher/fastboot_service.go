@@ -1,6 +1,7 @@
 package flasher
 
 import (
+	"ADBKit/internal/binary"
 	"ADBKit/internal/core"
 	"ADBKit/internal/device"
 	"context"
@@ -18,69 +19,56 @@ const (
 )
 
 type FastbootDeviceInfo struct {
-	Serial string      `json:"serial"`
+	Serial string       `json:"serial"`
 	State  device.State `json:"state"`
 	Mode   device.Mode  `json:"mode"`
 }
 
-type binaryResolver interface {
-	GetBinaryStatus(*core.AppConfig) *coreBinaryStatus
-}
-
-type coreBinaryStatus struct {
-	Adb      *core.BinaryInfo
-	Fastboot *core.BinaryInfo
-	Scrcpy   *core.BinaryInfo
-}
-
-func (s coreBinaryStatus) GetAdb() *core.BinaryInfo     { return s.Adb }
-func (s coreBinaryStatus) GetFastboot() *core.BinaryInfo { return s.Fastboot }
-func (s coreBinaryStatus) GetScrcpy() *core.BinaryInfo   { return s.Scrcpy }
-
 type FastbootService struct {
+	binaryService       *binary.Service
 	getConfig           func() *core.AppConfig
 	resolveActiveSerial func(context.Context) (string, error)
 }
 
 func NewFastbootService(
+	binaryService *binary.Service,
 	getConfig func() *core.AppConfig,
 	resolveActiveSerial func(context.Context) (string, error),
 ) *FastbootService {
 	return &FastbootService{
+		binaryService:       binaryService,
 		getConfig:           getConfig,
 		resolveActiveSerial: resolveActiveSerial,
 	}
 }
 
+// resolveBinaryPath memakai detection cascade yang sama dengan service lain
+// (config path > system PATH > app-data > common paths), bukan hanya membaca
+// config.FastbootPath. Ini memastikan fastboot yang hanya ada di PATH tetap
+// terdeteksi seperti pada Dashboard.
 func (s *FastbootService) resolveBinaryPath(name string) (string, error) {
+	if s.binaryService == nil {
+		return "", core.NewOperationError("resolve_fastboot_binary", "binary service is not available", "binary service is nil", false)
+	}
 	if s.getConfig == nil {
-		return "", core.NewOperationError("resolve_fastboot_binary", "config getter is not configured", "", false)
+		return "", core.NewOperationError("resolve_fastboot_binary", "application config is unavailable", "config getter is nil", false)
 	}
-	status := s.getConfig()
-	if status == nil {
-		return "", core.NewOperationError("resolve_fastboot_binary", "config is not available", "", false)
-	}
+
+	status := s.binaryService.GetBinaryStatus(s.getConfig())
 	var info *core.BinaryInfo
 	switch name {
 	case core.BinaryNameAdb:
-		if status.AdbPath == "" {
-			return "", core.NewOperationError("resolve_fastboot_binary", "binary is not configured", fmt.Sprintf("binary '%s' not set", name), true)
-		}
-		return status.AdbPath, nil
+		info = status.Adb
 	case core.BinaryNameFastboot:
-		if status.FastbootPath == "" {
-			return "", core.NewOperationError("resolve_fastboot_binary", "binary is not configured", fmt.Sprintf("binary '%s' not set", name), true)
-		}
-		return status.FastbootPath, nil
+		info = status.Fastboot
 	case core.BinaryNameScrcpy:
-		if status.ScrcpyPath == "" {
-			return "", core.NewOperationError("resolve_fastboot_binary", "binary is not configured", fmt.Sprintf("binary '%s' not set", name), true)
-		}
-		return status.ScrcpyPath, nil
+		info = status.Scrcpy
 	}
+
 	if info == nil || info.Status != core.BinaryReady || info.Path == "" {
-		return "", core.NewOperationError("resolve_fastboot_binary", "binary is not ready", fmt.Sprintf("binary '%s' unavailable", name), true)
+		return "", core.NewOperationError("resolve_fastboot_binary", "required binary is not ready", fmt.Sprintf("binary '%s' is unavailable", name), true)
 	}
+
 	return info.Path, nil
 }
 
