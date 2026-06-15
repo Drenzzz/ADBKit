@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/google/uuid"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -43,11 +44,12 @@ type LogcatStatusEvent struct {
 }
 
 type logcatStream struct {
-	serial string
-	cmd    *exec.Cmd
-	stdout io.ReadCloser
-	stderr io.ReadCloser
-	once   sync.Once
+	serial   string
+	cmd      *exec.Cmd
+	stdout   io.ReadCloser
+	stderr   io.ReadCloser
+	once     sync.Once
+	stopping atomic.Bool
 }
 
 type LogcatService struct {
@@ -168,8 +170,11 @@ func (s *LogcatService) readLogcatOutput(stream *logcatStream, pipe io.ReadClose
 
 	for scanner.Scan() {
 		entry := parseLogcatEntry(stream.serial, scanner.Text())
-		if isError {
-			entry.Level = "E"
+		// adb menulis diagnostik non-fatal ke stderr (mis. "waiting for device").
+		// Hanya tandai sebagai warning bila baris bukan format logcat valid;
+		// baris yang sudah terparse mempertahankan level aslinya.
+		if isError && entry.Tag == "" {
+			entry.Level = "W"
 		}
 		wailsruntime.EventsEmit(s.ctx, EventLine, entry)
 	}
@@ -187,7 +192,10 @@ func (s *LogcatService) readLogcatOutput(stream *logcatStream, pipe io.ReadClose
 
 func (s *LogcatService) waitForStreamExit(stream *logcatStream) {
 	err := stream.cmd.Wait()
-	if err != nil {
+	// Kill yang dipicu user (StopStream/Shutdown) membuat Wait() mengembalikan
+	// signal error; itu bukan kegagalan jadi tetap dilaporkan sebagai "stopped".
+	if err != nil && !stream.stopping.Load() {
+		s.emitError(stream, err)
 		s.closeStream(stream, "error")
 		return
 	}
@@ -195,8 +203,20 @@ func (s *LogcatService) waitForStreamExit(stream *logcatStream) {
 	s.closeStream(stream, "stopped")
 }
 
+func (s *LogcatService) emitError(stream *logcatStream, err error) {
+	wailsruntime.EventsEmit(s.ctx, EventLine, LogcatEntry{
+		ID:      uuid.NewString(),
+		Serial:  stream.serial,
+		Level:   "E",
+		Message: fmt.Sprintf("logcat stream ended: %s", err.Error()),
+		Raw:     err.Error(),
+	})
+}
+
 func (s *LogcatService) closeStream(stream *logcatStream, status string) {
 	stream.once.Do(func() {
+		stream.stopping.Store(true)
+
 		s.mu.Lock()
 		delete(s.streams, stream.serial)
 		s.mu.Unlock()
