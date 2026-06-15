@@ -348,7 +348,7 @@ func (s *Service) closeSession(process *scrcpyProcess, status SessionStatus, emi
 }
 
 func (s *Service) getSession(sessionID string) (*scrcpyProcess, error) {
-	trimmed := sessionID
+	trimmed := strings.TrimSpace(sessionID)
 	if trimmed == "" {
 		return nil, core.NewOperationError(
 			"scrcpy_session",
@@ -371,7 +371,7 @@ func (s *Service) getSession(sessionID string) (*scrcpyProcess, error) {
 }
 
 func (s *Service) resolveSerial(ctx context.Context, serial string) (string, error) {
-	trimmed := serial
+	trimmed := strings.TrimSpace(serial)
 	if trimmed != "" {
 		return trimmed, nil
 	}
@@ -438,13 +438,14 @@ func (s *Service) emitErrorEvent(session Session, message string) {
 	})
 }
 
-func (s *Service) logAudit(operation, serial string, success bool, errMsg string) {
+func (s *Service) logAudit(operation, serial string, success bool, details string) {
 	if s.auditLog == nil {
 		return
 	}
-	s.auditLog.LogOperation(
+	s.auditLog.LogOperationWithDetails(
 		operation,
 		fmt.Sprintf("serial=%s", serial),
+		details,
 		"",
 		success,
 	)
