@@ -59,11 +59,9 @@ func (a *App) ImportAuditLogs(path string) (int, error) {
 	if err := json.Unmarshal(data, &entries); err != nil {
 		return 0, core.NewOperationError("import_audit_logs", "import file is not a valid audit log", err.Error(), false)
 	}
-	if err := a.auditLog.ReplaceAll(entries); err != nil {
-		return 0, core.NewOperationError("import_audit_logs", "failed to apply import", err.Error(), true)
-	}
-	a.auditLog.Log(audit.LogLevelInfo, "audit_logs", fmt.Sprintf("Audit logs imported from %s", path))
-	return len(entries), nil
+	added := a.auditLog.Merge(entries)
+	a.auditLog.Log(audit.LogLevelInfo, "audit_logs", fmt.Sprintf("Imported %d audit log entries from %s", added, path))
+	return added, nil
 }
 
 func (a *App) GetAppConfig() core.AppConfigSnapshot {

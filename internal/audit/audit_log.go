@@ -59,18 +59,43 @@ func New(dataDir string) (*Log, error) {
 
 	entries := make([]Entry, 0)
 	if _, err := os.Stat(logPath); err == nil {
-		data, err := os.ReadFile(logPath)
-		if err == nil {
-			_ = json.Unmarshal(data, &entries)
+		data, readErr := os.ReadFile(logPath)
+		if readErr != nil {
+			fmt.Fprintf(os.Stderr, "audit log read error: %v\n", readErr)
+		} else if unmarshalErr := json.Unmarshal(data, &entries); unmarshalErr != nil {
+			// File korup: backup dulu sebelum dioverwrite supaya history bisa diselamatkan.
+			entries = make([]Entry, 0)
+			backupPath := logPath + ".corrupt"
+			if backupErr := os.WriteFile(backupPath, data, 0o600); backupErr != nil {
+				fmt.Fprintf(os.Stderr, "audit log corrupt, failed to back up: %v\n", backupErr)
+			} else {
+				fmt.Fprintf(os.Stderr, "audit log corrupt, backed up to %s\n", backupPath)
+			}
 		}
 	}
 
-	return &Log{
+	log := &Log{
 		entries:    entries,
 		path:       logPath,
 		maxEntries: defaultMaxEntries,
 		idCounter:  time.Now().UnixNano(),
-	}, nil
+	}
+	log.advanceCounterPastEntries()
+	return log, nil
+}
+
+// advanceCounterPastEntries memastikan idCounter selalu di atas ID terbesar yang
+// sudah ada, mencegah collision setelah load atau merge import.
+func (l *Log) advanceCounterPastEntries() {
+	var maxID int64
+	for _, entry := range l.entries {
+		if entry.ID > maxID {
+			maxID = entry.ID
+		}
+	}
+	if maxID >= l.idCounter {
+		atomic.StoreInt64(&l.idCounter, maxID+1)
+	}
 }
 
 func (l *Log) Log(level LogLevel, operation, message string) {
@@ -152,8 +177,39 @@ func (l *Log) ReplaceAll(entries []Entry) error {
 	}
 	l.mu.Unlock()
 
+	l.advanceCounterPastEntries()
 	l.saveNow()
 	return nil
+}
+
+// Merge menambahkan entry impor ke log yang ada tanpa menghapus history. Entry
+// dengan ID yang sudah ada dilewati agar tidak duplikat. Mengembalikan jumlah
+// entry baru yang benar-benar ditambahkan.
+func (l *Log) Merge(entries []Entry) int {
+	l.mu.Lock()
+	existingIDs := make(map[int64]struct{}, len(l.entries))
+	for _, entry := range l.entries {
+		existingIDs[entry.ID] = struct{}{}
+	}
+
+	added := 0
+	for _, entry := range entries {
+		if _, exists := existingIDs[entry.ID]; exists {
+			continue
+		}
+		l.entries = append(l.entries, entry)
+		existingIDs[entry.ID] = struct{}{}
+		added++
+	}
+
+	if len(l.entries) > l.maxEntries {
+		l.entries = l.entries[len(l.entries)-l.maxEntries:]
+	}
+	l.mu.Unlock()
+
+	l.advanceCounterPastEntries()
+	l.saveNow()
+	return added
 }
 
 func (l *Log) Clear() {
