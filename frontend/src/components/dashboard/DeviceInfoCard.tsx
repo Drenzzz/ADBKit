@@ -1,77 +1,60 @@
-import {
-  Building, Code, Cpu, Database, Hash, Info, RefreshCw, Server,
-  ShieldCheck, Smartphone, Tag, Wifi, Battery,
-} from 'lucide-react'
+import { Info, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useDevices } from '@/hooks/useDevices'
-
-function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string }) {
-  return (
-    <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-      <div className="text-muted-foreground">{icon}</div>
-      <div className="min-w-0 flex-1">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="truncate text-sm font-medium">{value || '—'}</div>
-      </div>
-    </div>
-  )
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <Skeleton key={i} className="h-14 w-full" />
-      ))}
-    </div>
-  )
-}
 
 export function DeviceInfoCard() {
   const { activeSerial, deviceInfo, loading, refreshDevices } = useDevices()
 
   const infoItems = deviceInfo
     ? [
-        { icon: <Building className="h-4 w-4" />, label: 'Brand', value: deviceInfo.brand },
-        { icon: <Tag className="h-4 w-4" />, label: 'Device Name', value: deviceInfo.connectionLabel },
-        { icon: <Code className="h-4 w-4" />, label: 'Codename', value: deviceInfo.codename },
-        { icon: <Smartphone className="h-4 w-4" />, label: 'Model', value: deviceInfo.model },
-        { icon: <Hash className="h-4 w-4" />, label: 'Serial', value: deviceInfo.serial },
-        { icon: <Server className="h-4 w-4" />, label: 'Build', value: deviceInfo.buildId },
-        { icon: <Info className="h-4 w-4" />, label: 'Android', value: deviceInfo.androidVersion },
-        { icon: <Battery className="h-4 w-4" />, label: 'Battery', value: deviceInfo.batteryLevel },
-        { icon: <Cpu className="h-4 w-4" />, label: 'RAM', value: deviceInfo.ramTotal },
-        { icon: <Database className="h-4 w-4" />, label: 'Storage', value: deviceInfo.storageInfo },
-        { icon: <Wifi className="h-4 w-4" />, label: 'IP Address', value: deviceInfo.ipAddress },
-        { icon: <ShieldCheck className="h-4 w-4" />, label: 'Root', value: deviceInfo.rootStatus },
+        { label: 'Android Version', value: deviceInfo.androidVersion },
+        { label: 'SDK API Level', value: deviceInfo.sdkVersion },
+        { label: 'Build Identifier', value: deviceInfo.buildId },
+        { label: 'Security Patch', value: deviceInfo.securityPatch },
+        { label: 'CPU Architecture', value: deviceInfo.abis },
+        { label: 'Manufacturer', value: deviceInfo.manufacturer },
       ]
     : []
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Info className="h-4 w-4" />
-          Device Info
+    <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4">
+        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+          <Info className="h-3.5 w-3.5" />
+          Device Specifications
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={refreshDevices} disabled={loading || !activeSerial}>
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        {activeSerial && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            onClick={refreshDevices}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+        )}
       </CardHeader>
-      <CardContent>
-        {!activeSerial ? (
-          <p className="text-sm text-muted-foreground">Select a device to view info.</p>
-        ) : loading && !deviceInfo ? (
-          <LoadingSkeleton />
+      <CardContent className="px-4 pb-4">
+        {loading && !deviceInfo ? (
+          <div className="space-y-3.5 py-2">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+          </div>
         ) : !deviceInfo ? (
-          <p className="text-sm text-muted-foreground">Click "Refresh" to load device data.</p>
+          <p className="text-xs text-muted-foreground py-2 text-center">No active device details.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="divide-y divide-border/40">
             {infoItems.map((item) => (
-              <InfoItem key={item.label} {...item} />
+              <div key={item.label} className="flex justify-between py-2 text-xs">
+                <span className="text-muted-foreground font-medium">{item.label}</span>
+                <span className="text-foreground font-mono font-medium truncate max-w-[65%]" title={item.value}>
+                  {item.value || '—'}
+                </span>
+              </div>
             ))}
           </div>
         )}

@@ -21,7 +21,7 @@ export function WirelessConnectCard() {
     setIsEnabling(true)
     try {
       const message = await enableWirelessTCPIP(port)
-      toast.success('Wireless mode enabled', { description: message })
+      toast.success('Wireless TCP/IP mode enabled', { description: message })
     } catch (e) {
       toast.error('Failed to enable wireless mode', {
         description: e instanceof Error ? e.message : String(e),
@@ -40,9 +40,9 @@ export function WirelessConnectCard() {
     try {
       const address = `${ip}:${port}`
       const message = await connectWireless(address)
-      toast.success('Connected', { description: message })
+      toast.success('Wireless ADB connected successfully', { description: message })
     } catch (e) {
-      toast.error('Connection failed', {
+      toast.error('Wireless connection failed', {
         description: e instanceof Error ? e.message : String(e),
       })
     } finally {
@@ -59,9 +59,9 @@ export function WirelessConnectCard() {
     try {
       const address = `${ip}:${port}`
       const message = await disconnectWireless(address)
-      toast.success('Disconnected', { description: message })
+      toast.success('Wireless ADB disconnected', { description: message })
     } catch (e) {
-      toast.error('Disconnect failed', {
+      toast.error('Disconnection failed', {
         description: e instanceof Error ? e.message : String(e),
       })
     } finally {
@@ -70,65 +70,93 @@ export function WirelessConnectCard() {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Wifi className="h-4 w-4" />
-          Wireless ADB
+    <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
+      <CardHeader className="pb-2 pt-4 px-4">
+        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+          <Wifi className="h-3.5 w-3.5" />
+          Wireless Terminal Connector
         </CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-medium text-muted-foreground">Step 1: Enable via USB</p>
-          <p className="text-xs text-muted-foreground">
-            Connect device via USB cable first, then enable TCP/IP mode.
-          </p>
-          <Button
-            size="sm"
-            onClick={handleEnableTCPIP}
-            disabled={isEnabling || !hasUsbDevice}
-          >
-            {isEnabling ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Usb className="mr-2 h-3.5 w-3.5" />}
-            Enable Wireless Mode
-          </Button>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-medium text-muted-foreground">Step 2: Connect via WiFi</p>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Device IP"
-              value={ip}
-              onChange={(e) => setIp(e.target.value)}
-              disabled={isConnecting || isDisconnecting}
-              className="flex-1"
-            />
-            <Input
-              placeholder="Port"
-              value={port}
-              onChange={(e) => setPort(e.target.value)}
-              disabled={isConnecting || isDisconnecting}
-              className="w-20"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              size="sm"
-              onClick={handleConnect}
-              disabled={isConnecting || !ip || isDisconnecting}
-            >
-              {isConnecting ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Wifi className="mr-2 h-3.5 w-3.5" />}
-              Connect
-            </Button>
+      <CardContent className="px-4 pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 divide-y md:divide-y-0 md:divide-x divide-border/40">
+          {/* Column 1: TCP/IP Activator */}
+          <div className="flex flex-col gap-2.5 pb-4 md:pb-0 md:pr-6 justify-between">
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                1. USB Activator
+              </span>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Connect your device via USB cable first, then activate TCP/IP wireless listener mode.
+              </p>
+            </div>
             <Button
               size="sm"
               variant="outline"
-              onClick={handleDisconnect}
-              disabled={isDisconnecting || !ip || isConnecting}
+              className="h-8 text-xs font-medium w-full mt-2"
+              onClick={handleEnableTCPIP}
+              disabled={isEnabling || !hasUsbDevice}
             >
-              {isDisconnecting ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <PlugZap className="mr-2 h-3.5 w-3.5" />}
-              Disconnect
+              {isEnabling ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Usb className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              Activate TCP/IP Mode
             </Button>
+          </div>
+
+          {/* Column 2: IP Linker */}
+          <div className="flex flex-col gap-2.5 pt-4 md:pt-0 md:pl-6 justify-between">
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                2. Wireless Linker
+              </span>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Device IP (e.g. 192.168.1.5)"
+                  value={ip}
+                  onChange={(e) => setIp(e.target.value)}
+                  disabled={isConnecting || isDisconnecting}
+                  className="h-8 text-xs flex-1"
+                />
+                <Input
+                  placeholder="Port"
+                  value={port}
+                  onChange={(e) => setPort(e.target.value)}
+                  disabled={isConnecting || isDisconnecting}
+                  className="h-8 text-xs w-16"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <Button
+                size="sm"
+                className="h-8 text-xs font-medium"
+                onClick={handleConnect}
+                disabled={isConnecting || !ip || isDisconnecting}
+              >
+                {isConnecting ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Wifi className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                Connect IP
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 text-xs font-medium"
+                onClick={handleDisconnect}
+                disabled={isDisconnecting || !ip || isConnecting}
+              >
+                {isDisconnecting ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <PlugZap className="mr-1.5 h-3.5 w-3.5" />
+                )}
+                Disconnect
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
