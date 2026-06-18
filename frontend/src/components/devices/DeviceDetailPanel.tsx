@@ -1,81 +1,145 @@
+import { useState } from 'react'
+import { motion } from 'motion/react'
+import { toast } from 'sonner'
 import {
-  Building, Code, Cpu, Database, Hash, Info, RefreshCw, Server,
-  ShieldCheck, Smartphone, Tag, Wifi, Battery,
+  Smartphone,
+  Layers,
+  Hash,
+  Shield,
+  Cpu,
+  Factory,
+  KeyRound,
+  Wifi,
+  Battery,
+  HardDrive,
+  MemoryStick,
+  Tag,
+  Info,
+  Cable,
+  Check,
+  Copy,
+  RefreshCw,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useDevices } from '@/hooks/useDevices'
+import type { DeviceInfo } from '@/lib/types'
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string }) {
-  return (
-    <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-      <div className="text-muted-foreground">{icon}</div>
-      <div className="min-w-0 flex-1">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="truncate text-sm font-medium">{value || '—'}</div>
-      </div>
-    </div>
-  )
+interface InfoCell {
+  label: string
+  value: string
+  icon: React.ElementType
+  mono?: boolean
 }
 
-function LoadingSkeleton() {
-  return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <Skeleton key={i} className="h-14 w-full" />
-      ))}
-    </div>
-  )
+function isWireless(serial: string): boolean {
+  return /^\d{1,3}(?:\.\d{1,3}){3}:\d+$/.test(serial)
+}
+
+function buildCells(deviceInfo: DeviceInfo): InfoCell[] {
+  const cells: InfoCell[] = []
+
+  if (deviceInfo.model) cells.push({ label: 'Model', value: deviceInfo.model, icon: Smartphone })
+  if (deviceInfo.brand) cells.push({ label: 'Brand', value: deviceInfo.brand, icon: Tag })
+  if (deviceInfo.manufacturer) cells.push({ label: 'Maker', value: deviceInfo.manufacturer, icon: Factory })
+  if (deviceInfo.codename) cells.push({ label: 'Codename', value: deviceInfo.codename, icon: Info, mono: true })
+  if (deviceInfo.androidVersion) cells.push({ label: 'Android', value: deviceInfo.androidVersion, icon: Smartphone })
+  if (deviceInfo.sdkVersion) cells.push({ label: 'SDK', value: `API ${deviceInfo.sdkVersion}`, icon: Layers })
+  if (deviceInfo.buildId) cells.push({ label: 'Build ID', value: deviceInfo.buildId, icon: Hash, mono: true })
+  if (deviceInfo.securityPatch) cells.push({ label: 'Patch', value: deviceInfo.securityPatch, icon: Shield })
+  if (deviceInfo.abis) cells.push({ label: 'ABI', value: deviceInfo.abis, icon: Cpu, mono: true })
+  if (deviceInfo.serial) cells.push({ label: 'Serial', value: deviceInfo.serial, icon: Hash, mono: true })
+  if (deviceInfo.batteryLevel) cells.push({ label: 'Battery', value: deviceInfo.batteryLevel, icon: Battery })
+  if (deviceInfo.storageInfo) cells.push({ label: 'Storage', value: deviceInfo.storageInfo, icon: HardDrive, mono: true })
+  if (deviceInfo.ramTotal) cells.push({ label: 'RAM', value: deviceInfo.ramTotal, icon: MemoryStick })
+  if (deviceInfo.ipAddress) cells.push({ label: 'IP Address', value: deviceInfo.ipAddress, icon: Wifi, mono: true })
+  if (deviceInfo.rootStatus) cells.push({ label: 'Root', value: deviceInfo.rootStatus, icon: KeyRound })
+  cells.push({ label: 'Mode', value: isWireless(deviceInfo.serial) ? 'Wi-Fi' : 'USB', icon: Cable })
+  if (deviceInfo.transportId) cells.push({ label: 'Transport', value: deviceInfo.transportId, icon: Hash, mono: true })
+  if (deviceInfo.product) cells.push({ label: 'Product', value: deviceInfo.product, icon: Info, mono: true })
+  if (deviceInfo.device) cells.push({ label: 'Device', value: deviceInfo.device, icon: Info, mono: true })
+  if (deviceInfo.connectionLabel) cells.push({ label: 'Connection', value: deviceInfo.connectionLabel, icon: Wifi, mono: true })
+
+  return cells
 }
 
 export function DeviceDetailPanel() {
   const { activeSerial, deviceInfo, loading, refreshDevices } = useDevices()
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
-  const items = deviceInfo
-    ? [
-        { icon: <Building className="h-4 w-4" />, label: 'Brand', value: deviceInfo.brand },
-        { icon: <Tag className="h-4 w-4" />, label: 'Device Name', value: deviceInfo.connectionLabel },
-        { icon: <Code className="h-4 w-4" />, label: 'Codename', value: deviceInfo.codename },
-        { icon: <Smartphone className="h-4 w-4" />, label: 'Model', value: deviceInfo.model },
-        { icon: <Hash className="h-4 w-4" />, label: 'Serial', value: deviceInfo.serial },
-        { icon: <Server className="h-4 w-4" />, label: 'Build ID', value: deviceInfo.buildId },
-        { icon: <Info className="h-4 w-4" />, label: 'Android Version', value: deviceInfo.androidVersion },
-        { icon: <Cpu className="h-4 w-4" />, label: 'SDK Version', value: deviceInfo.sdkVersion },
-        { icon: <ShieldCheck className="h-4 w-4" />, label: 'Security Patch', value: deviceInfo.securityPatch },
-        { icon: <Battery className="h-4 w-4" />, label: 'Battery', value: deviceInfo.batteryLevel },
-        { icon: <Cpu className="h-4 w-4" />, label: 'RAM', value: deviceInfo.ramTotal },
-        { icon: <Database className="h-4 w-4" />, label: 'Storage', value: deviceInfo.storageInfo },
-        { icon: <Wifi className="h-4 w-4" />, label: 'IP Address', value: deviceInfo.ipAddress },
-        { icon: <ShieldCheck className="h-4 w-4" />, label: 'Root Status', value: deviceInfo.rootStatus },
-        { icon: <Cpu className="h-4 w-4" />, label: 'ABIs', value: deviceInfo.abis },
-      ]
-    : []
+  const cells = deviceInfo ? buildCells(deviceInfo) : []
+
+  async function handleCopy(label: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedKey(label)
+      toast.success(`Copied ${label}`)
+      window.setTimeout(() => setCopiedKey(null), 1200)
+    } catch {
+      toast.error('Copy failed')
+    }
+  }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Smartphone className="h-4 w-4" />
-          Device Details
+    <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)] w-full">
+      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4">
+        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+          <Info className="h-3.5 w-3.5" />
+          Device Specifications
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={refreshDevices} disabled={loading || !activeSerial}>
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        {activeSerial && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            onClick={refreshDevices}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+        )}
       </CardHeader>
-      <CardContent>
-        {!activeSerial ? (
-          <p className="text-sm text-muted-foreground">Select a device from the sidebar.</p>
-        ) : loading && !deviceInfo ? (
-          <LoadingSkeleton />
-        ) : !deviceInfo ? (
-          <p className="text-sm text-muted-foreground">No device info available.</p>
+      <CardContent className="px-4 pb-4">
+        {!deviceInfo ? (
+          <p className="text-xs text-muted-foreground py-4 text-center">No active device details.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((item) => (
-              <InfoRow key={item.label} {...item} />
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+            {cells.map((cell) => {
+              const Icon = cell.icon
+              const isCopied = copiedKey === cell.label
+              return (
+                <motion.button
+                  key={cell.label}
+                  type="button"
+                  whileHover={{ scale: 1.01, backgroundColor: 'rgba(var(--muted), 0.1)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleCopy(cell.label, cell.value)}
+                  className="group flex items-start gap-2.5 rounded-xl border border-border/40 bg-muted/10 p-2.5 text-left transition-colors hover:border-border/60 hover:shadow-sm cursor-pointer"
+                >
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-background border border-border/40 text-muted-foreground group-hover:text-primary transition-colors">
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/60">
+                        {cell.label}
+                      </p>
+                      <span className="flex h-3 w-3 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                        {isCopied ? (
+                          <Check className="h-2.5 w-2.5 text-success" />
+                        ) : (
+                          <Copy className="h-2.5 w-2.5 text-muted-foreground/50 group-hover:text-primary" />
+                        )}
+                      </span>
+                    </div>
+                    <p className={cn('mt-0.5 truncate text-xs font-semibold text-foreground', cell.mono && 'font-mono text-[10px]')}>
+                      {cell.value}
+                    </p>
+                  </div>
+                </motion.button>
+              )
+            })}
           </div>
         )}
       </CardContent>

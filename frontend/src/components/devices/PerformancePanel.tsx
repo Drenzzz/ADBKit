@@ -1,31 +1,16 @@
-import { Activity, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Cpu, MemoryStick, Wifi, Activity, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useMonitor } from '@/hooks/useMonitor'
-import { useDevices } from '@/hooks/useDevices'
+import { StatTile } from '@/components/ui/stat-tile'
+import { useMetricsHistoryStore } from '@/stores/metricsHistoryStore'
+import type { PerformanceSnapshot } from '@/lib/types'
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1 rounded-lg bg-muted/50 p-3">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-sm font-semibold">{value}</span>
-    </div>
-  )
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Skeleton key={i} className="h-16 w-full" />
-      ))}
-    </div>
-  )
+interface PerformancePanelProps {
+  snapshot: PerformanceSnapshot | null
+  error: string | null
 }
 
 function formatBytes(bytes?: number): string {
-  if (!bytes || bytes <= 0) return '—'
+  if (!bytes || bytes <= 0) return '0 B'
   const kb = 1024
   const mb = kb * 1024
   const gb = mb * 1024
@@ -34,58 +19,84 @@ function formatBytes(bytes?: number): string {
   return `${(bytes / kb).toFixed(0)} KB`
 }
 
-function formatUptime(seconds?: number): string {
-  if (!seconds || seconds <= 0) return '—'
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  if (h >= 24) {
-    const d = Math.floor(h / 24)
-    const rh = h % 24
-    return `${d}d ${rh}h ${m}m`
-  }
-  if (h > 0) return `${h}h ${m}m`
-  return `${m}m`
+function formatBytesPerSec(bps?: number): string {
+  if (!bps || bps <= 0) return '0 B/s'
+  return `${formatBytes(bps)}/s`
 }
 
-export function PerformancePanel() {
-  const { activeSerial, deviceMode } = useDevices()
-  const isOnline = deviceMode === 'adb'
-  const { snapshot, polling, refresh } = useMonitor(activeSerial, isOnline)
+function cpuTone(percent: number): 'default' | 'warning' | 'danger' {
+  if (percent > 80) return 'danger'
+  if (percent > 60) return 'warning'
+  return 'default'
+}
+
+function ramTone(percent: number): 'default' | 'warning' | 'danger' {
+  if (percent > 85) return 'danger'
+  if (percent > 65) return 'warning'
+  return 'default'
+}
+
+export function PerformancePanel({ snapshot, error }: PerformancePanelProps) {
+  const cpuHistory = useMetricsHistoryStore((state) => state.cpuHistory)
+  const ramHistory = useMetricsHistoryStore((state) => state.ramHistory)
+  const rxHistory = useMetricsHistoryStore((state) => state.rxHistory)
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Activity className="h-4 w-4" />
-          Performance Monitor
+    <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
+      <CardHeader className="pb-3 pt-5 px-5 flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+          <Activity className="h-3.5 w-3.5" />
+          Performance Telemetry
         </CardTitle>
-        <Button variant="outline" size="sm" onClick={refresh} disabled={polling || !activeSerial || !isOnline}>
-          <RefreshCw className={`h-3.5 w-3.5 ${polling ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
       </CardHeader>
-      <CardContent>
-        {!activeSerial ? (
-          <p className="text-sm text-muted-foreground">Select a device first.</p>
-        ) : !isOnline ? (
-          <p className="text-sm text-muted-foreground">Device must be in ADB mode for monitoring.</p>
-        ) : polling && !snapshot ? (
-          <LoadingSkeleton />
+      <CardContent className="px-5 pb-5">
+        {error ? (
+          <div className="flex items-center justify-center py-6">
+            <p className="text-xs text-destructive text-center">{error}</p>
+          </div>
         ) : !snapshot ? (
-          <p className="text-sm text-muted-foreground">No performance data available.</p>
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <p className="text-xs">Connecting diagnostics stream...</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            <Metric label="CPU Usage" value={`${snapshot.cpuUsage.toFixed(1)}%`} />
-            <Metric label="RAM Usage" value={`${snapshot.ramUsage.toFixed(1)}%`} />
-            <Metric label="RAM Used" value={formatBytes(snapshot.ramUsedBytes)} />
-            <Metric label="RAM Total" value={formatBytes(snapshot.ramTotalBytes)} />
-            <Metric label="Battery" value={snapshot.batteryLevel ? `${snapshot.batteryLevel}%` : '—'} />
-            <Metric label="Battery Temp" value={snapshot.batteryTemperatureC ? `${snapshot.batteryTemperatureC.toFixed(1)}°C` : '—'} />
-            <Metric label="Storage Used" value={formatBytes(snapshot.storageUsedBytes)} />
-            <Metric label="Storage Total" value={formatBytes(snapshot.storageTotalBytes)} />
-            <Metric label="Network RX" value={formatBytes(snapshot.networkRxBytes)} />
-            <Metric label="Network TX" value={formatBytes(snapshot.networkTxBytes)} />
-            <Metric label="Uptime" value={formatUptime(snapshot.uptimeSeconds)} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <StatTile
+              icon={<Cpu className="h-3.5 w-3.5 text-muted-foreground" />}
+              label="CPU Activity"
+              value={`${snapshot.cpuUsage.toFixed(1)}%`}
+              sublabel="Process Load: Active"
+              trend={cpuHistory}
+              trendColor="#007AFF"
+              trendHeight={44}
+              valueTone={cpuTone(snapshot.cpuUsage)}
+              className="py-4 px-3.5 gap-2.5"
+            />
+            <StatTile
+              icon={<MemoryStick className="h-3.5 w-3.5 text-muted-foreground" />}
+              label="RAM Utilization"
+              value={`${snapshot.ramUsage.toFixed(1)}%`}
+              sublabel={
+                snapshot.ramUsedBytes && snapshot.ramTotalBytes
+                  ? `${formatBytes(snapshot.ramUsedBytes)} / ${formatBytes(snapshot.ramTotalBytes)}`
+                  : undefined
+              }
+              trend={ramHistory}
+              trendColor="#34C759"
+              trendHeight={44}
+              valueTone={ramTone(snapshot.ramUsage)}
+              className="py-4 px-3.5 gap-2.5"
+            />
+            <StatTile
+              icon={<Wifi className="h-3.5 w-3.5 text-muted-foreground" />}
+              label="Network Link"
+              value={`↓ ${formatBytesPerSec(snapshot.networkRxSec)}`}
+              sublabel={`↑ ${formatBytesPerSec(snapshot.networkTxSec)}`}
+              trend={rxHistory}
+              trendColor="#5856D6"
+              trendHeight={44}
+              className="py-4 px-3.5 gap-2.5"
+            />
           </div>
         )}
       </CardContent>

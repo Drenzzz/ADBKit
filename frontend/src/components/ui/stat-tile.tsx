@@ -9,6 +9,7 @@ interface StatTileProps {
   sublabel?: string
   trend?: number[]
   trendColor?: string
+  trendHeight?: number
   valueTone?: 'default' | 'success' | 'warning' | 'danger' | 'info'
   className?: string
   onClick?: () => void
@@ -29,6 +30,7 @@ function StatTile({
   sublabel,
   trend,
   trendColor,
+  trendHeight = 22,
   valueTone = 'default',
   className,
   onClick,
@@ -61,7 +63,7 @@ function StatTile({
       {trend && trend.length >= 2 && (
         <Sparkline
           data={trend}
-          height={22}
+          height={trendHeight}
           width={120}
           color={trendColor ?? 'var(--primary)'}
           className="w-full mt-0.5"

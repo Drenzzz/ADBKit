@@ -11,25 +11,25 @@ interface RebootOption {
   mode: string
   label: string
   icon: typeof RotateCw
-  variant: 'default' | 'secondary' | 'destructive'
+  variant: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link'
 }
 
 const ONLINE_OPTIONS: RebootOption[] = [
-  { mode: 'system', label: 'Reboot', icon: RotateCw, variant: 'default' },
-  { mode: 'bootloader', label: 'Bootloader', icon: Shield, variant: 'secondary' },
-  { mode: 'recovery', label: 'Recovery', icon: Power, variant: 'secondary' },
-  { mode: 'fastboot', label: 'Reboot Fastbootd', icon: RotateCw, variant: 'secondary' },
+  { mode: 'system', label: 'Reboot System', icon: RotateCw, variant: 'outline' },
+  { mode: 'bootloader', label: 'Bootloader', icon: Shield, variant: 'outline' },
+  { mode: 'recovery', label: 'Recovery', icon: Power, variant: 'outline' },
+  { mode: 'fastboot', label: 'Reboot Fastbootd', icon: RotateCw, variant: 'outline' },
 ]
 
 const FASTBOOT_OPTIONS: RebootOption[] = [
-  { mode: 'system', label: 'Reboot to System', icon: ArrowRight, variant: 'default' },
-  { mode: 'bootloader', label: 'Reboot Bootloader', icon: Shield, variant: 'secondary' },
-  { mode: 'recovery', label: 'Recovery', icon: Power, variant: 'secondary' },
-  { mode: 'fastboot', label: 'Reboot Fastbootd', icon: RotateCw, variant: 'secondary' },
+  { mode: 'system', label: 'Reboot to System', icon: ArrowRight, variant: 'outline' },
+  { mode: 'bootloader', label: 'Reboot Bootloader', icon: Shield, variant: 'outline' },
+  { mode: 'recovery', label: 'Recovery', icon: Power, variant: 'outline' },
+  { mode: 'fastboot', label: 'Reboot Fastbootd', icon: RotateCw, variant: 'outline' },
 ]
 
 const RECOVERY_OPTIONS: RebootOption[] = [
-  { mode: 'system', label: 'Exit to System', icon: ArrowRight, variant: 'default' },
+  { mode: 'system', label: 'Exit to System', icon: ArrowRight, variant: 'outline' },
 ]
 
 function isWireless(serial: string): boolean {
@@ -77,7 +77,7 @@ export function DeviceActions() {
     setRebooting(mode)
     try {
       const message = await rebootDevice(activeSerial, mode)
-      toast.success('Reboot command sent', { description: message })
+      toast.success('Reboot command executed', { description: message })
     } catch (e) {
       toast.error('Reboot failed', {
         description: e instanceof Error ? e.message : String(e),
@@ -92,44 +92,46 @@ export function DeviceActions() {
     if (!activeSerial) return
     try {
       const message = await disconnectWireless(activeSerial)
-      toast.success('Disconnected', { description: message })
+      toast.success('Device disconnected', { description: message })
       refreshDevices()
     } catch (e) {
-      toast.error('Disconnect failed', {
+      toast.error('Disconnection failed', {
         description: e instanceof Error ? e.message : String(e),
       })
     }
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold">Device Actions</CardTitle>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+    <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
+      <CardHeader className="pb-2 pt-4 px-4 flex flex-row items-center justify-between">
+        <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+          Device Actions
+        </CardTitle>
+        {activeSerial && (
+          <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
             {stateLabel}
           </span>
-        </div>
+        )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 pb-4">
         {!activeSerial ? (
-          <p className="text-sm text-muted-foreground">Select a device first.</p>
+          <p className="text-xs text-muted-foreground">Select a device from the sidebar to execute actions.</p>
         ) : state === 'offline' || state === 'unauthorized' ? (
-          <div className="flex flex-col gap-3">
-            <p className="text-xs text-muted-foreground">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {state === 'unauthorized'
-                ? 'Device is not authorized. Check the device screen to allow USB debugging.'
-                : 'Device is offline. Check the connection and try again.'}
+                ? 'Device is unauthorized. Please verify the USB debugging prompt on your phone screen.'
+                : 'Device is offline. Check the hardware connection or USB cable.'}
             </p>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={refreshDevices} disabled={refreshing}>
-                <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-                Retry
+            <div className="flex gap-2 mt-1">
+              <Button size="sm" variant="outline" className="h-8 text-xs font-medium" onClick={refreshDevices} disabled={refreshing}>
+                <RefreshCw className={`mr-1.5 h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
+                Retry Connection
               </Button>
             </div>
           </div>
         ) : options.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No actions available for this device state.</p>
+          <p className="text-xs text-muted-foreground">No operations available for the current device state.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {options.map(({ mode, label, icon: Icon, variant }) => (
@@ -139,13 +141,14 @@ export function DeviceActions() {
                     <Button
                       size="sm"
                       variant="destructive"
+                      className="h-8 text-xs font-medium"
                       onClick={() => handleReboot(mode)}
                       disabled={rebooting !== null}
                     >
-                      {rebooting === mode ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
+                      {rebooting === mode ? <Loader2 className="mr-1.5 h-3 w-3 animate-spin" /> : null}
                       Confirm {label}
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
+                    <Button size="sm" variant="ghost" className="h-8 text-xs font-medium" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
                       Cancel
                     </Button>
                   </div>
@@ -153,10 +156,11 @@ export function DeviceActions() {
                   <Button
                     size="sm"
                     variant={variant}
+                    className="h-8 text-xs font-medium"
                     onClick={() => setConfirmMode(mode)}
                     disabled={rebooting !== null}
                   >
-                    <Icon className="mr-1.5 h-3.5 w-3.5" />
+                    <Icon className="mr-1.5 h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
                     {label}
                   </Button>
                 )}
@@ -164,32 +168,36 @@ export function DeviceActions() {
             ))}
 
             {isWirelessDevice && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setConfirmMode('forget')}
-                disabled={rebooting !== null}
-              >
-                <WifiOff className="mr-1.5 h-3.5 w-3.5" />
-                Disconnect
-              </Button>
+              <div>
+                {confirmMode === 'forget' ? (
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-8 text-xs font-medium"
+                      onClick={handleForget}
+                      disabled={rebooting !== null}
+                    >
+                      Confirm Disconnect
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-8 text-xs font-medium" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 text-xs font-medium"
+                    onClick={() => setConfirmMode('forget')}
+                    disabled={rebooting !== null}
+                  >
+                    <WifiOff className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+                    Disconnect
+                  </Button>
+                )}
+              </div>
             )}
-          </div>
-        )}
-
-        {confirmMode === 'forget' && (
-          <div className="mt-3 flex items-center gap-2 border-t border-border/50 pt-3">
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={handleForget}
-              disabled={rebooting !== null}
-            >
-              Confirm Disconnect
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
-              Cancel
-            </Button>
           </div>
         )}
       </CardContent>

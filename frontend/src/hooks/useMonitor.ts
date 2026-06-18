@@ -3,7 +3,7 @@ import { getPerformanceSnapshot } from '@/services/deviceService'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useMetricsHistoryStore } from '@/stores/metricsHistoryStore'
 
-const MONITOR_POLL_INTERVAL = 5000
+const MONITOR_POLL_INTERVAL = 3000
 
 export function useMonitor(serial: string, isActive: boolean) {
   const { performance, perfLoading, error, setPerformance, setPerfLoading, setError } = useDeviceStore()
