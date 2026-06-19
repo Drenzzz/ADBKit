@@ -440,6 +440,26 @@ export function useAppManager() {
     [],
   )
 
+  const loadDetails = useCallback(async (packageName: string) => {
+    if (detailsCache.has(packageName) || pendingDetailsRef.current.has(packageName)) return
+
+    pendingDetailsRef.current.add(packageName)
+    try {
+      const details = await svcGetDetails(packageName)
+      if (details) {
+        setDetailsCache((prev) => {
+          const next = new Map(prev)
+          next.set(packageName, details)
+          return next
+        })
+      }
+    } catch {
+      // ignore
+    } finally {
+      pendingDetailsRef.current.delete(packageName)
+    }
+  }, [detailsCache])
+
   const getDetails = useCallback(
     async (packageName: string): Promise<PackageDetails | null> => {
       try {
@@ -467,6 +487,7 @@ export function useAppManager() {
     busyBatchAction: store.busyBatchAction,
     error: store.error,
     lastUpdatedAt: store.lastUpdatedAt,
+    detailsCache,
 
     setFilter: store.setFilter,
     setStatusFilter: store.setStatusFilter,
@@ -493,5 +514,6 @@ export function useAppManager() {
     launch,
     forceStop,
     getDetails,
+    loadDetails,
   }
 }
