@@ -525,16 +525,19 @@ export function useFileExplorer() {
 
   async function handlePullConfirm(localPath: string) {
     if (!store.dialogTargetFile) return
-    await pullSingleFile(store.dialogTargetFile.path, localPath)
+    const success = await pullSingleFile(store.dialogTargetFile.path, localPath)
+    if (success) store.setIsPullDialogOpen(false)
   }
   async function handlePushConfirm(localPath: string) {
     if (!store.dialogTargetFile) return
-    await pushSingleFile(localPath, store.dialogTargetFile.path)
+    const success = await pushSingleFile(localPath, store.dialogTargetFile.path)
+    if (success) store.setIsPushDialogOpen(false)
   }
   async function handlePushFolderConfirm(localPath: string) {
     const remoteDir = normalizePath(store.currentPath)
     const name = localPath.split(/[/\\]/).pop() ?? localPath
-    await pushSingleFile(localPath, `${remoteDir}/${name}`)
+    const success = await pushSingleFile(localPath, `${remoteDir}/${name}`)
+    if (success) store.setIsPushFolderDialogOpen(false)
   }
   async function handlePushFilesToCurrentDirectory() {
     const paths = await chooseMultipleLocalFiles()
@@ -544,19 +547,31 @@ export function useFileExplorer() {
   async function handleRenameConfirm(newName: string) {
     if (!store.dialogTargetFile) return
     const parent = store.dialogTargetFile.path.slice(0, store.dialogTargetFile.path.lastIndexOf('/'))
-    await renameExistingFile(store.dialogTargetFile.path, `${parent}/${newName}`)
+    const success = await renameExistingFile(store.dialogTargetFile.path, `${parent}/${newName}`)
+    if (success) store.setIsRenameDialogOpen(false)
   }
   async function handleDeleteConfirm() {
     if (!store.dialogTargetFile) return
-    await removeFile(store.dialogTargetFile.path)
+    const success = await removeFile(store.dialogTargetFile.path)
+    if (success) store.setIsDeleteDialogOpen(false)
   }
-  async function handleNewFolderConfirm(name: string) { await createFolder(name) }
+  async function handleNewFolderConfirm(name: string) {
+    const success = await createFolder(name)
+    if (success) store.setIsNewFolderDialogOpen(false)
+  }
   async function handleMoveConfirm(destinationDir: string) {
     if (!store.dialogTargetFile) return
-    await moveFile(store.dialogTargetFile.path, normalizePath(destinationDir))
+    const success = await moveFile(store.dialogTargetFile.path, normalizePath(destinationDir))
+    if (success) store.setIsMoveDialogOpen(false)
   }
-  async function handleBatchPullConfirm(localDir: string) { await pullSelectedFiles(localDir) }
-  async function handleBatchDeleteConfirm() { await deleteSelectedFiles() }
+  async function handleBatchPullConfirm(localDir: string) {
+    const success = await pullSelectedFiles(localDir)
+    if (success) store.setIsBatchPullDialogOpen(false)
+  }
+  async function handleBatchDeleteConfirm() {
+    const success = await deleteSelectedFiles()
+    if (success) store.setIsBatchDeleteDialogOpen(false)
+  }
 
   return {
     currentPath: store.currentPath,

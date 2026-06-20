@@ -15,20 +15,27 @@ interface SortHeaderProps {
   onSort: (field: FileSortField) => void
 }
 
-function SortHeader({ label, field, currentField, direction, onSort }: SortHeaderProps) {
+function SortHeader({
+  label,
+  field,
+  currentField,
+  direction,
+  onSort,
+}: SortHeaderProps) {
   const isActive = field === currentField
   return (
     <span
-      className="inline-flex items-center gap-1 cursor-pointer select-none text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+      className="inline-flex items-center gap-1 cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
       onClick={() => onSort(field)}
       role="button"
     >
       {label}
-      {isActive && (
-        direction === 'asc'
-          ? <ArrowUp className="h-3 w-3" />
-          : <ArrowDown className="h-3 w-3" />
-      )}
+      {isActive &&
+        (direction === 'asc' ? (
+          <ArrowUp className="h-3 w-3 text-primary" />
+        ) : (
+          <ArrowDown className="h-3 w-3 text-primary" />
+        ))}
     </span>
   )
 }
@@ -75,7 +82,7 @@ export function FileTable({
   onGetSize,
 }: FileTableProps) {
   const parentRef = useRef<HTMLDivElement>(null)
-  
+
   const rowVirtualizer = useVirtualizer({
     count: files.length,
     getScrollElement: () => parentRef.current,
@@ -84,7 +91,8 @@ export function FileTable({
   })
 
   const allPaths = files.map((f) => f.path)
-  const allSelected = allPaths.length > 0 && allPaths.every((p) => selectedFiles.includes(p))
+  const allSelected =
+    allPaths.length > 0 && allPaths.every((p) => selectedFiles.includes(p))
 
   if (loading) {
     return (
@@ -97,14 +105,17 @@ export function FileTable({
   }
 
   if (files.length === 0) {
-    return searchTerm.trim()
-      ? <NoSearchResultsState term={searchTerm} />
-      : <EmptyFolderState />
+    return searchTerm.trim() ? (
+      <NoSearchResultsState term={searchTerm} />
+    ) : (
+      <EmptyFolderState />
+    )
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)]">
-      <div className="grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border bg-background sticky top-0 z-10 h-10">
+    <div className="flex flex-col h-[calc(100vh-280px)] relative">
+      {/* Table Header */}
+      <div className="grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border bg-muted/20 sticky top-0 z-10 h-10 select-none">
         <div className="px-3">
           <Checkbox
             checked={allSelected}
@@ -112,21 +123,42 @@ export function FileTable({
           />
         </div>
         <div className="px-3">
-          <SortHeader label="Name" field="name" currentField={sortField} direction={sortDirection} onSort={onSort} />
+          <SortHeader
+            label="Name"
+            field="name"
+            currentField={sortField}
+            direction={sortDirection}
+            onSort={onSort}
+          />
         </div>
         <div className="px-3 text-right">
-          <SortHeader label="Size" field="size" currentField={sortField} direction={sortDirection} onSort={onSort} />
+          <SortHeader
+            label="Size"
+            field="size"
+            currentField={sortField}
+            direction={sortDirection}
+            onSort={onSort}
+          />
         </div>
         <div className="px-3 hidden md:block">
-          <span className="text-xs font-medium text-muted-foreground">Permissions</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Permissions
+          </span>
         </div>
         <div className="px-3 hidden lg:block">
-          <SortHeader label="Modified" field="date" currentField={sortField} direction={sortDirection} onSort={onSort} />
+          <SortHeader
+            label="Modified"
+            field="date"
+            currentField={sortField}
+            direction={sortDirection}
+            onSort={onSort}
+          />
         </div>
         <div className="px-2" />
       </div>
-      
-      <div ref={parentRef} className="flex-1 overflow-auto">
+
+      {/* Table Body */}
+      <div ref={parentRef} className="flex-1 overflow-auto perf-scroll">
         <div
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
@@ -136,6 +168,8 @@ export function FileTable({
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const file = files[virtualRow.index]
+            if (!file) return null
+
             return (
               <div
                 key={file.path}
