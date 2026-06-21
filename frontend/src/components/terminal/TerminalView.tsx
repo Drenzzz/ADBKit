@@ -25,15 +25,67 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
     <div
       ref={containerRef}
       className={cn(
-        'h-full w-full overflow-auto bg-[#0f1117] px-4 py-3 font-mono text-xs leading-5 text-slate-200',
+        'h-full w-full overflow-auto bg-white dark:bg-[#0a0b10] px-5 py-4 font-mono text-xs leading-5 text-zinc-700 dark:text-zinc-300 perf-scroll select-text selection:bg-primary/20 dark:selection:bg-primary/30 selection:text-zinc-900 dark:selection:text-white',
         className,
       )}
     >
       {lines.length === 0 || (lines.length === 1 && lines[0] === '') ? (
-        <div className="text-slate-500">No terminal output yet.</div>
+        <div className="text-zinc-400 dark:text-zinc-600 italic select-none">No terminal output yet.</div>
       ) : (
-        <div className="whitespace-pre-wrap break-words">
-          {output}
+        <div className="space-y-0.5">
+          {lines.map((line, idx) => {
+            const trimmed = line.trim()
+
+            // Highlight commands prompt
+            if (trimmed.startsWith('$')) {
+              const cmdPart = line.substring(line.indexOf('$') + 1)
+              const prevLine = idx > 0 ? lines[idx - 1].trim() : ''
+              const showSpacer = idx > 0 && prevLine !== ''
+              return (
+                <div 
+                  key={idx} 
+                  className={cn("font-mono leading-5", showSpacer && "mt-4")}
+                >
+                  <span className="text-blue-600 dark:text-sky-400 font-semibold select-none">$</span>
+                  <span className="text-zinc-900 dark:text-zinc-100 font-semibold">{cmdPart}</span>
+                </div>
+              )
+            }
+
+            // Highlight errors
+            const lowerLine = trimmed.toLowerCase()
+            if (
+              lowerLine.includes('error') ||
+              lowerLine.includes('failed') ||
+              lowerLine.includes('exception') ||
+              lowerLine.includes('err:')
+            ) {
+              return (
+                <div key={idx} className="font-mono leading-5 text-rose-600 dark:text-rose-400 font-semibold whitespace-pre-wrap break-all">
+                  {line}
+                </div>
+              )
+            }
+
+            // Highlight fastboot OKAY / Finished
+            if (
+              trimmed.includes('OKAY [') ||
+              trimmed.includes('Finished. Total time:') ||
+              trimmed.startsWith('Rebooting')
+            ) {
+              return (
+                <div key={idx} className="font-mono leading-5 text-amber-700 dark:text-amber-400 font-semibold whitespace-pre-wrap break-words">
+                  {line}
+                </div>
+              )
+            }
+
+            return (
+              <div key={idx} className="font-mono leading-5 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap break-words">
+                {line}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

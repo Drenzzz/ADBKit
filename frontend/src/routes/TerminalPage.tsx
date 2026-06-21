@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import {
   CornerDownLeft,
   Terminal as TerminalIcon,
@@ -43,6 +44,23 @@ const MODE_OPTIONS: { value: TerminalMode; label: string }[] = [
   { value: 'adb-host', label: 'ADB Host' },
   { value: 'fastboot-host', label: 'Fastboot' },
 ]
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring' as const, stiffness: 300, damping: 24 },
+  },
+}
 
 export default function TerminalPage() {
   const {
@@ -239,259 +257,289 @@ export default function TerminalPage() {
   }, [])
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden pb-24">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-lg font-semibold tracking-tight">
-          Terminal
-        </h1>
-        <p className="text-sm text-muted-foreground">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden pb-0 font-sans"
+    >
+      {/* Title Header */}
+      <motion.div variants={itemVariants} className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Terminal</h1>
+        <p className="text-xs text-muted-foreground">
           Run shell commands, inspect logcat, and manage live terminal sessions
         </p>
-      </div>
+      </motion.div>
 
-      <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
-        <div className="flex items-center gap-0.5 rounded-lg border border-border/40 bg-muted/30 p-0.5 shrink-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setActivePanel('shell')}
-            className={cn(
-              'flex items-center gap-1.5 rounded-md px-2.5 py-1 h-auto text-xs font-medium transition-colors hover:bg-transparent',
-              activePanel === 'shell'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <TerminalIcon className="h-3 w-3" />
-            Shell
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setActivePanel('logcat')}
-            className={cn(
-              'flex items-center gap-1.5 rounded-md px-2.5 py-1 h-auto text-xs font-medium transition-colors hover:bg-transparent',
-              activePanel === 'logcat'
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            <ScrollText className="h-3 w-3" />
-            Logcat
-          </Button>
+      {/* Obsidian macOS-Style Window Container */}
+      <motion.div
+        variants={itemVariants}
+        className="flex-1 min-h-0 overflow-hidden flex flex-col rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10] shadow-2xl relative"
+      >
+        
+        {/* macOS Window Header (Title Bar) */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-950 select-none">
+          {/* Left: Window Dots (hover shows miniature symbols) */}
+          <div className="flex items-center gap-2 group/dots w-20">
+            <button
+              onClick={connected ? handleDisconnect : undefined}
+              className={cn(
+                "w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold transition-all relative border border-transparent outline-none",
+                connected 
+                  ? "bg-[#ff5f56] hover:bg-[#e0443e] text-[#5c0000] cursor-pointer" 
+                  : "bg-zinc-300 dark:bg-zinc-700 text-zinc-400 dark:text-zinc-800 cursor-not-allowed"
+              )}
+              title={connected ? "Disconnect session" : "No active session"}
+            >
+              <span className="opacity-0 group-hover/dots:opacity-100 absolute -top-0.5">×</span>
+            </button>
+            <div className="w-3 h-3 rounded-full bg-[#ffbd2e] relative flex items-center justify-center text-[7px] font-bold text-[#5c3e00]">
+              <span className="opacity-0 group-hover/dots:opacity-100 absolute -top-0.5">-</span>
+            </div>
+            <div className="w-3 h-3 rounded-full bg-[#27c93f] relative flex items-center justify-center text-[7px] font-bold text-[#004d00]">
+              <span className="opacity-0 group-hover/dots:opacity-100 absolute -top-0.5">+</span>
+            </div>
+          </div>
+
+          {/* Center: iOS Segmented Tabs */}
+          <div className="flex items-center gap-0.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-200/50 dark:bg-zinc-950 p-0.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
+            <button
+              onClick={() => setActivePanel('shell')}
+              className={cn(
+                'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                activePanel === 'shell'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-foreground shadow-sm'
+                  : 'text-zinc-500 dark:text-muted-foreground hover:text-zinc-900 dark:hover:text-zinc-200',
+              )}
+            >
+              <TerminalIcon className="h-3.5 w-3.5" />
+              Shell
+            </button>
+            <button
+              onClick={() => setActivePanel('logcat')}
+              className={cn(
+                'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                activePanel === 'logcat'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-foreground shadow-sm'
+                  : 'text-zinc-500 dark:text-muted-foreground hover:text-zinc-900 dark:hover:text-zinc-200',
+              )}
+            >
+              <ScrollText className="h-3.5 w-3.5" />
+              Logcat
+            </button>
+          </div>
+
+          {/* Right: Window Session Label */}
+          <div className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 w-20 text-right truncate">
+            {connected && session ? `${session.serial}` : 'idle'}
+          </div>
         </div>
 
-        {activePanel === 'shell' && (
-          <>
-            <div className="h-3.5 w-px bg-border/50 shrink-0" />
-
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button
-                  variant="ghost"
-                  size="sm"
+        {/* Content Pane */}
+        {activePanel === 'shell' ? (
+          <div className="flex min-h-0 flex-1 flex-col">
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center gap-3 bg-zinc-50 dark:bg-zinc-900/40 px-4 py-2 border-b border-zinc-200 dark:border-zinc-950">
+              {/* Dropdown Mode Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger
                   disabled={connected}
                   className={cn(
-                    'flex items-center gap-1 rounded-md px-2 py-1 h-auto text-xs transition-colors shrink-0',
-                    connected
-                      ? 'text-muted-foreground/50 cursor-not-allowed'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                    'inline-flex h-7 items-center gap-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/40 px-3 py-1 text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer shadow-sm active:scale-[0.97]',
+                    connected && 'opacity-50 cursor-not-allowed',
                   )}
                 >
                   {modeLabel(mode)}
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {MODE_OPTIONS.map((opt) => (
-                  <DropdownMenuItem
-                    key={opt.value}
-                    onClick={() => handleModeChange(opt.value)}
-                    className={cn(
-                      'text-xs',
-                      mode === opt.value && 'font-medium',
-                    )}
-                  >
-                    {opt.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-300 rounded-xl shadow-lg">
+                  {MODE_OPTIONS.map((opt) => (
+                    <DropdownMenuItem
+                      key={opt.value}
+                      onClick={() => handleModeChange(opt.value)}
+                      className={cn(
+                        'text-xs rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:bg-zinc-100 dark:focus:bg-zinc-800 focus:text-zinc-900 dark:focus:text-white',
+                        mode === opt.value && 'font-bold text-primary',
+                      )}
+                    >
+                      {opt.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {connected && session && (
-              <>
-                <div className="h-3.5 w-px bg-border/50 shrink-0" />
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                  <span className="truncate">{session.serial}</span>
+              {/* Status indicators */}
+              {connected && session && (
+                <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Connected
                 </span>
-              </>
-            )}
-            {connecting && (
-              <>
-                <div className="h-3.5 w-px bg-border/50 shrink-0" />
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin shrink-0" />
+              )}
+              {connecting && (
+                <span className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-semibold">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
                   Connecting...
                 </span>
-              </>
-            )}
-            {!connected && !connecting && activeSerial && (
-              <>
-                <div className="h-3.5 w-px bg-border/50 shrink-0" />
-                <span className="text-xs text-muted-foreground/60 truncate">
-                  {activeSerial}
+              )}
+              {!connected && !connecting && activeSerial && (
+                <span className="text-xs text-zinc-400 dark:text-zinc-500 font-mono">
+                  Target: {activeSerial}
                 </span>
-              </>
-            )}
-          </>
-        )}
-
-        <div className="flex-1" />
-
-        {activePanel === 'shell' && (
-          <div className="flex items-center gap-1 shrink-0">
-            <Button
-              size="sm"
-              variant="ghost"
-              className={cn(
-                'h-7 w-7 p-0 text-muted-foreground hover:text-foreground',
-                refreshing && 'animate-spin',
               )}
-              onClick={refreshDevices}
-              disabled={refreshing}
-              title="Refresh devices"
-            >
-              <RotateCw className="h-3.5 w-3.5" />
-            </Button>
 
-            <Button
-              size="sm"
-              variant="ghost"
-              className={cn(
-                'h-7 w-7 p-0 text-muted-foreground hover:text-foreground',
-                showHistory && 'bg-muted text-foreground',
-              )}
-              onClick={() => setShowHistory(!showHistory)}
-              title="Command history"
-            >
-              <History className="h-3.5 w-3.5" />
-            </Button>
+              <div className="flex-1" />
 
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-              onClick={clearOutput}
-              disabled={!session}
-              title="Clear output"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+              {/* Console control actions */}
+              <div className="flex items-center gap-1.5">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={cn(
+                    'h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer',
+                    refreshing && 'animate-spin',
+                  )}
+                  onClick={refreshDevices}
+                  disabled={refreshing}
+                  title="Refresh devices"
+                >
+                  <RotateCw className="h-3.5 w-3.5" />
+                </Button>
 
-            <div className="h-3.5 w-px bg-border/50 mx-0.5" />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={cn(
+                    'h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer',
+                    showHistory && 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-foreground',
+                  )}
+                  onClick={() => setShowHistory(!showHistory)}
+                  title="Command history"
+                >
+                  <History className="h-3.5 w-3.5" />
+                </Button>
 
-            {connected ? (
-              <Button
-                size="sm"
-                variant="destructive"
-                className="h-7 text-xs px-3"
-                onClick={handleDisconnect}
-              >
-                Disconnect
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="h-7 text-xs px-3 gap-1.5"
-                onClick={handleConnect}
-                disabled={connecting || !canConnect(mode)}
-              >
-                {connecting ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                  onClick={clearOutput}
+                  disabled={!session}
+                  title="Clear output"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+
+                <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800 mx-1" />
+
+                {connected ? (
+                  <Button
+                    size="sm"
+                    className="h-7 text-xs font-semibold px-4 rounded-full bg-rose-600 hover:bg-rose-500 text-white border-0 transition-all active:scale-[0.97] cursor-pointer shadow-sm"
+                    onClick={handleDisconnect}
+                  >
+                    Disconnect
+                  </Button>
                 ) : (
-                  <Wifi className="h-3 w-3" />
+                  <Button
+                    size="sm"
+                    className="h-7 text-xs font-semibold px-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-all active:scale-[0.97] cursor-pointer shadow-sm gap-1.5"
+                    onClick={handleConnect}
+                    disabled={connecting || !canConnect(mode)}
+                  >
+                    {connecting ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Wifi className="h-3.5 w-3.5" />
+                    )}
+                    Connect
+                  </Button>
                 )}
-                Connect
+              </div>
+            </div>
+
+            {/* Terminal view window screen */}
+            <div className="flex-1 min-h-0 overflow-hidden bg-white dark:bg-[#0a0b10]">
+              <TerminalView
+                className="h-full w-full"
+                output={output}
+                onResize={handleResize}
+              />
+            </div>
+
+            {/* Integrated Input Form */}
+            <form
+              className="flex items-center gap-2 border-t border-zinc-200 dark:border-zinc-950 bg-zinc-50 dark:bg-[#0d0e14]/90 px-4 py-2.5"
+              onSubmit={handleSubmitCommand}
+            >
+              <span className="font-mono text-xs text-blue-600 dark:text-sky-400 font-bold select-none shrink-0 ml-1">
+                $
+              </span>
+              <Input
+                value={command}
+                onChange={(event) => setCommand(event.target.value)}
+                onKeyDown={handleInputKeyDown}
+                placeholder={placeholderText(mode, connected)}
+                className="h-8 rounded-full font-mono text-xs border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 focus-visible:ring-1 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-700 text-zinc-900 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-650 outline-none"
+                disabled={!connected || !session}
+                autoComplete="off"
+                autoCapitalize="off"
+                spellCheck={false}
+              />
+              <Button
+                type="submit"
+                size="sm"
+                className="h-8 gap-1.5 text-xs shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-all active:scale-[0.97] cursor-pointer px-4 shadow-sm font-semibold"
+                disabled={!connected || !session || command.trim() === ''}
+              >
+                <CornerDownLeft className="h-3.5 w-3.5" />
+                Send
               </Button>
+            </form>
+
+            {/* Errors / helper footer */}
+            {error && (
+              <div className="px-5 py-2 border-t border-zinc-200 dark:border-zinc-950 bg-rose-50 dark:bg-rose-950/20 text-xs text-rose-600 dark:text-rose-400">
+                {error}
+              </div>
+            )}
+            {!canConnect(mode) && !error && !connected && (
+              <div className="px-5 py-2 border-t border-zinc-200 dark:border-zinc-950 bg-zinc-50 dark:bg-zinc-950/30 text-xs text-zinc-500 dark:text-zinc-500 font-medium">
+                {mode === 'fastboot-host'
+                  ? 'Fastboot mode does not require an active ADB device selection.'
+                  : 'No device selected. Select a device first.'}
+              </div>
             )}
           </div>
+        ) : (
+          <div className="min-h-0 flex-1 bg-white dark:bg-[#0a0b10] select-text">
+            <LogcatWorkspace embedded />
+          </div>
         )}
-      </div>
 
-      {activePanel === 'shell' ? (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 min-h-0 overflow-hidden bg-white dark:bg-[#0f1117]">
-            <TerminalView
-              className="h-full w-full"
-              output={output}
-              onResize={handleResize}
-            />
-          </div>
-
-          <form
-            className="flex items-center gap-2 border-t border-border/40 bg-background px-4 py-2.5"
-            onSubmit={handleSubmitCommand}
-          >
-            <span className="font-mono text-xs text-muted-foreground select-none shrink-0">
-              $
-            </span>
-            <Input
-              value={command}
-              onChange={(event) => setCommand(event.target.value)}
-              onKeyDown={handleInputKeyDown}
-              placeholder={placeholderText(mode, connected)}
-              className="h-8 rounded-lg font-mono text-xs border-0 bg-muted/30 focus-visible:ring-1 focus-visible:ring-border"
-              disabled={!connected || !session}
-              autoComplete="off"
-              autoCapitalize="off"
-              spellCheck={false}
-            />
-            <Button
-              type="submit"
-              size="sm"
-              className="h-8 gap-1.5 text-xs shrink-0"
-              disabled={!connected || !session || command.trim() === ''}
+        {/* macOS-style Command History Drawer */}
+        <AnimatePresence>
+          {showHistory && (
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 250 }}
+              className="absolute inset-y-0 right-0 z-50 w-80 border-l border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-[#0a0b10]/95 backdrop-blur-md shadow-2xl flex flex-col"
             >
-              <CornerDownLeft className="h-3.5 w-3.5" />
-              Send
-            </Button>
-          </form>
-
-          {error && (
-            <div className="px-4 py-1.5 border-t border-border/40 text-xs text-destructive">
-              {error}
-            </div>
+              <div className="absolute left-0 top-3 -ml-3">
+                <Button
+                  size="icon"
+                  className="h-6 w-6 rounded-full p-0 shadow-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer"
+                  onClick={() => setShowHistory(false)}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <CommandHistory onReExecute={handleReExecuteCommand} />
+            </motion.div>
           )}
-          {!canConnect(mode) && !error && !connected && (
-            <div className="px-4 py-1.5 border-t border-border/40 text-xs text-muted-foreground">
-              {mode === 'fastboot-host'
-                ? 'Fastboot mode does not require an active ADB device selection.'
-                : 'No device selected. Connect a device first.'}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="min-h-0 flex-1">
-          <LogcatWorkspace embedded />
-        </div>
-      )}
-
-      {showHistory && (
-        <div className="absolute inset-y-0 right-0 z-50 w-80 border-l border-border/40 bg-background shadow-xl">
-          <div className="absolute left-0 top-3 -ml-3">
-            <Button
-              size="sm"
-              variant="secondary"
-              className="h-6 w-6 rounded-full p-0 shadow-md"
-              onClick={() => setShowHistory(false)}
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-          <CommandHistory onReExecute={handleReExecuteCommand} />
-        </div>
-      )}
-    </div>
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
   )
 }
