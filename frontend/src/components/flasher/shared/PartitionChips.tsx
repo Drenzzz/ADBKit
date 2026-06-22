@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
@@ -43,41 +41,50 @@ export function PartitionChips({ selected, onSelect, disabled }: PartitionChipsP
   const partitions = expanded ? ALL_PARTITIONS : COMMON_PARTITIONS
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       <div className="flex flex-wrap gap-1.5">
-        {partitions.map((p) => (
-          <Badge
-            key={p}
-            variant={selected === p ? 'default' : 'outline'}
-            className={cn(
-              'cursor-pointer text-xs transition-colors',
-              disabled && 'pointer-events-none opacity-50',
-            )}
-            onClick={() => onSelect(selected === p ? '' : p)}
-          >
-            {p}
-          </Badge>
-        ))}
+        {partitions.map((p) => {
+          const isSelected = selected === p
+          return (
+            <button
+              key={p}
+              type="button"
+              disabled={disabled}
+              onClick={() => onSelect(isSelected ? '' : p)}
+              className={cn(
+                "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border transition-all duration-200 cursor-pointer outline-none select-none",
+                isSelected
+                  ? "bg-primary border-primary text-primary-foreground shadow-sm scale-[1.03]"
+                  : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900",
+                disabled && "opacity-40 cursor-not-allowed pointer-events-none"
+              )}
+            >
+              {p}
+            </button>
+          )
+        })}
       </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-6 px-2 text-xs text-muted-foreground"
+      <button
+        type="button"
+        className={cn(
+          "inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed outline-none",
+          disabled && "pointer-events-none"
+        )}
         onClick={() => setExpanded(!expanded)}
         disabled={disabled}
       >
         {expanded ? (
           <>
-            <ChevronUp className="mr-1 h-3 w-3" />
-            Show common
+            <ChevronUp className="h-3 w-3" />
+            Show common partitions
           </>
         ) : (
           <>
-            <ChevronDown className="mr-1 h-3 w-3" />
+            <ChevronDown className="h-3 w-3" />
             Show all partitions
           </>
         )}
-      </Button>
+      </button>
     </div>
   )
 }
