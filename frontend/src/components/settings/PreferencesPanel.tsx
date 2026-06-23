@@ -2,8 +2,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { Check, Sun, Moon, RotateCcw, Save } from 'lucide-react'
+import { Check, Sun, Moon, RotateCcw, Save, Settings } from 'lucide-react'
 import type { PreferencesPayload } from '@/lib/types'
 
 interface PreferencesPanelProps {
@@ -17,8 +18,8 @@ interface PreferencesPanelProps {
 }
 
 const THEME_OPTIONS: { value: 'dark' | 'light'; label: string; description: string; Icon: typeof Sun }[] = [
-  { value: 'dark', label: 'Dark', description: 'Low-light interface', Icon: Moon },
-  { value: 'light', label: 'Light', description: 'Bright environment interface', Icon: Sun },
+  { value: 'dark', label: 'Dark', description: 'Low-light UI', Icon: Moon },
+  { value: 'light', label: 'Light', description: 'Bright UI', Icon: Sun },
 ]
 
 const TERMINAL_MODES = [
@@ -37,187 +38,171 @@ export function PreferencesPanel({
   onReset,
 }: PreferencesPanelProps) {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
-          Appearance
-        </span>
-        <div className="inline-flex w-full items-center gap-1 rounded-lg border border-border/40 p-1">
-          {THEME_OPTIONS.map(({ value, label, description, Icon }) => {
-            const active = preferencesDraft.theme === value
-            return (
-              <button
-                key={value}
-                type="button"
-                onClick={() => onDraftChange({ theme: value })}
-                className={cn(
-                  'flex flex-1 items-center gap-2 rounded-md px-3 py-2 text-left transition-colors',
-                  active
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent/40 hover:text-foreground',
-                )}
-              >
-                <div
-                  className={cn(
-                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors',
-                    active ? 'bg-background' : 'bg-transparent',
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-medium">{label}</span>
-                  <span className="text-[10px] text-muted-foreground/60">
-                    {description}
-                  </span>
-                </div>
-                {active && (
-                  <Check className="ml-auto h-3.5 w-3.5 text-primary" />
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
-          Terminal
-        </span>
-        <div className="flex flex-col gap-3 rounded-lg border border-border/40 p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs font-medium">Default mode</span>
-              <span className="text-[10px] text-muted-foreground/60">
-                Mode awal saat membuka terminal
-              </span>
+    <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm h-full flex flex-col justify-between">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Settings className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          Preferences
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="space-y-4 flex-grow p-5 pt-0">
+        <div className="space-y-4">
+          {/* Appearance Section */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">
+              Appearance
+            </span>
+            <div className="inline-flex w-full items-center gap-1 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/20 p-1">
+              {THEME_OPTIONS.map(({ value, label, description, Icon }) => {
+                const active = preferencesDraft.theme === value
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => onDraftChange({ theme: value })}
+                    className={cn(
+                      'flex flex-1 items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors cursor-pointer',
+                      active
+                        ? 'bg-white dark:bg-zinc-800 text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:bg-zinc-100/50 dark:hover:bg-zinc-900/30 hover:text-foreground',
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-md transition-colors',
+                        active ? 'bg-zinc-50 dark:bg-zinc-950' : 'bg-transparent',
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-semibold">{label}</span>
+                      <span className="text-[9px] text-muted-foreground/60 text-left">
+                        {description}
+                      </span>
+                    </div>
+                    {active && (
+                      <Check className="ml-auto h-3 w-3 text-primary" />
+                    )}
+                  </button>
+                )
+              })}
             </div>
-            <Select
-              value={preferencesDraft.default_terminal_mode || 'adb-shell'}
-              onValueChange={(v) => onDraftChange({ default_terminal_mode: v ?? undefined })}
-            >
-              <SelectTrigger className="w-[160px] h-8 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TERMINAL_MODES.map(({ value, label }) => (
-                  <SelectItem key={value} value={value} className="text-xs">
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
-        </div>
-      </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
-          Device Sync
-        </span>
-        <div className="flex flex-col gap-3 rounded-lg border border-border/40 p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs font-medium">Auto-refresh device list</span>
-              <span className="text-[10px] text-muted-foreground/60">
-                Sinkronisasi otomatis device yang terhubung
-              </span>
-            </div>
-            <Switch
-              checked={preferencesDraft.auto_refresh_devices ?? true}
-              onCheckedChange={(v) => onDraftChange({ auto_refresh_devices: v })}
-            />
-          </div>
-          {(preferencesDraft.auto_refresh_devices ?? true) && (
-            <div className="flex items-center justify-between">
+          {/* Terminal Section */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">
+              Terminal
+            </span>
+            <div className="flex items-center justify-between rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/10 p-3">
               <div className="flex flex-col">
-                <span className="text-xs font-medium">Refresh interval</span>
-                <span className="text-[10px] text-muted-foreground/60">
-                  Detik antara setiap sinkronisasi
+                <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Default mode</span>
+                <span className="text-[9px] text-muted-foreground/60">
+                  Initial mode when opening terminal
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  min={2}
-                  max={60}
-                  value={preferencesDraft.device_refresh_seconds ?? 8}
-                  onChange={(e) => {
-                    const v = Number.parseInt(e.target.value, 10)
-                    if (!Number.isNaN(v)) onDraftChange({ device_refresh_seconds: v })
-                  }}
-                  className="w-16 h-8 text-xs text-right"
-                />
-                <span className="text-[10px] text-muted-foreground/60">s</span>
-              </div>
+              <Select
+                value={preferencesDraft.default_terminal_mode || 'adb-shell'}
+                onValueChange={(v) => onDraftChange({ default_terminal_mode: v ?? undefined })}
+              >
+                <SelectTrigger className="w-[120px] h-8 rounded-full text-xs bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800">
+                  {TERMINAL_MODES.map(({ value, label }) => (
+                    <SelectItem key={value} value={value} className="text-xs cursor-pointer">
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
-          Logcat
-        </span>
-        <div className="flex flex-col gap-3 rounded-lg border border-border/40 p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs font-medium">Buffer limit</span>
-              <span className="text-[10px] text-muted-foreground/60">
-                Maksimal jumlah log entry yang disimpan
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min={1000}
-                max={100000}
-                step={1000}
-                value={preferencesDraft.logcat_buffer_limit ?? 5000}
-                onChange={(e) => {
-                  const v = Number.parseInt(e.target.value, 10)
-                  if (!Number.isNaN(v)) onDraftChange({ logcat_buffer_limit: v })
-                }}
-                className="w-20 h-8 text-xs text-right"
-              />
-              <span className="text-[10px] text-muted-foreground/60">lines</span>
+          {/* Device Sync Section */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">
+              Device Sync
+            </span>
+            <div className="flex flex-col gap-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/10 p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Auto-refresh</span>
+                  <span className="text-[9px] text-muted-foreground/60">
+                    Automatically sync connected devices
+                  </span>
+                </div>
+                <Switch
+                  checked={preferencesDraft.auto_refresh_devices ?? true}
+                  onCheckedChange={(v) => onDraftChange({ auto_refresh_devices: v })}
+                />
+              </div>
+              {(preferencesDraft.auto_refresh_devices ?? true) && (
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-150 dark:border-zinc-800/80">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Interval</span>
+                    <span className="text-[9px] text-muted-foreground/60">
+                      Sync frequency in seconds
+                    </span>
+                  </div>
+                  <div className="relative flex items-center shrink-0">
+                    <Input
+                      type="number"
+                      min={2}
+                      max={60}
+                      value={preferencesDraft.device_refresh_seconds ?? 8}
+                      onChange={(e) => {
+                        const v = Number.parseInt(e.target.value, 10)
+                        if (!Number.isNaN(v)) onDraftChange({ device_refresh_seconds: v })
+                      }}
+                      className="w-16 h-8 rounded-full text-xs font-mono text-center bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 pr-5"
+                    />
+                    <span className="absolute right-2 text-[9px] text-zinc-400 dark:text-zinc-500 pointer-events-none font-mono">s</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
 
-      {errorMessage && (
-        <p className="text-xs text-destructive">{errorMessage}</p>
-      )}
+        {errorMessage && (
+          <p className="text-[11px] text-rose-500 font-semibold mt-2">{errorMessage}</p>
+        )}
 
-      <div className="flex items-center justify-end gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={onReset}
-          disabled={!hasChanges || saving}
-        >
-          <RotateCcw className="mr-1.5 h-3 w-3" />
-          Reset
-        </Button>
-        <Button
-          size="sm"
-          onClick={onSave}
-          disabled={!hasChanges || saving}
-        >
-          {saving ? (
-            <>
-              <span className="mr-1.5 h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
-              Saving
-            </>
-          ) : (
-            <>
-              {hasChanges && <Save className="mr-1.5 h-3 w-3" />}
-              Save changes
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
+        {/* Buttons Row */}
+        <div className="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-zinc-150 dark:border-zinc-800/80">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onReset}
+            disabled={!hasChanges || saving}
+            className="rounded-full h-8 text-xs font-semibold cursor-pointer"
+          >
+            <RotateCcw className="mr-1.5 h-3 w-3" />
+            Reset
+          </Button>
+          <Button
+            size="sm"
+            onClick={onSave}
+            disabled={!hasChanges || saving}
+            className="rounded-full h-8 text-xs font-semibold cursor-pointer bg-primary hover:bg-primary/95 text-primary-foreground border-0 shadow-sm transition-all active:scale-[0.96]"
+          >
+            {saving ? (
+              <>
+                <span className="mr-1.5 h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                Saving
+              </>
+            ) : (
+              <>
+                {hasChanges && <Save className="mr-1.5 h-3 w-3" />}
+                Save
+              </>
+            )}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

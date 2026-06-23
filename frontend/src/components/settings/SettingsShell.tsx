@@ -1,11 +1,27 @@
+import { motion } from 'motion/react'
 import { useSettings } from '@/hooks/useSettings'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BinaryManager } from './BinaryManager'
 import { PreferencesPanel } from './PreferencesPanel'
 import { AuditLogsPanel } from './AuditLogsPanel'
 import { DiagnosticsPanel } from './DiagnosticsPanel'
-import { Binary, Settings, ScrollText, Activity } from 'lucide-react'
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring' as const, stiffness: 260, damping: 22 },
+  },
+}
 
 export function SettingsShell() {
   const {
@@ -24,47 +40,37 @@ export function SettingsShell() {
     return (
       <div className="flex h-full flex-col gap-4 p-1">
         <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-12 w-full animate-pulse" />
+        <Skeleton className="h-32 w-full animate-pulse" />
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-lg font-semibold tracking-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Configure binaries, appearance, review operation history, and inspect
-          runtime diagnostics.
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto pr-1"
+    >
+      {/* Header */}
+      <motion.div variants={itemVariants} className="flex flex-col gap-0.5 shrink-0">
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Settings</h1>
+        <p className="text-xs text-muted-foreground font-medium">
+          Manage system binaries, visual preferences, runtime diagnostics, and system operation logs.
         </p>
-      </div>
+      </motion.div>
 
-      <Tabs defaultValue="binary" className="flex flex-col gap-4">
-        <TabsList className="h-9 w-fit">
-          <TabsTrigger value="binary" className="gap-1.5">
-            <Binary className="h-3.5 w-3.5" />
-            Binaries
-          </TabsTrigger>
-          <TabsTrigger value="preferences" className="gap-1.5">
-            <Settings className="h-3.5 w-3.5" />
-            Preferences
-          </TabsTrigger>
-          <TabsTrigger value="audit" className="gap-1.5">
-            <ScrollText className="h-3.5 w-3.5" />
-            Audit Logs
-          </TabsTrigger>
-          <TabsTrigger value="diagnostics" className="gap-1.5">
-            <Activity className="h-3.5 w-3.5" />
-            Diagnostics
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="binary" className="mt-0">
+      {/* Bento Grid Container */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 pb-6 min-h-0">
+        
+        {/* Box 1: Binaries (Takes 2/3 width) */}
+        <motion.div variants={itemVariants} className="lg:col-span-2 flex flex-col min-w-0">
           <BinaryManager />
-        </TabsContent>
+        </motion.div>
 
-        <TabsContent value="preferences" className="mt-0">
+        {/* Box 2: Preferences (Takes 1/3 width) */}
+        <motion.div variants={itemVariants} className="lg:col-span-1 flex flex-col min-w-0">
           <PreferencesPanel
             preferencesDraft={preferencesDraft}
             saving={savingPreferences}
@@ -74,16 +80,18 @@ export function SettingsShell() {
             onSave={() => void savePreferences()}
             onReset={resetPreferencesDraft}
           />
-        </TabsContent>
+        </motion.div>
 
-        <TabsContent value="audit" className="mt-0">
+        {/* Box 3: Audit Logs (Full Width) */}
+        <motion.div variants={itemVariants} className="lg:col-span-3 flex flex-col min-w-0">
           <AuditLogsPanel />
-        </TabsContent>
+        </motion.div>
 
-        <TabsContent value="diagnostics" className="mt-0">
+        {/* Box 4: Diagnostics (Full Width at the very bottom) */}
+        <motion.div variants={itemVariants} className="lg:col-span-3 flex flex-col min-w-0">
           <DiagnosticsPanel />
-        </TabsContent>
-      </Tabs>
-    </div>
+        </motion.div>
+      </div>
+    </motion.div>
   )
 }

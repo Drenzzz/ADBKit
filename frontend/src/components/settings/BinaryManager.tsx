@@ -9,6 +9,8 @@ import {
 } from '@/services/binaryService'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Binary } from 'lucide-react'
 import { toast } from 'sonner'
 import type { BinaryInfo } from '@/lib/types'
 
@@ -83,32 +85,41 @@ export function BinaryManager() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      {loading && !status ? (
-        <div className="rounded-lg border border-border/40">
-          <Skeleton className="h-12 w-full rounded-none" />
-          <Skeleton className="h-12 w-full rounded-none" />
-          <Skeleton className="h-12 w-full rounded-none" />
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-lg border border-border/40">
-          {BINARY_NAMES.map(({ key, displayName, optional }, index) => (
-            <BinaryModuleCard
-              key={key}
-              displayName={displayName}
-              status={status?.[key] as BinaryInfo | undefined}
-              loading={loading}
-              optional={optional}
-              isLast={index === BINARY_NAMES.length - 1}
-              onDetect={reload}
-              onBrowseFile={() => void handleBrowseFile(key)}
-              onBrowseFolder={key === 'adb' || key === 'fastboot' ? () => void handleBrowseFolder() : undefined}
-              onClear={() => void handleClear(key)}
-              onSavePath={(path) => handleSavePath(key, path)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm h-full flex flex-col justify-between">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Binary className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          Binaries
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="space-y-4 flex-grow p-0">
+        {loading && !status ? (
+          <div className="space-y-2 p-4">
+            <Skeleton className="h-10 w-full rounded-xl" />
+            <Skeleton className="h-10 w-full rounded-xl" />
+            <Skeleton className="h-10 w-full rounded-xl" />
+          </div>
+        ) : (
+          <div className="divide-y divide-zinc-150/40 dark:divide-zinc-800/40">
+            {BINARY_NAMES.map(({ key, displayName, optional }, index) => (
+              <BinaryModuleCard
+                key={key}
+                displayName={displayName}
+                status={status?.[key] as BinaryInfo | undefined}
+                loading={loading}
+                optional={optional}
+                isLast={index === BINARY_NAMES.length - 1}
+                onDetect={reload}
+                onBrowseFile={() => void handleBrowseFile(key)}
+                onBrowseFolder={key === 'adb' || key === 'fastboot' ? () => void handleBrowseFolder() : undefined}
+                onClear={() => void handleClear(key)}
+                onSavePath={(path) => handleSavePath(key, path)}
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
