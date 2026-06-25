@@ -14,6 +14,7 @@ import {
   canResolveFilePaths,
   resolveFilePaths,
 } from '@/services/fileDropService'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface InstallApkDialogProps {
   open: boolean
@@ -32,6 +33,7 @@ export function InstallApkDialog({
   onSelectFile,
   initialFilePath,
 }: InstallApkDialogProps) {
+  const reduced = useReducedMotion()
   const [filePath, setFilePath] = useState('')
   const [status, setStatus] = useState<InstallStatus>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -131,24 +133,27 @@ export function InstallApkDialog({
             <motion.div
               animate={{
                 scale: isDragOver ? 1.015 : 1,
-                borderColor: isDragOver ? 'var(--primary)' : 'rgba(var(--border), 0.3)',
-                backgroundColor: isDragOver ? 'rgba(var(--primary), 0.05)' : 'rgba(var(--muted), 0.1)',
               }}
               onClick={() => {
                 if (!filePath && status === 'idle') handleBrowse()
               }}
               className={cn(
                 'flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed px-6 py-8 transition-colors text-center cursor-pointer w-full min-w-0',
+                isDragOver
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border/30 bg-muted/10',
                 filePath && 'opacity-30 cursor-default pointer-events-none'
               )}
             >
               <motion.div
                 animate={{
-                  y: isDragOver ? [0, 5, 0] : 0,
+                  y: isDragOver ? (reduced ? 0 : [0, 5, 0]) : 0,
                 }}
                 transition={
                   isDragOver
-                    ? { repeat: Infinity, duration: 1.2, ease: 'easeInOut' }
+                    ? reduced
+                      ? undefined
+                      : { repeat: Infinity, duration: 1.2, ease: 'easeInOut' }
                     : undefined
                 }
                 className={cn(
@@ -172,8 +177,9 @@ export function InstallApkDialog({
           {/* File Selected Card */}
           {filePath && (
             <motion.div
-              initial={{ opacity: 0, y: 8 }}
+              initial={reduced ? undefined : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={reduced ? { duration: 0 } : undefined}
               className="flex items-start gap-3 rounded-xl border border-border/40 bg-muted/10 p-3 w-full min-w-0"
             >
               <div

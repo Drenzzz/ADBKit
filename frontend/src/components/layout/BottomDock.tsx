@@ -233,10 +233,11 @@ export function BottomDock() {
                     <AnimatePresence initial={false}>
                       {isActive && (
                         <motion.span
-                          initial={{ opacity: 0, width: 0, x: -4 }}
-                          animate={{ opacity: 1, width: 'auto', x: 0 }}
-                          exit={{ opacity: 0, width: 0, x: -4 }}
+                          initial={{ opacity: 0, scaleX: 0 }}
+                          animate={{ opacity: 1, scaleX: 1 }}
+                          exit={{ opacity: 0, scaleX: 0 }}
                           transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
+                          className="origin-left overflow-hidden text-[11px] font-medium leading-none whitespace-nowrap"
                           className="overflow-hidden text-[11px] font-medium leading-none whitespace-nowrap"
                         >
                           {item.label}
@@ -336,10 +337,13 @@ export function BottomDock() {
             </div>
 
             {/* macOS Active route indicator bar */}
-            <motion.div
+            <div
               className="pointer-events-none absolute bottom-1.5 h-[2.5px] rounded-full bg-primary shadow-[0_0_8px_var(--primary)]"
-              animate={{ left: indicatorPos.left, width: indicatorPos.width }}
-              transition={{ type: 'spring', stiffness: 460, damping: 32, mass: 0.42 }}
+              style={{
+                left: indicatorPos.left,
+                width: indicatorPos.width,
+                transition: reduced ? 'none' : 'left 0.28s cubic-bezier(0.32,0.72,0,1), width 0.28s cubic-bezier(0.32,0.72,0,1)',
+              }}
             />
           </motion.div>
         )}

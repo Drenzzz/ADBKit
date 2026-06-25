@@ -114,10 +114,10 @@ export function DeviceDetailPanel() {
                 <motion.button
                   key={cell.label}
                   type="button"
-                  whileHover={reduced ? undefined : { scale: 1.01, backgroundColor: 'rgba(var(--muted), 0.1)' }}
+                  whileHover={reduced ? undefined : { scale: 1.01 }}
                   whileTap={reduced ? undefined : { scale: 0.98 }}
                   onClick={() => handleCopy(cell.label, cell.value)}
-                  className="group flex items-start gap-2.5 rounded-xl border border-border/40 bg-muted/10 p-2.5 text-left transition-colors hover:border-border/60 hover:shadow-sm cursor-pointer"
+                  className="group flex items-start gap-2.5 rounded-xl border border-border/40 bg-muted/10 p-2.5 text-left transition-colors hover:border-border/60 hover:bg-muted/20 hover:shadow-sm cursor-pointer"
                 >
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-background border border-border/40 text-muted-foreground group-hover:text-primary transition-colors">
                     <Icon className="h-3.5 w-3.5" />
