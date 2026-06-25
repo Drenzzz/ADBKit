@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { immer } from 'zustand/middleware/immer'
 import type {
   FlasherState,
   FlasherActions,
@@ -44,7 +45,7 @@ function createPlanSteps(plan: FlashPlan): FlashPlanStepStatus[] {
   }))
 }
 
-export const useFlasherStore = create<FlasherState & FlasherActions>()((set, get) => ({
+export const useFlasherStore = create<FlasherState & FlasherActions>()(immer((set, get) => ({
   ...initialState,
 
   setFastbootDevices: (devices) => set({ fastbootDevices: devices }),
@@ -69,25 +70,30 @@ export const useFlasherStore = create<FlasherState & FlasherActions>()((set, get
   },
 
   setFlashPlanStepStatus: (partition, status, detail = null) => {
-    const { flashPlanSteps } = get()
-    const updated = flashPlanSteps.map((step) =>
-      step.partition === partition ? { ...step, status, detail } : step,
-    )
-    set({ flashPlanSteps: updated })
+    set((state) => {
+      const step = state.flashPlanSteps.find((s) => s.partition === partition)
+      if (step) {
+        step.status = status
+        step.detail = detail
+      }
+    })
   },
 
   togglePartitionSelection: (partition) => {
-    const { selectedPartitions } = get()
-    if (selectedPartitions.includes(partition)) {
-      set({ selectedPartitions: selectedPartitions.filter((p) => p !== partition) })
-    } else {
-      set({ selectedPartitions: [...selectedPartitions, partition] })
-    }
+    set((state) => {
+      const idx = state.selectedPartitions.indexOf(partition)
+      if (idx >= 0) {
+        state.selectedPartitions.splice(idx, 1)
+      } else {
+        state.selectedPartitions.push(partition)
+      }
+    })
   },
 
   selectAllPartitions: () => {
-    const { flashPlanSteps } = get()
-    set({ selectedPartitions: flashPlanSteps.map((s) => s.partition) })
+    set((state) => {
+      state.selectedPartitions = state.flashPlanSteps.map((s) => s.partition)
+    })
   },
 
   deselectAllPartitions: () => set({ selectedPartitions: [] }),
@@ -109,4 +115,4 @@ export const useFlasherStore = create<FlasherState & FlasherActions>()((set, get
   setLastUpdatedAt: (time) => set({ lastUpdatedAt: time }),
 
   reset: () => set(initialState),
-}))
+})))

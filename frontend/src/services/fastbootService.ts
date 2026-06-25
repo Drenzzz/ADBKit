@@ -15,6 +15,7 @@ import {
 } from '../../wailsjs/go/main/App'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 import type { FastbootDeviceInfo, FlashPlan } from '@/lib/types'
+import { flasher } from '../../wailsjs/go/models'
 
 export const FLASH_STEP_STATUS_EVENT = 'flash_step_status'
 
@@ -103,5 +104,5 @@ export async function flashRomFolder(
       image_file: s.image_file,
     })),
   }
-  return FlashRomFolder(serial, folderPath, backendPlan as any)
+  return FlashRomFolder(serial, folderPath, flasher.Plan.createFrom(backendPlan))
 }
