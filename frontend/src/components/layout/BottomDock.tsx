@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
   LayoutDashboard,
   Smartphone,
@@ -37,6 +38,7 @@ function applyThemeClass(theme: 'dark' | 'light') {
 }
 
 export function BottomDock() {
+  const reduced = useReducedMotion()
   const navigate = useNavigate()
   const location = useLocation()
   const { theme, setTheme: setLocalTheme } = useUIStore()
@@ -176,7 +178,7 @@ export function BottomDock() {
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
-            transition={{ duration: 0.24, ease: [0.32, 0.72, 0, 1] }}
+            transition={reduced ? { duration: 0 } : { duration: 0.24, ease: [0.32, 0.72, 0, 1] }}
             className={cn(
               'fixed bottom-3 left-1/2 z-50 -translate-x-1/2',
               'flex items-center gap-0.5 px-3 py-1.5',
@@ -198,7 +200,7 @@ export function BottomDock() {
                         initial={{ opacity: 0, y: 6, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        transition={reduced ? { duration: 0 } : { duration: 0.16, ease: 'easeOut' }}
                         className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap"
                       >
                         <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
@@ -216,8 +218,8 @@ export function BottomDock() {
                     onClick={() => navigate(item.to)}
                     onMouseEnter={() => setHoveredIndex(index)}
                     onMouseLeave={() => setHoveredIndex(null)}
-                    whileHover={{ scale: 1.06, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={reduced ? undefined : { scale: 1.06, y: -2 }}
+                    whileTap={reduced ? undefined : { scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 420, damping: 28, mass: 0.5 }}
                     className={cn(
                       'relative flex items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 transition-colors duration-200',
@@ -258,7 +260,7 @@ export function BottomDock() {
                       initial={{ opacity: 0, y: 6, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                      transition={{ duration: 0.16, ease: 'easeOut' }}
+                      transition={reduced ? { duration: 0 } : { duration: 0.16, ease: 'easeOut' }}
                       className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap"
                     >
                       <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
@@ -283,7 +285,7 @@ export function BottomDock() {
                       initial={{ opacity: 0, y: 6, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                      transition={{ duration: 0.16, ease: 'easeOut' }}
+                      transition={reduced ? { duration: 0 } : { duration: 0.16, ease: 'easeOut' }}
                       className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap"
                     >
                       <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
@@ -312,7 +314,7 @@ export function BottomDock() {
                     initial={{ opacity: 0, y: 6, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                    transition={{ duration: 0.16, ease: 'easeOut' }}
+                    transition={reduced ? { duration: 0 } : { duration: 0.16, ease: 'easeOut' }}
                     className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap"
                   >
                     <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">

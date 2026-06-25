@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
   Smartphone,
   RefreshCw,
@@ -94,6 +95,7 @@ export function HeroDeviceCard({
   onReboot,
 }: HeroDeviceCardProps) {
   const navigate = useNavigate()
+  const reduced = useReducedMotion()
   const connectedAtRef = useRef<{ serial: string; at: number }>({ serial: '', at: 0 })
   const [tick, setTick] = useState(Date.now())
 
@@ -179,8 +181,8 @@ export function HeroDeviceCard({
                 <motion.button
                   key={shortcut.key}
                   type="button"
-                  whileHover={{ scale: 1.01, y: -0.5 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={reduced ? undefined : { scale: 1.01, y: -0.5 }}
+                  whileTap={reduced ? undefined : { scale: 0.98 }}
                   onClick={() => navigate(shortcut.path)}
                   className="group flex items-center gap-3 rounded-xl border border-border/40 bg-muted/20 p-3 text-left hover:bg-muted/40 transition-colors"
                 >

@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { RefreshCw, Package, Upload, Loader2, ArrowUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -106,6 +107,7 @@ function SegmentedTabs<T extends string>({
 }
 
 export default function AppsPage() {
+  const reduced = useReducedMotion()
   const { activeSerial } = useDevices()
   const appManager = useAppManager()
 
@@ -154,7 +156,9 @@ export default function AppsPage() {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.05 },
+      transition: reduced
+        ? { duration: 0, staggerChildren: 0 }
+        : { staggerChildren: 0.05 },
     },
   }
 
@@ -163,7 +167,9 @@ export default function AppsPage() {
     show: {
       opacity: 1,
       y: 0,
-      transition: { type: 'spring' as const, stiffness: 300, damping: 24 },
+      transition: reduced
+        ? { duration: 0 }
+        : { type: 'spring' as const, stiffness: 300, damping: 24 },
     },
   }
 

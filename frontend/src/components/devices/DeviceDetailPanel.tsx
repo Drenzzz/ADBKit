@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { toast } from 'sonner'
 import {
   Smartphone,
@@ -65,6 +66,7 @@ function buildCells(deviceInfo: DeviceInfo): InfoCell[] {
 }
 
 export function DeviceDetailPanel() {
+  const reduced = useReducedMotion()
   const { activeSerial, deviceInfo, loading, refreshDevices } = useDevices()
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
@@ -112,8 +114,8 @@ export function DeviceDetailPanel() {
                 <motion.button
                   key={cell.label}
                   type="button"
-                  whileHover={{ scale: 1.01, backgroundColor: 'rgba(var(--muted), 0.1)' }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={reduced ? undefined : { scale: 1.01, backgroundColor: 'rgba(var(--muted), 0.1)' }}
+                  whileTap={reduced ? undefined : { scale: 0.98 }}
                   onClick={() => handleCopy(cell.label, cell.value)}
                   className="group flex items-start gap-2.5 rounded-xl border border-border/40 bg-muted/10 p-2.5 text-left transition-colors hover:border-border/60 hover:shadow-sm cursor-pointer"
                 >

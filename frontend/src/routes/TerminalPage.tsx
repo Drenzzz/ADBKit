@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
   CornerDownLeft,
   Terminal as TerminalIcon,
@@ -45,24 +46,29 @@ const MODE_OPTIONS: { value: TerminalMode; label: string }[] = [
   { value: 'fastboot-host', label: 'Fastboot' },
 ]
 
-const containerVariants = {
+const containerVariants = (reduced: boolean) => ({
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.05 },
+    transition: reduced
+      ? { duration: 0, staggerChildren: 0 }
+      : { staggerChildren: 0.05 },
   },
-}
+})
 
-const itemVariants = {
+const itemVariants = (reduced: boolean) => ({
   hidden: { opacity: 0, y: 10 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { type: 'spring' as const, stiffness: 300, damping: 24 },
+    transition: reduced
+      ? { duration: 0 }
+      : { type: 'spring' as const, stiffness: 300, damping: 24 },
   },
-}
+})
 
 export default function TerminalPage() {
+  const reduced = useReducedMotion()
   const {
     session,
     output,
@@ -258,13 +264,13 @@ export default function TerminalPage() {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants(reduced)}
       initial="hidden"
       animate="show"
       className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden pb-0 font-sans"
     >
       {/* Title Header */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-1">
+      <motion.div variants={itemVariants(reduced)} className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Terminal</h1>
         <p className="text-xs text-muted-foreground">
           Run shell commands, inspect logcat, and manage live terminal sessions
@@ -273,7 +279,7 @@ export default function TerminalPage() {
 
       {/* Obsidian macOS-Style Window Container */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants(reduced)}
         className="flex-1 min-h-0 overflow-hidden flex flex-col rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10] shadow-2xl relative"
       >
         

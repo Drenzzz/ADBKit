@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pencil, Smartphone, Clock } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { DeviceDetailPanel } from '@/components/devices/DeviceDetailPanel'
@@ -25,26 +26,29 @@ function formatUptime(seconds?: number): string {
   return `${m}m`
 }
 
-const containerVariants = {
+const containerVariants = (reduced: boolean) => ({
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-    },
+    transition: reduced
+      ? { duration: 0, staggerChildren: 0 }
+      : { staggerChildren: 0.06 },
   },
-}
+})
 
-const itemVariants = {
+const itemVariants = (reduced: boolean) => ({
   hidden: { opacity: 0, y: 12 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { type: 'spring' as const, stiffness: 350, damping: 26 },
+    transition: reduced
+      ? { duration: 0 }
+      : { type: 'spring' as const, stiffness: 350, damping: 26 },
   },
-}
+})
 
 export default function DevicesPage() {
+  const reduced = useReducedMotion()
   const { activeSerial, deviceInfo, nicknames, deviceMode } = useDevices()
   const [renameOpen, setRenameOpen] = useState(false)
 
@@ -80,14 +84,14 @@ export default function DevicesPage() {
         {activeSerial ? (
           <motion.div
             key={activeSerial}
-            variants={containerVariants}
+            variants={containerVariants(reduced)}
             initial="hidden"
             animate="show"
             className="flex flex-col gap-5"
           >
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
               {/* Left 2 Columns */}
-              <motion.div variants={itemVariants} className="lg:col-span-2 flex flex-col gap-5">
+              <motion.div variants={itemVariants(reduced)} className="lg:col-span-2 flex flex-col gap-5">
                 <DeviceActions />
                 {isOnline && (
                   <>
@@ -110,14 +114,14 @@ export default function DevicesPage() {
               </motion.div>
 
               {/* Right 1 Column */}
-              <motion.div variants={itemVariants} className="lg:col-span-1 flex flex-col gap-5">
+              <motion.div variants={itemVariants(reduced)} className="lg:col-span-1 flex flex-col gap-5">
                 {isOnline && snapshot && (
                   <SidebarStatusPanel snapshot={snapshot} />
                 )}
               </motion.div>
             </div>
 
-            <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants(reduced)}>
               <DeviceDetailPanel />
             </motion.div>
           </motion.div>

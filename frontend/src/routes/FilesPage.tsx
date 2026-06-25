@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Download, Pencil, Trash2, X } from 'lucide-react'
 import { useDevices } from '@/hooks/useDevices'
 import { useFileExplorer } from '@/hooks/useFileExplorer'
@@ -15,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import type { StorageInfo } from '@/lib/types'
 
 export default function FilesPage() {
+  const reduced = useReducedMotion()
   const { activeSerial } = useDevices()
   const fe = useFileExplorer()
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
@@ -47,7 +49,9 @@ export default function FilesPage() {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.05 },
+      transition: reduced
+        ? { duration: 0, staggerChildren: 0 }
+        : { staggerChildren: 0.05 },
     },
   }
 
@@ -56,7 +60,9 @@ export default function FilesPage() {
     show: {
       opacity: 1,
       y: 0,
-      transition: { type: 'spring' as const, stiffness: 300, damping: 24 },
+      transition: reduced
+        ? { duration: 0 }
+        : { type: 'spring' as const, stiffness: 300, damping: 24 },
     },
   }
 

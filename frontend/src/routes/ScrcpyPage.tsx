@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { RefreshCw, Play, Smartphone, AlertTriangle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -30,24 +31,29 @@ function formatElapsed(startedAt: number): string {
   return `${mm}:${ss}`
 }
 
-const containerVariants = {
+const containerVariants = (reduced: boolean) => ({
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.05 },
+    transition: reduced
+      ? { duration: 0, staggerChildren: 0 }
+      : { staggerChildren: 0.05 },
   },
-}
+})
 
-const itemVariants = {
+const itemVariants = (reduced: boolean) => ({
   hidden: { opacity: 0, y: 10 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { type: 'spring' as const, stiffness: 300, damping: 24 },
+    transition: reduced
+      ? { duration: 0 }
+      : { type: 'spring' as const, stiffness: 300, damping: 24 },
   },
-}
+})
 
 export default function ScrcpyPage() {
+  const reduced = useReducedMotion()
   const {
     session,
     encoderSupport,
@@ -117,14 +123,14 @@ export default function ScrcpyPage() {
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={containerVariants(reduced)}
       initial="hidden"
       animate="show"
       className="flex h-full min-h-0 flex-col gap-4 overflow-hidden"
     >
       {/* Header */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants(reduced)}
         className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <div className="flex flex-col gap-0.5">
@@ -150,7 +156,7 @@ export default function ScrcpyPage() {
 
       {/* Main Grid: Split Layout */}
       <motion.div
-        variants={itemVariants}
+        variants={itemVariants(reduced)}
         className="relative flex-1 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/20 flex flex-col lg:flex-row shadow-sm"
       >
         {/* Left Column: Device Screen / Mirror Box */}

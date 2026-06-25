@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { motion } from 'motion/react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useDevices } from '@/hooks/useDevices'
 import { rebootDevice } from '@/services/deviceService'
 import { HeroDeviceCard } from '@/components/dashboard/HeroDeviceCard'
@@ -26,6 +27,7 @@ const TAGLINES: Record<TaglineContext, string> = {
 }
 
 export default function DashboardPage() {
+  const reduced = useReducedMotion()
   const {
     devices,
     activeSerial,
@@ -64,9 +66,9 @@ export default function DashboardPage() {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-      },
+      transition: reduced
+        ? { duration: 0, staggerChildren: 0 }
+        : { staggerChildren: 0.08 },
     },
   }
 
@@ -75,7 +77,9 @@ export default function DashboardPage() {
     show: {
       opacity: 1,
       y: 0,
-      transition: { type: 'spring' as const, stiffness: 350, damping: 26 },
+      transition: reduced
+        ? { duration: 0 }
+        : { type: 'spring' as const, stiffness: 350, damping: 26 },
     },
   }
 
