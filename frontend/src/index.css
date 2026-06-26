@@ -88,6 +88,34 @@
   --sidebar-accent-foreground: oklch(0.2 0.004 265);
   --sidebar-border: oklch(0 0 0 / 10%);
   --sidebar-ring: oklch(0.623 0.214 257);
+
+  /* Terminal */
+  --terminal-bg: #f5f5f5;
+  --terminal-surface: #ebebeb;
+
+  /* Logcat levels */
+  --logcat-verbose: oklch(0.55 0.01 265);
+  --logcat-debug: oklch(0.55 0.01 265);
+  --logcat-info: oklch(0.623 0.214 257);
+  --logcat-warn: oklch(0.77 0.17 62);
+  --logcat-error: oklch(0.637 0.234 25);
+  --logcat-fatal: oklch(0.5 0.25 25);
+
+  /* Chart */
+  --chart-primary: oklch(0.623 0.214 257);
+  --chart-secondary: oklch(0.72 0.19 152);
+  --chart-tertiary: oklch(0.6 0.15 280);
+
+  /* Glow (low-opacity state indicators) */
+  --glow-info: oklch(0.623 0.214 257 / 35%);
+  --glow-success: oklch(0.72 0.19 152 / 35%);
+  --glow-warning: oklch(0.77 0.17 62 / 35%);
+  --glow-error: oklch(0.637 0.234 25 / 35%);
+
+  /* Traffic light (macOS terminal decorative) */
+  --traffic-light-red: #ff5f56;
+  --traffic-light-yellow: #ffbd2e;
+  --traffic-light-green: #27c93f;
 }
 
 .dark {
@@ -124,6 +152,34 @@
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.656 0.196 257);
+
+  /* Terminal */
+  --terminal-bg: #0a0b10;
+  --terminal-surface: #08090d;
+
+  /* Logcat levels */
+  --logcat-verbose: oklch(0.65 0.01 265);
+  --logcat-debug: oklch(0.65 0.01 265);
+  --logcat-info: oklch(0.656 0.196 257);
+  --logcat-warn: oklch(0.80 0.16 64);
+  --logcat-error: oklch(0.66 0.22 25);
+  --logcat-fatal: oklch(0.55 0.27 25);
+
+  /* Chart */
+  --chart-primary: oklch(0.656 0.196 257);
+  --chart-secondary: oklch(0.76 0.19 152);
+  --chart-tertiary: oklch(0.65 0.15 280);
+
+  /* Glow (low-opacity state indicators) */
+  --glow-info: oklch(0.656 0.196 257 / 35%);
+  --glow-success: oklch(0.76 0.19 152 / 35%);
+  --glow-warning: oklch(0.80 0.16 64 / 35%);
+  --glow-error: oklch(0.66 0.22 25 / 35%);
+
+  /* Traffic light (macOS terminal decorative) */
+  --traffic-light-red: #ff5f56;
+  --traffic-light-yellow: #ffbd2e;
+  --traffic-light-green: #27c93f;
 }
 
 @layer base {
