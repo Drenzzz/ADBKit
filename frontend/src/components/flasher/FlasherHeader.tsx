@@ -52,28 +52,28 @@ export function FlasherHeader() {
     if (deviceMode === 'fastbootd') {
       return {
         label: 'Fastbootd',
-        dotClass: 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]',
-        bgClass: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400',
+        dotClass: 'bg-[var(--success)] shadow-[var(--glow-success)]',
+        bgClass: 'bg-[var(--success)]/10 dark:bg-[var(--success)]/20 border-[var(--success)]/30 dark:border-[var(--success)]/20 text-[var(--success)]',
       }
     }
     if (deviceMode === 'fastboot') {
       return {
         label: 'Fastboot',
-        dotClass: 'bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.6)]',
-        bgClass: 'bg-teal-50 dark:bg-teal-950/20 border-teal-200 dark:border-teal-900/50 text-teal-700 dark:text-teal-400',
+        dotClass: 'bg-[var(--primary)] shadow-[var(--glow-info)]',
+        bgClass: 'bg-[var(--primary)]/10 dark:bg-[var(--primary)]/20 border-[var(--primary)]/30 dark:border-[var(--primary)]/20 text-[var(--primary)]',
       }
     }
     if (deviceMode === 'sideload') {
       return {
         label: 'Sideload',
-        dotClass: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]',
-        bgClass: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400',
+        dotClass: 'bg-[var(--warning)] shadow-[var(--glow-warning)]',
+        bgClass: 'bg-[var(--warning)]/10 dark:bg-[var(--warning)]/20 border-[var(--warning)]/30 dark:border-[var(--warning)]/20 text-[var(--warning)]',
       }
     }
     return {
       label: 'Disconnected',
-      dotClass: 'bg-zinc-400 dark:bg-zinc-600',
-      bgClass: 'bg-zinc-50 dark:bg-zinc-900/30 border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400',
+      dotClass: 'bg-muted-foreground dark:bg-muted-foreground',
+      bgClass: 'bg-[var(--muted)]/30 dark:bg-[var(--muted)]/30 border-[var(--border)] dark:border-[var(--border)] text-muted-foreground dark:text-muted-foreground',
     }
   }
 
@@ -110,15 +110,15 @@ export function FlasherHeader() {
 
         {/* macOS-style Slot Switcher */}
         {hasSlot && (
-          <div className="flex items-center gap-0.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 p-0.5 shadow-sm">
+          <div className="flex items-center gap-0.5 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)] dark:bg-[var(--muted)] p-0.5 shadow-sm">
             <button
               onClick={() => currentSlot === 'b' && handleSlotSwitch('a')}
               disabled={runningSlotChange}
               className={cn(
                 "rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200 cursor-pointer",
                 currentSlot === 'a'
-                  ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-foreground shadow-sm"
-                  : "text-zinc-500 dark:text-muted-foreground hover:text-zinc-900 dark:hover:text-zinc-200"
+                  ? "bg-card dark:bg-card text-foreground dark:text-foreground shadow-sm"
+                  : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground"
               )}
             >
               Slot A
@@ -129,8 +129,8 @@ export function FlasherHeader() {
               className={cn(
                 "rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200 cursor-pointer",
                 currentSlot === 'b'
-                  ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-foreground shadow-sm"
-                  : "text-zinc-500 dark:text-muted-foreground hover:text-zinc-900 dark:hover:text-zinc-200"
+                  ? "bg-card dark:bg-card text-foreground dark:text-foreground shadow-sm"
+                  : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground"
               )}
             >
               Slot B
@@ -142,7 +142,7 @@ export function FlasherHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-full text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="h-8 w-8 rounded-full text-muted-foreground dark:text-muted-foreground hover:bg-[var(--muted)] dark:hover:bg-[var(--muted)]"
             onClick={() => syncFastbootDevices(true)}
             disabled={refreshingDevices}
           >

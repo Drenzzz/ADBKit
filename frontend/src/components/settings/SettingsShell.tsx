@@ -1,29 +1,36 @@
 import { motion } from 'motion/react'
 import { useSettings } from '@/hooks/useSettings'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BinaryManager } from './BinaryManager'
 import { PreferencesPanel } from './PreferencesPanel'
 import { AuditLogsPanel } from './AuditLogsPanel'
 import { DiagnosticsPanel } from './DiagnosticsPanel'
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { type: 'spring' as const, stiffness: 260, damping: 22 },
-  },
-}
-
 export function SettingsShell() {
+  const reduced = useReducedMotion()
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: reduced
+        ? { duration: 0, staggerChildren: 0 }
+        : { staggerChildren: 0.05 },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 12 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: reduced
+        ? { duration: 0 }
+        : { type: 'spring' as const, stiffness: 260, damping: 22 },
+    },
+  }
+
   const {
     appConfig,
     preferencesDraft,

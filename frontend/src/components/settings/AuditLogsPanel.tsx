@@ -50,11 +50,11 @@ const LEVEL_ICON: Record<AuditLogLevel, React.ReactNode> = {
 }
 
 const LEVEL_CLASS: Record<AuditLogLevel, string> = {
-  info: 'text-blue-500 dark:text-blue-400',
-  warning: 'text-amber-500 dark:text-amber-400',
-  error: 'text-rose-500 dark:text-rose-400',
+  info: 'text-[var(--logcat-info)]',
+  warning: 'text-[var(--warning)]',
+  error: 'text-[var(--destructive)]',
   debug: 'text-muted-foreground/80',
-  success: 'text-emerald-500 dark:text-emerald-400',
+  success: 'text-[var(--success)]',
 }
 
 const ALL_LEVELS: AuditLogLevel[] = ['info', 'warning', 'error', 'debug', 'success']
@@ -74,13 +74,13 @@ interface AuditRowProps {
 
 function AuditRow({ entry, isOpen, onToggle }: AuditRowProps) {
   return (
-    <div className="border-b border-zinc-150 dark:border-zinc-800/60 last:border-b-0">
+    <div className="border-b border-[var(--border)] dark:border-[var(--border)]/60 last:border-b-0">
       <button
         type="button"
         onClick={onToggle}
         className={cn(
-          'grid w-full grid-cols-12 gap-2 px-4 py-2.5 text-left text-[12px] transition-colors hover:bg-zinc-55 dark:hover:bg-zinc-900/30 cursor-pointer items-center',
-          isOpen && 'bg-zinc-100/50 dark:bg-zinc-900/60',
+          'grid w-full grid-cols-12 gap-2 px-4 py-2.5 text-left text-[12px] transition-colors hover:bg-[var(--muted)]/55 dark:hover:bg-[var(--muted)]/30 cursor-pointer items-center',
+          isOpen && 'bg-[var(--muted)]/50 dark:bg-[var(--muted)]/60',
         )}
       >
         <div
@@ -92,20 +92,20 @@ function AuditRow({ entry, isOpen, onToggle }: AuditRowProps) {
           {LEVEL_ICON[entry.level]}
           {entry.level}
         </div>
-        <div className="col-span-3 truncate font-mono text-[11px] text-zinc-500 dark:text-zinc-400">
+        <div className="col-span-3 truncate font-mono text-[11px] text-muted-foreground dark:text-muted-foreground">
           {entry.operation}
         </div>
-        <div className="col-span-4 truncate text-zinc-700 dark:text-zinc-300 font-medium">
+        <div className="col-span-4 truncate text-foreground dark:text-foreground font-medium">
           {entry.message}
         </div>
-        <div className="col-span-2 truncate text-[11px] tabular-nums text-zinc-500 dark:text-zinc-500">
+        <div className="col-span-2 truncate text-[11px] tabular-nums text-muted-foreground dark:text-muted-foreground">
           {formatTimestamp(entry.timestamp)}
         </div>
         <div className="col-span-1 flex items-center justify-end gap-1.5">
           {entry.success ? (
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-[var(--success)]" />
           ) : (
-            <XCircle className="h-3.5 w-3.5 text-rose-500" />
+            <XCircle className="h-3.5 w-3.5 text-[var(--destructive)]" />
           )}
           <ChevronDown
             className={cn(
@@ -117,13 +117,13 @@ function AuditRow({ entry, isOpen, onToggle }: AuditRowProps) {
       </button>
 
       {isOpen && (
-        <div className="border-t border-zinc-150 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/20 px-4 py-3">
+        <div className="border-t border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/50 dark:bg-[var(--muted)]/20 px-4 py-3">
           <div className="grid grid-cols-[100px_1fr] gap-x-3 gap-y-1.5 text-xs">
-            <span className="text-zinc-400 dark:text-zinc-500 font-medium">ID</span>
-            <span className="font-mono text-zinc-600 dark:text-zinc-400 break-all select-all">
+            <span className="text-muted-foreground dark:text-muted-foreground font-medium">ID</span>
+            <span className="font-mono text-foreground dark:text-foreground break-all select-all">
               {entry.id}
             </span>
-            <span className="text-zinc-400 dark:text-zinc-500 font-medium">Level</span>
+            <span className="text-muted-foreground dark:text-muted-foreground font-medium">Level</span>
             <span
               className={cn(
                 'font-bold capitalize',
@@ -132,30 +132,30 @@ function AuditRow({ entry, isOpen, onToggle }: AuditRowProps) {
             >
               {entry.level}
             </span>
-            <span className="text-zinc-400 dark:text-zinc-500 font-medium">Operation</span>
-            <span className="font-mono text-zinc-600 dark:text-zinc-400">
+            <span className="text-muted-foreground dark:text-muted-foreground font-medium">Operation</span>
+            <span className="font-mono text-foreground dark:text-foreground">
               {entry.operation}
             </span>
-            <span className="text-zinc-400 dark:text-zinc-500 font-medium">Time</span>
-            <span className="text-zinc-700 dark:text-zinc-300 font-medium">
+            <span className="text-muted-foreground dark:text-muted-foreground font-medium">Time</span>
+            <span className="text-foreground dark:text-foreground font-medium">
               {formatTimestamp(entry.timestamp)}
             </span>
-            <span className="text-zinc-400 dark:text-zinc-500 font-medium">Message</span>
-            <span className="text-zinc-700 dark:text-zinc-300 font-medium break-words">
+            <span className="text-muted-foreground dark:text-muted-foreground font-medium">Message</span>
+            <span className="text-foreground dark:text-foreground font-medium break-words">
               {entry.message}
             </span>
             {entry.details && (
               <>
-                <span className="text-zinc-400 dark:text-zinc-500 font-medium">Details</span>
-                <pre className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-3 font-mono text-[10px] text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap break-all">
+                <span className="text-muted-foreground dark:text-muted-foreground font-medium">Details</span>
+                <pre className="rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/60 p-3 font-mono text-[10px] text-foreground dark:text-foreground whitespace-pre-wrap break-all">
                   {entry.details}
                 </pre>
               </>
             )}
             {entry.duration && (
               <>
-                <span className="text-zinc-400 dark:text-zinc-500 font-medium">Duration</span>
-                <span className="font-mono text-zinc-600 dark:text-zinc-400">
+                <span className="text-muted-foreground dark:text-muted-foreground font-medium">Duration</span>
+                <span className="font-mono text-foreground dark:text-foreground">
                   {entry.duration}
                 </span>
               </>
@@ -237,10 +237,10 @@ export function AuditLogsPanel() {
   }
 
   return (
-    <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm">
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 gap-3 border-b border-zinc-150/80 dark:border-zinc-800/80">
+    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)]">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 gap-3 border-b border-[var(--border)]/80 dark:border-[var(--border)]/80">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <ScrollText className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <ScrollText className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
           Audit Logs
         </CardTitle>
         
@@ -285,7 +285,7 @@ export function AuditLogsPanel() {
             variant="outline"
             onClick={() => setShowClearDialog(true)}
             disabled={clearingAuditLogs || auditLogs.length === 0}
-            className="h-8 rounded-full text-xs font-semibold cursor-pointer text-rose-500 hover:text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 border-zinc-200 dark:border-zinc-800"
+            className="h-8 rounded-full text-xs font-semibold cursor-pointer text-[var(--destructive)] hover:text-[var(--destructive)]/80 dark:text-[var(--destructive)] hover:bg-[var(--destructive)]/10 dark:hover:bg-[var(--destructive)]/20 border-[var(--border)] dark:border-[var(--border)]"
           >
             <Trash2 className="mr-1.5 h-3.5 w-3.5" />
             Clear
@@ -295,11 +295,11 @@ export function AuditLogsPanel() {
       
       <CardContent className="space-y-4 p-5">
         {error && (
-          <p className="text-xs text-rose-500 font-semibold">{error}</p>
+          <p className="text-xs text-[var(--destructive)] font-semibold">{error}</p>
         )}
 
         {/* Filters Toolbar */}
-        <div className="flex flex-wrap items-center gap-3 bg-zinc-50/50 dark:bg-zinc-950/20 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800/80">
+        <div className="flex flex-wrap items-center gap-3 bg-[var(--muted)]/50 dark:bg-[var(--muted)]/20 p-2.5 rounded-xl border border-[var(--border)] dark:border-[var(--border)]/80">
           {/* Search */}
           <div className="flex-grow min-w-[200px]">
             <Input
@@ -308,7 +308,7 @@ export function AuditLogsPanel() {
               onChange={(event) =>
                 setAuditLogFilters({ text: event.target.value })
               }
-              className="h-8 rounded-full font-mono text-xs pl-3 bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800"
+              className="h-8 rounded-full font-mono text-xs pl-3 bg-card dark:bg-[var(--muted)]/60 border border-[var(--border)] dark:border-[var(--border)]"
             />
           </div>
 
@@ -321,10 +321,10 @@ export function AuditLogsPanel() {
               })
             }
           >
-            <SelectTrigger className="h-8 w-auto min-w-[125px] rounded-full text-xs bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 focus:ring-0">
+            <SelectTrigger className="h-8 w-auto min-w-[125px] rounded-full text-xs bg-card dark:bg-[var(--muted)]/60 border border-[var(--border)] dark:border-[var(--border)] focus:ring-0">
               <SelectValue placeholder="All outcomes" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800">
+            <SelectContent className="rounded-xl border-[var(--border)] dark:border-[var(--border)]">
               <SelectItem value="all" className="text-xs cursor-pointer">All outcomes</SelectItem>
               <SelectItem value="succeeded" className="text-xs cursor-pointer">Succeeded</SelectItem>
               <SelectItem value="failed" className="text-xs cursor-pointer">Failed</SelectItem>
@@ -340,10 +340,10 @@ export function AuditLogsPanel() {
               })
             }
           >
-            <SelectTrigger className="h-8 w-auto min-w-[130px] max-w-[180px] rounded-full text-xs bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 focus:ring-0">
+            <SelectTrigger className="h-8 w-auto min-w-[130px] max-w-[180px] rounded-full text-xs bg-card dark:bg-[var(--muted)]/60 border border-[var(--border)] dark:border-[var(--border)] focus:ring-0">
               <SelectValue placeholder="All operations" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800 max-h-[240px]">
+            <SelectContent className="rounded-xl border-[var(--border)] dark:border-[var(--border)] max-h-[240px]">
               <SelectItem value={ALL_OPERATIONS_VALUE} className="text-xs cursor-pointer">All operations</SelectItem>
               {availableOperations.map((op) => (
                 <SelectItem key={op} value={op} className="text-xs cursor-pointer">
@@ -358,10 +358,10 @@ export function AuditLogsPanel() {
             value={String(auditLogLimit)}
             onValueChange={(value) => changeLimit(Number(value))}
           >
-            <SelectTrigger className="h-8 w-auto min-w-[105px] rounded-full text-xs bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 focus:ring-0">
+            <SelectTrigger className="h-8 w-auto min-w-[105px] rounded-full text-xs bg-card dark:bg-[var(--muted)]/60 border border-[var(--border)] dark:border-[var(--border)] focus:ring-0">
               <SelectValue placeholder="Limit" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800">
+            <SelectContent className="rounded-xl border-[var(--border)] dark:border-[var(--border)]">
               {AUDIT_LOG_LIMIT_OPTIONS.map((value) => (
                 <SelectItem key={value} value={String(value)} className="text-xs cursor-pointer">
                   {value} entries
@@ -371,7 +371,7 @@ export function AuditLogsPanel() {
           </Select>
 
           {/* Level Chips Toggles */}
-          <div className="flex items-center gap-1 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-0.5">
+          <div className="flex items-center gap-1 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-0.5">
             {ALL_LEVELS.map((level) => {
               const isActive = auditLogFilters.levels.includes(level)
               return (
@@ -382,8 +382,8 @@ export function AuditLogsPanel() {
                   className={cn(
                     'flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold capitalize transition-colors cursor-pointer',
                     isActive
-                      ? 'bg-zinc-100 dark:bg-zinc-800 text-foreground'
-                      : 'text-muted-foreground/60 hover:bg-zinc-50 dark:hover:bg-zinc-900/30 hover:text-foreground',
+                      ? 'bg-[var(--muted)] dark:bg-[var(--muted)] text-foreground'
+                      : 'text-muted-foreground/60 hover:bg-[var(--muted)]/50 dark:hover:bg-[var(--muted)]/30 hover:text-foreground',
                   )}
                 >
                   <span
@@ -401,7 +401,7 @@ export function AuditLogsPanel() {
           </div>
 
           {/* Sort Toggles */}
-          <div className="flex items-center gap-1 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-0.5">
+          <div className="flex items-center gap-1 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-0.5">
             {(
               [
                 { value: 'newest', label: 'Newest' },
@@ -419,8 +419,8 @@ export function AuditLogsPanel() {
                   className={cn(
                     'rounded-full px-2.5 py-1 text-[10px] font-bold transition-colors cursor-pointer',
                     isActive
-                      ? 'bg-zinc-100 dark:bg-zinc-800 text-foreground'
-                      : 'text-muted-foreground/60 hover:bg-zinc-50 dark:hover:bg-zinc-900/30 hover:text-foreground',
+                      ? 'bg-[var(--muted)] dark:bg-[var(--muted)] text-foreground'
+                      : 'text-muted-foreground/60 hover:bg-[var(--muted)]/50 dark:hover:bg-[var(--muted)]/30 hover:text-foreground',
                   )}
                 >
                   {option.label}
@@ -431,8 +431,8 @@ export function AuditLogsPanel() {
         </div>
 
         {/* Logs Table Area */}
-        <div className="overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
-          <div className="grid grid-cols-12 gap-2 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/20 px-4 py-2.5 text-[9px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">
+        <div className="overflow-hidden rounded-2xl border border-[var(--border)] dark:border-[var(--border)]">
+          <div className="grid grid-cols-12 gap-2 border-b border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/50 dark:bg-[var(--muted)]/20 px-4 py-2.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
             <div className="col-span-2">Level</div>
             <div className="col-span-3">Operation</div>
             <div className="col-span-4">Message</div>
@@ -440,7 +440,7 @@ export function AuditLogsPanel() {
             <div className="col-span-1 text-right">Result</div>
           </div>
 
-          <div className="max-h-[350px] overflow-y-auto divide-y divide-zinc-150/40 dark:divide-zinc-800/40">
+          <div className="max-h-[350px] overflow-y-auto divide-y divide-[var(--border)]/40 dark:divide-[var(--border)]/40">
             {loadingAuditLogs ? (
               <div className="flex flex-col gap-2 p-4">
                 <Skeleton className="h-8 w-full rounded-full animate-pulse" />
@@ -451,7 +451,7 @@ export function AuditLogsPanel() {
             ) : filteredLogs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16">
                 <Filter className="mb-2 h-6 w-6 text-muted-foreground/30" />
-                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                <span className="text-xs font-bold text-foreground dark:text-foreground">
                   No matching logs
                 </span>
                 <span className="mt-1 text-[10px] text-muted-foreground/60 text-center px-6 leading-relaxed">
@@ -491,7 +491,7 @@ export function AuditLogsPanel() {
       </CardContent>
 
       <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-        <AlertDialogContent className="rounded-2xl border-zinc-200 dark:border-zinc-800">
+        <AlertDialogContent className="rounded-2xl border-[var(--border)] dark:border-[var(--border)]">
           <AlertDialogHeader>
             <AlertDialogTitle>Clear all audit logs?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -501,7 +501,7 @@ export function AuditLogsPanel() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClear} className="rounded-full bg-rose-500 hover:bg-rose-600 text-white border-0">
+            <AlertDialogAction onClick={handleClear} className="rounded-full bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white border-0">
               Clear logs
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -509,7 +509,7 @@ export function AuditLogsPanel() {
       </AlertDialog>
 
       <AlertDialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-        <AlertDialogContent className="rounded-2xl border-zinc-200 dark:border-zinc-800">
+        <AlertDialogContent className="rounded-2xl border-[var(--border)] dark:border-[var(--border)]">
           <AlertDialogHeader>
             <AlertDialogTitle>Import audit logs?</AlertDialogTitle>
             <AlertDialogDescription>

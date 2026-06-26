@@ -6,26 +6,32 @@ import { SideloadCard } from '@/components/flasher/cards/SideloadCard'
 import { WipeDataCard } from '@/components/flasher/cards/WipeDataCard'
 import { Separator } from '@/components/ui/separator'
 import { useFlasher } from '@/hooks/useFlasher'
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05 },
-  },
-}
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { type: 'spring' as const, stiffness: 300, damping: 24 },
-  },
-}
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export function FlasherBento() {
   const { deviceMode } = useFlasher()
+  const reduced = useReducedMotion()
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: reduced
+        ? { duration: 0, staggerChildren: 0 }
+        : { staggerChildren: 0.05 },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: reduced
+        ? { duration: 0 }
+        : { type: 'spring' as const, stiffness: 300, damping: 24 },
+    },
+  }
 
   const isFastboot = deviceMode === 'fastboot' || deviceMode === 'fastbootd'
   const isSideload = deviceMode === 'sideload'
@@ -45,7 +51,7 @@ export function FlasherBento() {
         <FlasherHeader />
       </motion.div>
       <motion.div variants={itemVariants}>
-        <Separator className="bg-zinc-150 dark:bg-zinc-800" />
+        <Separator className="bg-[var(--muted)] dark:bg-[var(--muted)]" />
       </motion.div>
       <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <PartitionFlashCard disabled={flashDisabled} />

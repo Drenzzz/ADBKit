@@ -145,7 +145,7 @@ export default function ScrcpyPage() {
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full"
+            className="h-8 w-8 text-muted-foreground dark:text-muted-foreground hover:bg-[var(--muted)] dark:hover:bg-[var(--muted)] rounded-full"
             onClick={() => useScrcpyStore.getState().reset()}
             aria-label="Reset scrcpy state"
           >
@@ -157,10 +157,10 @@ export default function ScrcpyPage() {
       {/* Main Grid: Split Layout */}
       <motion.div
         variants={itemVariants(reduced)}
-        className="relative flex-1 overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/20 flex flex-col lg:flex-row shadow-sm"
+        className="relative flex-1 overflow-hidden rounded-2xl border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/20 flex flex-col lg:flex-row shadow-[var(--shadow-card)]"
       >
         {/* Left Column: Device Screen / Mirror Box */}
-        <div className="relative flex-grow flex flex-col items-center justify-center p-6 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 min-h-[300px]">
+        <div className="relative flex-grow flex flex-col items-center justify-center p-6 border-b lg:border-b-0 lg:border-r border-[var(--border)] dark:border-[var(--border)] min-h-[300px]">
           <motion.div
             key={isStopping ? 'stopping' : isConnected ? 'connected' : 'idle'}
             initial={{ opacity: 0, scale: 0.97 }}
@@ -170,8 +170,8 @@ export default function ScrcpyPage() {
           >
             {isStopping ? (
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-zinc-400 dark:text-zinc-500" />
-                <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground dark:text-muted-foreground" />
+                <p className="text-xs font-semibold text-muted-foreground dark:text-muted-foreground">
                   Stopping session...
                 </p>
               </div>
@@ -203,31 +203,31 @@ export default function ScrcpyPage() {
               /* Idle Screen Phone Mockup */
               <div className="flex max-w-md flex-col items-center text-center z-10">
                 <div
-                  className={`mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all duration-300 ${
+                  className={`mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-[var(--border)] dark:border-[var(--border)] shadow-[var(--shadow-card)] transition-all duration-300 ${
                     isStarting
                       ? 'bg-primary/10 text-primary animate-pulse'
-                      : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-400'
+                      : 'bg-[var(--muted)] dark:bg-[var(--muted)]/30 text-muted-foreground'
                   }`}
                 >
                   {isStarting ? (
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
                   ) : (
-                    <Smartphone className="h-9 w-9 text-zinc-400 dark:text-zinc-500" />
+                    <Smartphone className="h-9 w-9 text-muted-foreground dark:text-muted-foreground" />
                   )}
                 </div>
 
-                <h2 className="text-lg font-bold tracking-tight text-zinc-800 dark:text-zinc-100">
+                <h2 className="text-lg font-bold tracking-tight text-foreground dark:text-foreground">
                   {isStarting ? 'Connecting...' : 'Ready to mirror'}
                 </h2>
 
-                <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                <p className="mt-1.5 text-xs text-muted-foreground dark:text-muted-foreground font-medium">
                   {activeSerial
                     ? `Device: ${activeSerial}`
                     : 'No active device selected'}
                 </p>
 
                 {error && (
-                  <div className="mt-4 flex w-full items-start gap-2 rounded-xl border border-rose-500/20 bg-rose-50 dark:bg-rose-950/20 px-3 py-2 text-left text-[11px] text-rose-600 dark:text-rose-400">
+                  <div className="mt-4 flex w-full items-start gap-2 rounded-xl border border-[var(--destructive)]/20 bg-[var(--destructive)]/10 dark:bg-[var(--destructive)]/20 px-3 py-2 text-left text-[11px] text-[var(--destructive)] dark:text-[var(--destructive)]">
                     <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                     <span>{error}</span>
                   </div>
@@ -253,7 +253,7 @@ export default function ScrcpyPage() {
                 </Button>
 
                 {!activeSerial && !isStarting && (
-                  <p className="mt-3 text-[10px] text-rose-500 font-semibold animate-pulse">
+                  <p className="mt-3 text-[10px] text-[var(--destructive)] font-semibold animate-pulse">
                     Select a device first
                   </p>
                 )}
@@ -263,7 +263,7 @@ export default function ScrcpyPage() {
         </div>
 
         {/* Right Column: Configuration & Utilities */}
-        <div className="w-full lg:w-[400px] flex flex-col bg-zinc-50/50 dark:bg-[#0a0b10]/20 overflow-y-auto min-w-0">
+        <div className="w-full lg:w-[400px] flex flex-col bg-[var(--muted)]/50 dark:bg-[var(--terminal-bg)]/20 overflow-y-auto min-w-0">
           <motion.div
             key={isStopping ? 'stopping' : isConnected ? 'connected' : 'idle'}
             initial={{ opacity: 0, x: 15 }}
@@ -293,7 +293,7 @@ export default function ScrcpyPage() {
               <div className="p-5 flex-grow flex flex-col">
                 <h3 className="text-sm font-bold text-foreground mb-4 tracking-tight">Configuration</h3>
                 <Tabs value={configTab} onValueChange={setConfigTab} className="w-full flex-1 flex flex-col">
-                  <TabsList className="mb-4 grid w-full grid-cols-4 bg-zinc-100 dark:bg-zinc-900/60 p-0.5 rounded-full">
+                  <TabsList className="mb-4 grid w-full grid-cols-4 bg-[var(--muted)] dark:bg-[var(--muted)]/60 p-0.5 rounded-full">
                     <TabsTrigger value="quality" className="rounded-full text-[11px] font-semibold">Quality</TabsTrigger>
                     <TabsTrigger value="audio" className="rounded-full text-[11px] font-semibold">Audio</TabsTrigger>
                     <TabsTrigger value="device" className="rounded-full text-[11px] font-semibold">Device</TabsTrigger>
@@ -301,7 +301,7 @@ export default function ScrcpyPage() {
                   </TabsList>
 
                   <TabsContent value="quality" className="mt-0 outline-none flex-grow">
-                    <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-4 rounded-2xl shadow-sm">
+                    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
                       <QualityControls
                         options={scrcpyOptions}
                         onOptionChange={(key, val) => setScrcpyOptions({ ...scrcpyOptions, [key]: val })}
@@ -310,7 +310,7 @@ export default function ScrcpyPage() {
                   </TabsContent>
 
                   <TabsContent value="audio" className="mt-0 outline-none flex-grow">
-                    <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-4 rounded-2xl shadow-sm">
+                    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
                       <AudioControls
                         options={scrcpyOptions}
                         onOptionChange={(key, val) => setScrcpyOptions({ ...scrcpyOptions, [key]: val })}
@@ -319,7 +319,7 @@ export default function ScrcpyPage() {
                   </TabsContent>
 
                   <TabsContent value="device" className="mt-0 outline-none flex-grow">
-                    <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 p-4 rounded-2xl shadow-sm">
+                    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
                       <DeviceOptionsControls
                         options={scrcpyOptions}
                         onOptionChange={(key, val) => setScrcpyOptions({ ...scrcpyOptions, [key]: val })}

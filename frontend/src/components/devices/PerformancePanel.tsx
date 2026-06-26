@@ -67,7 +67,7 @@ export function PerformancePanel({ snapshot, error }: PerformancePanelProps) {
               value={`${snapshot.cpuUsage.toFixed(1)}%`}
               sublabel="Process Load: Active"
               trend={cpuHistory}
-              trendColor="#007AFF"
+              trendColor="var(--chart-primary)"
               trendHeight={44}
               valueTone={cpuTone(snapshot.cpuUsage)}
               className="py-4 px-3.5 gap-2.5"
@@ -82,7 +82,7 @@ export function PerformancePanel({ snapshot, error }: PerformancePanelProps) {
                   : undefined
               }
               trend={ramHistory}
-              trendColor="#34C759"
+              trendColor="var(--chart-secondary)"
               trendHeight={44}
               valueTone={ramTone(snapshot.ramUsage)}
               className="py-4 px-3.5 gap-2.5"
@@ -93,7 +93,7 @@ export function PerformancePanel({ snapshot, error }: PerformancePanelProps) {
               value={`↓ ${formatBytesPerSec(snapshot.networkRxSec)}`}
               sublabel={`↑ ${formatBytesPerSec(snapshot.networkTxSec)}`}
               trend={rxHistory}
-              trendColor="#5856D6"
+              trendColor="var(--chart-tertiary)"
               trendHeight={44}
               className="py-4 px-3.5 gap-2.5"
             />

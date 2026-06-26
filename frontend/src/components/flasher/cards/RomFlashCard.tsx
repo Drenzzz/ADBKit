@@ -51,10 +51,10 @@ export function RomFlashCard({ disabled }: RomFlashCardProps) {
   }
 
   return (
-    <Card className="relative overflow-hidden border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm h-full flex flex-col">
+    <Card className="relative overflow-hidden border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)] h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <FolderSearch className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <FolderSearch className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
           Flash ROM Folder
         </CardTitle>
       </CardHeader>
@@ -71,7 +71,7 @@ export function RomFlashCard({ disabled }: RomFlashCardProps) {
 
           <Button
             variant="outline"
-            className="w-full rounded-full border border-zinc-200 dark:border-zinc-800 bg-white hover:bg-zinc-50 dark:bg-zinc-950 dark:hover:bg-zinc-900 text-xs font-semibold cursor-pointer h-9 transition-all"
+            className="w-full rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card hover:bg-[var(--muted)]/50 dark:bg-[var(--muted)] dark:hover:bg-[var(--muted)]/80 text-xs font-semibold cursor-pointer h-9 transition-all"
             onClick={scanSelectedRomFolder}
             disabled={disabled || !romFolderPath || scanningPlan || runningBatchFlash}
           >
@@ -87,7 +87,7 @@ export function RomFlashCard({ disabled }: RomFlashCardProps) {
 
           {hasPlan && (
             <>
-              <div className="h-px bg-zinc-150 dark:bg-zinc-800/80" />
+              <div className="h-px bg-[var(--muted)] dark:bg-[var(--muted)]/80" />
               <RomPartitionList
                 steps={flashPlanSteps}
                 selectedPartitions={selectedPartitions}
@@ -100,8 +100,8 @@ export function RomFlashCard({ disabled }: RomFlashCardProps) {
           )}
 
           {runningBatchFlash && hasPlan && (
-            <div className="space-y-2 rounded-xl bg-zinc-50 dark:bg-zinc-900/30 p-3 border border-zinc-100 dark:border-zinc-900/50">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+            <div className="space-y-2 rounded-xl bg-[var(--muted)]/30 dark:bg-[var(--muted)]/30 p-3 border border-[var(--muted)] dark:border-[var(--muted)]/50">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
                 <span>Flashing progress</span>
                 <span>{completedCount}/{flashPlanSteps.length} completed</span>
               </div>
@@ -124,9 +124,9 @@ export function RomFlashCard({ disabled }: RomFlashCardProps) {
       </CardContent>
 
       {disabled && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 dark:bg-[#08090d]/85 backdrop-blur-[3px] select-none transition-all duration-300">
-          <div className="flex items-center gap-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
-            <Cpu className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/80 dark:bg-[var(--terminal-surface)]/85 backdrop-blur-[3px] select-none transition-all duration-300">
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
+            <Cpu className="h-3.5 w-3.5 text-muted-foreground dark:text-muted-foreground" />
             Fastboot Mode Required
           </div>
         </div>

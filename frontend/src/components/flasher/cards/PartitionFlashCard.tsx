@@ -31,10 +31,10 @@ export function PartitionFlashCard({ disabled }: PartitionFlashCardProps) {
     !!activeFastbootSerial && !!selectedPartition && !!selectedImagePath && !needsUserspace && !disabled
 
   return (
-    <Card className="relative overflow-hidden border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm h-full flex flex-col">
+    <Card className="relative overflow-hidden border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)] h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Zap className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <Zap className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
           Flash Partition
         </CardTitle>
       </CardHeader>
@@ -53,11 +53,11 @@ export function PartitionFlashCard({ disabled }: PartitionFlashCardProps) {
               value={selectedPartition}
               onChange={(e) => setSelectedPartition(e.target.value)}
               disabled={disabled || runningFlash}
-              className="h-8 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 focus-visible:ring-1 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-700 text-xs pl-3.5"
+              className="h-8 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/60 focus-visible:ring-1 focus-visible:ring-muted-foreground dark:focus-visible:ring-muted-foreground text-xs pl-3.5"
             />
           </div>
 
-          <div className="h-px bg-zinc-150 dark:bg-zinc-800/80" />
+          <div className="h-px bg-[var(--muted)] dark:bg-[var(--muted)]/80" />
 
           <FilePicker
             value={selectedImagePath}
@@ -68,11 +68,11 @@ export function PartitionFlashCard({ disabled }: PartitionFlashCardProps) {
           />
 
           {needsUserspace && (
-            <Alert variant="destructive" className="rounded-xl py-2 px-3 border-rose-500/20 dark:border-rose-500/10 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400">
-              <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
+            <Alert variant="destructive" className="rounded-xl py-2 px-3 border-[var(--destructive)]/20 dark:border-[var(--destructive)]/10 bg-[var(--destructive)]/10 dark:bg-[var(--destructive)]/20 text-[var(--destructive)]">
+              <AlertTriangle className="h-3.5 w-3.5 text-[var(--destructive)]" />
               <AlertDescription className="text-[11px] leading-relaxed">
                 Logical partitions need fastbootd. Run{' '}
-                <code className="rounded bg-rose-100 dark:bg-rose-950/60 px-1 py-0.5 font-mono text-[10px] text-rose-700 dark:text-rose-300">
+                <code className="rounded bg-[var(--destructive)]/10 dark:bg-[var(--destructive)]/60 px-1 py-0.5 font-mono text-[10px] text-[var(--destructive)] dark:text-[var(--destructive)]">
                   fastboot reboot fastboot
                 </code>{' '}
                 first.
@@ -91,9 +91,9 @@ export function PartitionFlashCard({ disabled }: PartitionFlashCardProps) {
       </CardContent>
 
       {disabled && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 dark:bg-[#08090d]/85 backdrop-blur-[3px] select-none transition-all duration-300">
-          <div className="flex items-center gap-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
-            <Cpu className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/80 dark:bg-[var(--terminal-surface)]/85 backdrop-blur-[3px] select-none transition-all duration-300">
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
+            <Cpu className="h-3.5 w-3.5 text-muted-foreground dark:text-muted-foreground" />
             Fastboot Mode Required
           </div>
         </div>

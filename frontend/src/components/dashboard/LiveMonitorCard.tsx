@@ -86,7 +86,7 @@ export function LiveMonitorCard() {
               label="CPU Usage"
               value={`${snapshot.cpuUsage.toFixed(1)}%`}
               trend={cpuHistory}
-              trendColor="#007AFF"
+              trendColor="var(--chart-primary)"
               valueTone={cpuTone(snapshot.cpuUsage)}
             />
             <StatTile
@@ -99,7 +99,7 @@ export function LiveMonitorCard() {
                   : undefined
               }
               trend={ramHistory}
-              trendColor="#34C759"
+              trendColor="var(--chart-secondary)"
               valueTone={ramTone(snapshot.ramUsage)}
             />
             <StatTile
@@ -108,7 +108,7 @@ export function LiveMonitorCard() {
               value={`↓ ${formatBytesPerSec(snapshot.networkRxSec)}`}
               sublabel={`↑ ${formatBytesPerSec(snapshot.networkTxSec)}`}
               trend={rxHistory}
-              trendColor="#5856D6"
+              trendColor="var(--chart-tertiary)"
             />
           </div>
         )}

@@ -83,7 +83,7 @@ export function CommandPalette() {
         className="fixed inset-0 bg-background/60 backdrop-blur-sm"
         onClick={() => setCommandPaletteOpen(false)}
       />
-      <Command className="relative z-10 w-full max-w-md overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-lg">
+      <Command className="relative z-10 w-full max-w-md overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-[var(--shadow-raised)]">
         <Command.Input
           placeholder="Type a command or search..."
           className="flex h-11 w-full rounded-t-xl border-b border-border bg-transparent px-4 text-sm outline-none placeholder:text-muted-foreground"

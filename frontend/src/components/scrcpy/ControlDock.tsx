@@ -38,8 +38,8 @@ function TooltipIconButton({
             variant="ghost"
             className={`h-8 w-8 rounded-full transition-all active:scale-[0.93] cursor-pointer flex items-center justify-center ${
               variant === 'destructive'
-                ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-sm'
-                : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/60'
+                ? 'bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white shadow-sm'
+                : 'text-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground hover:bg-[var(--muted)]/60 dark:hover:bg-[var(--muted)]/60'
             }`}
             onClick={onClick}
             disabled={disabled}
@@ -64,7 +64,7 @@ export function ControlDock({
 }: ControlDockProps) {
   return (
     <div
-      className={`flex items-center gap-1.5 rounded-full border border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md transition-all duration-300 ${
+      className={`flex items-center gap-1.5 rounded-full border border-[var(--border)]/50 dark:border-[var(--border)]/50 bg-card/70 dark:bg-[var(--muted)]/70 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md transition-all duration-300 ${
         className ?? ''
       }`}
     >
@@ -87,11 +87,11 @@ export function ControlDock({
         {isRecording ? (
           <Square className="h-3.5 w-3.5 fill-current" />
         ) : (
-          <Circle className="h-3.5 w-3.5 fill-current text-rose-500" />
+          <Circle className="h-3.5 w-3.5 fill-current text-[var(--destructive)]" />
         )}
       </TooltipIconButton>
 
-      <Separator orientation="vertical" className="mx-1 h-6 bg-zinc-200 dark:bg-zinc-800" />
+      <Separator orientation="vertical" className="mx-1 h-6 bg-[var(--border)] dark:bg-[var(--border)]" />
 
       <Tooltip>
         <TooltipTrigger
@@ -101,7 +101,7 @@ export function ControlDock({
               type="button"
               size="sm"
               variant="destructive"
-              className="h-8 rounded-full px-4 text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white border-0 shadow-sm active:scale-95 transition-all cursor-pointer"
+              className="h-8 rounded-full px-4 text-xs font-semibold bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white border-0 shadow-sm active:scale-95 transition-all cursor-pointer"
               onClick={onStopSession}
               disabled={!isConnected}
             >

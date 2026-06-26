@@ -37,10 +37,10 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
   const hasFile = !!sideloadFilePath
 
   return (
-    <Card className="relative overflow-hidden border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm h-full flex flex-col">
+    <Card className="relative overflow-hidden border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)] h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Package className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <Package className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
           Sideload Package
         </CardTitle>
       </CardHeader>
@@ -52,11 +52,11 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
               className={cn(
                 "h-2 w-2 rounded-full",
                 isSideloadMode 
-                  ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" 
-                  : "bg-zinc-300 dark:bg-zinc-700"
+                  ? "bg-[var(--success)] shadow-[var(--glow-success)] animate-pulse" 
+                  : "bg-muted-foreground dark:bg-muted-foreground"
               )}
             />
-            <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-500">
+            <span className="text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
               {isSideloadMode ? 'Sideload mode ready' : 'No device in sideload mode'}
             </span>
           </div>
@@ -70,8 +70,8 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
           />
 
           {runningSideload && (
-            <div className="space-y-2 rounded-xl bg-zinc-50 dark:bg-zinc-900/30 p-3 border border-zinc-100 dark:border-zinc-900/50">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
+            <div className="space-y-2 rounded-xl bg-[var(--muted)]/30 dark:bg-[var(--muted)]/30 p-3 border border-[var(--muted)] dark:border-[var(--muted)]/50">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <Loader2 className="h-3 w-3 animate-spin text-primary" />
                   Sideloading in progress...
@@ -99,9 +99,9 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
       </CardContent>
 
       {disabled && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 dark:bg-[#08090d]/85 backdrop-blur-[3px] select-none transition-all duration-300">
-          <div className="flex items-center gap-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
-            <Cpu className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500" />
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/80 dark:bg-[var(--terminal-surface)]/85 backdrop-blur-[3px] select-none transition-all duration-300">
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
+            <Cpu className="h-3.5 w-3.5 text-muted-foreground dark:text-muted-foreground" />
             Sideload Mode Required
           </div>
         </div>

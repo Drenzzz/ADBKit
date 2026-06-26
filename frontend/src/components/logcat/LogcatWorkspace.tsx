@@ -49,7 +49,7 @@ export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border/40">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {isStreaming ? (
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] animate-pulse shrink-0" />
           ) : (
             <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
           )}
@@ -129,7 +129,7 @@ export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
 
       <LogcatFilters />
 
-      <div className="flex-1 min-h-0 relative bg-[#0f1117]">
+      <div className="flex-1 min-h-0 relative bg-[var(--terminal-bg)]">
         <div ref={scrollContainerRef} className="h-full overflow-auto">
           <LogcatView />
         </div>
@@ -137,7 +137,7 @@ export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
         {showScrollButton && (
           <Button
             size="icon"
-            className="absolute bottom-4 right-4 h-7 w-7 rounded-full shadow-lg"
+            className="absolute bottom-4 right-4 h-7 w-7 rounded-full shadow-[var(--shadow-raised)]"
             onClick={scrollToBottom}
           >
             <ArrowDownToLine className="h-3.5 w-3.5" />
@@ -156,7 +156,7 @@ export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
         </div>
         <div className="flex items-center gap-2">
           {bufferFull && (
-            <span className="text-[10px] text-amber-500">
+            <span className="text-[10px] text-[var(--warning)]">
               Buffer full
             </span>
           )}

@@ -34,7 +34,7 @@ function FileIcon({ name, type }: { name: string; type: FileEntry['type'] }) {
     return <Folder className="h-4 w-4 text-amber-500 fill-amber-500/10 shrink-0" />
   }
   if (type === 'symlink') {
-    return <Link className="h-4 w-4 text-sky-400 shrink-0" />
+    return <Link className="h-4 w-4 text-[var(--primary)] shrink-0" />
   }
 
   const ext = name.toLowerCase().split('.').pop() ?? ''
@@ -53,11 +53,11 @@ function FileIcon({ name, type }: { name: string; type: FileEntry['type'] }) {
   }
   // APK files
   if (ext === 'apk') {
-    return <FileCode className="h-4 w-4 text-emerald-500 fill-emerald-500/10 shrink-0" />
+    return <FileCode className="h-4 w-4 text-[var(--success)] fill-[var(--success)]/10 shrink-0" />
   }
   // Document files
   if (['pdf', 'txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'csv'].includes(ext)) {
-    return <FileText className="h-4 w-4 text-rose-500 fill-rose-500/10 shrink-0" />
+    return <FileText className="h-4 w-4 text-[var(--destructive)] fill-[var(--destructive)]/10 shrink-0" />
   }
   // Archives
   if (['zip', 'rar', 'tar', 'gz', '7z', 'bz2', 'xz'].includes(ext)) {

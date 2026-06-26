@@ -13,10 +13,10 @@ export function DiagnosticsPanel() {
 
   if (query.isLoading) {
     return (
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm">
+      <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Activity className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+            <Activity className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
             Diagnostics
           </CardTitle>
         </CardHeader>
@@ -34,15 +34,15 @@ export function DiagnosticsPanel() {
 
   if (query.error || !query.data) {
     return (
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm">
+      <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)]">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Activity className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+            <Activity className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
             Diagnostics
           </CardTitle>
         </CardHeader>
         <CardContent className="p-5">
-          <p className="text-xs text-rose-500 font-semibold">Failed to load diagnostics.</p>
+          <p className="text-xs text-[var(--destructive)] font-semibold">Failed to load diagnostics.</p>
         </CardContent>
       </Card>
     )
@@ -51,10 +51,10 @@ export function DiagnosticsPanel() {
   const data = query.data
 
   return (
-    <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm">
+    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)]">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Activity className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <Activity className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
           Diagnostics
         </CardTitle>
       </CardHeader>
@@ -63,46 +63,46 @@ export function DiagnosticsPanel() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Column 1: System Info */}
-          <div className="flex flex-col gap-1.5 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/10">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <div className="flex flex-col gap-1.5 p-3 rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/30 dark:bg-[var(--muted)]/10">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
               System info
             </span>
             <div className="space-y-1 text-xs">
               <div className="flex justify-between">
-                <span className="text-zinc-500">OS:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">{data.os} ({data.arch})</span>
+                <span className="text-muted-foreground">OS:</span>
+                <span className="font-semibold text-foreground dark:text-foreground">{data.os} ({data.arch})</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Active Theme:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">{data.theme === 'light' ? 'Light' : 'Dark'}</span>
+                <span className="text-muted-foreground">Active Theme:</span>
+                <span className="font-semibold text-foreground dark:text-foreground">{data.theme === 'light' ? 'Light' : 'Dark'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Setup:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">{data.setup_completed ? 'Completed' : 'Pending'}</span>
+                <span className="text-muted-foreground">Setup:</span>
+                <span className="font-semibold text-foreground dark:text-foreground">{data.setup_completed ? 'Completed' : 'Pending'}</span>
               </div>
             </div>
           </div>
 
           {/* Column 2: Paths & Directories */}
-          <div className="flex flex-col gap-1.5 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/10 justify-between">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <div className="flex flex-col gap-1.5 p-3 rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/30 dark:bg-[var(--muted)]/10 justify-between">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
               Paths & Directories
             </span>
             <div className="space-y-1.5 text-[10px] font-mono leading-tight">
               <div className="flex flex-col">
-                <span className="text-zinc-500 text-[8px] font-sans font-bold uppercase">Data directory</span>
-                <span className="truncate text-zinc-700 dark:text-zinc-300" title={data.data_dir}>{data.data_dir}</span>
+                <span className="text-muted-foreground text-[8px] font-sans font-bold uppercase">Data directory</span>
+                <span className="truncate text-foreground dark:text-foreground" title={data.data_dir}>{data.data_dir}</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-zinc-500 text-[8px] font-sans font-bold uppercase">Config file</span>
-                <span className="truncate text-zinc-700 dark:text-zinc-300" title={data.config_path}>{data.config_path}</span>
+                <span className="text-muted-foreground text-[8px] font-sans font-bold uppercase">Config file</span>
+                <span className="truncate text-foreground dark:text-foreground" title={data.config_path}>{data.config_path}</span>
               </div>
             </div>
           </div>
 
           {/* Column 3: Binary Versions */}
-          <div className="flex flex-col gap-1.5 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/10">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <div className="flex flex-col gap-1.5 p-3 rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/30 dark:bg-[var(--muted)]/10">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
               Binary versions
             </span>
             <div className="space-y-1 text-xs">
@@ -117,8 +117,8 @@ export function DiagnosticsPanel() {
                 }
                 return (
                   <div key={key} className="flex justify-between font-mono text-[10px]">
-                    <span className="capitalize text-zinc-500 font-sans">{key}:</span>
-                    <span className="font-semibold text-zinc-700 dark:text-zinc-300">{display}</span>
+                    <span className="capitalize text-muted-foreground font-sans">{key}:</span>
+                    <span className="font-semibold text-foreground dark:text-foreground">{display}</span>
                   </div>
                 )
               })}
@@ -126,8 +126,8 @@ export function DiagnosticsPanel() {
           </div>
 
           {/* Column 4: Capabilities */}
-          <div className="flex flex-col gap-1.5 p-3 rounded-xl border border-zinc-150 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/10">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+          <div className="flex flex-col gap-1.5 p-3 rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/30 dark:bg-[var(--muted)]/10">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground">
               Capabilities
             </span>
             <div className="flex flex-wrap gap-1 mt-0.5">
@@ -140,7 +140,7 @@ export function DiagnosticsPanel() {
                   <Badge
                     key={key}
                     variant="default"
-                    className="text-[9px] px-1.5 py-0 rounded bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-0 font-semibold"
+                    className="text-[9px] px-1.5 py-0 rounded bg-[var(--success)]/10 text-[var(--success)] dark:bg-[var(--success)]/20 dark:text-[var(--success)] border-0 font-semibold"
                   >
                     {cleanKey}
                   </Badge>

@@ -30,7 +30,7 @@ export function SettingsPanel({
   return (
     <div className="space-y-4">
       {/* Clipboard Card */}
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 rounded-2xl shadow-sm p-4">
+      <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 rounded-2xl shadow-[var(--shadow-card)] p-4">
         <h3 className="mb-0.5 text-xs font-bold text-foreground">Clipboard Sync</h3>
         <p className="mb-3.5 text-[10px] text-muted-foreground leading-relaxed">
           Two-way clipboard synchronization between host and device.
@@ -43,7 +43,7 @@ export function SettingsPanel({
               value={clipboardDraft}
               onChange={(e) => setClipboardDraft(e.target.value)}
               placeholder="Type text to send to device..."
-              className="h-9 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 focus-visible:ring-1 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-700 text-xs pl-3.5 pr-20"
+              className="h-9 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/60 focus-visible:ring-1 focus-visible:ring-muted-foreground dark:focus-visible:ring-muted-foreground text-xs pl-3.5 pr-20"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && clipboardDraft && isConnected) {
                   onPushClipboard(clipboardDraft)
@@ -70,16 +70,16 @@ export function SettingsPanel({
             variant="outline"
             onClick={onPullClipboard}
             disabled={!isConnected}
-            className="w-full rounded-full border border-zinc-200 dark:border-zinc-800 bg-white hover:bg-zinc-50 dark:bg-zinc-950 dark:hover:bg-zinc-900 text-xs font-semibold h-9 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card hover:bg-[var(--muted)]/50 dark:bg-[var(--muted)] dark:hover:bg-[var(--muted)]/80 text-xs font-semibold h-9 transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
-            <ClipboardCopy className="h-3.5 w-3.5 text-zinc-500" />
+            <ClipboardCopy className="h-3.5 w-3.5 text-muted-foreground" />
             Pull Device Clipboard
           </Button>
         </div>
       </Card>
 
       {/* Encoders Card */}
-      <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 rounded-2xl shadow-sm p-4">
+      <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 rounded-2xl shadow-[var(--shadow-card)] p-4">
         <div className="mb-3.5 flex items-center justify-between">
           <div>
             <h3 className="text-xs font-bold text-foreground">Available Encoders</h3>
@@ -93,10 +93,10 @@ export function SettingsPanel({
             variant="outline"
             onClick={onRefreshEncoder}
             disabled={isFetchingEncoder || !isConnected}
-            className="h-8 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-xs font-semibold px-3 cursor-pointer flex items-center"
+            className="h-8 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)] text-xs font-semibold px-3 cursor-pointer flex items-center"
           >
             <RefreshCw
-              className={`h-3 w-3 mr-1.5 text-zinc-500 ${isFetchingEncoder ? 'animate-spin' : ''}`}
+              className={`h-3 w-3 mr-1.5 text-muted-foreground ${isFetchingEncoder ? 'animate-spin' : ''}`}
             />
             Refresh
           </Button>

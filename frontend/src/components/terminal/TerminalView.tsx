@@ -25,7 +25,7 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
     <div
       ref={containerRef}
       className={cn(
-        'h-full w-full overflow-auto bg-white dark:bg-[#0a0b10] px-5 py-4 font-mono text-xs leading-5 text-zinc-700 dark:text-zinc-300 perf-scroll select-text selection:bg-primary/20 dark:selection:bg-primary/30 selection:text-zinc-900 dark:selection:text-white',
+        'h-full w-full overflow-auto bg-white dark:bg-[var(--terminal-bg)] px-5 py-4 font-mono text-xs leading-5 text-zinc-700 dark:text-zinc-300 perf-scroll select-text selection:bg-primary/20 dark:selection:bg-primary/30 selection:text-zinc-900 dark:selection:text-white',
         className,
       )}
     >
@@ -46,7 +46,7 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
                   key={idx} 
                   className={cn("font-mono leading-5", showSpacer && "mt-4")}
                 >
-                  <span className="text-blue-600 dark:text-sky-400 font-semibold select-none">$</span>
+                  <span className="text-[var(--logcat-info)] dark:text-[var(--logcat-info)] font-semibold select-none">$</span>
                   <span className="text-zinc-900 dark:text-zinc-100 font-semibold">{cmdPart}</span>
                 </div>
               )
@@ -61,7 +61,7 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
               lowerLine.includes('err:')
             ) {
               return (
-                <div key={idx} className="font-mono leading-5 text-rose-600 dark:text-rose-400 font-semibold whitespace-pre-wrap break-all">
+                <div key={idx} className="font-mono leading-5 text-[var(--logcat-error)] dark:text-[var(--logcat-error)] font-semibold whitespace-pre-wrap break-all">
                   {line}
                 </div>
               )
@@ -74,7 +74,7 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
               trimmed.startsWith('Rebooting')
             ) {
               return (
-                <div key={idx} className="font-mono leading-5 text-amber-700 dark:text-amber-400 font-semibold whitespace-pre-wrap break-words">
+                <div key={idx} className="font-mono leading-5 text-[var(--logcat-warn)] dark:text-[var(--logcat-warn)] font-semibold whitespace-pre-wrap break-words">
                   {line}
                 </div>
               )

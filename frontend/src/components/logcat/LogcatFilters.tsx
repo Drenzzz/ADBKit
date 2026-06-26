@@ -15,20 +15,20 @@ const LEVELS: { value: LogcatLevel; label: string }[] = [
 
 const LEVEL_BADGE_COLORS: Record<LogcatLevel, string> = {
   V: 'border-muted-foreground/30 text-muted-foreground hover:bg-muted-foreground/10',
-  D: 'border-blue-400/30 text-blue-400 hover:bg-blue-400/10',
-  I: 'border-green-400/30 text-green-400 hover:bg-green-400/10',
-  W: 'border-yellow-400/30 text-yellow-400 hover:bg-yellow-400/10',
-  E: 'border-red-400/30 text-red-400 hover:bg-red-400/10',
-  F: 'border-red-400/40 text-red-400 font-bold hover:bg-red-400/20',
+  D: 'border-[var(--logcat-debug)]/30 text-[var(--logcat-debug)] hover:bg-[var(--logcat-debug)]/10',
+  I: 'border-[var(--logcat-info)]/30 text-[var(--logcat-info)] hover:bg-[var(--logcat-info)]/10',
+  W: 'border-[var(--logcat-warn)]/30 text-[var(--logcat-warn)] hover:bg-[var(--logcat-warn)]/10',
+  E: 'border-[var(--logcat-error)]/30 text-[var(--logcat-error)] hover:bg-[var(--logcat-error)]/10',
+  F: 'border-[var(--logcat-fatal)]/40 text-[var(--logcat-fatal)] font-bold hover:bg-[var(--logcat-fatal)]/20',
 }
 
 const LEVEL_ACTIVE_BG: Record<LogcatLevel, string> = {
   V: 'bg-muted-foreground/20',
-  D: 'bg-blue-400/20',
-  I: 'bg-green-400/20',
-  W: 'bg-yellow-400/20',
-  E: 'bg-red-400/20',
-  F: 'bg-red-400/30',
+  D: 'bg-[var(--logcat-debug)]/20',
+  I: 'bg-[var(--logcat-info)]/20',
+  W: 'bg-[var(--logcat-warn)]/20',
+  E: 'bg-[var(--logcat-error)]/20',
+  F: 'bg-[var(--logcat-error)]/30',
 }
 
 export function LogcatFilters() {

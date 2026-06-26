@@ -4,20 +4,20 @@ import type { LogcatEntry as LogcatEntryType } from '@/lib/types'
 
 const LEVEL_COLORS: Record<string, string> = {
   V: 'text-muted-foreground',
-  D: 'text-blue-400',
-  I: 'text-green-400',
-  W: 'text-yellow-400',
-  E: 'text-red-400',
-  F: 'text-red-400 font-bold',
+  D: 'text-[var(--logcat-debug)]',
+  I: 'text-[var(--logcat-info)]',
+  W: 'text-[var(--logcat-warn)]',
+  E: 'text-[var(--logcat-error)]',
+  F: 'text-[var(--logcat-fatal)] font-bold',
 }
 
 const LEVEL_BG: Record<string, string> = {
   V: 'bg-muted-foreground/10',
-  D: 'bg-blue-400/10',
-  I: 'bg-green-400/10',
-  W: 'bg-yellow-400/10',
-  E: 'bg-red-400/10',
-  F: 'bg-red-400/20',
+  D: 'bg-[var(--logcat-debug)]/10',
+  I: 'bg-[var(--logcat-info)]/10',
+  W: 'bg-[var(--logcat-warn)]/10',
+  E: 'bg-[var(--logcat-error)]/10',
+  F: 'bg-[var(--logcat-error)]/20',
 }
 
 interface LogcatEntryProps {

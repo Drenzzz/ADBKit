@@ -83,7 +83,7 @@ export function CommandHistory({ onReExecute }: CommandHistoryProps) {
   }
 
   return (
-    <div className="flex h-full flex-col bg-[#0a0b10]/95 backdrop-blur-md text-zinc-300">
+    <div className="flex h-full flex-col bg-[var(--terminal-bg)]/95 backdrop-blur-md text-zinc-300">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-zinc-800/80 px-4 py-3">
         <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export function CommandHistory({ onReExecute }: CommandHistoryProps) {
       </div>
 
       {/* Filter Input */}
-      <div className="border-b border-zinc-800/80 px-4 py-2 bg-zinc-950/20">
+      <div className="border-b border-zinc-800/80 px-4 py-2 bg-muted/20">
         <Input
           type="text"
           value={searchTerm}
@@ -133,7 +133,7 @@ export function CommandHistory({ onReExecute }: CommandHistoryProps) {
             {groups.map((group, groupIndex) => (
               <div key={`${group.key}-${groupIndex}`} className="mb-2">
                 {/* Session Header */}
-                <div className="sticky top-0 z-10 flex items-center gap-1.5 bg-[#12131a]/90 px-4 py-1 border-b border-zinc-900/40 backdrop-blur-sm">
+                <div className="sticky top-0 z-10 flex items-center gap-1.5 bg-[var(--terminal-surface)]/90 px-4 py-1 border-b border-zinc-900/40 backdrop-blur-sm">
                   <span className="text-[10px] font-mono font-medium text-zinc-400 truncate max-w-[130px]">
                     {group.serial}
                   </span>
@@ -168,7 +168,7 @@ export function CommandHistory({ onReExecute }: CommandHistoryProps) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-5 w-5 p-0 rounded-full text-zinc-500 hover:text-rose-400 hover:bg-zinc-800"
+                          className="h-5 w-5 p-0 rounded-full text-zinc-500 hover:text-[var(--destructive)] hover:bg-zinc-800"
                           onClick={() => removeHistoryEntry(entry.id)}
                           title="Remove entry"
                         >

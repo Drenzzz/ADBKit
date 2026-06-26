@@ -85,10 +85,10 @@ export function BinaryManager() {
   }
 
   return (
-    <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0a0b10]/40 rounded-2xl shadow-sm h-full flex flex-col justify-between">
+    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)] h-full flex flex-col justify-between">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Binary className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+          <Binary className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
           Binaries
         </CardTitle>
       </CardHeader>
@@ -101,7 +101,7 @@ export function BinaryManager() {
             <Skeleton className="h-10 w-full rounded-xl" />
           </div>
         ) : (
-          <div className="divide-y divide-zinc-150/40 dark:divide-zinc-800/40">
+          <div className="divide-y divide-[var(--border)]/40 dark:divide-[var(--border)]/40">
             {BINARY_NAMES.map(({ key, displayName, optional }, index) => (
               <BinaryModuleCard
                 key={key}
