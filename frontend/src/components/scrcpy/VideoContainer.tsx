@@ -49,7 +49,7 @@ export function VideoContainer({
           {/* Wave ring 2 */}
           <span className="absolute inline-flex h-12 w-12 animate-pulse rounded-full bg-primary/10 opacity-50" />
           
-          <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 text-primary shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-primary/20 bg-primary/5 text-primary">
             <MonitorPlay className="h-5 w-5 text-primary animate-pulse" />
           </div>
         </div>
