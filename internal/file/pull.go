@@ -39,7 +39,7 @@ func (s *Service) PullFile(ctx context.Context, remotePath string, localPath str
 	var cmdErr error
 	for attempt := 1; attempt <= transferRetries; attempt++ {
 		result, cmdErr = core.RunCommandStreaming(transferCtx, core.StreamingExecRequest{
-			Command: core.BinaryNameAdb,
+			Command: s.getBinPath().Adb,
 			Args:    []string{"-s", serial, "pull", "-a", normalizedRemotePath, trimmedLocalPath},
 			OnStderrLine: func(line string) {
 				if m := adbProgressPattern.FindStringSubmatch(line); len(m) > 1 {

@@ -28,6 +28,7 @@ var adbProgressPattern = regexp.MustCompile(`\[\s*(\d+)%\]\s*(.*)`)
 type Service struct {
 	wailsCtx            context.Context
 	resolveActiveSerial func(context.Context) (string, error)
+	getBinPath          func() core.BinaryPaths
 
 	mu         sync.Mutex
 	cancelFunc context.CancelFunc
@@ -36,10 +37,12 @@ type Service struct {
 func NewService(
 	wailsCtx context.Context,
 	resolveActiveSerial func(context.Context) (string, error),
+	getBinPath func() core.BinaryPaths,
 ) *Service {
 	return &Service{
 		wailsCtx:            wailsCtx,
 		resolveActiveSerial: resolveActiveSerial,
+		getBinPath:          getBinPath,
 	}
 }
 

@@ -22,15 +22,18 @@ const (
 type Service struct {
 	resolveActiveSerial func(context.Context) (string, error)
 	selectSaveFile      func(string) (string, error)
+	getBinPath          func() core.BinaryPaths
 }
 
 func NewService(
 	resolveActiveSerial func(context.Context) (string, error),
 	selectSaveFile func(string) (string, error),
+	getBinPath func() core.BinaryPaths,
 ) *Service {
 	return &Service{
 		resolveActiveSerial: resolveActiveSerial,
 		selectSaveFile:      selectSaveFile,
+		getBinPath:          getBinPath,
 	}
 }
 
@@ -62,7 +65,7 @@ func (s *Service) InstallPackage(ctx context.Context, filePath string) (string, 
 	defer cancel()
 
 	result, err := core.RunCommand(installCtx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "install", "-r", trimmedPath},
 		Timeout: installPackageTimeout,
 	})
@@ -93,7 +96,7 @@ func (s *Service) LaunchPackage(ctx context.Context, packageName string) (string
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args: []string{
 			"-s", serial, "shell", "monkey",
 			"-p", trimmedName,
@@ -124,7 +127,7 @@ func (s *Service) ForceStopPackage(ctx context.Context, packageName string) (str
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "am", "force-stop", trimmedName},
 		Timeout: 10 * time.Second,
 	})
@@ -150,7 +153,7 @@ func (s *Service) ClearPackageData(ctx context.Context, packageName string) (str
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "pm", "clear", trimmedName},
 		Timeout: 30 * time.Second,
 	})

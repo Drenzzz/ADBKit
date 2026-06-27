@@ -19,7 +19,7 @@ func (s *Service) ListFiles(ctx context.Context, remotePath string, showHidden b
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "ls", "-lAL", quoteShellArg(normalizedPath)},
 		Timeout: 15 * time.Second,
 	})
@@ -50,7 +50,7 @@ func (s *Service) GetDirectorySize(ctx context.Context, remotePath string) (stri
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "du", "-sh", quoteShellArg(normalizedPath)},
 		Timeout: 30 * time.Second,
 	})
@@ -71,7 +71,7 @@ func (s *Service) GetStorageInfo(ctx context.Context) (StorageInfo, error) {
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "df", "-k", "/sdcard"},
 		Timeout: 10 * time.Second,
 	})

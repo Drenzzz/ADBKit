@@ -24,7 +24,7 @@ func (s *Service) GetPackageDetails(ctx context.Context, packageName string) (De
 	}
 
 	infoResult, _ := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "dumpsys", "package", trimmedName},
 		Timeout: packageDetailsTimeout,
 	})
@@ -34,7 +34,7 @@ func (s *Service) GetPackageDetails(ctx context.Context, packageName string) (De
 	}
 
 	pathResult, _ := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "pm", "path", trimmedName},
 		Timeout: packageDetailsTimeout,
 	})
@@ -42,7 +42,7 @@ func (s *Service) GetPackageDetails(ctx context.Context, packageName string) (De
 		remotePath, parseErr := parsePackagePathOutput(pathResult.Stdout)
 		if parseErr == nil {
 			apkSizeResult, _ := core.RunCommand(ctx, core.ExecRequest{
-				Command: core.BinaryNameAdb,
+				Command: s.getBinPath().Adb,
 				Args:    []string{"-s", serial, "shell", "stat", "-c", "%s", remotePath},
 				Timeout: packageDetailsTimeout,
 			})
@@ -54,7 +54,7 @@ func (s *Service) GetPackageDetails(ctx context.Context, packageName string) (De
 
 	if details.DataSizeBytes < 0 {
 		dataSizeResult, _ := core.RunCommand(ctx, core.ExecRequest{
-			Command: core.BinaryNameAdb,
+			Command: s.getBinPath().Adb,
 			Args:    []string{"-s", serial, "shell", "du", "-s", fmt.Sprintf("/data/data/%s", trimmedName)},
 			Timeout: packageDetailsTimeout,
 		})
@@ -65,7 +65,7 @@ func (s *Service) GetPackageDetails(ctx context.Context, packageName string) (De
 
 	if details.DataSizeBytes < 0 {
 		dataSizeResult, _ := core.RunCommand(ctx, core.ExecRequest{
-			Command: core.BinaryNameAdb,
+			Command: s.getBinPath().Adb,
 			Args:    []string{"-s", serial, "shell", "du", "-s", fmt.Sprintf("/data/user/0/%s", trimmedName)},
 			Timeout: packageDetailsTimeout,
 		})

@@ -16,15 +16,17 @@ type monitorSnapshot struct {
 }
 
 type MonitorService struct {
-	dataDir string
-	mu      sync.Mutex
-	prev    map[string]monitorSnapshot
+	dataDir    string
+	getBinPath func() core.BinaryPaths
+	mu         sync.Mutex
+	prev       map[string]monitorSnapshot
 }
 
-func NewMonitorService(dataDir string) *MonitorService {
+func NewMonitorService(dataDir string, getBinPath func() core.BinaryPaths) *MonitorService {
 	return &MonitorService{
-		dataDir: dataDir,
-		prev:    make(map[string]monitorSnapshot),
+		dataDir:    dataDir,
+		getBinPath: getBinPath,
+		prev:       make(map[string]monitorSnapshot),
 	}
 }
 
@@ -112,7 +114,7 @@ type cpuStat struct {
 
 func (s *MonitorService) readCPUStat(ctx context.Context, serial string) (cpuStat, bool) {
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "cat", "/proc/stat"},
 		Timeout: 5 * time.Second,
 	})
@@ -151,7 +153,7 @@ func (s *MonitorService) readCPUStat(ctx context.Context, serial string) (cpuSta
 
 func (s *MonitorService) fetchRAMUsage(ctx context.Context, serial string) (usagePercent float64, usedBytes int64, totalBytes int64) {
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "cat", "/proc/meminfo"},
 		Timeout: 5 * time.Second,
 	})
@@ -197,7 +199,7 @@ func (s *MonitorService) fetchRAMUsage(ctx context.Context, serial string) (usag
 
 func (s *MonitorService) fetchNetworkBytes(ctx context.Context, serial string) (rxBytes int64, txBytes int64) {
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "cat", "/proc/net/dev"},
 		Timeout: 5 * time.Second,
 	})
@@ -252,7 +254,7 @@ func isMeteredInterface(iface string) bool {
 
 func (s *MonitorService) fetchBattery(ctx context.Context, serial string) (level int, temperatureC float64) {
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "dumpsys", "battery"},
 		Timeout: 5 * time.Second,
 	})
@@ -281,7 +283,7 @@ func (s *MonitorService) fetchBattery(ctx context.Context, serial string) (level
 
 func (s *MonitorService) fetchStorage(ctx context.Context, serial string) (usedBytes int64, totalBytes int64) {
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "df", "/data"},
 		Timeout: 5 * time.Second,
 	})
@@ -311,7 +313,7 @@ func (s *MonitorService) fetchStorage(ctx context.Context, serial string) (usedB
 
 func (s *MonitorService) fetchUptime(ctx context.Context, serial string) int64 {
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "cat", "/proc/uptime"},
 		Timeout: 5 * time.Second,
 	})

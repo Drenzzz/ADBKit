@@ -20,7 +20,7 @@ func (s *Service) UninstallPackage(ctx context.Context, packageName string) (str
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "pm", "uninstall", trimmedName},
 		Timeout: 30 * time.Second,
 	})
@@ -77,7 +77,7 @@ func (s *Service) setPackageEnabledState(ctx context.Context, packageName string
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    commandArgs,
 		Timeout: 15 * time.Second,
 	})

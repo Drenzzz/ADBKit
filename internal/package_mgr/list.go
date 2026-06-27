@@ -102,7 +102,7 @@ func (s *Service) queryPackages(ctx context.Context, filterFlag string, isSystem
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    args,
 		Timeout: 15 * time.Second,
 	})

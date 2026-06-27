@@ -49,7 +49,7 @@ func (s *Service) PushFile(ctx context.Context, localPath string, remotePath str
 	var cmdErr error
 	for attempt := 1; attempt <= transferRetries; attempt++ {
 		result, cmdErr = core.RunCommandStreaming(transferCtx, core.StreamingExecRequest{
-			Command: core.BinaryNameAdb,
+			Command: s.getBinPath().Adb,
 			Args:    []string{"-s", serial, "push", trimmedLocalPath, normalizedRemotePath},
 			OnStderrLine: func(line string) {
 				if m := adbProgressPattern.FindStringSubmatch(line); len(m) > 1 {

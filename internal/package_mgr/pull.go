@@ -24,7 +24,7 @@ func (s *Service) PullPackageApk(ctx context.Context, packageName string) (strin
 	}
 
 	pathResult, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "pm", "path", trimmedName},
 		Timeout: 10 * time.Second,
 	})
@@ -53,7 +53,7 @@ func (s *Service) PullPackageApk(ctx context.Context, packageName string) (strin
 	defer cancel()
 
 	pullResult, err := core.RunCommand(pullCtx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "pull", remotePath, localPath},
 		Timeout: pullPackageTimeout,
 	})

@@ -108,6 +108,10 @@ func (bs *Service) CompleteSetup(cfg *core.AppConfig) (*SetupState, error) {
 	if !state.CanFinish {
 		return nil, core.NewOperationError("complete_setup", "required binaries are not ready", "adb, fastboot, and scrcpy must be ready", false)
 	}
+	// Persist detected binary paths so they survive app restart
+	syncBinaryConfig(cfg, BinaryNameAdb, state.Status.Adb)
+	syncBinaryConfig(cfg, BinaryNameFastboot, state.Status.Fastboot)
+	syncBinaryConfig(cfg, BinaryNameScrcpy, state.Status.Scrcpy)
 	cfg.SetupCompleted = true
 	return bs.GetSetupState(cfg), nil
 }

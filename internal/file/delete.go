@@ -24,7 +24,7 @@ func (s *Service) DeleteFile(ctx context.Context, remotePath string) (string, er
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "rm", "-rf", quoteShellArg(normalizedPath)},
 		Timeout: 30 * time.Second,
 	})
@@ -77,7 +77,7 @@ func (s *Service) CreateDirectory(ctx context.Context, remotePath string) (strin
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "mkdir", "-p", quoteShellArg(normalizedPath)},
 		Timeout: 10 * time.Second,
 	})
@@ -114,7 +114,7 @@ func (s *Service) RenameFile(ctx context.Context, oldRemotePath string, newRemot
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", serial, "shell", "mv", quoteShellArg(normalizedOldPath), quoteShellArg(normalizedNewPath)},
 		Timeout: 10 * time.Second,
 	})

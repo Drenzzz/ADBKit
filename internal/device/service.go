@@ -7,11 +7,12 @@ import (
 )
 
 type Service struct {
-	dataDir string
+	dataDir    string
+	getBinPath func() core.BinaryPaths
 }
 
-func NewService(dataDir string) *Service {
-	return &Service{dataDir: dataDir}
+func NewService(dataDir string, getBinPath func() core.BinaryPaths) *Service {
+	return &Service{dataDir: dataDir, getBinPath: getBinPath}
 }
 
 // ListDevices menggabungkan device ADB dan fastboot. Fastboot sering tidak

@@ -26,7 +26,7 @@ func (s *Service) RebootDevice(ctx context.Context, serial string, mode string) 
 			args = append(args, mode)
 		}
 		result, err := core.RunCommand(ctx, core.ExecRequest{
-			Command: core.BinaryNameAdb,
+			Command: s.getBinPath().Adb,
 			Args:    args,
 			Timeout: 10e9,
 		})
@@ -44,7 +44,7 @@ func (s *Service) RebootDevice(ctx context.Context, serial string, mode string) 
 			args = append(args, mode)
 		}
 		result, err := core.RunCommand(ctx, core.ExecRequest{
-			Command: core.BinaryNameFastboot,
+			Command: s.getBinPath().Fastboot,
 			Args:    args,
 			Timeout: 10e9,
 		})

@@ -75,12 +75,13 @@ func (a *App) startup(ctx context.Context) {
 	a.auditLog = al
 
 	a.binSvc = binary.NewService(a.dataDir)
-	a.devSvc = device.NewService(a.dataDir)
-	a.wireSvc = device.NewWirelessService(a.dataDir)
-	a.monSvc = device.NewMonitorService(a.dataDir)
+	getBinPath := core.GetBinaryPaths(a.cfg)
+	a.devSvc = device.NewService(a.dataDir, getBinPath)
+	a.wireSvc = device.NewWirelessService(a.dataDir, getBinPath)
+	a.monSvc = device.NewMonitorService(a.dataDir, getBinPath)
 	a.diaSvc = dialog.New(ctx)
-	a.pkgSvc = packagemgr.NewService(a.resolveActiveSerial, a.diaSvc.SelectSaveFile)
-	a.fileSvc = file.NewService(ctx, a.resolveActiveSerial)
+	a.pkgSvc = packagemgr.NewService(a.resolveActiveSerial, a.diaSvc.SelectSaveFile, getBinPath)
+	a.fileSvc = file.NewService(ctx, a.resolveActiveSerial, getBinPath)
 	a.termSvc = shell.NewTerminalService(ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial)
 	a.logSvc = shell.NewLogcatService(ctx, a.binSvc, a.currentConfig)
 	a.fbSvc = flasher.NewFastbootService(a.binSvc, a.currentConfig, a.resolveActiveSerial)

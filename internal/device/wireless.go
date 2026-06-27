@@ -8,11 +8,12 @@ import (
 )
 
 type WirelessService struct {
-	dataDir string
+	dataDir    string
+	getBinPath func() core.BinaryPaths
 }
 
-func NewWirelessService(dataDir string) *WirelessService {
-	return &WirelessService{dataDir: dataDir}
+func NewWirelessService(dataDir string, getBinPath func() core.BinaryPaths) *WirelessService {
+	return &WirelessService{dataDir: dataDir, getBinPath: getBinPath}
 }
 
 func (s *WirelessService) Connect(ctx context.Context, address string) (string, error) {
@@ -22,7 +23,7 @@ func (s *WirelessService) Connect(ctx context.Context, address string) (string, 
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"connect", address},
 		Timeout: 10e9,
 	})
@@ -51,7 +52,7 @@ func (s *WirelessService) EnableTCPIP(ctx context.Context, serial string, port s
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    []string{"-s", trimmedSerial, "tcpip", trimmedPort},
 		Timeout: 10e9,
 	})
@@ -77,7 +78,7 @@ func (s *WirelessService) Disconnect(ctx context.Context, address string) (strin
 	}
 
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: s.getBinPath().Adb,
 		Args:    args,
 		Timeout: 10e9,
 	})

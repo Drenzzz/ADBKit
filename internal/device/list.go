@@ -9,8 +9,9 @@ import (
 )
 
 func (s *Service) listADBDevices(ctx context.Context) ([]Summary, error) {
+	paths := s.getBinPath()
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: paths.Adb,
 		Args:    []string{"devices", "-l"},
 		Timeout: 5e9,
 	})
@@ -25,8 +26,9 @@ func (s *Service) listADBDevices(ctx context.Context) ([]Summary, error) {
 }
 
 func (s *Service) listFastbootDevices(ctx context.Context) ([]Summary, error) {
+	paths := s.getBinPath()
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameFastboot,
+		Command: paths.Fastboot,
 		Args:    []string{"devices"},
 		Timeout: 5e9,
 	})
@@ -41,8 +43,9 @@ func (s *Service) listFastbootDevices(ctx context.Context) ([]Summary, error) {
 }
 
 func (s *Service) getDeviceProperties(ctx context.Context, serial string) (map[string]string, error) {
+	paths := s.getBinPath()
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: paths.Adb,
 		Args:    []string{"-s", serial, "shell", "getprop"},
 		Timeout: 10e9,
 	})
@@ -53,8 +56,9 @@ func (s *Service) getDeviceProperties(ctx context.Context, serial string) (map[s
 }
 
 func (s *Service) getBatteryLevel(ctx context.Context, serial string) (string, error) {
+	paths := s.getBinPath()
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: paths.Adb,
 		Args:    []string{"-s", serial, "shell", "dumpsys", "battery"},
 		Timeout: 5e9,
 	})
@@ -65,8 +69,9 @@ func (s *Service) getBatteryLevel(ctx context.Context, serial string) (string, e
 }
 
 func (s *Service) getStorageInfo(ctx context.Context, serial string) (string, error) {
+	paths := s.getBinPath()
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: paths.Adb,
 		Args:    []string{"-s", serial, "shell", "df", "/data"},
 		Timeout: 5e9,
 	})
@@ -77,8 +82,9 @@ func (s *Service) getStorageInfo(ctx context.Context, serial string) (string, er
 }
 
 func (s *Service) getRAMTotal(ctx context.Context, serial string) (string, error) {
+	paths := s.getBinPath()
 	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: core.BinaryNameAdb,
+		Command: paths.Adb,
 		Args:    []string{"-s", serial, "shell", "cat", "/proc/meminfo"},
 		Timeout: 5e9,
 	})

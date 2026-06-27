@@ -93,3 +93,30 @@ func SaveConfig(dataDir string, cfg *AppConfig) error {
 	}
 	return WriteFileAtomicWithMode(path, data, 0o600)
 }
+
+// BinaryPaths holds resolved binary paths for command execution.
+type BinaryPaths struct {
+	Adb      string
+	Fastboot string
+	Scrcpy   string
+}
+
+// GetBinaryPaths returns a function that resolves binary paths from the current config.
+// Empty config paths fall back to bare names so exec.LookPath handles discovery.
+func GetBinaryPaths(cfg *AppConfig) func() BinaryPaths {
+	return func() BinaryPaths {
+		adb := cfg.AdbPath
+		if adb == "" {
+			adb = BinaryNameAdb
+		}
+		fastboot := cfg.FastbootPath
+		if fastboot == "" {
+			fastboot = BinaryNameFastboot
+		}
+		scrcpy := cfg.ScrcpyPath
+		if scrcpy == "" {
+			scrcpy = BinaryNameScrcpy
+		}
+		return BinaryPaths{Adb: adb, Fastboot: fastboot, Scrcpy: scrcpy}
+	}
+}
