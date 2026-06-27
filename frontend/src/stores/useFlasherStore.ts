@@ -45,7 +45,7 @@ function createPlanSteps(plan: FlashPlan): FlashPlanStepStatus[] {
   }))
 }
 
-export const useFlasherStore = create<FlasherState & FlasherActions>()(immer((set, get) => ({
+export const useFlasherStore = create<FlasherState & FlasherActions>()(immer((set) => ({
   ...initialState,
 
   setFastbootDevices: (devices) => set({ fastbootDevices: devices }),
