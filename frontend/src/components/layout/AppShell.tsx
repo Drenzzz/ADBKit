@@ -70,8 +70,8 @@ export function AppShell() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-      <main className="flex-1 overflow-y-auto pb-16">
-        <div className="mx-auto h-full w-full max-w-screen-2xl px-6 py-5">
+      <main className="flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 min-h-0 w-full flex flex-col p-6 pb-24 overflow-y-auto">
           <Outlet />
         </div>
       </main>
