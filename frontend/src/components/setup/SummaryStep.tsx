@@ -1,22 +1,20 @@
 import { useState } from 'react'
-import { Check, ArrowLeft, AlertTriangle } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { completeSetup } from '@/services/binaryService'
 import type { BinaryInfo } from '@/lib/types'
 
-function BinarySummary({ label, info }: { label: string; info?: BinaryInfo }) {
-  const ready = info?.status === 'ready'
+function BinarySummaryRow({ label, info }: { label: string; info?: BinaryInfo }) {
   return (
-    <div className="flex items-center justify-between rounded-md border border-border/50 px-3 py-2">
-      <div className="flex items-center gap-2">
-        {ready && <Check className="h-3.5 w-3.5 text-green-500" />}
-        <span className="text-sm font-medium">{label}</span>
+    <div className="flex flex-col gap-1 py-1 px-2 hover:bg-muted/10 rounded transition-colors duration-150">
+      <div className="flex items-center justify-between text-[11px]">
+        <span className="font-semibold text-foreground">{label}</span>
+        <span className="font-semibold text-success">{info?.version ?? 'ready'}</span>
       </div>
-      <Badge variant={ready ? 'default' : 'destructive'} className="text-[10px]">
-        {ready ? info?.version ?? 'ready' : 'not found'}
-      </Badge>
+      <div className="text-[10px] text-muted-foreground/60 font-mono truncate select-all">
+        {info?.path ?? 'not configured'}
+      </div>
     </div>
   )
 }
@@ -42,52 +40,63 @@ export function SummaryStep() {
 
   if (done) {
     return (
-      <div className="flex flex-col items-center gap-4 text-center">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
-          <Check className="h-5 w-5 text-green-500" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold">Setup complete</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            ADBKit is ready to use.
+      <div className="flex flex-col gap-5 text-left w-full">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-full bg-success/15 flex items-center justify-center text-success">
+              <Check className="h-3.5 w-3.5" />
+            </div>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">Setup Complete</h2>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
+            ADBKit environment has been successfully configured. You can now access the full suite.
           </p>
         </div>
-        <Button onClick={() => window.location.reload()}>Continue to ADBKit</Button>
+
+        <div className="border-t border-border/10 pt-5 mt-2 flex justify-end">
+          <Button onClick={() => window.location.reload()} size="sm" className="px-5">
+            Launch ADBKit
+          </Button>
+        </div>
       </div>
     )
   }
 
-  const scrcpyMissing = setupState?.status?.scrcpy?.status !== 'ready'
-
   return (
-    <div className="flex flex-col gap-5">
-      <div className="text-center">
-        <h2 className="text-lg font-semibold">Summary</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          All required binaries are configured.
+    <div className="flex flex-col gap-6 text-left w-full">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-xl font-semibold tracking-tight text-foreground">Configuration Summary</h2>
+        <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
+          Please review the final local paths and versions of your developer tools before finalizing.
         </p>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <BinarySummary label="ADB" info={setupState?.status?.adb} />
-        <BinarySummary label="Fastboot" info={setupState?.status?.fastboot} />
-        <BinarySummary label="Scrcpy" info={setupState?.status?.scrcpy} />
+      <div className="rounded-xl border border-border/50 bg-[#0c0d10] p-4 flex flex-col gap-3 font-mono">
+        <div className="text-[10px] text-muted-foreground/45 border-b border-border/15 pb-2 mb-1 uppercase tracking-wider select-none">
+          Local Environment Diagnostics
+        </div>
+        <div className="flex flex-col gap-2.5 divide-y divide-border/10">
+          <BinarySummaryRow label="ADB" info={setupState?.status?.adb} />
+          <div className="pt-2">
+            <BinarySummaryRow label="Fastboot" info={setupState?.status?.fastboot} />
+          </div>
+          <div className="pt-2">
+            <BinarySummaryRow label="Scrcpy" info={setupState?.status?.scrcpy} />
+          </div>
+        </div>
       </div>
 
-      {scrcpyMissing && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-400">
-          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-          <span>scrcpy is missing — go back to the previous step and provide a valid scrcpy binary before finishing setup.</span>
-        </div>
-      )}
-
-      <div className="flex justify-between">
-        <Button variant="ghost" onClick={prevStep} disabled={submitting}>
-          <ArrowLeft className="h-4 w-4" />
+      <div className="flex items-center justify-between border-t border-border/10 pt-4 mt-2">
+        <Button variant="ghost" size="sm" onClick={prevStep} disabled={submitting} className="h-8">
           Back
         </Button>
-        <Button onClick={handleFinish} disabled={submitting || !setupState?.canFinish}>
-          {submitting ? 'Finishing...' : 'Finish setup'}
+        <Button
+          onClick={handleFinish}
+          disabled={submitting || !setupState?.canFinish}
+          size="sm"
+          className="px-5 h-8 font-medium"
+        >
+          {submitting ? 'Writing Config...' : 'Finish Setup'}
         </Button>
       </div>
     </div>
