@@ -101,6 +101,7 @@ func RunCommandWithStdin(ctx context.Context, req ExecRequest, stdin string) (*E
 type StreamingExecRequest struct {
 	Command      string
 	Args         []string
+	Timeout      time.Duration
 	OnStderrLine func(line string)
 }
 
@@ -129,6 +130,12 @@ var errPTYUnsupported = errors.New("pty unsupported on this platform")
 // callback. It prefers a PTY so adb emits interactive progress; on platforms
 // where PTY is unavailable it falls back to dual-pipe streaming.
 func RunCommandStreaming(ctx context.Context, req StreamingExecRequest) (*ExecResult, error) {
+	if req.Timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, req.Timeout)
+		defer cancel()
+	}
+
 	if result, err := runWithPTY(ctx, req.Command, req.Args, req.OnStderrLine); err == nil {
 		return result, nil
 	} else if !errors.Is(err, errPTYUnsupported) {
