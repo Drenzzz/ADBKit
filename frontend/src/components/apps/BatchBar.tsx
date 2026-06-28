@@ -38,7 +38,7 @@ export function BatchBar({
           animate={{ y: 0, x: '-50%', opacity: 1, scale: 1 }}
           exit={{ y: 40, x: '-50%', opacity: 0, scale: 0.96 }}
           transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 28 }}
-          className="fixed bottom-22 left-1/2 z-40 flex items-center gap-2 rounded-full border border-border/80 bg-background/90 px-4 py-2 shadow-[0_16px_40px_rgba(0,0,0,0.5)] backdrop-blur-md shrink-0"
+          className="fixed bottom-22 left-1/2 z-40 flex items-center gap-2 rounded-full border border-border/80 bg-background/90 px-4 py-2 shadow-[var(--shadow-floating)] backdrop-blur-md shrink-0"
         >
           <span className="text-xs font-semibold text-foreground px-2 border-r border-border/40 shrink-0">
             {count} selected
@@ -106,7 +106,7 @@ export function BatchBar({
               onClick={onUninstall}
               disabled={busyAction !== null}
               className={cn(
-                'h-8 rounded-full px-3 text-[11px] font-semibold transition-all',
+                'h-8 rounded-full px-3 text-[11px] font-semibold transition-colors',
                 'bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground border border-destructive/20'
               )}
             >

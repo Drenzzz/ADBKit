@@ -52,7 +52,7 @@ export function PartitionChips({ selected, onSelect, disabled }: PartitionChipsP
               disabled={disabled}
               onClick={() => onSelect(isSelected ? '' : p)}
               className={cn(
-                "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border transition-all duration-200 cursor-pointer outline-none select-none",
+                "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border transition-colors duration-200 cursor-pointer outline-none select-none",
                 isSelected
                   ? "bg-primary border-primary text-primary-foreground shadow-sm scale-[1.03]"
                   : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900",

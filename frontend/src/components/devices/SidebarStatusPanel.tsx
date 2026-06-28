@@ -52,7 +52,7 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
             <div className="h-2 w-full bg-border/50 rounded-full overflow-hidden">
               <div
                 className={cn(
-                  'h-full rounded-full transition-all duration-500',
+                  'h-full rounded-full transition-colors duration-500',
                   batteryPercent > 20 ? 'bg-success' : 'bg-destructive'
                 )}
                 style={{ width: `${batteryPercent}%` }}
@@ -100,7 +100,7 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
             </div>
             <div className="h-2 w-full bg-border/50 rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
+                className="h-full rounded-full bg-primary transition-colors duration-500"
                 style={{ width: `${storagePercent}%` }}
               />
             </div>

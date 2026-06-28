@@ -40,7 +40,7 @@ function CandidatePicker({
               type="button"
               onClick={() => onSelect(candidate.path)}
               className={cn(
-                'flex items-center justify-between rounded-lg border px-3 py-2 text-left transition-all duration-150',
+                'flex items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors duration-150',
                 isSelected
                   ? 'border-primary/45 bg-primary/5 text-foreground'
                   : 'border-border/40 hover:border-border bg-card/40',

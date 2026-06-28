@@ -36,7 +36,7 @@ function TooltipIconButton({
             type="button"
             size="icon"
             variant="ghost"
-            className={`h-8 w-8 rounded-full transition-all active:scale-[0.93] cursor-pointer flex items-center justify-center ${
+            className={`h-8 w-8 rounded-full transition-[colors,transform] active:scale-[0.93] cursor-pointer flex items-center justify-center ${
               variant === 'destructive'
                 ? 'bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white shadow-sm'
                 : 'text-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground hover:bg-[var(--muted)]/60 dark:hover:bg-[var(--muted)]/60'
@@ -64,7 +64,7 @@ export function ControlDock({
 }: ControlDockProps) {
   return (
     <div
-      className={`flex items-center gap-1.5 rounded-full border border-[var(--border)]/50 dark:border-[var(--border)]/50 bg-card/70 dark:bg-[var(--muted)]/70 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md transition-all duration-300 ${
+      className={`flex items-center gap-1.5 rounded-full border border-[var(--border)]/50 dark:border-[var(--border)]/50 bg-card/70 dark:bg-[var(--muted)]/70 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md transition-colors duration-300 ${
         className ?? ''
       }`}
     >
@@ -101,7 +101,7 @@ export function ControlDock({
               type="button"
               size="sm"
               variant="destructive"
-              className="h-8 rounded-full px-4 text-xs font-semibold bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white border-0 shadow-sm active:scale-95 transition-all cursor-pointer"
+              className="h-8 rounded-full px-4 text-xs font-semibold bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white border-0 shadow-sm active:scale-95 transition-[colors,transform] cursor-pointer"
               onClick={onStopSession}
               disabled={!isConnected}
             >

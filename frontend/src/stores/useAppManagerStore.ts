@@ -5,6 +5,7 @@ import type {
   PackageInfo,
   PackageSortOrder,
   PackageStatusFilter,
+  PackageDetails,
 } from '@/lib/types'
 
 interface AppManagerState {
@@ -21,6 +22,7 @@ interface AppManagerState {
   busyBatchAction: PackageBatchAction | null
   error: string | null
   lastUpdatedAt: number | null
+  detailsCache: Map<string, PackageDetails>
 }
 
 interface AppManagerActions {
@@ -40,6 +42,9 @@ interface AppManagerActions {
   setBusyBatchAction: (action: PackageBatchAction | null) => void
   setError: (error: string | null) => void
   setLastUpdatedAt: (timestamp: number | null) => void
+  setDetailsCache: (cache: Map<string, PackageDetails>) => void
+  updateDetails: (packageName: string, details: PackageDetails) => void
+  clearDetailsCache: () => void
   resetFilters: () => void
   reset: () => void
 }
@@ -60,6 +65,7 @@ const initialState: AppManagerState = {
   busyBatchAction: null,
   error: null,
   lastUpdatedAt: null,
+  detailsCache: new Map(),
 }
 
 export const useAppManagerStore = create<AppManagerStore>()((set) => ({
@@ -107,6 +113,14 @@ export const useAppManagerStore = create<AppManagerStore>()((set) => ({
   setBusyBatchAction: (busyBatchAction) => set({ busyBatchAction }),
   setError: (error) => set({ error }),
   setLastUpdatedAt: (lastUpdatedAt) => set({ lastUpdatedAt }),
+  setDetailsCache: (detailsCache) => set({ detailsCache }),
+  updateDetails: (packageName, details) =>
+    set((state) => {
+      const next = new Map(state.detailsCache)
+      next.set(packageName, details)
+      return { detailsCache: next }
+    }),
+  clearDetailsCache: () => set({ detailsCache: new Map() }),
   resetFilters: () =>
     set({
       filter: initialState.filter,

@@ -80,7 +80,7 @@ function SegmentedTabs<T extends string>({
       className="relative inline-flex items-center gap-0.5 rounded-full border border-border/50 bg-muted/20 p-0.5"
     >
       <div
-        className="absolute top-0.5 bottom-0.5 rounded-full bg-background shadow-sm transition-all duration-200 ease-out"
+        className="absolute top-0.5 bottom-0.5 rounded-full bg-background shadow-sm transition-colors duration-200 ease-out"
         style={{ left: indicator.left, width: indicator.width }}
       />
       {tabs.map((tab, idx) => (

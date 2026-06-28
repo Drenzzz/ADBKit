@@ -101,7 +101,7 @@ export function InstallApkDialog({
         if (!isInstalling) onOpenChange(v)
       }}
     >
-      <DialogContent className="sm:max-w-[420px] rounded-2xl border border-border/80 bg-card/95 backdrop-blur-md shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+      <DialogContent className="sm:max-w-[420px] rounded-2xl border border-border/80 bg-card/95 backdrop-blur-md shadow-[var(--shadow-floating)]">
         <DialogHeader>
           <DialogTitle className="text-sm font-semibold tracking-tight uppercase text-muted-foreground/80">Install APK</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1">

@@ -20,7 +20,6 @@ import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useFileExplorerStore } from '@/stores/useFileExplorerStore'
 import type { DeviceSummary, FileEntry, FileSortField, FileSortDirection } from '@/lib/types'
 
-const DIR_SIZE_CONCURRENCY = 2
 
 function getErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback
@@ -119,32 +118,6 @@ export function useFileExplorer() {
     return unsub
   }, [])
 
-  const loadDirSizes = useCallback(
-    async (key: string, nextFiles: FileEntry[], reqId: number) => {
-      const dirs = nextFiles.filter((f) => f.type === 'directory')
-      let cursor = 0
-
-      async function worker() {
-        while (cursor < dirs.length) {
-          const dir = dirs[cursor]
-          cursor += 1
-          if (!dir || requestIdRef.current !== reqId) return
-          try {
-            const size = await getDirectorySize(dir.path)
-            if (requestIdRef.current !== reqId) return
-            store.updateFileSize(dir.path, size, key)
-          } catch {
-            if (requestIdRef.current !== reqId) return
-            store.updateFileSize(dir.path, '--', key)
-          }
-        }
-      }
-
-      const count = Math.min(DIR_SIZE_CONCURRENCY, dirs.length)
-      await Promise.all(Array.from({ length: count }, () => worker()))
-    },
-    [],
-  )
 
   const loadFiles = useCallback(
     async (nextPath: string, opts: { background?: boolean; force?: boolean } = {}) => {
@@ -187,7 +160,7 @@ export function useFileExplorer() {
         store.setCachedFiles(key, nextFiles, now)
         store.clearSelection()
         store.setLastUpdatedAt(now)
-        void loadDirSizes(key, nextFiles, reqId)
+
       } catch (err) {
         if (requestIdRef.current !== reqId) return
         store.setError(getErrorMessage(err, 'Failed to load files'))

@@ -28,7 +28,7 @@ export function FilePicker({
       disabled={disabled}
       type="button"
       className={cn(
-        'flex w-full items-center gap-3 px-3 py-2 text-left rounded-xl border transition-all duration-200 outline-none select-none cursor-pointer',
+        'flex w-full items-center gap-3 px-3 py-2 text-left rounded-xl border transition-colors duration-200 outline-none select-none cursor-pointer',
         hasValue
           ? 'bg-[var(--muted)]/50 dark:bg-[var(--muted)]/30 border-[var(--border)] dark:border-[var(--border)] text-foreground dark:text-foreground shadow-sm'
           : 'bg-[var(--muted)]/20 dark:bg-[var(--muted)]/10 border-dashed border-[var(--border)] dark:border-[var(--border)] text-muted-foreground dark:text-muted-foreground hover:border-[var(--muted-foreground)] dark:hover:border-[var(--muted-foreground)] hover:bg-[var(--muted)]/50 dark:hover:bg-[var(--muted)]/20',

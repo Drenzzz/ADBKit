@@ -164,7 +164,7 @@ export function HeroDeviceCard({
             <div className="h-1.5 w-full bg-border/50 rounded-full overflow-hidden">
               <div
                 className={cn(
-                  'h-full rounded-full transition-all duration-500',
+                  'h-full rounded-full transition-colors duration-500',
                   batteryNum > 20 ? 'bg-success' : 'bg-destructive'
                 )}
                 style={{ width: `${batteryNum}%` }}

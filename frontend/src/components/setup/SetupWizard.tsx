@@ -46,13 +46,13 @@ function SidebarStepper({ current }: { current: SetupWizardStep }) {
             <div
               key={step.key}
               className={cn(
-                'flex items-center gap-3.5 px-3 py-2.5 rounded-lg transition-all duration-200 select-none relative z-10',
+                'flex items-center gap-3.5 px-3 py-2.5 rounded-lg transition-colors duration-200 select-none relative z-10',
                 active ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground/75',
               )}
             >
               <div
                 className={cn(
-                  'h-6 w-6 rounded-full flex items-center justify-center border transition-all duration-200 shadow-sm',
+                  'h-6 w-6 rounded-full flex items-center justify-center border transition-colors duration-200 shadow-sm',
                   active
                     ? 'border-primary bg-primary text-primary-foreground font-semibold'
                     : done

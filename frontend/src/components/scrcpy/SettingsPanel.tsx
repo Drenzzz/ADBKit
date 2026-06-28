@@ -59,7 +59,7 @@ export function SettingsPanel({
                 setClipboardDraft('')
               }}
               disabled={!clipboardDraft || !isConnected}
-              className="absolute right-1 top-1 bottom-1 h-7 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-[10px] px-3 border-0 transition-all active:scale-[0.96]"
+              className="absolute right-1 top-1 bottom-1 h-7 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-[10px] px-3 border-0 transition-[colors,transform] active:scale-[0.96]"
             >
               Push
             </Button>
@@ -70,7 +70,7 @@ export function SettingsPanel({
             variant="outline"
             onClick={onPullClipboard}
             disabled={!isConnected}
-            className="w-full rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card hover:bg-[var(--muted)]/50 dark:bg-[var(--muted)] dark:hover:bg-[var(--muted)]/80 text-xs font-semibold h-9 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card hover:bg-[var(--muted)]/50 dark:bg-[var(--muted)] dark:hover:bg-[var(--muted)]/80 text-xs font-semibold h-9 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
           >
             <ClipboardCopy className="h-3.5 w-3.5 text-muted-foreground" />
             Pull Device Clipboard

@@ -38,12 +38,27 @@ func (s *MonitorService) GetSnapshot(ctx context.Context, serial string) (Perfor
 
 	snap := PerformanceSnapshot{Serial: trimmedSerial}
 
-	snap.CPUUsage = s.fetchCPUUsage(ctx, trimmedSerial)
-	snap.RAMUsage, snap.RAMUsedBytes, snap.RAMTotalBytes = s.fetchRAMUsage(ctx, trimmedSerial)
-	snap.NetworkRxBytes, snap.NetworkTxBytes = s.fetchNetworkBytes(ctx, trimmedSerial)
-	snap.BatteryLevel, snap.BatteryTemperatureC = s.fetchBattery(ctx, trimmedSerial)
-	snap.StorageUsedBytes, snap.StorageTotalBytes = s.fetchStorage(ctx, trimmedSerial)
-	snap.UptimeSeconds = s.fetchUptime(ctx, trimmedSerial)
+	// Combined adb shell command to run all checks in a single subprocess call.
+	// We use ';' to ensure subsequent commands execute even if an earlier command returns an error.
+	cmd := "cat /proc/stat; echo '---CPU---'; sleep 0.25; cat /proc/stat; echo '---MEM---'; cat /proc/meminfo; echo '---NET---'; cat /proc/net/dev; echo '---BATT---'; dumpsys battery; echo '---STOR---'; df /data; echo '---UPTIME---'; cat /proc/uptime"
+
+	result, err := core.RunCommand(ctx, core.ExecRequest{
+		Command: s.getBinPath().Adb,
+		Args:    []string{"-s", trimmedSerial, "shell", cmd},
+		Timeout: 10 * time.Second,
+	})
+	if err != nil {
+		return PerformanceSnapshot{}, core.NewOperationError("get_performance_snapshot", "Failed to run combined performance commands", err.Error(), true)
+	}
+
+	stat1, stat2, mem, net, batt, stor, uptime := parseCombinedOutput(result.Stdout)
+
+	snap.CPUUsage = s.calculateCPUUsage(stat1, stat2)
+	snap.RAMUsage, snap.RAMUsedBytes, snap.RAMTotalBytes = s.parseRAMUsage(mem)
+	snap.NetworkRxBytes, snap.NetworkTxBytes = s.parseNetworkBytes(net)
+	snap.BatteryLevel, snap.BatteryTemperatureC = s.parseBattery(batt)
+	snap.StorageUsedBytes, snap.StorageTotalBytes = s.parseStorage(stor)
+	snap.UptimeSeconds = s.parseUptime(uptime)
 
 	now := time.Now()
 	s.mu.Lock()
@@ -71,22 +86,80 @@ func (s *MonitorService) GetSnapshot(ctx context.Context, serial string) (Perfor
 	return snap, nil
 }
 
-// fetchCPUUsage membaca /proc/stat dua kali dengan jeda singkat lalu menghitung
-// utilisasi dari delta idle terhadap total. Pendekatan ini akurat lintas device
-// dan tidak bergantung pada format output `top` yang berbeda antar toolbox.
-func (s *MonitorService) fetchCPUUsage(ctx context.Context, serial string) float64 {
-	first, ok := s.readCPUStat(ctx, serial)
+// parseCombinedOutput splits combined stdout string by headers into respective command outputs
+func parseCombinedOutput(stdout string) (stat1, stat2, mem, net, batt, stor, uptime string) {
+	idxCPU := strings.Index(stdout, "---CPU---")
+	idxMEM := strings.Index(stdout, "---MEM---")
+	idxNET := strings.Index(stdout, "---NET---")
+	idxBATT := strings.Index(stdout, "---BATT---")
+	idxSTOR := strings.Index(stdout, "---STOR---")
+	idxUPTIME := strings.Index(stdout, "---UPTIME---")
+
+	if idxCPU != -1 {
+		stat1 = stdout[:idxCPU]
+	} else {
+		stat1 = stdout
+	}
+
+	if idxCPU != -1 {
+		start := idxCPU + len("---CPU---")
+		if idxMEM != -1 {
+			stat2 = stdout[start:idxMEM]
+		} else {
+			stat2 = stdout[start:]
+		}
+	}
+
+	if idxMEM != -1 {
+		start := idxMEM + len("---MEM---")
+		if idxNET != -1 {
+			mem = stdout[start:idxNET]
+		} else {
+			mem = stdout[start:]
+		}
+	}
+
+	if idxNET != -1 {
+		start := idxNET + len("---NET---")
+		if idxBATT != -1 {
+			net = stdout[start:idxBATT]
+		} else {
+			net = stdout[start:]
+		}
+	}
+
+	if idxBATT != -1 {
+		start := idxBATT + len("---BATT---")
+		if idxSTOR != -1 {
+			batt = stdout[start:idxSTOR]
+		} else {
+			batt = stdout[start:]
+		}
+	}
+
+	if idxSTOR != -1 {
+		start := idxSTOR + len("---STOR---")
+		if idxUPTIME != -1 {
+			stor = stdout[start:idxUPTIME]
+		} else {
+			stor = stdout[start:]
+		}
+	}
+
+	if idxUPTIME != -1 {
+		uptime = stdout[idxUPTIME+len("---UPTIME---"):]
+	}
+
+	return
+}
+
+func (s *MonitorService) calculateCPUUsage(stat1, stat2 string) float64 {
+	first, ok := s.parseCPUStat(stat1)
 	if !ok {
 		return 0
 	}
 
-	select {
-	case <-ctx.Done():
-		return 0
-	case <-time.After(400 * time.Millisecond):
-	}
-
-	second, ok := s.readCPUStat(ctx, serial)
+	second, ok := s.parseCPUStat(stat2)
 	if !ok {
 		return 0
 	}
@@ -112,17 +185,8 @@ type cpuStat struct {
 	idle  int64
 }
 
-func (s *MonitorService) readCPUStat(ctx context.Context, serial string) (cpuStat, bool) {
-	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: s.getBinPath().Adb,
-		Args:    []string{"-s", serial, "shell", "cat", "/proc/stat"},
-		Timeout: 5 * time.Second,
-	})
-	if err != nil {
-		return cpuStat{}, false
-	}
-
-	for _, rawLine := range strings.Split(result.Stdout, "\n") {
+func (s *MonitorService) parseCPUStat(output string) (cpuStat, bool) {
+	for _, rawLine := range strings.Split(output, "\n") {
 		fields := strings.Fields(strings.TrimSpace(rawLine))
 		if len(fields) < 5 || fields[0] != "cpu" {
 			continue
@@ -151,19 +215,10 @@ func (s *MonitorService) readCPUStat(ctx context.Context, serial string) (cpuSta
 	return cpuStat{}, false
 }
 
-func (s *MonitorService) fetchRAMUsage(ctx context.Context, serial string) (usagePercent float64, usedBytes int64, totalBytes int64) {
-	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: s.getBinPath().Adb,
-		Args:    []string{"-s", serial, "shell", "cat", "/proc/meminfo"},
-		Timeout: 5 * time.Second,
-	})
-	if err != nil {
-		return 0, 0, 0
-	}
-
+func (s *MonitorService) parseRAMUsage(output string) (usagePercent float64, usedBytes int64, totalBytes int64) {
 	var memTotal, memAvailable float64
 
-	for _, rawLine := range strings.Split(result.Stdout, "\n") {
+	for _, rawLine := range strings.Split(output, "\n") {
 		line := strings.TrimSpace(rawLine)
 		fields := strings.Fields(line)
 		if len(fields) < 2 {
@@ -197,17 +252,8 @@ func (s *MonitorService) fetchRAMUsage(ctx context.Context, serial string) (usag
 	return usagePercent, usedBytes, totalBytes
 }
 
-func (s *MonitorService) fetchNetworkBytes(ctx context.Context, serial string) (rxBytes int64, txBytes int64) {
-	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: s.getBinPath().Adb,
-		Args:    []string{"-s", serial, "shell", "cat", "/proc/net/dev"},
-		Timeout: 5 * time.Second,
-	})
-	if err != nil {
-		return 0, 0
-	}
-
-	for _, rawLine := range strings.Split(result.Stdout, "\n") {
+func (s *MonitorService) parseNetworkBytes(output string) (rxBytes int64, txBytes int64) {
+	for _, rawLine := range strings.Split(output, "\n") {
 		line := strings.TrimSpace(rawLine)
 		colonIdx := strings.Index(line, ":")
 		if colonIdx < 0 {
@@ -252,17 +298,8 @@ func isMeteredInterface(iface string) bool {
 	return false
 }
 
-func (s *MonitorService) fetchBattery(ctx context.Context, serial string) (level int, temperatureC float64) {
-	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: s.getBinPath().Adb,
-		Args:    []string{"-s", serial, "shell", "dumpsys", "battery"},
-		Timeout: 5 * time.Second,
-	})
-	if err != nil {
-		return 0, 0
-	}
-
-	for _, rawLine := range strings.Split(result.Stdout, "\n") {
+func (s *MonitorService) parseBattery(output string) (level int, temperatureC float64) {
+	for _, rawLine := range strings.Split(output, "\n") {
 		line := strings.TrimSpace(rawLine)
 		if strings.HasPrefix(line, "level:") {
 			val, parseErr := strconv.Atoi(strings.TrimSpace(strings.TrimPrefix(line, "level:")))
@@ -281,17 +318,8 @@ func (s *MonitorService) fetchBattery(ctx context.Context, serial string) (level
 	return level, temperatureC
 }
 
-func (s *MonitorService) fetchStorage(ctx context.Context, serial string) (usedBytes int64, totalBytes int64) {
-	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: s.getBinPath().Adb,
-		Args:    []string{"-s", serial, "shell", "df", "/data"},
-		Timeout: 5 * time.Second,
-	})
-	if err != nil {
-		return 0, 0
-	}
-
-	for _, rawLine := range strings.Split(result.Stdout, "\n") {
+func (s *MonitorService) parseStorage(output string) (usedBytes int64, totalBytes int64) {
+	for _, rawLine := range strings.Split(output, "\n") {
 		line := strings.TrimSpace(rawLine)
 		if line == "" {
 			continue
@@ -311,17 +339,8 @@ func (s *MonitorService) fetchStorage(ctx context.Context, serial string) (usedB
 	return 0, 0
 }
 
-func (s *MonitorService) fetchUptime(ctx context.Context, serial string) int64 {
-	result, err := core.RunCommand(ctx, core.ExecRequest{
-		Command: s.getBinPath().Adb,
-		Args:    []string{"-s", serial, "shell", "cat", "/proc/uptime"},
-		Timeout: 5 * time.Second,
-	})
-	if err != nil {
-		return 0
-	}
-
-	fields := strings.Fields(strings.TrimSpace(result.Stdout))
+func (s *MonitorService) parseUptime(output string) int64 {
+	fields := strings.Fields(strings.TrimSpace(output))
 	if len(fields) == 0 {
 		return 0
 	}

@@ -203,7 +203,7 @@ export default function ScrcpyPage() {
               /* Idle Screen Phone Mockup */
               <div className="flex max-w-md flex-col items-center text-center z-10">
                 <div
-                  className={`mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-[var(--border)] dark:border-[var(--border)] shadow-[var(--shadow-card)] transition-all duration-300 ${
+                  className={`mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-[var(--border)] dark:border-[var(--border)] shadow-[var(--shadow-card)] transition-colors duration-300 ${
                     isStarting
                       ? 'bg-primary/10 text-primary animate-pulse'
                       : 'bg-[var(--muted)] dark:bg-[var(--muted)]/30 text-muted-foreground'
@@ -235,7 +235,7 @@ export default function ScrcpyPage() {
 
                 <Button
                   size="lg"
-                  className="mt-8 w-56 gap-2 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-xs h-10 shadow-sm cursor-pointer transition-all active:scale-[0.97]"
+                  className="mt-8 w-56 gap-2 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-xs h-10 shadow-sm cursor-pointer transition-[colors,transform] active:scale-[0.97]"
                   onClick={() => handleStart(scrcpyOptions)}
                   disabled={isStarting || !activeSerial}
                 >

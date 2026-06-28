@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 import { useAppManagerStore } from '@/stores/useAppManagerStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
@@ -31,8 +31,25 @@ function isReadyAdbDevice(d: DeviceSummary): boolean {
 export function useAppManager() {
   const store = useAppManagerStore()
   const { devices, activeSerial } = useDeviceStore()
-  const [detailsCache, setDetailsCache] = useState<Map<string, PackageDetails>>(new Map())
+  const detailsCache = useAppManagerStore((s) => s.detailsCache)
+  const updateDetails = useAppManagerStore((s) => s.updateDetails)
+  const clearDetailsCache = useAppManagerStore((s) => s.clearDetailsCache)
   const pendingDetailsRef = useRef<Set<string>>(new Set())
+  const queueRef = useRef<string[]>([])
+  const isProcessingRef = useRef(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    clearDetailsCache()
+  }, [activeSerial, clearDetailsCache])
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
+  }, [])
 
   const hasReadyAdbDevice = useMemo(
     () => devices.some(isReadyAdbDevice),
@@ -43,6 +60,59 @@ export function useAppManager() {
     () => devices.some((d) => d.serial === activeSerial && isReadyAdbDevice(d)),
     [activeSerial, devices],
   )
+
+  const processQueue = useCallback(async () => {
+    if (isProcessingRef.current || queueRef.current.length === 0) return
+    isProcessingRef.current = true
+
+    const BATCH_SIZE = 2
+    while (queueRef.current.length > 0) {
+      const batch = queueRef.current.splice(0, BATCH_SIZE)
+      const toFetch = batch.filter(
+        (name) => !detailsCache.has(name) && !pendingDetailsRef.current.has(name)
+      )
+
+      if (toFetch.length === 0) continue
+
+      for (const name of toFetch) {
+        pendingDetailsRef.current.add(name)
+      }
+
+      await Promise.allSettled(
+        toFetch.map(async (name) => {
+          try {
+            const details = await svcGetDetails(name)
+            if (details) {
+              updateDetails(name, details)
+            }
+          } catch {
+            // ignore
+          } finally {
+            pendingDetailsRef.current.delete(name)
+          }
+        })
+      )
+
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+
+    isProcessingRef.current = false
+  }, [detailsCache, updateDetails])
+
+  const loadDetails = useCallback((packageName: string) => {
+    if (detailsCache.has(packageName) || pendingDetailsRef.current.has(packageName)) return
+
+    if (!queueRef.current.includes(packageName)) {
+      queueRef.current.push(packageName)
+    }
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+    timerRef.current = setTimeout(() => {
+      void processQueue()
+    }, 200)
+  }, [detailsCache, processQueue])
 
   const fetchPackages = useCallback(
     async (isRefresh = false) => {
@@ -128,32 +198,15 @@ export function useAppManager() {
     if (!isSizeSort || filteredPackages.length === 0) return
 
     const uncached = filteredPackages
-      .filter((pkg) => !detailsCache.has(pkg.packageName) && !pendingDetailsRef.current.has(pkg.packageName))
+      .filter((pkg) => !detailsCache.has(pkg.packageName))
       .slice(0, 20)
 
     if (uncached.length === 0) return
 
     for (const pkg of uncached) {
-      pendingDetailsRef.current.add(pkg.packageName)
+      loadDetails(pkg.packageName)
     }
-
-    void Promise.allSettled(
-      uncached.map(async (pkg) => {
-        try {
-          const details = await svcGetDetails(pkg.packageName)
-          if (details) {
-            setDetailsCache((prev) => {
-              const next = new Map(prev)
-              next.set(pkg.packageName, details)
-              return next
-            })
-          }
-        } finally {
-          pendingDetailsRef.current.delete(pkg.packageName)
-        }
-      }),
-    )
-  }, [isSizeSort, filteredPackages])
+  }, [isSizeSort, filteredPackages, detailsCache, loadDetails])
 
   const installApk = useCallback(async () => {
     try {
@@ -440,25 +493,6 @@ export function useAppManager() {
     [],
   )
 
-  const loadDetails = useCallback(async (packageName: string) => {
-    if (detailsCache.has(packageName) || pendingDetailsRef.current.has(packageName)) return
-
-    pendingDetailsRef.current.add(packageName)
-    try {
-      const details = await svcGetDetails(packageName)
-      if (details) {
-        setDetailsCache((prev) => {
-          const next = new Map(prev)
-          next.set(packageName, details)
-          return next
-        })
-      }
-    } catch {
-      // ignore
-    } finally {
-      pendingDetailsRef.current.delete(packageName)
-    }
-  }, [detailsCache])
 
   const getDetails = useCallback(
     async (packageName: string): Promise<PackageDetails | null> => {

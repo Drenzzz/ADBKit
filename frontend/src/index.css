@@ -186,31 +186,37 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
-  
+
   /* Custom scrollbar matching macOS style */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 9999px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background: var(--muted-foreground);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -239,4 +245,18 @@
   border-radius: inherit !important;
   -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
   backdrop-filter: blur(24px) saturate(150%) !important;
+}
+
+.perf-scroll {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

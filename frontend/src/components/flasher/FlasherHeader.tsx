@@ -93,7 +93,7 @@ export function FlasherHeader() {
       <div className="flex flex-wrap items-center gap-3">
         {/* Unified Device Status Pane */}
         <div className={cn(
-          "flex items-center gap-2.5 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm transition-all duration-300",
+          "flex items-center gap-2.5 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm transition-colors duration-300",
           status.bgClass
         )}>
           <span className={cn("h-2 w-2 rounded-full animate-pulse", status.dotClass)} />
@@ -115,7 +115,7 @@ export function FlasherHeader() {
               onClick={() => currentSlot === 'b' && handleSlotSwitch('a')}
               disabled={runningSlotChange}
               className={cn(
-                "rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200 cursor-pointer",
+                "rounded-full px-3 py-1 text-[11px] font-semibold transition-colors duration-200 cursor-pointer",
                 currentSlot === 'a'
                   ? "bg-card dark:bg-card text-foreground dark:text-foreground shadow-sm"
                   : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground"
@@ -127,7 +127,7 @@ export function FlasherHeader() {
               onClick={() => currentSlot === 'a' && handleSlotSwitch('b')}
               disabled={runningSlotChange}
               className={cn(
-                "rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200 cursor-pointer",
+                "rounded-full px-3 py-1 text-[11px] font-semibold transition-colors duration-200 cursor-pointer",
                 currentSlot === 'b'
                   ? "bg-card dark:bg-card text-foreground dark:text-foreground shadow-sm"
                   : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground"

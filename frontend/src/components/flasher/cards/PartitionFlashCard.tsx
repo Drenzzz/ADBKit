@@ -82,7 +82,7 @@ export function PartitionFlashCard({ disabled }: PartitionFlashCardProps) {
         </div>
 
         <Button
-          className="w-full rounded-full bg-primary hover:bg-primary/95 text-primary-foreground border-0 transition-all active:scale-[0.97] cursor-pointer text-xs font-semibold shadow-sm h-9 mt-4"
+          className="w-full rounded-full bg-primary hover:bg-primary/95 text-primary-foreground border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer text-xs font-semibold shadow-sm h-9 mt-4"
           onClick={executeFlashPartition}
           disabled={!canFlash || runningFlash}
         >
@@ -91,7 +91,7 @@ export function PartitionFlashCard({ disabled }: PartitionFlashCardProps) {
       </CardContent>
 
       {disabled && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/80 dark:bg-[var(--terminal-surface)]/85 backdrop-blur-[3px] select-none transition-all duration-300">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/80 dark:bg-[var(--terminal-surface)]/85 backdrop-blur-[3px] select-none transition-colors duration-300">
           <div className="flex items-center gap-1.5 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
             <Cpu className="h-3.5 w-3.5 text-muted-foreground dark:text-muted-foreground" />
             Fastboot Mode Required

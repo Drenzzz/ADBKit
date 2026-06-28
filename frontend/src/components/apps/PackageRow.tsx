@@ -81,7 +81,7 @@ export function PackageRow({
             onToggleEnabled(pkg.packageName)
           }}
           className={cn(
-            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[10px] font-semibold tracking-wider transition-all duration-150 cursor-pointer select-none active:scale-95',
+            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[10px] font-semibold tracking-wider transition-[colors,transform] duration-150 cursor-pointer select-none active:scale-95',
             pkg.isEnabled
               ? 'bg-success/15 text-success border-success/30 hover:bg-success/20'
               : 'bg-destructive/10 text-destructive border-destructive/25 hover:bg-destructive/15'

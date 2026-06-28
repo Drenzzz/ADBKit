@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -44,17 +44,9 @@ export function BottomDock() {
   const { theme, setTheme: setLocalTheme } = useUIStore()
   const { appConfig, setTheme: persistTheme } = useSettings()
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
-
   const [isVisible, setIsVisible] = useState(false)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [indicatorPos, setIndicatorPos] = useState({ left: 0, width: 20 })
+  const containerRef = useRef<HTMLDivElement>(null)
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const [isThemeHovered, setIsThemeHovered] = useState(false)
-  const [isBadgeHovered, setIsBadgeHovered] = useState(false)
-  const [isSelectorHovered, setIsSelectorHovered] = useState(false)
 
   // Sync theme with config
   useEffect(() => {
@@ -73,72 +65,7 @@ export function BottomDock() {
     void persistTheme(next)
   }
 
-  function updateIndicator() {
-    const activeIdx = navItems.findIndex((item) => {
-      if (item.to === '/') {
-        return location.pathname === '/'
-      }
-      return location.pathname.startsWith(item.to)
-    })
-    if (activeIdx === -1) return
 
-    const activeEl = itemRefs.current[activeIdx]
-    const containerEl = containerRef.current
-    if (!activeEl || !containerEl) return
-
-    const activeRect = activeEl.getBoundingClientRect()
-    const containerRect = containerEl.getBoundingClientRect()
-
-    const horizontalPadding = 10
-    const width = Math.max(20, activeRect.width - horizontalPadding * 2)
-    const left = activeRect.left - containerRect.left + horizontalPadding
-
-    setIndicatorPos({ left, width })
-  }
-
-  useLayoutEffect(() => {
-    updateIndicator()
-  }, [location.pathname, isVisible])
-
-  useEffect(() => {
-    function handleResize() {
-      updateIndicator()
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [location.pathname, isVisible])
-
-  useEffect(() => {
-    if (!isVisible) return
-
-    const activeIdx = navItems.findIndex((item) => {
-      if (item.to === '/') {
-        return location.pathname === '/'
-      }
-      return location.pathname.startsWith(item.to)
-    })
-    if (activeIdx === -1) return
-
-    const activeEl = itemRefs.current[activeIdx]
-    if (!activeEl) return
-
-    const resizeObserver = new ResizeObserver(() => {
-      updateIndicator()
-    })
-    resizeObserver.observe(activeEl)
-
-    return () => {
-      resizeObserver.disconnect()
-    }
-  }, [location.pathname, isVisible])
-
-  useEffect(() => {
-    if (!isVisible) return
-    const rafId = window.requestAnimationFrame(() => {
-      updateIndicator()
-    })
-    return () => window.cancelAnimationFrame(rafId)
-  }, [hoveredIndex, isVisible, location.pathname])
 
   useEffect(() => {
     return () => {
@@ -159,7 +86,6 @@ export function BottomDock() {
   function handleDockMouseLeave() {
     hideTimeoutRef.current = setTimeout(() => {
       setIsVisible(false)
-      setHoveredIndex(null)
     }, HIDE_DELAY_MS)
   }
 
@@ -182,47 +108,29 @@ export function BottomDock() {
             className={cn(
               'fixed bottom-3 left-1/2 z-50 -translate-x-1/2',
               'flex items-center gap-0.5 px-3 py-1.5',
-              'rounded-2xl border border-border/60 bg-white/80 dark:bg-[#1c1c1e]/80 shadow-[var(--shadow-floating)] backdrop-blur-xl backdrop-saturate-150',
+              'rounded-2xl border border-border/50 bg-background/95 dark:bg-zinc-900/95 shadow-lg backdrop-blur-sm',
             )}
             onMouseEnter={handleDockMouseEnter}
             onMouseLeave={handleDockMouseLeave}
           >
-            {navItems.map((item, index) => {
+            {navItems.map((item) => {
               const isActive = item.to === '/' ? location.pathname === '/' : location.pathname.startsWith(item.to)
               const Icon = item.icon
-              const isHovered = hoveredIndex === index
 
               return (
-                <div key={item.to} className="relative flex flex-col items-center">
-                  <AnimatePresence>
-                    {isHovered && !isActive && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                        transition={reduced ? { duration: 0 } : { duration: 0.16, ease: 'easeOut' }}
-                        className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap"
-                      >
-                        <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
-                          {item.label}
-                        </div>
-                        <div className="mx-auto mt-[-1px] h-1.5 w-1.5 rotate-45 border-b border-r border-border/60 bg-popover" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                <div key={item.to} className="relative flex flex-col items-center group">
+                  {/* CSS-only Tooltip (runs on browser thread) */}
+                  <div className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 transition-[transform,opacity] duration-150 ease-out whitespace-nowrap">
+                    <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
+                      {item.label}
+                    </div>
+                    <div className="mx-auto mt-[-1px] h-1.5 w-1.5 rotate-45 border-b border-r border-border/60 bg-popover" />
+                  </div>
 
-                  <motion.button
-                    ref={(el) => {
-                      itemRefs.current[index] = el
-                    }}
+                  <button
                     onClick={() => navigate(item.to)}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                    whileHover={reduced ? undefined : { scale: 1.06, y: -2 }}
-                    whileTap={reduced ? undefined : { scale: 0.98 }}
-                    transition={{ type: 'spring', stiffness: 420, damping: 28, mass: 0.5 }}
                     className={cn(
-                      'relative flex items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 transition-colors duration-200',
+                      'relative flex items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 transition-colors duration-200 cursor-pointer',
                       isActive
                         ? 'bg-primary/10 text-primary border border-primary/20'
                         : 'border border-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground',
@@ -243,7 +151,18 @@ export function BottomDock() {
                         </motion.span>
                       )}
                     </AnimatePresence>
-                  </motion.button>
+
+                    {/* Active route indicator bar */}
+                    {isActive && (
+                      <motion.div
+                        className="pointer-events-none absolute bottom-0.5 left-1/2 -translate-x-1/2 h-[2.5px] rounded-full bg-primary shadow-[0_0_8px_var(--primary)]"
+                        initial={{ opacity: 0, width: 4 }}
+                        animate={{ opacity: 1, width: '40%' }}
+                        exit={{ opacity: 0, width: 4 }}
+                        transition={reduced ? { duration: 0 } : { duration: 0.18, ease: 'easeOut' }}
+                      />
+                    )}
+                  </button>
                 </div>
               )
             })}
@@ -253,52 +172,28 @@ export function BottomDock() {
 
             {/* Active connection & device controls */}
             <div className="flex items-center gap-1.5">
-              <div className="relative flex items-center">
-                <AnimatePresence>
-                  {isBadgeHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                      transition={reduced ? { duration: 0 } : { duration: 0.16, ease: 'easeOut' }}
-                      className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap"
-                    >
-                      <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
-                        Connection Mode Status
-                      </div>
-                      <div className="mx-auto mt-[-1px] h-1.5 w-1.5 rotate-45 border-b border-r border-border/60 bg-popover" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <div
-                  onMouseEnter={() => setIsBadgeHovered(true)}
-                  onMouseLeave={() => setIsBadgeHovered(false)}
-                >
+              <div className="relative flex items-center group">
+                {/* CSS-only Tooltip */}
+                <div className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 transition-[transform,opacity] duration-150 ease-out whitespace-nowrap">
+                  <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
+                    Connection Mode Status
+                  </div>
+                  <div className="mx-auto mt-[-1px] h-1.5 w-1.5 rotate-45 border-b border-r border-border/60 bg-popover" />
+                </div>
+                <div>
                   <DeviceModeBadge />
                 </div>
               </div>
 
-              <div className="relative flex items-center">
-                <AnimatePresence>
-                  {isSelectorHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                      transition={reduced ? { duration: 0 } : { duration: 0.16, ease: 'easeOut' }}
-                      className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap"
-                    >
-                      <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
-                        Select Target Device
-                      </div>
-                      <div className="mx-auto mt-[-1px] h-1.5 w-1.5 rotate-45 border-b border-r border-border/60 bg-popover" />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                <div
-                  onMouseEnter={() => setIsSelectorHovered(true)}
-                  onMouseLeave={() => setIsSelectorHovered(false)}
-                >
+              <div className="relative flex items-center group">
+                {/* CSS-only Tooltip */}
+                <div className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 transition-[transform,opacity] duration-150 ease-out whitespace-nowrap">
+                  <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
+                    Select Target Device
+                  </div>
+                  <div className="mx-auto mt-[-1px] h-1.5 w-1.5 rotate-45 border-b border-r border-border/60 bg-popover" />
+                </div>
+                <div>
                   <ActiveDeviceSelector />
                 </div>
               </div>
@@ -307,43 +202,24 @@ export function BottomDock() {
             <span className="mx-2 h-5 w-px bg-border/50" />
 
             {/* Theme switcher */}
-            <div className="relative flex items-center justify-center">
-              <AnimatePresence>
-                {isThemeHovered && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                    transition={reduced ? { duration: 0 } : { duration: 0.16, ease: 'easeOut' }}
-                    className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap"
-                  >
-                    <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
-                      {theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                    </div>
-                    <div className="mx-auto mt-[-1px] h-1.5 w-1.5 rotate-45 border-b border-r border-border/60 bg-popover" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="relative flex items-center justify-center group">
+              {/* CSS-only Tooltip */}
+              <div className="absolute -top-10 left-1/2 z-50 -translate-x-1/2 scale-95 opacity-0 pointer-events-none group-hover:scale-100 group-hover:opacity-100 transition-[transform,opacity] duration-150 ease-out whitespace-nowrap">
+                <div className="rounded-lg border border-border/60 bg-popover px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-[var(--shadow-card)]">
+                  {theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                </div>
+                <div className="mx-auto mt-[-1px] h-1.5 w-1.5 rotate-45 border-b border-r border-border/60 bg-popover" />
+              </div>
 
               <button
                 onClick={handleToggleTheme}
-                onMouseEnter={() => setIsThemeHovered(true)}
-                onMouseLeave={() => setIsThemeHovered(false)}
-                className="flex items-center justify-center rounded-xl p-2 text-muted-foreground transition-all duration-150 hover:bg-muted/40 hover:text-foreground"
+                className="flex items-center justify-center rounded-xl p-2 text-muted-foreground transition-colors duration-150 hover:bg-muted/40 hover:text-foreground cursor-pointer"
               >
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
             </div>
 
-            {/* macOS Active route indicator bar */}
-            <div
-              className="pointer-events-none absolute bottom-1.5 h-[2.5px] rounded-full bg-primary shadow-[0_0_8px_var(--primary)]"
-              style={{
-                left: indicatorPos.left,
-                width: indicatorPos.width,
-                transition: reduced ? 'none' : 'left 0.28s cubic-bezier(0.32,0.72,0,1), width 0.28s cubic-bezier(0.32,0.72,0,1)',
-              }}
-            />
+
           </motion.div>
         )}
       </AnimatePresence>

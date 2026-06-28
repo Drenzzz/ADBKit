@@ -104,7 +104,7 @@ export function FileRow({
 }: FileRowProps) {
   return (
     <div
-      className="group grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border/30 transition-all duration-150 hover:bg-muted/50 h-10 cursor-pointer select-none"
+      className="group grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border/30 transition-colors duration-150 hover:bg-muted/50 h-10 cursor-pointer select-none"
       onDoubleClick={() => {
         if (file.type === 'directory') onOpen(file)
       }}

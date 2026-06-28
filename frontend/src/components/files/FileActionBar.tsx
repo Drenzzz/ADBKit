@@ -75,7 +75,7 @@ export function FileActionBar({
 
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border/50 bg-muted/50 px-3.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-all cursor-pointer shadow-sm active:scale-[0.97]"
+            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border/50 bg-muted/50 px-3.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-[colors,transform] cursor-pointer shadow-sm active:scale-[0.97]"
           >
             <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
             {currentSortLabel}
@@ -125,7 +125,7 @@ export function FileActionBar({
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
             onClick={onPushFiles}
             disabled={refreshing}
           >
@@ -135,7 +135,7 @@ export function FileActionBar({
 
           <Button
             size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
             onClick={onPushFolder}
             disabled={refreshing}
           >
@@ -145,7 +145,7 @@ export function FileActionBar({
 
           <Button
             size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
             onClick={onNewFolder}
             disabled={refreshing}
           >

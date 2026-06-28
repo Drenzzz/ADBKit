@@ -290,7 +290,7 @@ export default function TerminalPage() {
             <button
               onClick={connected ? handleDisconnect : undefined}
               className={cn(
-                "w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold transition-all relative border border-transparent outline-none",
+                "w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold transition-colors relative border border-transparent outline-none",
                 connected 
                   ? "bg-[var(--traffic-light-red)] hover:bg-[var(--traffic-light-red)]/80 text-[color:var(--destructive)]/50 cursor-pointer" 
                   : "bg-muted dark:bg-zinc-700 text-muted-foreground dark:text-zinc-800 cursor-not-allowed"
@@ -312,7 +312,7 @@ export default function TerminalPage() {
             <button
               onClick={() => setActivePanel('shell')}
               className={cn(
-                'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-colors duration-200 cursor-pointer',
                 activePanel === 'shell'
                   ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-foreground shadow-sm'
                   : 'text-muted-foreground dark:text-muted-foreground hover:text-zinc-900 dark:hover:text-zinc-200',
@@ -324,7 +324,7 @@ export default function TerminalPage() {
             <button
               onClick={() => setActivePanel('logcat')}
               className={cn(
-                'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer',
+                'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-colors duration-200 cursor-pointer',
                 activePanel === 'logcat'
                   ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-foreground shadow-sm'
                   : 'text-muted-foreground dark:text-muted-foreground hover:text-zinc-900 dark:hover:text-zinc-200',
@@ -351,7 +351,7 @@ export default function TerminalPage() {
                 <DropdownMenuTrigger
                   disabled={connected}
                   className={cn(
-                    'inline-flex h-7 items-center gap-1.5 rounded-full border border-border dark:border-zinc-800 bg-white dark:bg-zinc-950/40 px-3 py-1 text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer shadow-sm active:scale-[0.97]',
+                    'inline-flex h-7 items-center gap-1.5 rounded-full border border-border dark:border-zinc-800 bg-white dark:bg-zinc-950/40 px-3 py-1 text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-[colors,transform] cursor-pointer shadow-sm active:scale-[0.97]',
                     connected && 'opacity-50 cursor-not-allowed',
                   )}
                 >
@@ -401,7 +401,7 @@ export default function TerminalPage() {
                   size="sm"
                   variant="ghost"
                   className={cn(
-                    'h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer',
+                    'h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer',
                     refreshing && 'animate-spin',
                   )}
                   onClick={refreshDevices}
@@ -415,7 +415,7 @@ export default function TerminalPage() {
                   size="sm"
                   variant="ghost"
                   className={cn(
-                    'h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer',
+                    'h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer',
                     showHistory && 'bg-zinc-200 dark:bg-zinc-800 text-foreground dark:text-foreground',
                   )}
                   onClick={() => setShowHistory(!showHistory)}
@@ -427,7 +427,7 @@ export default function TerminalPage() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all cursor-pointer"
+                  className="h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                   onClick={clearOutput}
                   disabled={!session}
                   title="Clear output"
@@ -440,7 +440,7 @@ export default function TerminalPage() {
                 {connected ? (
                   <Button
                     size="sm"
-                    className="h-7 text-xs font-semibold px-4 rounded-full bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white border-0 transition-all active:scale-[0.97] cursor-pointer shadow-sm"
+                    className="h-7 text-xs font-semibold px-4 rounded-full bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer shadow-sm"
                     onClick={handleDisconnect}
                   >
                     Disconnect
@@ -448,7 +448,7 @@ export default function TerminalPage() {
                 ) : (
                   <Button
                     size="sm"
-                    className="h-7 text-xs font-semibold px-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-all active:scale-[0.97] cursor-pointer shadow-sm gap-1.5"
+                    className="h-7 text-xs font-semibold px-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer shadow-sm gap-1.5"
                     onClick={handleConnect}
                     disabled={connecting || !canConnect(mode)}
                   >
@@ -494,7 +494,7 @@ export default function TerminalPage() {
               <Button
                 type="submit"
                 size="sm"
-                className="h-8 gap-1.5 text-xs shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-all active:scale-[0.97] cursor-pointer px-4 shadow-sm font-semibold"
+                className="h-8 gap-1.5 text-xs shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer px-4 shadow-sm font-semibold"
                 disabled={!connected || !session || command.trim() === ''}
               >
                 <CornerDownLeft className="h-3.5 w-3.5" />

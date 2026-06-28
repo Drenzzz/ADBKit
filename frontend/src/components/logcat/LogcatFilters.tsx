@@ -56,7 +56,7 @@ export function LogcatFilters() {
               key={value}
               variant="outline"
               className={cn(
-                'cursor-pointer text-[10px] h-5 px-1.5 gap-0.5 transition-all',
+                'cursor-pointer text-[10px] h-5 px-1.5 gap-0.5 transition-colors',
                 LEVEL_BADGE_COLORS[value],
                 isActive && LEVEL_ACTIVE_BG[value],
               )}

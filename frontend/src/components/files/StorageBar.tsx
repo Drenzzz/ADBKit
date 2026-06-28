@@ -23,7 +23,7 @@ export function StorageBar({ info }: StorageBarProps) {
     <div className="flex items-center gap-3 text-xs text-muted-foreground">
       <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
         <div
-          className="h-full rounded-full bg-primary transition-all duration-300"
+          className="h-full rounded-full bg-primary transition-colors duration-300"
           style={{ width: `${Math.min(info.usedPct, 100)}%` }}
         />
       </div>
