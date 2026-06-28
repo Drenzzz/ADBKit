@@ -220,3 +220,23 @@
     scroll-behavior: auto !important;
   }
 }
+
+.glass-panel {
+  position: relative !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.dark .glass-panel {
+  background-color: rgba(28, 28, 30, 0.75) !important;
+}
+
+.glass-panel::before {
+  content: "" !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  border-radius: inherit !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+}
