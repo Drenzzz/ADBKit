@@ -273,3 +273,79 @@ func CurrentPlatformArch() string {
 		return goos + "-" + goarch
 	}
 }
+
+// FindExtractedDir finds the first directory whose name starts with prefix
+// inside root. Archives typically extract to a single top-level folder
+// (e.g. "platform-tools/", "scrcpy-linux-x86_64-v3.3.1/").
+func FindExtractedDir(root string, prefix string) (string, error) {
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return "", core.NewOperationError("find_extracted_dir", "failed to read extraction root", err.Error(), false)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() && strings.HasPrefix(entry.Name(), prefix) {
+			return filepath.Join(root, entry.Name()), nil
+		}
+	}
+	return "", core.NewOperationError("find_extracted_dir", "no directory matching prefix '"+prefix+"' found in extraction", root, false)
+}
+
+// MoveExtractedDir moves src directory to dst. Uses os.Rename for same-device
+// atomic move; falls back to copy+delete for cross-device scenarios.
+func MoveExtractedDir(src string, dst string) error {
+	if err := os.RemoveAll(dst); err != nil {
+		return core.NewOperationError("move_extracted_dir", "failed to remove old destination", err.Error(), true)
+	}
+	if err := os.Rename(src, dst); err == nil {
+		return nil
+	}
+	return copyDir(src, dst)
+}
+
+func copyDir(src string, dst string) error {
+	if err := os.MkdirAll(dst, permDir); err != nil {
+		return err
+	}
+	entries, err := os.ReadDir(src)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		srcPath := filepath.Join(src, entry.Name())
+		dstPath := filepath.Join(dst, entry.Name())
+		if entry.IsDir() {
+			if err := copyDir(srcPath, dstPath); err != nil {
+				return err
+			}
+		} else {
+			if err := copyFile(srcPath, dstPath); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func copyFile(src string, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	if err := os.MkdirAll(filepath.Dir(dst), permDir); err != nil {
+		return err
+	}
+	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, permExecutable)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	if _, err := io.Copy(out, in); err != nil {
+		return err
+	}
+	info, err := os.Stat(src)
+	if err == nil {
+		os.Chmod(dst, info.Mode())
+	}
+	return nil
+}

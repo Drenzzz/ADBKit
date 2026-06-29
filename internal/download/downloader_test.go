@@ -240,3 +240,72 @@ func TestFetchHTTPError(t *testing.T) {
 		t.Fatal("expected error for 500 status")
 	}
 }
+
+func TestFindExtractedDir(t *testing.T) {
+	tmpDir := t.TempDir()
+	nested := filepath.Join(tmpDir, "platform-tools")
+	if err := os.MkdirAll(nested, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	found, err := FindExtractedDir(tmpDir, "platform-tools")
+	if err != nil {
+		t.Fatalf("FindExtractedDir failed: %v", err)
+	}
+	if found != nested {
+		t.Fatalf("expected %q, got %q", nested, found)
+	}
+}
+
+func TestFindExtractedDirNested(t *testing.T) {
+	tmpDir := t.TempDir()
+	nested := filepath.Join(tmpDir, "scrcpy-linux-x86_64-v3.3.1")
+	if err := os.MkdirAll(nested, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	found, err := FindExtractedDir(tmpDir, "scrcpy")
+	if err != nil {
+		t.Fatalf("FindExtractedDir failed: %v", err)
+	}
+	if found != nested {
+		t.Fatalf("expected %q, got %q", nested, found)
+	}
+}
+
+func TestFindExtractedDirMissing(t *testing.T) {
+	tmpDir := t.TempDir()
+	_, err := FindExtractedDir(tmpDir, "nonexistent")
+	if err == nil {
+		t.Fatal("expected error for missing directory")
+	}
+}
+
+func TestMoveExtractedDir(t *testing.T) {
+	src := t.TempDir()
+	subdir := filepath.Join(src, "platform-tools")
+	if err := os.MkdirAll(subdir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(subdir, "adb"), []byte("fake-adb"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(subdir, "fastboot"), []byte("fake-fb"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	dst := filepath.Join(t.TempDir(), "dest-platform-tools")
+	if err := MoveExtractedDir(subdir, dst); err != nil {
+		t.Fatalf("MoveExtractedDir failed: %v", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(dst, "adb")); err != nil {
+		t.Fatalf("expected adb in destination: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dst, "fastboot")); err != nil {
+		t.Fatalf("expected fastboot in destination: %v", err)
+	}
+	if _, err := os.Stat(subdir); !os.IsNotExist(err) {
+		t.Fatal("expected source to be removed after move")
+	}
+}

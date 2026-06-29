@@ -80,18 +80,19 @@ func (s *Service) DownloadPlatformTools(ctx context.Context) error {
 		return err
 	}
 
-	for _, name := range []string{"adb", "fastboot"} {
-		src, err := FindBinaryInDir(tmpDir, name)
-		if err != nil {
-			s.emitProgress("platform-tools", 0, 0, 0, "error")
-			return err
-		}
-		dst := filepath.Join(s.dataDir, "bin", BinaryExecutableName(name))
-		if err := AtomicBinaryMove(src, dst); err != nil {
-			s.emitProgress("platform-tools", 0, 0, 0, "error")
-			return err
-		}
+	extractedDir, err := FindExtractedDir(tmpDir, "platform-tools")
+	if err != nil {
+		s.emitProgress("platform-tools", 0, 0, 0, "error")
+		return err
 	}
+
+	destDir := filepath.Join(s.dataDir, "bin", "platform-tools")
+	if err := MoveExtractedDir(extractedDir, destDir); err != nil {
+		s.emitProgress("platform-tools", 0, 0, 0, "error")
+		return err
+	}
+
+	s.cleanupOldStandalone("adb", "fastboot")
 
 	s.emitProgress("platform-tools", 100, 0, 0, "done")
 	return nil
@@ -161,16 +162,19 @@ func (s *Service) DownloadScrcpy(ctx context.Context) error {
 		}
 	}
 
-	src, err := FindBinaryInDir(tmpDir, "scrcpy")
+	extractedDir, err := FindExtractedDir(tmpDir, "scrcpy")
 	if err != nil {
 		s.emitProgress("scrcpy", 0, 0, 0, "error")
 		return err
 	}
-	dst := filepath.Join(s.dataDir, "bin", BinaryExecutableName("scrcpy"))
-	if err := AtomicBinaryMove(src, dst); err != nil {
+
+	destDir := filepath.Join(s.dataDir, "bin", "scrcpy")
+	if err := MoveExtractedDir(extractedDir, destDir); err != nil {
 		s.emitProgress("scrcpy", 0, 0, 0, "error")
 		return err
 	}
+
+	s.cleanupOldStandalone("scrcpy")
 
 	s.emitProgress("scrcpy", 100, 0, 0, "done")
 	return nil
@@ -189,4 +193,11 @@ func (s *Service) emitProgress(name string, pct float64, received, total int64, 
 	})
 
 	_ = time.Now()
+}
+
+func (s *Service) cleanupOldStandalone(names ...string) {
+	for _, name := range names {
+		path := filepath.Join(s.dataDir, "bin", BinaryExecutableName(name))
+		os.Remove(path)
+	}
 }
