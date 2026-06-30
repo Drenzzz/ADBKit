@@ -40,6 +40,20 @@ func TestValidatePath_Exists(t *testing.T) {
 	}
 }
 
+func TestValidatePath_Traversal(t *testing.T) {
+	cases := []string{
+		"../etc/passwd",
+		"/tmp/../etc/passwd",
+		"../../etc/shadow",
+		"..",
+	}
+	for _, c := range cases {
+		if err := ValidatePath(c); err == nil {
+			t.Errorf("expected error for traversal path %q", c)
+		}
+	}
+}
+
 func TestValidateFlashPartition_Empty(t *testing.T) {
 	if err := ValidateFlashPartition(""); err == nil {
 		t.Fatal("expected error for empty partition")

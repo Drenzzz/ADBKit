@@ -14,7 +14,7 @@ func normalizeFastbootArgs(args string) ([]string, error) {
 	}
 	argList := strings.Fields(trimmed)
 	for _, arg := range argList {
-		if strings.ContainsAny(arg, "&|;><") {
+		if strings.ContainsAny(arg, "&|;><`$") {
 			return nil, core.NewOperationError("run_fastboot_command", "command arguments contain blocked shell operators", fmt.Sprintf("blocked token found in arg: %s", arg), false)
 		}
 	}

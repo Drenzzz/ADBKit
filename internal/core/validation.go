@@ -23,14 +23,19 @@ func IsSupportedBinaryName(name string) bool {
 }
 
 // ValidatePath checks if a path exists and is accessible.
+// Rejects path traversal sequences (../) to prevent directory escape.
 func ValidatePath(path string) error {
-	if strings.TrimSpace(path) == "" {
+	trimmed := strings.TrimSpace(path)
+	if trimmed == "" {
 		return NewOperationError("validation", "path is empty", "", false)
 	}
-	info, err := os.Stat(path)
+	if strings.Contains(trimmed, ".."+string(filepath.Separator)) || trimmed == ".." {
+		return NewOperationError("validation", "path traversal is not allowed", trimmed, false)
+	}
+	info, err := os.Stat(trimmed)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return NewOperationError("validation", "path does not exist", path, false)
+			return NewOperationError("validation", "path does not exist", trimmed, false)
 		}
 		return NewOperationError("validation", "cannot access path", err.Error(), true)
 	}
