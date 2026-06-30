@@ -60,7 +60,7 @@ export function AppShell() {
     return (
       <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
         <main className="flex-1 overflow-y-auto pb-16">
-          <SetupWizard onSkipToApp={() => setSetupComplete(true)} />
+          <SetupWizard onComplete={() => setSetupComplete(true)} />
         </main>
         <BottomDock />
         <CommandPalette />

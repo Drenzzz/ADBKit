@@ -78,7 +78,7 @@ function SidebarStepper({ current }: { current: SetupWizardStep }) {
   )
 }
 
-function StepContent({ step }: { step: SetupWizardStep }) {
+function StepContent({ step, onComplete }: { step: SetupWizardStep; onComplete?: () => void }) {
   switch (step) {
     case 'welcome':
       return <WelcomeStep />
@@ -87,15 +87,11 @@ function StepContent({ step }: { step: SetupWizardStep }) {
     case 'scrcpy':
       return <ScrcpyStep />
     case 'summary':
-      return <SummaryStep />
+      return <SummaryStep onComplete={onComplete} />
   }
 }
 
-interface SetupWizardProps {
-  onSkipToApp?: () => void
-}
-
-export function SetupWizard({ onSkipToApp }: SetupWizardProps) {
+export function SetupWizard({ onComplete }: { onComplete?: () => void }) {
   const currentStep = useSetupWizardStore((s) => s.currentStep)
 
   return (
@@ -111,22 +107,10 @@ export function SetupWizard({ onSkipToApp }: SetupWizardProps) {
         </div>
 
         {/* Right Workspace */}
-        <div className="flex-1 p-8 flex flex-col justify-between overflow-y-auto bg-card relative">
+        <div className="flex-1 p-8 flex flex-col justify-center overflow-y-auto bg-card">
           <div className="flex-1 flex flex-col justify-center max-w-xl mx-auto w-full">
-            <StepContent step={currentStep} />
+            <StepContent step={currentStep} onComplete={onComplete} />
           </div>
-
-          {onSkipToApp && currentStep !== 'summary' && (
-            <div className="mt-6 flex justify-center border-t border-border/10 pt-4">
-              <button
-                type="button"
-                onClick={onSkipToApp}
-                className="text-[11px] text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors underline underline-offset-2"
-              >
-                Skip configuration for now (set up binaries manually later)
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>

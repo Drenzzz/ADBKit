@@ -19,7 +19,7 @@ function BinarySummaryRow({ label, info }: { label: string; info?: BinaryInfo })
   )
 }
 
-export function SummaryStep() {
+export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
   const { setupState, prevStep, setSetupState, setError } = useSetupWizardStore()
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
@@ -54,7 +54,7 @@ export function SummaryStep() {
         </div>
 
         <div className="border-t border-border/10 pt-5 mt-2 flex justify-end">
-          <Button onClick={() => window.location.reload()} size="sm" className="px-5">
+          <Button onClick={onComplete} size="sm" className="px-5">
             Launch ADBKit
           </Button>
         </div>
