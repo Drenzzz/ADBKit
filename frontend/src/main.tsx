@@ -26,10 +26,7 @@ createRoot(document.getElementById('root')!).render(
           <RouterProvider router={router} />
           <Toaster
             position="bottom-right"
-            toastOptions={{
-              className: 'text-sm',
-            }}
-            richColors
+            theme="system"
             closeButton
           />
         </TooltipProvider>
