@@ -7,7 +7,6 @@ export type BinarySource =
   | 'system-path'
   | 'app-data'
   | 'common-path'
-  | 'skipped'
 
 export interface BinaryInfo {
   name: string

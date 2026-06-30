@@ -5,7 +5,6 @@ const LABEL: Record<string, string> = {
   'system-path': 'System PATH',
   'app-data': 'Managed',
   'common-path': 'Discovered',
-  skipped: 'Skipped',
 }
 
 const VARIANT: Record<string, 'default' | 'secondary' | 'outline'> = {
@@ -13,7 +12,6 @@ const VARIANT: Record<string, 'default' | 'secondary' | 'outline'> = {
   'system-path': 'secondary',
   'app-data': 'outline',
   'common-path': 'outline',
-  skipped: 'outline',
 }
 
 interface BinarySourceBadgeProps {

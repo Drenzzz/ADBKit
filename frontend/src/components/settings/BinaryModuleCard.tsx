@@ -11,7 +11,6 @@ interface BinaryModuleCardProps {
   displayName: string
   status?: BinaryInfo
   loading: boolean
-  optional?: boolean
   isLast?: boolean
   onDetect: () => void
   onBrowseFile: () => void
@@ -36,7 +35,6 @@ export function BinaryModuleCard({
   displayName,
   status,
   loading,
-  optional = false,
   isLast = false,
   onDetect,
   onBrowseFile,
@@ -111,11 +109,6 @@ export function BinaryModuleCard({
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{displayName}</span>
-              {optional && (
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground/50">
-                  optional
-                </span>
-              )}
               {isReady && <Check className="h-3 w-3 text-emerald-500" />}
             </div>
             <div className="flex items-center gap-2 text-[11px] text-muted-foreground/60">

@@ -14,10 +14,10 @@ import { Binary } from 'lucide-react'
 import { toast } from 'sonner'
 import type { BinaryInfo } from '@/lib/types'
 
-const BINARY_NAMES: { key: 'adb' | 'fastboot' | 'scrcpy'; displayName: string; optional: boolean }[] = [
-  { key: 'adb', displayName: 'ADB', optional: false },
-  { key: 'fastboot', displayName: 'Fastboot', optional: false },
-  { key: 'scrcpy', displayName: 'scrcpy', optional: true },
+const BINARY_NAMES: { key: 'adb' | 'fastboot' | 'scrcpy'; displayName: string }[] = [
+  { key: 'adb', displayName: 'ADB' },
+  { key: 'fastboot', displayName: 'Fastboot' },
+  { key: 'scrcpy', displayName: 'scrcpy' },
 ]
 
 export function BinaryManager() {
@@ -102,13 +102,12 @@ export function BinaryManager() {
           </div>
         ) : (
           <div className="divide-y divide-[var(--border)]/40 dark:divide-[var(--border)]/40">
-            {BINARY_NAMES.map(({ key, displayName, optional }, index) => (
+            {BINARY_NAMES.map(({ key, displayName }, index) => (
               <BinaryModuleCard
                 key={key}
                 displayName={displayName}
                 status={status?.[key] as BinaryInfo | undefined}
                 loading={loading}
-                optional={optional}
                 isLast={index === BINARY_NAMES.length - 1}
                 onDetect={reload}
                 onBrowseFile={() => void handleBrowseFile(key)}
