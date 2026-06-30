@@ -16,7 +16,7 @@ import (
 
 const (
 	platformToolsVersion = "35.0.2"
-	scrcpyVersion        = "3.3.1"
+	scrcpyVersion        = "4.0"
 	eventName            = "binary_download_progress"
 )
 

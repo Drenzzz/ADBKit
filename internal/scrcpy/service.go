@@ -199,6 +199,8 @@ func (s *Service) StartSession(ctx context.Context, serial string, opts Options)
 		return nil, err
 	}
 
+	adbPath, _ := s.resolveADBPath()
+
 	s.mu.Lock()
 	if s.process != nil {
 		active := s.process.session
@@ -222,6 +224,9 @@ func (s *Service) StartSession(ctx context.Context, serial string, opts Options)
 	args = append(args, opts.ToArgs()...)
 
 	cmd := exec.CommandContext(processCtx, scrcpyPath, args...)
+	if adbPath != "" {
+		cmd.Env = append(os.Environ(), "ADB="+adbPath)
+	}
 	process := &scrcpyProcess{
 		session: session,
 		cmd:     cmd,
@@ -488,6 +493,8 @@ func (s *Service) StartRecording(serial, outputPath string, opts Options) error 
 		return err
 	}
 
+	adbPath, _ := s.resolveADBPath()
+
 	args := []string{"--no-playback", "--record=" + trimmedPath, "--serial=" + trimmedSerial}
 	if opts.BitRate > 0 {
 		args = append(args, "--video-bit-rate", fmt.Sprintf("%d", opts.BitRate))
@@ -506,6 +513,9 @@ func (s *Service) StartRecording(serial, outputPath string, opts Options) error 
 	}
 
 	cmd := exec.CommandContext(s.ctx, scrcpyPath, args...)
+	if adbPath != "" {
+		cmd.Env = append(os.Environ(), "ADB="+adbPath)
+	}
 	stderrPipe, pipeErr := cmd.StderrPipe()
 	if pipeErr != nil {
 		return core.NewOperationError(
@@ -673,7 +683,13 @@ func (s *Service) GetEncoderSupport(ctx context.Context, serial string) (*Encode
 		return nil, err
 	}
 
-	cmd := exec.CommandContext(ctx, scrcpyPath, "--serial", resolvedSerial, "--list-encoders")
+	adbPath, _ := s.resolveADBPath()
+	args := []string{"--serial", resolvedSerial, "--list-encoders"}
+
+	cmd := exec.CommandContext(ctx, scrcpyPath, args...)
+	if adbPath != "" {
+		cmd.Env = append(os.Environ(), "ADB="+adbPath)
+	}
 	out, runErr := cmd.CombinedOutput()
 	if runErr != nil {
 		return nil, core.NewOperationError(
