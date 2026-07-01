@@ -71,7 +71,7 @@ export default function FilesPage() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="flex flex-col gap-4 font-sans pb-24"
+      className="flex-1 min-h-0 flex flex-col gap-4 font-sans"
     >
       {/* Header Panel */}
       <motion.div
@@ -190,7 +190,7 @@ export default function FilesPage() {
       {/* File List Wrapper */}
       <motion.div
         variants={itemVariants}
-        className="overflow-hidden rounded-2xl border border-border/50 bg-card"
+        className="overflow-hidden rounded-2xl border border-border/50 bg-card flex-1 min-h-0 flex flex-col"
       >
         <FileTable
           files={fe.visibleFiles}

@@ -113,9 +113,9 @@ export function FileTable({
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)] relative">
+    <div className="flex-1 min-h-0 flex flex-col relative">
       {/* Table Header */}
-      <div className="grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border bg-muted/20 sticky top-0 z-10 h-10 select-none">
+      <div className="grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border bg-muted/20 sticky top-0 z-10 h-10 select-none shrink-0">
         <div className="px-3">
           <Checkbox
             checked={allSelected}

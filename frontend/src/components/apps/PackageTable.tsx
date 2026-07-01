@@ -84,9 +84,9 @@ export function PackageTable({
   }
 
   return (
-    <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
+    <div className="rounded-2xl border border-border/50 bg-card overflow-hidden flex-1 min-h-0 flex flex-col">
       {/* Table Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border/40 bg-muted/20">
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border/40 bg-muted/20 shrink-0">
         <Checkbox
           checked={isAllSelected}
           onCheckedChange={() => onToggleAll(allNames)}
@@ -113,8 +113,7 @@ export function PackageTable({
       {/* Table Body (Virtualized) */}
       <div
         ref={parentRef}
-        className="perf-scroll overflow-auto"
-        style={{ maxHeight: 'calc(100vh - 16.5rem)' }}
+        className="perf-scroll overflow-auto flex-1 min-h-0"
       >
         <div
           style={{

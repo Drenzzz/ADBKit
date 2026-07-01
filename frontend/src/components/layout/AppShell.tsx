@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { BottomDock } from './BottomDock'
 import { CommandPalette } from '@/components/common/CommandPalette'
 import { SetupWizard } from '@/components/setup/SetupWizard'
 import { getSetupState } from '@/services/binaryService'
 import { getAppConfig } from '@/services/settingsService'
 import { useUIStore } from '@/stores/useUIStore'
+import { cn } from '@/lib/utils'
 
 function applyThemeClass(theme: 'dark' | 'light') {
   document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -23,6 +24,9 @@ function StartupLoader() {
 }
 
 export function AppShell() {
+  const location = useLocation()
+  const isNoGlobalScroll = ['/apps', '/files', '/devices', '/terminal', '/scrcpy', '/settings'].includes(location.pathname)
+
   const [setupChecked, setSetupChecked] = useState(false)
   const [setupComplete, setSetupComplete] = useState(false)
   const setStartupLoading = useUIStore((s) => s.setStartupLoading)
@@ -71,7 +75,10 @@ export function AppShell() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <main className="flex-1 min-h-0 flex flex-col">
-        <div className="flex-1 min-h-0 w-full flex flex-col p-6 pb-24 overflow-y-auto perf-scroll">
+        <div className={cn(
+          "flex-1 min-h-0 w-full flex flex-col p-6 pb-24 perf-scroll",
+          isNoGlobalScroll ? "overflow-hidden" : "overflow-y-auto"
+        )}>
           <Outlet />
         </div>
       </main>

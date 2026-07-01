@@ -178,7 +178,7 @@ export default function AppsPage() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="space-y-4 pb-24 font-sans"
+      className="flex-1 min-h-0 flex flex-col gap-4 font-sans"
     >
       {/* Header Panel */}
       <motion.header
@@ -303,7 +303,7 @@ export default function AppsPage() {
       </motion.div>
 
       {/* Virtualized List Card */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants} className="flex-1 min-h-0 flex flex-col">
         {isEmpty ? (
           hasSearch ? (
             <NoSearchResultsState term={appManager.searchTerm} />
