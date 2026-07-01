@@ -20,6 +20,7 @@ type AppConfig struct {
 	DefaultTerminalMode  string            `json:"default_terminal_mode"`
 	AutoRefreshDevices   bool              `json:"auto_refresh_devices"`
 	DeviceRefreshSeconds int               `json:"device_refresh_seconds"`
+	AuditEnabled         bool              `json:"audit_enabled"`
 }
 
 const (

@@ -449,6 +449,7 @@ export interface PreferencesPayload {
   default_terminal_mode?: string
   auto_refresh_devices?: boolean
   device_refresh_seconds?: number
+  audit_enabled?: boolean
 }
 
 export interface AppConfigSnapshot {
@@ -464,6 +465,7 @@ export interface AppConfigSnapshot {
   default_terminal_mode: string
   auto_refresh_devices: boolean
   device_refresh_seconds: number
+  audit_enabled: boolean
 }
 
 export interface RuntimeDiagnostics {

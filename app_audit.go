@@ -7,15 +7,22 @@ import (
 	"time"
 )
 
+func (a *App) isAuditEnabled() bool {
+	if a.cfg == nil {
+		return false
+	}
+	return a.cfg.AuditEnabled
+}
+
 func (a *App) logOperationSuccess(operation, message string, startedAt time.Time) {
-	if a.auditLog == nil {
+	if a.auditLog == nil || !a.isAuditEnabled() {
 		return
 	}
 	a.auditLog.LogOperation(operation, message, time.Since(startedAt).String(), true)
 }
 
 func (a *App) logOperationFailure(operation string, err error, startedAt time.Time) {
-	if a.auditLog == nil || err == nil {
+	if a.auditLog == nil || !a.isAuditEnabled() || err == nil {
 		return
 	}
 	a.auditLog.LogOperationWithDetails(

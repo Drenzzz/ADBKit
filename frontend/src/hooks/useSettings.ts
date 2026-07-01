@@ -26,6 +26,7 @@ function configsAreEqual(a: PreferencesPayload, b: AppConfigSnapshot): boolean {
   if ((a.default_terminal_mode ?? 'adb-shell') !== (b.default_terminal_mode ?? 'adb-shell')) return false
   if ((a.auto_refresh_devices ?? true) !== (b.auto_refresh_devices ?? true)) return false
   if ((a.device_refresh_seconds ?? 8) !== (b.device_refresh_seconds ?? 8)) return false
+  if ((a.audit_enabled ?? false) !== (b.audit_enabled ?? false)) return false
   return true
 }
 

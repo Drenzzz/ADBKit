@@ -100,6 +100,9 @@ func (a *App) UpdatePreferences(payload core.PreferencesPayload) (core.AppConfig
 	if payload.DeviceRefreshSeconds > 0 {
 		a.cfg.DeviceRefreshSeconds = payload.DeviceRefreshSeconds
 	}
+	if payload.AuditEnabled != nil {
+		a.cfg.AuditEnabled = *payload.AuditEnabled
+	}
 
 	if err := core.SaveConfig(a.dataDir, a.cfg); err != nil {
 		return core.AppConfigSnapshot{}, err
@@ -152,6 +155,7 @@ func (a *App) snapshotConfigLocked() core.AppConfigSnapshot {
 		DefaultTerminalMode:  a.cfg.DefaultTerminalMode,
 		AutoRefreshDevices:   a.cfg.AutoRefreshDevices,
 		DeviceRefreshSeconds: a.cfg.DeviceRefreshSeconds,
+		AuditEnabled:         a.cfg.AuditEnabled,
 	}
 }
 

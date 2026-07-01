@@ -23,6 +23,7 @@ const initialPreferencesDraft: PreferencesPayload = {
   default_terminal_mode: 'adb-shell',
   auto_refresh_devices: true,
   device_refresh_seconds: 8,
+  audit_enabled: false,
 }
 
 const initialState: SettingsState = {
@@ -81,6 +82,7 @@ export const useSettingsStore = create<SettingsStore>()((set) => ({
         default_terminal_mode: config?.default_terminal_mode ?? 'adb-shell',
         auto_refresh_devices: config?.auto_refresh_devices ?? true,
         device_refresh_seconds: config?.device_refresh_seconds ?? 8,
+        audit_enabled: config?.audit_enabled ?? false,
       },
     }),
   setAuditLogs: (auditLogs) => set({ auditLogs }),

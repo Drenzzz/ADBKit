@@ -165,6 +165,24 @@ export function PreferencesPanel({
               )}
             </div>
           </div>
+          {/* Diagnostics Section */}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">
+              Diagnostics
+            </span>
+            <div className="flex items-center justify-between rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/30 dark:bg-[var(--muted)]/10 p-3">
+              <div className="flex flex-col">
+                <span className="text-xs font-semibold text-foreground dark:text-foreground">Audit logs</span>
+                <span className="text-[9px] text-muted-foreground/60">
+                  Record operation history for debugging
+                </span>
+              </div>
+              <Switch
+                checked={preferencesDraft.audit_enabled ?? false}
+                onCheckedChange={(v) => onDraftChange({ audit_enabled: v })}
+              />
+            </div>
+          </div>
         </div>
 
         {errorMessage && (
