@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { NoDeviceEmptyState } from '@/components/common/NoDeviceEmptyState'
 import {
   CornerDownLeft,
   Terminal as TerminalIcon,
@@ -269,6 +270,17 @@ export default function TerminalPage() {
       animate="show"
       className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden pb-0 font-sans"
     >
+      {!activeSerial && !connected ? (
+        <div className="flex-1 flex flex-col">
+          <motion.div variants={itemVariants(reduced)} className="flex flex-col gap-1 mb-4">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Terminal</h1>
+            <p className="text-xs text-muted-foreground">
+              Run shell commands, inspect logcat, and manage live terminal sessions
+            </p>
+          </motion.div>
+          <NoDeviceEmptyState feature="terminal sessions" />
+        </div>
+      ) : (
       {/* Title Header */}
       <motion.div variants={itemVariants(reduced)} className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Terminal</h1>
@@ -546,6 +558,7 @@ export default function TerminalPage() {
           )}
         </AnimatePresence>
       </motion.div>
+      )}
     </motion.div>
   )
 }

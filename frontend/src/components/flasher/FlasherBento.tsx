@@ -7,6 +7,7 @@ import { WipeDataCard } from '@/components/flasher/cards/WipeDataCard'
 import { Separator } from '@/components/ui/separator'
 import { useFlasher } from '@/hooks/useFlasher'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { NoDeviceEmptyState } from '@/components/common/NoDeviceEmptyState'
 
 export function FlasherBento() {
   const { deviceMode } = useFlasher()
@@ -37,8 +38,17 @@ export function FlasherBento() {
   const isSideload = deviceMode === 'sideload'
   const hasDevice = isFastboot || isSideload
 
-  const flashDisabled = !hasDevice || isSideload
-  const sideloadDisabled = !hasDevice || isFastboot
+  if (!hasDevice) {
+    return (
+      <div className="space-y-6">
+        <FlasherHeader />
+        <NoDeviceEmptyState feature="flashing and Fastboot operations" />
+      </div>
+    )
+  }
+
+  const flashDisabled = isSideload
+  const sideloadDisabled = isFastboot
 
   return (
     <motion.div
