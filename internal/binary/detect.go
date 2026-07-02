@@ -4,7 +4,9 @@ import (
 	"ADBKit/internal/core"
 	"context"
 	"errors"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -63,9 +65,33 @@ func (bs *Service) resolveCandidate(name, path, source string, explicit bool) *B
 		info.Reason = err.Error()
 		return info
 	}
+	if source == "app-data" {
+		if pkgErr := bs.validatePackageCompleteness(name, path); pkgErr != nil {
+			info.Status = BinaryInvalid
+			info.Reason = pkgErr.Error()
+			return info
+		}
+	}
 	info.Status = BinaryReady
 	info.Version = version
 	return info
+}
+
+func (bs *Service) validatePackageCompleteness(name, path string) error {
+	dir := filepath.Dir(path)
+	switch name {
+	case BinaryNameScrcpy:
+		serverPath := filepath.Join(dir, "scrcpy-server")
+		if _, err := os.Stat(serverPath); os.IsNotExist(err) {
+			return core.NewOperationError("validate_package", "incomplete package: missing scrcpy-server", dir, false)
+		}
+	case BinaryNameAdb, BinaryNameFastboot:
+		libDir := filepath.Join(dir, "lib64")
+		if _, err := os.Stat(libDir); os.IsNotExist(err) {
+			return core.NewOperationError("validate_package", "incomplete package: missing lib64 directory", dir, false)
+		}
+	}
+	return nil
 }
 
 func (bs *Service) getVersion(name, path string) (string, error) {
