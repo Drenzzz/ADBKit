@@ -349,3 +349,25 @@ func copyFile(src string, dst string) error {
 	}
 	return nil
 }
+
+func ValidatePackageContents(dir string, requiredFiles []string) error {
+	for _, name := range requiredFiles {
+		path := filepath.Join(dir, BinaryExecutableName(name))
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			return core.NewOperationError("validate_package", "required file missing from extracted package", name, false)
+		}
+	}
+	return nil
+}
+
+func ValidateScrcpyPackage(dir string) error {
+	info, err := os.Stat(filepath.Join(dir, BinaryExecutableName("scrcpy")))
+	if err != nil || info.IsDir() {
+		return core.NewOperationError("validate_package", "scrcpy binary missing from extracted package", "scrcpy", false)
+	}
+	serverPath := filepath.Join(dir, "scrcpy-server")
+	if _, err := os.Stat(serverPath); os.IsNotExist(err) {
+		return core.NewOperationError("validate_package", "scrcpy-server missing from extracted package", "scrcpy-server", false)
+	}
+	return nil
+}
