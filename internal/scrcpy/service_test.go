@@ -55,7 +55,7 @@ func TestParseEncoderListSections(t *testing.T) {
 --audio-codec=opus --audio-encoder=c2.android.opus.encoder
 --audio-codec=opus --audio-encoder=c2.android.opus.encoder
 `
-	video, audio := parseEncoderList(output)
+	video, audio := ParseEncoderList(output)
 	if len(video) != 1 {
 		t.Fatalf("expected single best video codec, got %d", len(video))
 	}
@@ -128,7 +128,7 @@ func TestParseEncoderListPrefersCanonicalOverOMXAlias(t *testing.T) {
 --video-codec=h264 --video-encoder=OMX.qcom.video.encoder.avc     (hw) [vendor] (alias for c2.qti.avc.encoder)
 --video-codec=h264 --video-encoder=c2.android.avc.encoder         (sw)
 `
-	video, _ := parseEncoderList(output)
+	video, _ := ParseEncoderList(output)
 	if len(video) != 1 {
 		t.Fatalf("expected single h264 entry after dedup, got %d", len(video))
 	}
