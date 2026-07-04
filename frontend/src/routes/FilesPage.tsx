@@ -4,7 +4,8 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Download, Pencil, Trash2, X } from 'lucide-react'
 import { useDevices } from '@/hooks/useDevices'
 import { useFileExplorer } from '@/hooks/useFileExplorer'
-import { getStorageInfo } from '@/services/fileService'
+import { getStorageInfo, pushMultipleFiles } from '@/services/fileService'
+import { toast } from 'sonner'
 import { Breadcrumb } from '@/components/files/Breadcrumb'
 import { StorageBar } from '@/components/files/StorageBar'
 import { FileActionBar } from '@/components/files/FileActionBar'
@@ -209,8 +210,6 @@ export default function FilesPage() {
             const paths = await fe.chooseMultipleLocalFiles()
             if (paths.length === 0) return
             const remoteDir = `${targetDir.path}`
-            const { pushMultipleFiles } = await import('@/services/fileService')
-            const { toast } = await import('sonner')
             try {
               await toast.promise(pushMultipleFiles(paths, remoteDir), {
                 loading: `Importing ${paths.length} file(s)...`,

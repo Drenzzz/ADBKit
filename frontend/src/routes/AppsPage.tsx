@@ -13,6 +13,7 @@ import {
 import { useDevices } from '@/hooks/useDevices'
 import { useAppManager } from '@/hooks/useAppManager'
 import { onFileDrop } from '@/services/fileDropService'
+import { selectApkFile } from '@/services/packageService'
 import { PackageTable } from '@/components/apps/PackageTable'
 import { BatchBar } from '@/components/apps/BatchBar'
 import { InstallApkDialog } from '@/components/apps/InstallApkDialog'
@@ -417,7 +418,6 @@ export default function AppsPage() {
           return success
         }}
         onSelectFile={async () => {
-          const { selectApkFile } = await import('@/services/packageService')
           return selectApkFile()
         }}
         initialFilePath={installApkPath}

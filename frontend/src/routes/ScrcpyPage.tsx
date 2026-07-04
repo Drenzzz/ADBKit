@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useScrcpy } from '@/hooks/useScrcpy'
 import { useScrcpyStore } from '@/stores/scrcpyStore'
+import { getScrcpyEncoderSupport } from '@/services/scrcpyService'
 import { VideoContainer } from '@/components/scrcpy/VideoContainer'
 import { ControlDock } from '@/components/scrcpy/ControlDock'
 import { RecordingIndicator } from '@/components/scrcpy/RecordingIndicator'
@@ -105,9 +106,6 @@ export default function ScrcpyPage() {
     if (!activeSerial) return
     setEncoderSupport(null)
     try {
-      const { getScrcpyEncoderSupport } = await import(
-        '@/services/scrcpyService'
-      )
       const next = await getScrcpyEncoderSupport(activeSerial)
       setEncoderSupport(next)
     } catch (err) {
