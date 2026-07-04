@@ -110,6 +110,34 @@ func (a *App) FlashRomFolder(serial string, folderPath string, plan flasher.Plan
 	})
 }
 
+// FastbootContinue boots a device out of fastboot/bootloader without a
+// physical Start/Power press (WOF - Wake on Fastboot).
+func (a *App) FastbootContinue(serial string) (string, error) {
+	return auditAction(a, "fastboot_continue", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.FastbootContinue(a.ctx, resolved)
+	})
+}
+
+// WakeScreen turns the device screen on via KEYCODE_WAKEUP, replacing the
+// physical power button once the device is booted.
+func (a *App) WakeScreen(serial string) (string, error) {
+	return auditAction(a, "wake_screen", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.WakeScreen(a.ctx, resolved)
+	})
+}
+
 func (a *App) SelectFlashImageFile() (string, error) {
 	return a.diaSvc.SelectFlashImageFile()
 }

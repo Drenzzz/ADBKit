@@ -4,6 +4,7 @@ import { PartitionFlashCard } from '@/components/flasher/cards/PartitionFlashCar
 import { RomFlashCard } from '@/components/flasher/cards/RomFlashCard'
 import { SideloadCard } from '@/components/flasher/cards/SideloadCard'
 import { WipeDataCard } from '@/components/flasher/cards/WipeDataCard'
+import { WakeOnFastbootCard } from '@/components/flasher/cards/WakeOnFastbootCard'
 import { Separator } from '@/components/ui/separator'
 import { useFlasher } from '@/hooks/useFlasher'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -70,6 +71,9 @@ export function FlasherBento() {
       <motion.div variants={itemVariants} className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <SideloadCard disabled={sideloadDisabled} />
         <WipeDataCard disabled={flashDisabled} />
+      </motion.div>
+      <motion.div variants={itemVariants}>
+        <WakeOnFastbootCard />
       </motion.div>
     </motion.div>
   )

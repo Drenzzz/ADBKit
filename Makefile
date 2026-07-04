@@ -7,11 +7,59 @@ BINARY       := $(BUILD_DIR)/$(APP_NAME)
 PLATFORM     := linux/amd64
 DIST_DIR     := dist
 
-.PHONY: dev build build-upx clean lint typecheck check all deb rpm arch appimage frontend-install
+.PHONY: help dev build build-upx clean lint typecheck check all deb rpm arch appimage frontend-install deps doctor run
+
+.DEFAULT_GOAL := help
+
+# ── Help ─────────────────────────────────────────
+help:
+	@echo "$(APP_NAME) $(VERSION) - make targets:"
+	@echo ""
+	@echo "  Development"
+	@echo "    make dev              Run app in dev mode (hot reload)"
+	@echo "    make run              Build then run the binary"
+	@echo "    make deps             Install Go + frontend deps"
+	@echo "    make doctor           Check required tools are installed"
+	@echo ""
+	@echo "  Build"
+	@echo "    make build            Production build ($(PLATFORM))"
+	@echo "    make build-upx        Production build, UPX-compressed"
+	@echo ""
+	@echo "  Quality"
+	@echo "    make lint             Lint frontend"
+	@echo "    make typecheck        Typecheck frontend"
+	@echo "    make check            lint + typecheck"
+	@echo ""
+	@echo "  Packaging"
+	@echo "    make deb rpm arch appimage    Build individual packages"
+	@echo "    make all              Build all packages into $(DIST_DIR)/"
+	@echo ""
+	@echo "  Cleanup"
+	@echo "    make clean            Remove build + dist artifacts"
+
+# ── Setup ────────────────────────────────────────
+deps: frontend-install
+	go mod download
+
+doctor:
+	@echo "Checking required tools..."
+	@command -v go >/dev/null 2>&1 && echo "  ok  go"     || echo "  MISSING go"
+	@command -v wails >/dev/null 2>&1 && echo "  ok  wails"  || echo "  MISSING wails (go install github.com/wailsapp/wails/v2/cmd/wails@latest)"
+	@command -v bun >/dev/null 2>&1 && echo "  ok  bun"    || echo "  MISSING bun (https://bun.sh)"
+	@command -v adb >/dev/null 2>&1 && echo "  ok  adb"    || echo "  MISSING adb (android-platform-tools)"
+	@command -v nfpm >/dev/null 2>&1 && echo "  ok  nfpm"   || echo "  optional: nfpm (deb/rpm packaging)"
+	@command -v makepkg >/dev/null 2>&1 && echo "  ok  makepkg" || echo "  optional: makepkg (arch packaging)"
+	@command -v upx >/dev/null 2>&1 && echo "  ok  upx"    || echo "  optional: upx (build-upx)"
+
+frontend-install:
+	cd frontend && bun install
 
 # ── Development ──────────────────────────────────
 dev:
 	wails dev
+
+run: build
+	$(BINARY)
 
 # ── Core Build ───────────────────────────────────
 build:

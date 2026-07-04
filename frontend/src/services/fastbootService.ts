@@ -12,6 +12,8 @@ import {
   SelectFlashImageFile,
   SelectSideloadFile,
   SelectDirectory,
+  FastbootContinue,
+  WakeScreen,
 } from '../../wailsjs/go/main/App'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 import type { FastbootDeviceInfo, FlashPlan } from '@/lib/types'
@@ -74,6 +76,16 @@ export async function sideloadPackage(
 
 export async function isUserspaceFastboot(serial: string): Promise<boolean> {
   return IsUserspaceFastboot(serial)
+}
+
+// WOF (Wake on Fastboot): boot out of fastboot without a physical Start press.
+export async function fastbootContinue(serial: string): Promise<string> {
+  return FastbootContinue(serial)
+}
+
+// WOF: wake the device screen via KEYCODE_WAKEUP (power-button replacement).
+export async function wakeScreen(serial: string): Promise<string> {
+  return WakeScreen(serial)
 }
 
 export async function selectFlashImageFile(): Promise<string> {

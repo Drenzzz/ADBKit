@@ -367,6 +367,37 @@ export function useFlasher() {
     store.setRomFolderPath('')
   }, [])
 
+  // WOF (Wake on Fastboot): continue boot out of fastboot without a physical
+  // Start/Power press. Falls back to the active serial when none passed.
+  const continueBoot = useCallback(async () => {
+    const serial = store.activeFastbootSerial
+    if (!serial) {
+      toast.error('No fastboot device connected')
+      return
+    }
+    try {
+      const result = await fastbootSvc.fastbootContinue(serial)
+      toast.success(result || `Continuing boot on ${serial}`)
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    }
+  }, [store.activeFastbootSerial])
+
+  // WOF: wake the device screen via KEYCODE_WAKEUP (power-button replacement).
+  const wakeScreen = useCallback(async () => {
+    const serial = store.activeFastbootSerial
+    if (!serial) {
+      toast.error('No device connected')
+      return
+    }
+    try {
+      const result = await fastbootSvc.wakeScreen(serial)
+      toast.success(result || `Wake signal sent to ${serial}`)
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    }
+  }, [store.activeFastbootSerial])
+
   return {
     ...store,
     syncFastbootDevices: syncDevices,
@@ -382,5 +413,7 @@ export function useFlasher() {
     executeSideload,
     executeCustomCommand,
     resetFlashPlan,
+    continueBoot,
+    wakeScreen,
   }
 }

@@ -82,6 +82,10 @@ export function ExportAuditLogs(arg1) {
   return window['go']['main']['App']['ExportAuditLogs'](arg1);
 }
 
+export function FastbootContinue(arg1) {
+  return window['go']['main']['App']['FastbootContinue'](arg1);
+}
+
 export function FlashPartition(arg1, arg2, arg3) {
   return window['go']['main']['App']['FlashPartition'](arg1, arg2, arg3);
 }
@@ -360,6 +364,10 @@ export function UninstallPackage(arg1) {
 
 export function UpdatePreferences(arg1) {
   return window['go']['main']['App']['UpdatePreferences'](arg1);
+}
+
+export function WakeScreen(arg1) {
+  return window['go']['main']['App']['WakeScreen'](arg1);
 }
 
 export function WipeData(arg1) {

@@ -51,6 +51,8 @@ export function EnableWirelessTCPIP(arg1:string,arg2:string):Promise<string>;
 
 export function ExportAuditLogs(arg1:string):Promise<void>;
 
+export function FastbootContinue(arg1:string):Promise<string>;
+
 export function FlashPartition(arg1:string,arg2:string,arg3:string):Promise<string>;
 
 export function FlashRomFolder(arg1:string,arg2:string,arg3:flasher.Plan):Promise<string>;
@@ -190,5 +192,7 @@ export function UninstallMultiplePackages(arg1:Array<string>):Promise<string>;
 export function UninstallPackage(arg1:string):Promise<string>;
 
 export function UpdatePreferences(arg1:core.PreferencesPayload):Promise<core.AppConfigSnapshot>;
+
+export function WakeScreen(arg1:string):Promise<string>;
 
 export function WipeData(arg1:string):Promise<string>;
