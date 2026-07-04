@@ -398,6 +398,50 @@ export function useFlasher() {
     }
   }, [store.activeFastbootSerial])
 
+  // WOF: wake + dismiss non-secure keyguard (one-tap turn-on).
+  const wakeAndUnlock = useCallback(async () => {
+    const serial = store.activeFastbootSerial
+    if (!serial) {
+      toast.error('No device connected')
+      return
+    }
+    try {
+      const result = await fastbootSvc.wakeAndUnlock(serial)
+      toast.success(result || `Wake + unlock sent to ${serial}`)
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    }
+  }, [store.activeFastbootSerial])
+
+  // WOF: toggle "Stay awake while charging" so the screen never sleeps on USB.
+  const setStayAwake = useCallback(
+    async (enabled: boolean) => {
+      const serial = store.activeFastbootSerial
+      if (!serial) {
+        toast.error('No device connected')
+        return
+      }
+      try {
+        const result = await fastbootSvc.setStayAwakeWhileCharging(serial, enabled)
+        toast.success(result)
+      } catch (err) {
+        toast.error(getErrorMessage(err))
+        throw err
+      }
+    },
+    [store.activeFastbootSerial],
+  )
+
+  const getStayAwake = useCallback(async (): Promise<boolean> => {
+    const serial = store.activeFastbootSerial
+    if (!serial) return false
+    try {
+      return await fastbootSvc.getStayAwakeWhileCharging(serial)
+    } catch {
+      return false
+    }
+  }, [store.activeFastbootSerial])
+
   return {
     ...store,
     syncFastbootDevices: syncDevices,
@@ -415,5 +459,8 @@ export function useFlasher() {
     resetFlashPlan,
     continueBoot,
     wakeScreen,
+    wakeAndUnlock,
+    setStayAwake,
+    getStayAwake,
   }
 }

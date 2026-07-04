@@ -1,8 +1,14 @@
+<div align="center">
+
+<img src="build/appicon.png" alt="ADBKit logo" width="128" height="128" />
+
 # ADBKit
 
 A modern, unified desktop GUI for **ADB**, **Fastboot**, and **scrcpy** — built with [Wails v2](https://wails.io) (Go + React) for native performance and lightweight resource usage.
 
 > Android device management, visualized. From flashing ROMs to mirroring screens, ADBKit brings every terminal-heavy workflow into one structured desktop app.
+
+</div>
 
 ---
 
@@ -45,6 +51,10 @@ A modern, unified desktop GUI for **ADB**, **Fastboot**, and **scrcpy** — buil
 - Wipe data with confirmation guardrail
 - Sideload ZIP packages
 - Custom Fastboot command input with argument sanitization
+- **Wake on Fastboot (WOF)** — power-button replacement for devices with a broken/dead power button:
+  - Stay Awake While Charging toggle (screen never sleeps on any charger)
+  - Wake + Unlock (KEYCODE_WAKEUP + non-secure keyguard dismiss)
+  - Continue Boot (`fastboot continue` to exit the bootloader hands-free)
 - Extra confirmation for all destructive actions
 
 **Terminal**
@@ -159,7 +169,39 @@ ADBKit manages binaries through a detection-first approach:
 
 ## Building from Source
 
-**Prerequisites:** Go 1.23+, Bun
+**Prerequisites:** Go 1.23+, Bun, [Wails CLI](https://wails.io/docs/gettingstarted/installation)
+
+A `Makefile` wraps the common workflows. Run `make` (or `make help`) to list all targets.
+
+```bash
+# Check that required tools are installed (go, wails, bun, adb, ...)
+make doctor
+
+# Install Go + frontend dependencies
+make deps
+
+# Development (hot reload)
+make dev
+
+# Production build
+make build          # -> build/bin/ADBKit
+make build-upx      # UPX-compressed build
+
+# Build then run the binary
+make run
+
+# Quality
+make lint           # frontend lint
+make typecheck      # frontend typecheck
+make check          # lint + typecheck
+
+# Packaging (Linux)
+make deb rpm arch appimage   # individual packages
+make all                     # all packages -> dist/
+```
+
+<details>
+<summary>Manual (without make)</summary>
 
 ```bash
 # Install frontend dependencies
@@ -180,6 +222,8 @@ cd frontend && bun run lint
 # Go tests
 go test ./...
 ```
+
+</details>
 
 ---
 

@@ -138,6 +138,47 @@ func (a *App) WakeScreen(serial string) (string, error) {
 	})
 }
 
+// WakeAndUnlock wakes the screen and dismisses a non-secure keyguard in one
+// call (WOF one-tap turn-on for a dead power button).
+func (a *App) WakeAndUnlock(serial string) (string, error) {
+	return auditAction(a, "wake_and_unlock", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.WakeAndUnlock(a.ctx, resolved)
+	})
+}
+
+// SetStayAwakeWhileCharging toggles the "Stay awake" developer option so the
+// device never sleeps while charging (WOF power-button workaround).
+func (a *App) SetStayAwakeWhileCharging(serial string, enabled bool) (string, error) {
+	return auditAction(a, "set_stay_awake", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.SetStayAwakeWhileCharging(a.ctx, resolved, enabled)
+	})
+}
+
+// GetStayAwakeWhileCharging reports the current "Stay awake" setting state.
+func (a *App) GetStayAwakeWhileCharging(serial string) (bool, error) {
+	return auditAction(a, "get_stay_awake", func() (bool, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.fbSvc.GetStayAwakeWhileCharging(a.ctx, resolved)
+	})
+}
+
 func (a *App) SelectFlashImageFile() (string, error) {
 	return a.diaSvc.SelectFlashImageFile()
 }
