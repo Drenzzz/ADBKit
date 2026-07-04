@@ -6,6 +6,10 @@ BUILD_DIR    := build/bin
 BINARY       := $(BUILD_DIR)/$(APP_NAME)
 PLATFORM     := linux/amd64
 DIST_DIR     := dist
+# WebKitGTK build tag. Many modern distros ship webkit2gtk-4.1 instead of 4.0;
+# override on the CLI if needed:  make dev WEBKIT_TAG=
+WEBKIT_TAG   := webkit2_41
+WAILS_TAGS   := $(if $(WEBKIT_TAG),-tags $(WEBKIT_TAG),)
 
 .PHONY: help dev build build-upx clean lint typecheck check all deb rpm arch appimage frontend-install deps doctor run
 
@@ -56,17 +60,17 @@ frontend-install:
 
 # ── Development ──────────────────────────────────
 dev:
-	wails dev
+	wails dev $(WAILS_TAGS)
 
 run: build
 	$(BINARY)
 
 # ── Core Build ───────────────────────────────────
 build:
-	wails build -platform $(PLATFORM) -clean
+	wails build -platform $(PLATFORM) $(WAILS_TAGS) -clean
 
 build-upx:
-	wails build -platform $(PLATFORM) -clean -upx
+	wails build -platform $(PLATFORM) $(WAILS_TAGS) -clean -upx
 
 # ── Quality ──────────────────────────────────────
 lint:
