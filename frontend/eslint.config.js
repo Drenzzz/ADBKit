@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'wailsjs']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -17,6 +17,26 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+    },
+    rules: {
+      'react-refresh/only-export-components': [
+        'error',
+        { allowConstantExport: true },
+      ],
+      // React Compiler (eslint-plugin-react-hooks v6 RC) advisory perf hints,
+      // not correctness bugs — keep visible as warnings, do not block builds.
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/purity': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/incompatible-library': 'warn',
+    },
+  },
+  {
+    // shadcn/ui primitives intentionally co-locate cva variant exports with
+    // their components; Fast Refresh is irrelevant for these leaf files.
+    files: ['src/components/ui/**/*.{ts,tsx}', 'src/App.tsx', 'src/components/scrcpy/EncoderBadge.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 ])
