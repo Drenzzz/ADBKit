@@ -97,6 +97,31 @@ export function BottomDock() {
         onMouseEnter={handleDockMouseEnter}
       />
 
+      {/* Persistent handle — always-visible affordance so nav is discoverable.
+          Hidden while the full dock is open. */}
+      <AnimatePresence>
+        {!isVisible && (
+          <motion.button
+            type="button"
+            aria-label="Open navigation"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+            onMouseEnter={handleDockMouseEnter}
+            onClick={handleDockMouseEnter}
+            className={cn(
+              'fixed bottom-2 left-1/2 z-40 -translate-x-1/2',
+              'flex items-center gap-1.5 rounded-full px-3 py-1',
+              'border border-border/50 bg-background/90 dark:bg-zinc-900/90 shadow-md backdrop-blur-sm',
+              'text-muted-foreground hover:text-foreground transition-colors cursor-pointer',
+            )}
+          >
+            <span className="h-1 w-8 rounded-full bg-border" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {isVisible && (
           <motion.div
