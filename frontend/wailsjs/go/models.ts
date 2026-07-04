@@ -222,6 +222,7 @@ export namespace core {
 	    default_terminal_mode: string;
 	    auto_refresh_devices: boolean;
 	    device_refresh_seconds: number;
+	    audit_enabled: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppConfigSnapshot(source);
@@ -241,6 +242,7 @@ export namespace core {
 	        this.default_terminal_mode = source["default_terminal_mode"];
 	        this.auto_refresh_devices = source["auto_refresh_devices"];
 	        this.device_refresh_seconds = source["device_refresh_seconds"];
+	        this.audit_enabled = source["audit_enabled"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -291,6 +293,7 @@ export namespace core {
 	    default_terminal_mode: string;
 	    auto_refresh_devices: boolean;
 	    device_refresh_seconds: number;
+	    audit_enabled?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new PreferencesPayload(source);
@@ -305,6 +308,7 @@ export namespace core {
 	        this.default_terminal_mode = source["default_terminal_mode"];
 	        this.auto_refresh_devices = source["auto_refresh_devices"];
 	        this.device_refresh_seconds = source["device_refresh_seconds"];
+	        this.audit_enabled = source["audit_enabled"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

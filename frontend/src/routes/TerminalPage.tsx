@@ -281,6 +281,7 @@ export default function TerminalPage() {
           <NoDeviceEmptyState feature="terminal sessions" />
         </div>
       ) : (
+        <>
       {/* Title Header */}
       <motion.div variants={itemVariants(reduced)} className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Terminal</h1>
@@ -558,6 +559,7 @@ export default function TerminalPage() {
           )}
         </AnimatePresence>
       </motion.div>
+        </>
       )}
     </motion.div>
   )
