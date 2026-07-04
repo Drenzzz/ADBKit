@@ -1,6 +1,13 @@
 build/bin
+build/tools
+build/pkg
+build/AppImage-out
+build/*.pkg.tar.*
 node_modules
 frontend/dist
 *.log
 .env
 .env.local
+dist/
+packaging/arch/pkg/
+packaging/arch/*.pkg.tar.*

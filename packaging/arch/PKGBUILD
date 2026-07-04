@@ -1,0 +1,27 @@
+# Maintainer: Drenzzz <realdrenzzz@gmail.com>
+pkgname=adbkit
+pkgver=2.0.0beta1
+pkgrel=1
+pkgdesc="Modern desktop toolkit for ADB, Fastboot, and scrcpy"
+arch=('x86_64')
+url="https://github.com/drenzzz/adbkit"
+license=('MIT')
+depends=('gtk3' 'webkit2gtk-4.1')
+provides=('adbkit')
+conflicts=('adbkit')
+source=()
+md5sums=()
+
+build() {
+  cd "$startdir/../.."
+  # Binary already built by 'make build' — skip wails build inside makepkg
+  # to avoid Go embed scanning conflicts with makepkg's pkg/ directories
+  :
+}
+
+package() {
+  cd "$startdir/../.."
+  install -Dm755 build/bin/ADBKit "$pkgdir/usr/bin/ADBKit"
+  install -Dm644 build/linux/ADBKit.desktop "$pkgdir/usr/share/applications/ADBKit.desktop"
+  install -Dm644 build/appicon.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/ADBKit.png"
+}

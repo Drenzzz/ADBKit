@@ -7,6 +7,28 @@ The structure is:
 * bin - Output directory
 * darwin - macOS specific files
 * windows - Windows specific files
+* linux - Linux packaging assets (`.desktop` file)
+
+## Linux
+
+Build commands:
+
+```bash
+make build           # Build binary (linux/amd64)
+make deb             # Build .deb package (Debian/Ubuntu)
+make rpm             # Build .rpm package (Fedora/RHEL)
+make arch            # Build .pkg.tar.zst package (Arch Linux)
+make appimage        # Build AppImage (universal)
+make all             # Build all packages
+```
+
+System dependencies (Debian/Ubuntu):
+
+```bash
+sudo apt install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+```
+
+The `PKGBUILD` for Arch is in `packaging/arch/`.
 
 ## Mac
 
