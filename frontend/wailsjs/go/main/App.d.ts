@@ -51,6 +51,8 @@ export function EnableWirelessTCPIP(arg1:string,arg2:string):Promise<string>;
 
 export function ExportAuditLogs(arg1:string):Promise<void>;
 
+export function FastbootContinue(arg1:string):Promise<string>;
+
 export function FlashPartition(arg1:string,arg2:string,arg3:string):Promise<string>;
 
 export function FlashRomFolder(arg1:string,arg2:string,arg3:flasher.Plan):Promise<string>;
@@ -96,6 +98,8 @@ export function GetScrcpyClipboard(arg1:string):Promise<string>;
 export function GetScrcpyEncoderSupport(arg1:string):Promise<scrcpy.EncoderSupport>;
 
 export function GetSetupState():Promise<binary.SetupState>;
+
+export function GetStayAwakeWhileCharging(arg1:string):Promise<boolean>;
 
 export function GetStorageInfo():Promise<file.StorageInfo>;
 
@@ -165,6 +169,8 @@ export function SetCustomBinary(arg1:string,arg2:string):Promise<void>;
 
 export function SetDeviceNickname(arg1:string,arg2:string):Promise<void>;
 
+export function SetStayAwakeWhileCharging(arg1:string,arg2:boolean):Promise<string>;
+
 export function SideloadPackage(arg1:string,arg2:string):Promise<string>;
 
 export function StartLogcat(arg1:string,arg2:string,arg3:string):Promise<void>;
@@ -190,5 +196,9 @@ export function UninstallMultiplePackages(arg1:Array<string>):Promise<string>;
 export function UninstallPackage(arg1:string):Promise<string>;
 
 export function UpdatePreferences(arg1:core.PreferencesPayload):Promise<core.AppConfigSnapshot>;
+
+export function WakeAndUnlock(arg1:string):Promise<string>;
+
+export function WakeScreen(arg1:string):Promise<string>;
 
 export function WipeData(arg1:string):Promise<string>;

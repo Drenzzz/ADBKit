@@ -82,6 +82,10 @@ export function ExportAuditLogs(arg1) {
   return window['go']['main']['App']['ExportAuditLogs'](arg1);
 }
 
+export function FastbootContinue(arg1) {
+  return window['go']['main']['App']['FastbootContinue'](arg1);
+}
+
 export function FlashPartition(arg1, arg2, arg3) {
   return window['go']['main']['App']['FlashPartition'](arg1, arg2, arg3);
 }
@@ -172,6 +176,10 @@ export function GetScrcpyEncoderSupport(arg1) {
 
 export function GetSetupState() {
   return window['go']['main']['App']['GetSetupState']();
+}
+
+export function GetStayAwakeWhileCharging(arg1) {
+  return window['go']['main']['App']['GetStayAwakeWhileCharging'](arg1);
 }
 
 export function GetStorageInfo() {
@@ -310,6 +318,10 @@ export function SetDeviceNickname(arg1, arg2) {
   return window['go']['main']['App']['SetDeviceNickname'](arg1, arg2);
 }
 
+export function SetStayAwakeWhileCharging(arg1, arg2) {
+  return window['go']['main']['App']['SetStayAwakeWhileCharging'](arg1, arg2);
+}
+
 export function SideloadPackage(arg1, arg2) {
   return window['go']['main']['App']['SideloadPackage'](arg1, arg2);
 }
@@ -360,6 +372,14 @@ export function UninstallPackage(arg1) {
 
 export function UpdatePreferences(arg1) {
   return window['go']['main']['App']['UpdatePreferences'](arg1);
+}
+
+export function WakeAndUnlock(arg1) {
+  return window['go']['main']['App']['WakeAndUnlock'](arg1);
+}
+
+export function WakeScreen(arg1) {
+  return window['go']['main']['App']['WakeScreen'](arg1);
 }
 
 export function WipeData(arg1) {

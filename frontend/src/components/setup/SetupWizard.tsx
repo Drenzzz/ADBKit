@@ -5,9 +5,9 @@ import { PlatformToolsStep } from './PlatformToolsStep'
 import { ScrcpyStep } from './ScrcpyStep'
 import { SummaryStep } from './SummaryStep'
 import type { SetupWizardStep } from '@/lib/types'
-import { Monitor, Terminal, HelpCircle, CheckCircle2 } from 'lucide-react'
+import { Monitor, Terminal, HelpCircle, CheckCircle2, type LucideIcon } from 'lucide-react'
 
-const STEPS: { key: SetupWizardStep; label: string; icon: any }[] = [
+const STEPS: { key: SetupWizardStep; label: string; icon: LucideIcon }[] = [
   { key: 'welcome', label: 'Welcome', icon: HelpCircle },
   { key: 'platform-tools', label: 'Platform Tools', icon: Terminal },
   { key: 'scrcpy', label: 'Scrcpy', icon: Monitor },

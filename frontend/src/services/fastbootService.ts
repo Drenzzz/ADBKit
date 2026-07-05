@@ -12,6 +12,11 @@ import {
   SelectFlashImageFile,
   SelectSideloadFile,
   SelectDirectory,
+  FastbootContinue,
+  WakeScreen,
+  WakeAndUnlock,
+  SetStayAwakeWhileCharging,
+  GetStayAwakeWhileCharging,
 } from '../../wailsjs/go/main/App'
 import { EventsOn } from '../../wailsjs/runtime/runtime'
 import type { FastbootDeviceInfo, FlashPlan } from '@/lib/types'
@@ -74,6 +79,33 @@ export async function sideloadPackage(
 
 export async function isUserspaceFastboot(serial: string): Promise<boolean> {
   return IsUserspaceFastboot(serial)
+}
+
+// WOF (Wake on Fastboot): boot out of fastboot without a physical Start press.
+export async function fastbootContinue(serial: string): Promise<string> {
+  return FastbootContinue(serial)
+}
+
+// WOF: wake the device screen via KEYCODE_WAKEUP (power-button replacement).
+export async function wakeScreen(serial: string): Promise<string> {
+  return WakeScreen(serial)
+}
+
+// WOF: wake + dismiss non-secure keyguard in one call.
+export async function wakeAndUnlock(serial: string): Promise<string> {
+  return WakeAndUnlock(serial)
+}
+
+// WOF: toggle "Stay awake while charging" developer option.
+export async function setStayAwakeWhileCharging(
+  serial: string,
+  enabled: boolean,
+): Promise<string> {
+  return SetStayAwakeWhileCharging(serial, enabled)
+}
+
+export async function getStayAwakeWhileCharging(serial: string): Promise<boolean> {
+  return GetStayAwakeWhileCharging(serial)
 }
 
 export async function selectFlashImageFile(): Promise<string> {
