@@ -45,6 +45,7 @@ export function WelcomeStep() {
   return (
     <div className="flex flex-col gap-6 text-left w-full">
       <div className="flex flex-col gap-2">
+        <img src="/logo.webp" alt="ADBKit" className="h-14 w-14 object-contain mb-1" />
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           Welcome to ADBKit
         </h1>

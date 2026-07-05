@@ -15,6 +15,7 @@ function PageLoader() {
   return (
     <div className="flex flex-1 items-center justify-center">
       <div className="flex flex-col items-center gap-3">
+        <img src="/logo.webp" alt="ADBKit" className="h-10 w-10 object-contain opacity-80" />
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary" />
         <span className="text-xs text-muted-foreground">Loading…</span>
       </div>

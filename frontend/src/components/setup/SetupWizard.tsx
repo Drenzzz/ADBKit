@@ -20,9 +20,7 @@ function SidebarStepper({ current }: { current: SetupWizardStep }) {
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="flex items-center gap-2.5 px-2 py-4 border-b border-border/20">
-        <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center text-white shadow-sm">
-          <Terminal className="h-4.5 w-4.5" />
-        </div>
+        <img src="/logo.webp" alt="ADBKit" className="h-6 w-6 object-contain" />
         <div className="flex flex-col">
           <span className="text-xs font-semibold text-foreground tracking-tight select-none">
             ADBKit Setup
