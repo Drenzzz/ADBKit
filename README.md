@@ -100,7 +100,7 @@ A modern, unified desktop GUI for **ADB**, **Fastboot**, and **scrcpy** — buil
 
 ## Screenshots
 
-*Coming soon — screenshots will be available in the [screenshots/](screenshots/) directory.*
+Screenshots of each module are available in [here](screenshots/README.md).
 
 ---
 
