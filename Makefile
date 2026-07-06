@@ -1,7 +1,7 @@
 APP_NAME     := ADBKit
-VERSION      := 2.0.0-beta1
-VERSION_DEB  := 2.0.0~beta1
-VERSION_ARCH := 2.0.0beta1
+VERSION      := 2.0.0-beta2
+VERSION_DEB  := 2.0.0~beta2
+VERSION_ARCH := 2.0.0beta2
 BUILD_DIR    := build/bin
 BINARY       := $(BUILD_DIR)/$(APP_NAME)
 PLATFORM     := linux/amd64

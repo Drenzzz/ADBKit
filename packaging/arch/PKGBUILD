@@ -1,6 +1,6 @@
 # Maintainer: Drenzzz <realdrenzzz@gmail.com>
 pkgname=adbkit
-pkgver=2.0.0beta1
+pkgver=2.0.0beta2
 pkgrel=1
 pkgdesc="Modern desktop toolkit for ADB, Fastboot, and scrcpy"
 arch=('x86_64')
