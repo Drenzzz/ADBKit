@@ -30,6 +30,9 @@ const FASTBOOT_OPTIONS: RebootOption[] = [
 
 const RECOVERY_OPTIONS: RebootOption[] = [
   { mode: 'system', label: 'Exit to System', icon: ArrowRight, variant: 'outline' },
+  { mode: 'bootloader', label: 'Bootloader', icon: Shield, variant: 'outline' },
+  { mode: 'recovery', label: 'Recovery', icon: Power, variant: 'outline' },
+  { mode: 'fastboot', label: 'Reboot Fastbootd', icon: RotateCw, variant: 'outline' },
 ]
 
 function isWireless(serial: string): boolean {

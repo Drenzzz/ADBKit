@@ -40,7 +40,9 @@ func (s *Service) RebootDevice(ctx context.Context, serial string, mode string) 
 
 	case ModeFastboot:
 		args := []string{"reboot"}
-		if mode != "" {
+		// fastboot does not accept "system" as a reboot target;
+		// bare "fastboot reboot" already boots to system.
+		if mode != "" && mode != "system" {
 			args = append(args, mode)
 		}
 		result, err := core.RunCommand(ctx, core.ExecRequest{
