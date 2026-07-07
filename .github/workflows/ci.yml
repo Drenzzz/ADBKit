@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  frontend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        working-directory: frontend
+        run: bun run lint
+
+      - name: Typecheck
+        working-directory: frontend
+        run: bun run typecheck
+
+  go-test:
+    runs-on: ubuntu-latest
+    needs: [frontend-check]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend (needed for go:embed)
+        working-directory: frontend
+        run: bun run build
+
+      - name: Download Go dependencies
+        run: go mod download
+
+      - name: Run tests
+        run: go test ./...
+
+  go-build:
+    runs-on: ubuntu-latest
+    needs: [go-test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend (needed for go:embed)
+        working-directory: frontend
+        run: bun run build
+
+      - name: Download Go dependencies
+        run: go mod download
+
+      - name: Build
+        run: go build ./...
