@@ -34,7 +34,6 @@ describe('useFlasherStore', () => {
 
   it('sets flash plan and creates steps', () => {
     const plan: FlashPlan = {
-      folder_path: '/tmp/rom',
       steps: [
         { partition: 'boot', image_file: '/tmp/rom/boot.img' },
         { partition: 'system', image_file: '/tmp/rom/system.img' },
@@ -52,7 +51,6 @@ describe('useFlasherStore', () => {
 
   it('clears flash plan when null', () => {
     const plan: FlashPlan = {
-      folder_path: '/tmp/rom',
       steps: [{ partition: 'boot', image_file: '/tmp/boot.img' }],
     }
     useFlasherStore.getState().setFlashPlan(plan)
@@ -66,7 +64,6 @@ describe('useFlasherStore', () => {
 
   it('updates flash plan step status', () => {
     const plan: FlashPlan = {
-      folder_path: '/tmp/rom',
       steps: [{ partition: 'boot', image_file: '/tmp/boot.img' }],
     }
     useFlasherStore.getState().setFlashPlan(plan)
@@ -77,7 +74,6 @@ describe('useFlasherStore', () => {
 
   it('toggles partition selection', () => {
     const plan: FlashPlan = {
-      folder_path: '/tmp/rom',
       steps: [
         { partition: 'boot', image_file: '/tmp/boot.img' },
         { partition: 'system', image_file: '/tmp/system.img' },
@@ -94,7 +90,6 @@ describe('useFlasherStore', () => {
 
   it('selects and deselects all partitions', () => {
     const plan: FlashPlan = {
-      folder_path: '/tmp/rom',
       steps: [
         { partition: 'boot', image_file: '/tmp/boot.img' },
         { partition: 'system', image_file: '/tmp/system.img' },
