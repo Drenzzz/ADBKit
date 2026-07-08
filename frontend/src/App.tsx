@@ -1,5 +1,6 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, type ReactNode } from 'react'
 import { createHashRouter } from 'react-router-dom'
+import { RouteErrorBoundary } from '@/components/common/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
 
 const DashboardPage = lazy(() => import('@/routes/DashboardPage'))
@@ -23,6 +24,14 @@ function PageLoader() {
   )
 }
 
+function routeElement(page: ReactNode) {
+  return (
+    <RouteErrorBoundary>
+      <Suspense fallback={<PageLoader />}>{page}</Suspense>
+    </RouteErrorBoundary>
+  )
+}
+
 export const router = createHashRouter([
   {
     path: '/',
@@ -30,67 +39,35 @@ export const router = createHashRouter([
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <DashboardPage />
-          </Suspense>
-        ),
+        element: routeElement(<DashboardPage />),
       },
       {
         path: 'devices',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <DevicesPage />
-          </Suspense>
-        ),
+        element: routeElement(<DevicesPage />),
       },
       {
         path: 'apps',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <AppsPage />
-          </Suspense>
-        ),
+        element: routeElement(<AppsPage />),
       },
       {
         path: 'files',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <FilesPage />
-          </Suspense>
-        ),
+        element: routeElement(<FilesPage />),
       },
       {
         path: 'flasher',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <FlasherPage />
-          </Suspense>
-        ),
+        element: routeElement(<FlasherPage />),
       },
       {
         path: 'terminal',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <TerminalPage />
-          </Suspense>
-        ),
+        element: routeElement(<TerminalPage />),
       },
       {
         path: 'scrcpy',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <ScrcpyPage />
-          </Suspense>
-        ),
+        element: routeElement(<ScrcpyPage />),
       },
       {
         path: 'settings',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <SettingsPage />
-          </Suspense>
-        ),
+        element: routeElement(<SettingsPage />),
       },
     ],
   },
