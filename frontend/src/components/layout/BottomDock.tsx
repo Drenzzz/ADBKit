@@ -126,6 +126,8 @@ export function BottomDock() {
         {isVisible && (
           <motion.div
             ref={containerRef}
+            role="navigation"
+            aria-label="Main navigation"
             initial={{ opacity: 0, y: 20, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -154,6 +156,8 @@ export function BottomDock() {
 
                   <button
                     onClick={() => navigate(item.to)}
+                    aria-label={item.label}
+                    aria-current={isActive ? 'page' : undefined}
                     className={cn(
                       'relative flex items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 transition-colors duration-200 cursor-pointer',
                       isActive
@@ -238,6 +242,7 @@ export function BottomDock() {
 
               <button
                 onClick={handleToggleTheme}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                 className="flex items-center justify-center rounded-xl p-2 text-muted-foreground transition-colors duration-150 hover:bg-muted/40 hover:text-foreground cursor-pointer"
               >
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
