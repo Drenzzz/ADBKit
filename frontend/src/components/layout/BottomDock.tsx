@@ -173,7 +173,7 @@ export function BottomDock() {
                           initial={{ opacity: 0, scaleX: 0 }}
                           animate={{ opacity: 1, scaleX: 1 }}
                           exit={{ opacity: 0, scaleX: 0 }}
-                          transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
+                          transition={reduced ? { duration: 0 } : { duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
                           className="origin-left overflow-hidden text-[11px] font-medium leading-none whitespace-nowrap"
                         >
                           {item.label}
