@@ -81,6 +81,16 @@ typecheck:
 
 check: lint typecheck
 
+test:
+	cd frontend && bun run test
+	go test ./...
+
+test-coverage:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -func=coverage.out
+
+check-all: check test
+
 # ── Packaging ────────────────────────────────────
 deb: build
 	mkdir -p $(DIST_DIR)
