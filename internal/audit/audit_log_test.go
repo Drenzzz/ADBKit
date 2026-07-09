@@ -3,6 +3,7 @@ package audit
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -20,8 +21,10 @@ func TestAuditLoggerCreatesPrivateStorage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected data directory to exist: %v", err)
 	}
-	if dirInfo.Mode().Perm() != 0o700 {
-		t.Fatalf("expected data directory permission 0700, got %o", dirInfo.Mode().Perm())
+	if runtime.GOOS != "windows" {
+		if dirInfo.Mode().Perm() != 0o700 {
+			t.Fatalf("expected data directory permission 0700, got %o", dirInfo.Mode().Perm())
+		}
 	}
 
 	logger.saveNow()
@@ -31,8 +34,10 @@ func TestAuditLoggerCreatesPrivateStorage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected audit log file to exist: %v", err)
 	}
-	if logInfo.Mode().Perm() != 0o600 {
-		t.Fatalf("expected audit log permission 0600, got %o", logInfo.Mode().Perm())
+	if runtime.GOOS != "windows" {
+		if logInfo.Mode().Perm() != 0o600 {
+			t.Fatalf("expected audit log permission 0600, got %o", logInfo.Mode().Perm())
+		}
 	}
 
 	data, err := os.ReadFile(logPath)
