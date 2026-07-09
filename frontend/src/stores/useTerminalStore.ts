@@ -9,6 +9,7 @@ import type {
 } from '@/lib/types'
 
 const TERMINAL_HISTORY_LIMIT = 200
+const TERMINAL_OUTPUT_LIMIT = 100_000
 
 interface TerminalActions {
   setSession: (session: TerminalSession | null) => void
@@ -65,7 +66,7 @@ export const useTerminalStore = create<TerminalStore>()((set) => ({
   setError: (error) => set({ error }),
   appendOutput: (output) =>
     set((state) => ({
-      output: `${state.output}${output}`,
+      output: `${state.output}${output}`.slice(-TERMINAL_OUTPUT_LIMIT),
     })),
   clearOutput: () => set({ output: '' }),
   pushHistory: (command, serial, mode) =>
@@ -94,7 +95,7 @@ export const useTerminalStore = create<TerminalStore>()((set) => ({
       }
 
       return {
-        output: `${state.output}${event.data}`,
+        output: `${state.output}${event.data}`.slice(-TERMINAL_OUTPUT_LIMIT),
       }
     }),
   applyClosedEvent: (event) =>
