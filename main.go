@@ -23,11 +23,12 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "ADBKit",
-		Width:  1600,
-		Height: 900,
-		MinWidth:  1024,
-		MinHeight: 768,
+		Title:            "ADBKit",
+		Width:            1280,
+		Height:           800,
+		MinWidth:         1024,
+		MinHeight:        720,
+		WindowStartState: options.Maximised,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
