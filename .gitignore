@@ -11,3 +11,22 @@ frontend/dist
 dist/
 packaging/arch/pkg/
 packaging/arch/*.pkg.tar.*
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+*.exe
+*.deb
+*.AppImage
+*.dmg
