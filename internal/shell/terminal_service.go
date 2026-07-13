@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/google/uuid"
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -36,6 +38,7 @@ type terminalProcess struct {
 	cmd     *exec.Cmd
 	binary  string
 	once    sync.Once
+	running atomic.Bool
 }
 
 type TerminalService struct {
@@ -137,6 +140,9 @@ func (s *TerminalService) SendInput(sessionID string, input string) error {
 		return nil
 	}
 
+	if !process.running.CompareAndSwap(false, true) {
+		return core.NewOperationError("send_terminal_input", "A command is already running", "wait for the current command to finish", true)
+	}
 	go s.runCommand(process, trimmedInput)
 	return nil
 }
@@ -165,6 +171,7 @@ func (s *TerminalService) Shutdown() {
 }
 
 func (s *TerminalService) runCommand(process *terminalProcess, input string) {
+	defer process.running.Store(false)
 	args := splitTerminalArgs(input)
 	if len(args) == 0 {
 		return
@@ -186,6 +193,7 @@ func (s *TerminalService) runCommand(process *terminalProcess, input string) {
 	result, err := core.RunCommand(context.Background(), core.ExecRequest{
 		Command: process.binary,
 		Args:    commandArgs,
+		Timeout: 2 * time.Minute,
 	})
 	if err != nil {
 		s.emitSessionOutput(process.session, fmt.Sprintf("%s\r\n\r\n", err.Error()))
