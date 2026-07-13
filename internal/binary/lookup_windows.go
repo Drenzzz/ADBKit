@@ -10,11 +10,30 @@ import (
 
 func (bs *Service) commonPaths(name string) []string {
 	home, _ := os.UserHomeDir()
-	appData := os.Getenv("APPDATA")
+	localAppData := os.Getenv("LOCALAPPDATA")
+	androidHome := os.Getenv("ANDROID_HOME")
+	androidSDKRoot := os.Getenv("ANDROID_SDK_ROOT")
 	executable := core.BinaryExecutableName(name)
 
-	return []string{
+	paths := []string{
+		filepath.Join(androidSDKRoot, "platform-tools", executable),
+		filepath.Join(androidHome, "platform-tools", executable),
+		filepath.Join(localAppData, "Android", "Sdk", "platform-tools", executable),
 		filepath.Join(home, "AppData", "Local", "Android", "Sdk", "platform-tools", executable),
-		filepath.Join(appData, "adbkit", "bin", executable),
+		filepath.Join("C:", "Android", "Sdk", "platform-tools", executable),
 	}
+
+	result := make([]string, 0, len(paths))
+	seen := make(map[string]struct{})
+	for _, candidate := range paths {
+		if candidate == "" {
+			continue
+		}
+		if _, ok := seen[candidate]; ok {
+			continue
+		}
+		seen[candidate] = struct{}{}
+		result = append(result, candidate)
+	}
+	return result
 }
