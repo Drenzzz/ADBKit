@@ -89,6 +89,10 @@ func (s *Service) DownloadPlatformTools(ctx context.Context) error {
 		s.emitProgress("platform-tools", 0, 0, 0, "error")
 		return err
 	}
+	if err := ValidatePackageContents(extractedDir, []string{"adb", "fastboot"}); err != nil {
+		s.emitProgress("platform-tools", 0, 0, 0, "error")
+		return err
+	}
 
 	destDir := filepath.Join(s.dataDir, "bin", "platform-tools")
 	if err := MoveExtractedDir(extractedDir, destDir); err != nil {
@@ -173,6 +177,10 @@ func (s *Service) DownloadScrcpy(ctx context.Context) error {
 
 	extractedDir, err := FindExtractedDir(tmpDir, "scrcpy")
 	if err != nil {
+		s.emitProgress("scrcpy", 0, 0, 0, "error")
+		return err
+	}
+	if err := ValidateScrcpyPackage(extractedDir); err != nil {
 		s.emitProgress("scrcpy", 0, 0, 0, "error")
 		return err
 	}

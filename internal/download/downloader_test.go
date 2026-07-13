@@ -330,3 +330,32 @@ func TestMoveExtractedDir(t *testing.T) {
 		t.Fatal("expected source to be removed after move")
 	}
 }
+
+func TestMoveExtractedDirReplacesPackageAfterStaging(t *testing.T) {
+	root := t.TempDir()
+	src := filepath.Join(root, "extracted")
+	dst := filepath.Join(root, "managed")
+	if err := os.MkdirAll(src, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(src, "adb"), []byte("new"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(dst, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dst, "adb"), []byte("old"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := MoveExtractedDir(src, dst); err != nil {
+		t.Fatalf("MoveExtractedDir failed: %v", err)
+	}
+	content, err := os.ReadFile(filepath.Join(dst, "adb"))
+	if err != nil || string(content) != "new" {
+		t.Fatalf("expected new managed package, got %q (%v)", content, err)
+	}
+	if _, err := os.Stat(dst + ".previous"); !os.IsNotExist(err) {
+		t.Fatal("expected package backup to be removed")
+	}
+}

@@ -320,13 +320,35 @@ func FindExtractedDir(root string, prefix string) (string, error) {
 // MoveExtractedDir moves src directory to dst. Uses os.Rename for same-device
 // atomic move; falls back to copy+delete for cross-device scenarios.
 func MoveExtractedDir(src string, dst string) error {
-	if err := os.RemoveAll(dst); err != nil {
-		return core.NewOperationError("move_extracted_dir", "failed to remove old destination", err.Error(), true)
+	staging := dst + ".next"
+	backup := dst + ".previous"
+	if err := os.RemoveAll(staging); err != nil {
+		return core.NewOperationError("move_extracted_dir", "failed to clear staging directory", err.Error(), true)
 	}
-	if err := os.Rename(src, dst); err == nil {
-		return nil
+	if err := copyDir(src, staging); err != nil {
+		return core.NewOperationError("move_extracted_dir", "failed to stage extracted package", err.Error(), true)
 	}
-	return copyDir(src, dst)
+	if err := os.RemoveAll(backup); err != nil {
+		return core.NewOperationError("move_extracted_dir", "failed to clear package backup", err.Error(), true)
+	}
+	if _, err := os.Stat(dst); err == nil {
+		if err := os.Rename(dst, backup); err != nil {
+			return core.NewOperationError("move_extracted_dir", "failed to back up current package", err.Error(), true)
+		}
+	}
+	if err := os.Rename(staging, dst); err != nil {
+		if _, restoreErr := os.Stat(backup); restoreErr == nil {
+			_ = os.Rename(backup, dst)
+		}
+		return core.NewOperationError("move_extracted_dir", "failed to activate extracted package", err.Error(), true)
+	}
+	if err := os.RemoveAll(backup); err != nil {
+		return core.NewOperationError("move_extracted_dir", "package installed but failed to remove backup", err.Error(), true)
+	}
+	if err := os.RemoveAll(src); err != nil {
+		return core.NewOperationError("move_extracted_dir", "package installed but failed to clear extraction source", err.Error(), true)
+	}
+	return nil
 }
 
 func copyDir(src string, dst string) error {
