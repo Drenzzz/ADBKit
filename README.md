@@ -169,7 +169,7 @@ ADBKit manages binaries through a detection-first approach:
 
 ## Building from Source
 
-**Prerequisites:** Go 1.23+, Bun, [Wails CLI](https://wails.io/docs/gettingstarted/installation)
+**Prerequisites:** Go 1.25+, Bun, [Wails CLI](https://wails.io/docs/gettingstarted/installation)
 
 A `Makefile` wraps the common workflows. Run `make` (or `make help`) to list all targets.
 
