@@ -14,10 +14,11 @@ import (
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+var platformToolsVersion string
+
 const (
-	platformToolsVersion = "35.0.2"
-	scrcpyVersion        = "4.0"
-	eventName            = "binary_download_progress"
+	scrcpyVersion = "4.0"
+	eventName     = "binary_download_progress"
 )
 
 type ProgressEvent struct {
@@ -29,7 +30,7 @@ type ProgressEvent struct {
 }
 
 type Service struct {
-	ctx    context.Context
+	ctx     context.Context
 	dataDir string
 }
 
@@ -42,11 +43,14 @@ func (s *Service) DownloadPlatformTools(ctx context.Context) error {
 	var url string
 	switch goos {
 	case "linux":
+		platformToolsVersion = "35.0.2"
 		url = fmt.Sprintf("https://dl.google.com/android/repository/platform-tools_r%s-linux.zip", platformToolsVersion)
 	case "darwin":
+		platformToolsVersion = "35.0.2"
 		url = fmt.Sprintf("https://dl.google.com/android/repository/platform-tools_r%s-darwin.zip", platformToolsVersion)
 	case "windows":
-		url = fmt.Sprintf("https://dl.google.com/android/repository/platform-tools_r%s-windows.zip", platformToolsVersion)
+		platformToolsVersion = "latest"
+		url = fmt.Sprintf("https://dl.google.com/android/repository/platform-tools-%s-windows.zip", platformToolsVersion)
 	default:
 		return core.NewOperationError("download_platform_tools", "unsupported OS", goos, false)
 	}

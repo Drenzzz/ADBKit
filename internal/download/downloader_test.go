@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -137,7 +138,7 @@ func TestAtomicBinaryMove(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected dest to exist: %v", err)
 	}
-	if info.Mode().Perm()&0o111 == 0 {
+	if runtime.GOOS != "windows" && info.Mode().Perm()&0o111 == 0 {
 		t.Fatal("expected dest to be executable")
 	}
 

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -86,9 +87,11 @@ func (bs *Service) validatePackageCompleteness(name, path string) error {
 			return core.NewOperationError("validate_package", "incomplete package: missing scrcpy-server", dir, false)
 		}
 	case BinaryNameAdb, BinaryNameFastboot:
-		libDir := filepath.Join(dir, "lib64")
-		if _, err := os.Stat(libDir); os.IsNotExist(err) {
-			return core.NewOperationError("validate_package", "incomplete package: missing lib64 directory", dir, false)
+		if runtime.GOOS != "windows" {
+			libDir := filepath.Join(dir, "lib64")
+			if _, err := os.Stat(libDir); os.IsNotExist(err) {
+				return core.NewOperationError("validate_package", "incomplete package: missing lib64 directory", dir, false)
+			}
 		}
 	}
 	return nil
