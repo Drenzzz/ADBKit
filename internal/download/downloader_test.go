@@ -97,6 +97,16 @@ func TestExtractZip(t *testing.T) {
 	}
 }
 
+func TestExtractZipRejectsTraversal(t *testing.T) {
+	zipPath := createTestZip(t, map[string]string{
+		"../escaped": "unsafe",
+	})
+
+	if err := ExtractZip(zipPath, t.TempDir()); err == nil {
+		t.Fatal("expected traversal archive entry to be rejected")
+	}
+}
+
 func TestExtractTarGz(t *testing.T) {
 	tgzPath := createTestTarGz(t, map[string]string{
 		"scrcpy-linux-x86_64-v3.3.1/scrcpy": "fake-scrcpy-binary",
@@ -114,6 +124,16 @@ func TestExtractTarGz(t *testing.T) {
 	}
 	if string(content) != "fake-scrcpy-binary" {
 		t.Fatalf("scrcpy content mismatch: %q", content)
+	}
+}
+
+func TestExtractTarGzRejectsTraversal(t *testing.T) {
+	tgzPath := createTestTarGz(t, map[string]string{
+		"../../escaped": "unsafe",
+	})
+
+	if err := ExtractTarGz(tgzPath, t.TempDir()); err == nil {
+		t.Fatal("expected traversal archive entry to be rejected")
 	}
 }
 
