@@ -106,6 +106,14 @@ Screenshots of each module are available in [here](screenshots/README.md).
 
 ## Installation
 
+### Windows portable release
+
+Download and run `ADBKit.exe`; no installer is required. Windows 11 normally
+includes Microsoft Edge WebView2 Runtime. On Windows 10 or managed machines,
+install the Evergreen WebView2 Runtime before launching ADBKit if the app does
+not start. Managed binaries and configuration are stored in
+`%APPDATA%\adbkit\`.
+
 1. Go to the [Releases](https://github.com/drenzzz/ADBKit/releases) page
 2. Download the latest release for your OS
 3. Install or extract the package
@@ -235,6 +243,7 @@ go test ./...
 | Unauthorized device | Accept the RSA fingerprint prompt on your device screen |
 | Wireless ADB not working | Ensure device and computer are on the same network; check IP/port |
 | Linux USB access denied | Configure `udev` rules for your device vendor |
+| Windows app does not open | Install or repair Microsoft Edge WebView2 Runtime, then launch `ADBKit.exe` again |
 | scrcpy exits immediately | Check if `scrcpy-server` exists in the scrcpy package folder; re-download if missing |
 | Binary shows "Invalid path" | Binary may be incomplete; re-download via Settings → Binary Manager |
 | Setup wizard won't finish | All three binaries (ADB, Fastboot, scrcpy) must be `ready` — none can be skipped |
