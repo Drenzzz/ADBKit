@@ -35,6 +35,7 @@ func RunCommand(ctx context.Context, req ExecRequest) (*ExecResult, error) {
 	}
 
 	cmd := exec.CommandContext(ctx, req.Command, req.Args...)
+	ConfigureChildProcess(cmd)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -70,6 +71,7 @@ func RunCommandWithStdin(ctx context.Context, req ExecRequest, stdin string) (*E
 	}
 
 	cmd := exec.CommandContext(ctx, req.Command, req.Args...)
+	ConfigureChildProcess(cmd)
 	cmd.Stdin = bytes.NewBufferString(stdin)
 
 	var stdout, stderr bytes.Buffer
@@ -143,6 +145,7 @@ func RunCommandStreaming(ctx context.Context, req StreamingExecRequest) (*ExecRe
 	}
 
 	cmd := exec.CommandContext(ctx, req.Command, req.Args...)
+	ConfigureChildProcess(cmd)
 
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {

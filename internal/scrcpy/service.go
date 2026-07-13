@@ -206,6 +206,7 @@ func (s *Service) StartSession(ctx context.Context, serial string, opts Options)
 	args = append(args, opts.ToArgs()...)
 
 	cmd := exec.CommandContext(processCtx, scrcpyPath, args...)
+	core.ConfigureChildProcess(cmd)
 	if adbPath != "" {
 		cmd.Env = append(os.Environ(), "ADB="+adbPath)
 	}

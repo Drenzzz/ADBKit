@@ -69,6 +69,7 @@ func (s *Service) StartRecording(serial, outputPath string, opts Options) error 
 	}
 
 	cmd := exec.CommandContext(s.ctx, scrcpyPath, args...)
+	core.ConfigureChildProcess(cmd)
 	if adbPath != "" {
 		cmd.Env = append(os.Environ(), "ADB="+adbPath)
 	}
@@ -203,6 +204,7 @@ func (s *Service) TakeScreenshot(sessionID, outputPath string) (string, error) {
 	}
 
 	cmd := exec.CommandContext(s.ctx, adbPath, "-s", process.session.Serial, "exec-out", "screencap", "-p")
+	core.ConfigureChildProcess(cmd)
 	outFile, createErr := os.Create(trimmedPath)
 	if createErr != nil {
 		return "", core.NewOperationError(
