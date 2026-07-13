@@ -186,6 +186,9 @@ func RunCommandStreaming(ctx context.Context, req StreamingExecRequest) (*ExecRe
 
 	waitErr := cmd.Wait()
 	wg.Wait()
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
 
 	exitCode := 0
 	if waitErr != nil {
