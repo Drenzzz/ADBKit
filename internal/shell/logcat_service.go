@@ -94,6 +94,7 @@ func (s *LogcatService) StartStream(ctx context.Context, serial string, levels s
 	}
 
 	cmd := exec.CommandContext(ctx, adbPath, args...)
+	core.ConfigureChildProcess(cmd)
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
 		return core.NewOperationError("start_logcat_stream", "Failed to open logcat stdout", err.Error(), true)

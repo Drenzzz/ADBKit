@@ -36,7 +36,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.25.x"
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -62,7 +62,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.25.x"
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -77,3 +77,45 @@ jobs:
 
       - name: Build
         run: go build ./...
+
+  windows-portable-build:
+    runs-on: windows-latest
+    needs: [frontend-check]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.13.0
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
+
+      - name: Verify frontend
+        working-directory: frontend
+        run: |
+          bun run test
+          bun run lint
+          bun run typecheck
+
+      - name: Build frontend for Go embed
+        working-directory: frontend
+        run: bun run build
+
+      - name: Run Go tests
+        run: go test ./...
+
+      - name: Build portable Windows executable
+        run: wails build -platform windows/amd64 -clean
+
+      - name: Upload portable executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: adbkit-windows-amd64
+          path: build/bin/ADBKit.exe

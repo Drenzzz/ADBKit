@@ -39,6 +39,7 @@ func (s *Service) GetEncoderSupport(ctx context.Context, serial string) (*Encode
 	args := []string{"--serial", resolvedSerial, "--list-encoders"}
 
 	cmd := exec.CommandContext(ctx, scrcpyPath, args...)
+	core.ConfigureChildProcess(cmd)
 	if adbPath != "" {
 		cmd.Env = append([]string{}, "ADB="+adbPath)
 	}

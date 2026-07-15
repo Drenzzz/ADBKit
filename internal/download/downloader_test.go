@@ -97,6 +97,16 @@ func TestExtractZip(t *testing.T) {
 	}
 }
 
+func TestExtractZipRejectsTraversal(t *testing.T) {
+	zipPath := createTestZip(t, map[string]string{
+		"../escaped": "unsafe",
+	})
+
+	if err := ExtractZip(zipPath, t.TempDir()); err == nil {
+		t.Fatal("expected traversal archive entry to be rejected")
+	}
+}
+
 func TestExtractTarGz(t *testing.T) {
 	tgzPath := createTestTarGz(t, map[string]string{
 		"scrcpy-linux-x86_64-v3.3.1/scrcpy": "fake-scrcpy-binary",
@@ -114,6 +124,16 @@ func TestExtractTarGz(t *testing.T) {
 	}
 	if string(content) != "fake-scrcpy-binary" {
 		t.Fatalf("scrcpy content mismatch: %q", content)
+	}
+}
+
+func TestExtractTarGzRejectsTraversal(t *testing.T) {
+	tgzPath := createTestTarGz(t, map[string]string{
+		"../../escaped": "unsafe",
+	})
+
+	if err := ExtractTarGz(tgzPath, t.TempDir()); err == nil {
+		t.Fatal("expected traversal archive entry to be rejected")
 	}
 }
 
@@ -308,5 +328,34 @@ func TestMoveExtractedDir(t *testing.T) {
 	}
 	if _, err := os.Stat(subdir); !os.IsNotExist(err) {
 		t.Fatal("expected source to be removed after move")
+	}
+}
+
+func TestMoveExtractedDirReplacesPackageAfterStaging(t *testing.T) {
+	root := t.TempDir()
+	src := filepath.Join(root, "extracted")
+	dst := filepath.Join(root, "managed")
+	if err := os.MkdirAll(src, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(src, "adb"), []byte("new"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(dst, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dst, "adb"), []byte("old"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := MoveExtractedDir(src, dst); err != nil {
+		t.Fatalf("MoveExtractedDir failed: %v", err)
+	}
+	content, err := os.ReadFile(filepath.Join(dst, "adb"))
+	if err != nil || string(content) != "new" {
+		t.Fatalf("expected new managed package, got %q (%v)", content, err)
+	}
+	if _, err := os.Stat(dst + ".previous"); !os.IsNotExist(err) {
+		t.Fatal("expected package backup to be removed")
 	}
 }

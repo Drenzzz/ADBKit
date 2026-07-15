@@ -31,6 +31,7 @@ func (s *Service) PushClipboard(serial, text string) error {
 	}
 
 	cmd := exec.CommandContext(s.ctx, adbPath, "-s", trimmedSerial, "shell", "cmd", "clipboard", "set", text)
+	core.ConfigureChildProcess(cmd)
 	if out, runErr := cmd.CombinedOutput(); runErr != nil {
 		return core.NewOperationError(
 			"push_scrcpy_clipboard",
@@ -61,6 +62,7 @@ func (s *Service) GetClipboard(serial string) (string, error) {
 	}
 
 	cmd := exec.CommandContext(s.ctx, adbPath, "-s", trimmedSerial, "shell", "cmd", "clipboard", "get")
+	core.ConfigureChildProcess(cmd)
 	out, runErr := cmd.CombinedOutput()
 	if runErr != nil {
 		return "", core.NewOperationError(

@@ -11,7 +11,7 @@ DIST_DIR     := dist
 WEBKIT_TAG   := webkit2_41
 WAILS_TAGS   := $(if $(WEBKIT_TAG),-tags $(WEBKIT_TAG),)
 
-.PHONY: help dev build build-upx clean lint typecheck check all deb rpm arch appimage frontend-install deps doctor run
+.PHONY: help dev build build-upx windows clean lint typecheck check all deb rpm arch appimage frontend-install deps doctor run
 
 .DEFAULT_GOAL := help
 
@@ -28,6 +28,7 @@ help:
 	@echo "  Build"
 	@echo "    make build            Production build ($(PLATFORM))"
 	@echo "    make build-upx        Production build, UPX-compressed"
+	@echo "    make windows          Portable Windows amd64 executable"
 	@echo ""
 	@echo "  Quality"
 	@echo "    make lint             Lint frontend"
@@ -71,6 +72,9 @@ build:
 
 build-upx:
 	wails build -platform $(PLATFORM) $(WAILS_TAGS) -clean -upx
+
+windows:
+	wails build -platform windows/amd64 -clean
 
 # ── Quality ──────────────────────────────────────
 lint:

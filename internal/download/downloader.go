@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -18,10 +19,10 @@ import (
 )
 
 const (
-	downloadTimeout    = 10 * time.Minute
-	chunkSize          = 64 * 1024
-	permExecutable     = 0o755
-	permDir            = 0o700
+	downloadTimeout = 10 * time.Minute
+	chunkSize       = 64 * 1024
+	permExecutable  = 0o755
+	permDir         = 0o700
 )
 
 type ProgressFunc func(bytesReceived int64, bytesTotal int64)
@@ -116,13 +117,19 @@ func ExtractZip(archivePath string, destDir string) error {
 	defer r.Close()
 
 	for _, f := range r.File {
-		target := filepath.Join(destDir, f.Name)
+		target, err := safeArchiveTarget(destDir, f.Name)
+		if err != nil {
+			return err
+		}
 
 		if f.FileInfo().IsDir() {
 			if err := os.MkdirAll(target, permDir); err != nil {
 				return err
 			}
 			continue
+		}
+		if !f.Mode().IsRegular() {
+			return core.NewOperationError("extract_zip", "archive contains unsupported entry type", f.Name, false)
 		}
 
 		if err := os.MkdirAll(filepath.Dir(target), permDir); err != nil {
@@ -176,7 +183,10 @@ func ExtractTarGz(archivePath string, destDir string) error {
 			return core.NewOperationError("extract_tar_gz", "failed to read tar entry", err.Error(), true)
 		}
 
-		target := filepath.Join(destDir, header.Name)
+		target, err := safeArchiveTarget(destDir, header.Name)
+		if err != nil {
+			return err
+		}
 
 		switch header.Typeflag {
 		case tar.TypeDir:
@@ -196,10 +206,27 @@ func ExtractTarGz(archivePath string, destDir string) error {
 				return err
 			}
 			outFile.Close()
+		default:
+			return core.NewOperationError("extract_tar_gz", "archive contains unsupported entry type", header.Name, false)
 		}
 	}
 
 	return nil
+}
+
+// safeArchiveTarget rejects archive paths that could escape the extraction root.
+// Archive paths always use slash separators, but normalize backslashes too because
+// Windows treats them as separators when writing managed ZIP packages.
+func safeArchiveTarget(destDir, archiveName string) (string, error) {
+	normalized := strings.ReplaceAll(archiveName, "\\", "/")
+	cleaned := path.Clean(normalized)
+	if cleaned == "." || path.IsAbs(cleaned) || strings.Contains(cleaned, ":") {
+		return "", core.NewOperationError("extract_archive", "archive entry path is invalid", archiveName, false)
+	}
+	if cleaned == ".." || strings.HasPrefix(cleaned, "../") {
+		return "", core.NewOperationError("extract_archive", "archive entry escapes extraction directory", archiveName, false)
+	}
+	return filepath.Join(destDir, filepath.FromSlash(cleaned)), nil
 }
 
 // BinaryExecutableName returns the OS-specific binary name.
@@ -293,13 +320,35 @@ func FindExtractedDir(root string, prefix string) (string, error) {
 // MoveExtractedDir moves src directory to dst. Uses os.Rename for same-device
 // atomic move; falls back to copy+delete for cross-device scenarios.
 func MoveExtractedDir(src string, dst string) error {
-	if err := os.RemoveAll(dst); err != nil {
-		return core.NewOperationError("move_extracted_dir", "failed to remove old destination", err.Error(), true)
+	staging := dst + ".next"
+	backup := dst + ".previous"
+	if err := os.RemoveAll(staging); err != nil {
+		return core.NewOperationError("move_extracted_dir", "failed to clear staging directory", err.Error(), true)
 	}
-	if err := os.Rename(src, dst); err == nil {
-		return nil
+	if err := copyDir(src, staging); err != nil {
+		return core.NewOperationError("move_extracted_dir", "failed to stage extracted package", err.Error(), true)
 	}
-	return copyDir(src, dst)
+	if err := os.RemoveAll(backup); err != nil {
+		return core.NewOperationError("move_extracted_dir", "failed to clear package backup", err.Error(), true)
+	}
+	if _, err := os.Stat(dst); err == nil {
+		if err := os.Rename(dst, backup); err != nil {
+			return core.NewOperationError("move_extracted_dir", "failed to back up current package", err.Error(), true)
+		}
+	}
+	if err := os.Rename(staging, dst); err != nil {
+		if _, restoreErr := os.Stat(backup); restoreErr == nil {
+			_ = os.Rename(backup, dst)
+		}
+		return core.NewOperationError("move_extracted_dir", "failed to activate extracted package", err.Error(), true)
+	}
+	if err := os.RemoveAll(backup); err != nil {
+		return core.NewOperationError("move_extracted_dir", "package installed but failed to remove backup", err.Error(), true)
+	}
+	if err := os.RemoveAll(src); err != nil {
+		return core.NewOperationError("move_extracted_dir", "package installed but failed to clear extraction source", err.Error(), true)
+	}
+	return nil
 }
 
 func copyDir(src string, dst string) error {
