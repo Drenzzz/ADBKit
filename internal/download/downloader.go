@@ -5,6 +5,8 @@ import (
 	"archive/zip"
 	"compress/gzip"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -105,6 +107,24 @@ func (d *Downloader) Fetch(ctx context.Context, url string, destPath string) err
 		return core.NewOperationError("download", "failed to finalize download", err.Error(), true)
 	}
 
+	return nil
+}
+
+// VerifySHA256 confirms a downloaded archive matches its pinned SHA-256 digest.
+func VerifySHA256(path, expected string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return core.NewOperationError("verify_checksum", "failed to open archive", err.Error(), true)
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return core.NewOperationError("verify_checksum", "failed to hash archive", err.Error(), true)
+	}
+	if actual := hex.EncodeToString(h.Sum(nil)); !strings.EqualFold(actual, expected) {
+		return core.NewOperationError("verify_checksum", "downloaded archive checksum mismatch", "expected "+expected+", got "+actual, false)
+	}
 	return nil
 }
 

@@ -225,6 +225,21 @@ func TestFetchCancellation(t *testing.T) {
 	}
 }
 
+func TestVerifySHA256(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "archive.zip")
+	if err := os.WriteFile(path, []byte("hello world"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	const expected = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+	if err := VerifySHA256(path, expected); err != nil {
+		t.Fatalf("expected matching checksum to pass: %v", err)
+	}
+	if err := VerifySHA256(path, "0000000000000000000000000000000000000000000000000000000000000000"); err == nil {
+		t.Fatal("expected mismatched checksum to fail")
+	}
+}
+
 func TestFetchSuccess(t *testing.T) {
 	payload := []byte("hello-download-content")
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
