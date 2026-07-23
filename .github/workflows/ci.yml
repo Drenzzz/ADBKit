@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   frontend-check:
@@ -118,4 +119,59 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-windows-amd64
+          path: build/bin/ADBKit.exe
+
+  windows-signed-release:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.13.0
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
+
+      - name: Build signed release candidate
+        run: wails build -platform windows/amd64 -clean
+
+      - name: Sign and verify executable
+        shell: pwsh
+        env:
+          WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
+          WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+          WINDOWS_TIMESTAMP_URL: ${{ vars.WINDOWS_TIMESTAMP_URL }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERTIFICATE_BASE64) -or [string]::IsNullOrWhiteSpace($env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD)) {
+            throw "Windows signing certificate secrets are required."
+          }
+          $certificatePath = Join-Path $env:RUNNER_TEMP "adbkit-signing.pfx"
+          try {
+            [IO.File]::WriteAllBytes($certificatePath, [Convert]::FromBase64String($env:WINDOWS_SIGNING_CERTIFICATE_BASE64))
+            $timestampUrl = $env:WINDOWS_TIMESTAMP_URL
+            if ([string]::IsNullOrWhiteSpace($timestampUrl)) {
+              $timestampUrl = "http://timestamp.digicert.com"
+            }
+            signtool sign /fd SHA256 /f $certificatePath /p $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD /tr $timestampUrl /td SHA256 build/bin/ADBKit.exe
+            signtool verify /pa /all /v build/bin/ADBKit.exe
+          }
+          finally {
+            Remove-Item -Force -ErrorAction SilentlyContinue $certificatePath
+          }
+
+      - name: Upload signed executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: adbkit-windows-amd64-signed
           path: build/bin/ADBKit.exe

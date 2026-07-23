@@ -114,6 +114,9 @@ install the Evergreen WebView2 Runtime before launching ADBKit if the app does
 not start. Managed binaries and configuration are stored in
 `%APPDATA%\adbkit\`.
 
+Official Windows releases are Authenticode-signed. Verify the signer in the
+file's Properties > Digital Signatures tab before running it.
+
 1. Go to the [Releases](https://github.com/drenzzz/ADBKit/releases) page
 2. Download the latest release for your OS
 3. Install or extract the package
@@ -232,6 +235,18 @@ go test ./...
 ```
 
 </details>
+
+### Signing Windows releases
+
+The manual `windows-signed-release` GitHub Actions job signs the portable EXE
+and verifies it before upload. Configure these repository secrets first:
+
+- `WINDOWS_SIGNING_CERTIFICATE_BASE64`: Base64-encoded PFX certificate.
+- `WINDOWS_SIGNING_CERTIFICATE_PASSWORD`: PFX password.
+
+Optionally set the `WINDOWS_TIMESTAMP_URL` repository variable to the RFC 3161
+timestamp endpoint supplied by your certificate authority. The PFX must never
+be committed to this repository.
 
 ---
 
