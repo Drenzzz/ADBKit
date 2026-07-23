@@ -71,8 +71,9 @@ func runWithPTY(ctx context.Context, command string, args []string, onLine func(
 		}
 	}
 
-	return &ExecResult{
+	result := &ExecResult{
 		Stdout:   buf.String(),
 		ExitCode: exitCode,
-	}, nil
+	}
+	return result, waitErr
 }

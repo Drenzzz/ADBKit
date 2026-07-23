@@ -54,12 +54,13 @@ func RunCommand(ctx context.Context, req ExecRequest) (*ExecResult, error) {
 		}
 	}
 
-	return &ExecResult{
+	result := &ExecResult{
 		Stdout:   stdout.String(),
 		Stderr:   stderr.String(),
 		ExitCode: exitCode,
 		Duration: duration,
-	}, nil
+	}
+	return result, err
 }
 
 // RunCommandWithStdin executes a process that receives input via stdin.
@@ -91,12 +92,13 @@ func RunCommandWithStdin(ctx context.Context, req ExecRequest, stdin string) (*E
 		}
 	}
 
-	return &ExecResult{
+	result := &ExecResult{
 		Stdout:   stdout.String(),
 		Stderr:   stderr.String(),
 		ExitCode: exitCode,
 		Duration: duration,
-	}, nil
+	}
+	return result, err
 }
 
 // StreamingExecRequest extends ExecRequest with a line-level progress callback.
@@ -141,7 +143,7 @@ func RunCommandStreaming(ctx context.Context, req StreamingExecRequest) (*ExecRe
 	if result, err := runWithPTY(ctx, req.Command, req.Args, req.OnStderrLine); err == nil {
 		return result, nil
 	} else if !errors.Is(err, errPTYUnsupported) {
-		return nil, err
+		return result, err
 	}
 
 	cmd := exec.CommandContext(ctx, req.Command, req.Args...)
@@ -202,8 +204,9 @@ func RunCommandStreaming(ctx context.Context, req StreamingExecRequest) (*ExecRe
 		}
 	}
 
-	return &ExecResult{
+	result := &ExecResult{
 		Stdout:   stdoutBuf.String(),
 		ExitCode: exitCode,
-	}, nil
+	}
+	return result, waitErr
 }
