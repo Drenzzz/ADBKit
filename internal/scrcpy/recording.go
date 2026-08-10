@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 func (s *Service) StartRecording(serial, outputPath string, opts Options) error {
@@ -130,7 +130,7 @@ func (s *Service) monitorRecordingProcess(cmd *exec.Cmd, stderrPipe io.ReadClose
 		if detail == "" {
 			detail = exitErr.Error()
 		}
-		wailsruntime.EventsEmit(s.ctx, EventError, SessionEvent{
+		application.Get().Event.Emit(EventError, SessionEvent{
 			Status:  StatusError,
 			Message: "Recording stopped unexpectedly: " + detail,
 		})

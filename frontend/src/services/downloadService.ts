@@ -1,8 +1,8 @@
 import {
   DownloadPlatformTools,
   DownloadScrcpy,
-} from '../../wailsjs/go/main/App'
-import { EventsOn } from '../../wailsjs/runtime/runtime'
+} from '../../bindings/ADBKit/app'
+import { Events } from '@wailsio/runtime'
 
 export interface DownloadProgressEvent {
   name: string
@@ -25,7 +25,7 @@ export async function downloadScrcpy(): Promise<void> {
 export function onDownloadProgress(
   callback: (event: DownloadProgressEvent) => void,
 ): () => void {
-  return EventsOn(DOWNLOAD_PROGRESS_EVENT, (event: DownloadProgressEvent) => {
-    callback(event)
+  return Events.On(DOWNLOAD_PROGRESS_EVENT, (event) => {
+    callback(event.data)
   })
 }

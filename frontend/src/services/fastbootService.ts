@@ -17,10 +17,9 @@ import {
   WakeAndUnlock,
   SetStayAwakeWhileCharging,
   GetStayAwakeWhileCharging,
-} from '../../wailsjs/go/main/App'
-import { EventsOn } from '../../wailsjs/runtime/runtime'
+} from '../../bindings/ADBKit/app'
+import { Events } from '@wailsio/runtime'
 import type { FastbootDeviceInfo, FlashPlan } from '@/lib/types'
-import { flasher } from '../../wailsjs/go/models'
 
 export const FLASH_STEP_STATUS_EVENT = 'flash_step_status'
 
@@ -33,8 +32,8 @@ export interface FlashStepStatusEvent {
 export function onFlashStepStatus(
   callback: (event: FlashStepStatusEvent) => void,
 ): () => void {
-  return EventsOn(FLASH_STEP_STATUS_EVENT, (event: FlashStepStatusEvent) => {
-    callback(event)
+  return Events.On(FLASH_STEP_STATUS_EVENT, (event) => {
+    callback(event.data)
   })
 }
 
@@ -136,5 +135,5 @@ export async function flashRomFolder(
       image_file: s.image_file,
     })),
   }
-  return FlashRomFolder(serial, folderPath, flasher.Plan.createFrom(backendPlan))
+  return FlashRomFolder(serial, folderPath, backendPlan)
 }

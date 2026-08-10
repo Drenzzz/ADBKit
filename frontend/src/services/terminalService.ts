@@ -8,8 +8,8 @@ import {
   StartTerminalSession,
   SendTerminalInput,
   CloseTerminal,
-} from '../../wailsjs/go/main/App'
-import { EventsOn } from '../../wailsjs/runtime/runtime'
+} from '../../bindings/ADBKit/app'
+import { Events } from '@wailsio/runtime'
 
 export const TERMINAL_OUTPUT_EVENT = 'terminal_output'
 export const TERMINAL_CLOSED_EVENT = 'terminal_closed'
@@ -40,15 +40,15 @@ export async function closeTerminal(sessionId: string): Promise<void> {
 export function onTerminalOutput(
   callback: (event: TerminalOutputEvent) => void,
 ): () => void {
-  return EventsOn(TERMINAL_OUTPUT_EVENT, (event: TerminalOutputEvent) => {
-    callback(event)
+  return Events.On(TERMINAL_OUTPUT_EVENT, (event) => {
+    callback(event.data as TerminalOutputEvent)
   })
 }
 
 export function onTerminalClosed(
   callback: (event: TerminalClosedEvent) => void,
 ): () => void {
-  return EventsOn(TERMINAL_CLOSED_EVENT, (event: TerminalClosedEvent) => {
-    callback(event)
+  return Events.On(TERMINAL_CLOSED_EVENT, (event) => {
+    callback(event.data as TerminalClosedEvent)
   })
 }

@@ -1,32 +1,11 @@
-build/bin
-build/tools
-build/pkg
-build/AppImage-out
-build/*.pkg.tar.*
-node_modules
+.task
+bin
 frontend/dist
-*.log
-.env
-.env.local
-dist/
-packaging/arch/pkg/
-packaging/arch/*.pkg.tar.*
-
-# OS
-.DS_Store
-Thumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# Build artifacts
-*.exe
-*.deb
-*.AppImage
-*.dmg
+frontend/node_modules
+build/linux/appimage/build
+build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
+# Mobile generated (per-machine; overlays hold absolute paths)
+build/ios/xcode/overlay.json
+build/ios/xcode/gen/
+build/android/overlay.json
+build/android/gen/

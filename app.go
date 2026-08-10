@@ -18,6 +18,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 type App struct {
@@ -47,7 +49,7 @@ func NewApp() *App {
 	return &App{}
 }
 
-func (a *App) startup(ctx context.Context) {
+func (a *App) ServiceStartup(ctx context.Context, _ application.ServiceOptions) error {
 	a.ctx = ctx
 
 	dataDir, err := appDataDir()
@@ -88,9 +90,10 @@ func (a *App) startup(ctx context.Context) {
 	a.fpSvc.SetWailsContext(ctx)
 	a.scrSvc = scrcpy.New(a.ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial, a.diaSvc, a.auditLog)
 	a.dlSvc = download.NewService(a.ctx, a.dataDir)
+	return nil
 }
 
-func (a *App) shutdown(ctx context.Context) {
+func (a *App) ServiceShutdown() error {
 	if a.logSvc != nil {
 		a.logSvc.Shutdown()
 	}
@@ -100,6 +103,7 @@ func (a *App) shutdown(ctx context.Context) {
 	if a.scrSvc != nil {
 		a.scrSvc.Shutdown()
 	}
+	return nil
 }
 
 func (a *App) resolveActiveSerial(ctx context.Context) (string, error) {

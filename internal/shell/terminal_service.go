@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 const (
@@ -233,7 +233,7 @@ func (s *TerminalService) resolveCodename(serial string) string {
 }
 
 func (s *TerminalService) emitSessionOutput(session Session, data string) {
-	wailsruntime.EventsEmit(s.ctx, EventOutput, map[string]string{
+	application.Get().Event.Emit(EventOutput, map[string]string{
 		"sessionId": session.ID,
 		"serial":    session.Serial,
 		"data":      data,
@@ -251,7 +251,7 @@ func (s *TerminalService) closeSession(process *terminalProcess, emitEvent bool)
 		}
 
 		if emitEvent {
-			wailsruntime.EventsEmit(s.ctx, EventClosed, map[string]string{
+			application.Get().Event.Emit(EventClosed, map[string]string{
 				"sessionId": process.session.ID,
 				"serial":    process.session.Serial,
 			})

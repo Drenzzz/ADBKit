@@ -6,7 +6,7 @@ import {
   GetRuntimeDiagnostics,
   ImportAuditLogs,
   UpdatePreferences,
-} from '../../wailsjs/go/main/App'
+} from '../../bindings/ADBKit/app'
 import type {
   AppConfigSnapshot,
   AuditLogEntry,

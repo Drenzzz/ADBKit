@@ -12,7 +12,7 @@ import {
   SelectPlatformToolsDirectory,
   SelectSavePath,
   SelectFile,
-} from '../../wailsjs/go/main/App'
+} from '../../bindings/ADBKit/app'
 import type {
   BinaryName,
   BinarySetupResult,
@@ -57,7 +57,7 @@ export async function getManagedBinaryDir(): Promise<string> {
 }
 
 export async function listManagedBinaries(): Promise<string[]> {
-  return ListManagedBinaries()
+  return (await ListManagedBinaries()) ?? []
 }
 
 export async function getCapabilities(): Promise<Capabilities> {

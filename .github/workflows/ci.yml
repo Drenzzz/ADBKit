@@ -92,10 +92,10 @@ jobs:
           go-version: "1.25.x"
 
       - name: Install Wails CLI
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.13.0
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.6
 
       - name: Install Linux build dependencies
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev pkg-config build-essential
+        run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev pkg-config build-essential
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -106,13 +106,13 @@ jobs:
         run: bun run build
 
       - name: Build portable Linux executable
-        run: wails build -platform linux/amd64 -tags webkit2_41 -clean
+        run: wails3 build
 
       - name: Upload portable executable
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-linux-amd64
-          path: build/bin/ADBKit
+          path: bin/ADBKit
 
   windows-portable-build:
     runs-on: windows-latest
@@ -127,7 +127,7 @@ jobs:
           go-version: "1.25.x"
 
       - name: Install Wails CLI
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.13.0
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.6
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -148,13 +148,13 @@ jobs:
         run: go test ./...
 
       - name: Build portable Windows executable
-        run: wails build -platform windows/amd64 -clean
+        run: wails3 build
 
       - name: Upload portable executable
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-windows-amd64
-          path: build/bin/ADBKit.exe
+          path: bin/ADBKit.exe
 
   windows-signed-release:
     if: github.event_name == 'workflow_dispatch'
@@ -172,14 +172,14 @@ jobs:
           go-version: "1.25.x"
 
       - name: Install Wails CLI
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.13.0
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.6
 
       - name: Install frontend dependencies
         working-directory: frontend
         run: bun install --frozen-lockfile
 
       - name: Build signed release candidate
-        run: wails build -platform windows/amd64 -clean
+        run: wails3 build
 
       - name: Sign and verify executable
         shell: pwsh
@@ -198,8 +198,8 @@ jobs:
             if ([string]::IsNullOrWhiteSpace($timestampUrl)) {
               $timestampUrl = "http://timestamp.digicert.com"
             }
-            signtool sign /fd SHA256 /f $certificatePath /p $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD /tr $timestampUrl /td SHA256 build/bin/ADBKit.exe
-            signtool verify /pa /all /v build/bin/ADBKit.exe
+            signtool sign /fd SHA256 /f $certificatePath /p $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD /tr $timestampUrl /td SHA256 bin/ADBKit.exe
+            signtool verify /pa /all /v bin/ADBKit.exe
           }
           finally {
             Remove-Item -Force -ErrorAction SilentlyContinue $certificatePath
@@ -209,7 +209,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-windows-amd64-signed
-          path: build/bin/ADBKit.exe
+          path: bin/ADBKit.exe
 
   linux-packages:
     runs-on: ubuntu-latest
@@ -226,46 +226,20 @@ jobs:
           go-version: "1.25.x"
 
       - name: Install Wails CLI
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.13.0
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.6
 
       - name: Install Linux build dependencies
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev pkg-config build-essential
+        run: sudo apt-get update && sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev pkg-config build-essential
 
-      - name: Install packaging tools
-        run: |
-          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: bun install --frozen-lockfile
-
-      - name: Build frontend for Go embed
-        working-directory: frontend
-        run: bun run build
-
-      - name: Build Linux executable
-        run: wails build -platform linux/amd64 -tags webkit2_41 -clean
-
-      - name: Build DEB package
-        run: |
-          mkdir -p dist
-          sed 's/^version: .*/version: "2.0.0~beta4"/' nfpm.yaml > /tmp/nfpm-deb.yaml
-          ~/go/bin/nfpm package -p deb -f /tmp/nfpm-deb.yaml -t dist/
-
-      - name: Build RPM package
-        run: |
-          mkdir -p dist
-          sed 's/^version: .*/version: "2.0.0~beta4"/' nfpm.yaml > /tmp/nfpm-rpm.yaml
-          ~/go/bin/nfpm package -p rpm -f /tmp/nfpm-rpm.yaml -t dist/
-
-      - name: Build AppImage
-        run: VERSION=2.0.0-beta4 bash scripts/build-appimage.sh
+      - name: Build Linux packages
+        run: wails3 package
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-linux-packages
           path: |
-            dist/*.deb
-            dist/*.rpm
-            dist/*.AppImage
+            bin/*.deb
+            bin/*.rpm
+            bin/*.AppImage
+            bin/*.pkg.tar.zst

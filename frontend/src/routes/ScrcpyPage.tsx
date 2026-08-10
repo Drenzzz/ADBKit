@@ -74,10 +74,11 @@ export default function ScrcpyPage() {
     handleDeletePreset,
     handlePushClipboard,
     handlePullClipboard,
+    updateOptions,
+    resetScrcpy,
   } = useScrcpy()
 
   const scrcpyOptions = useScrcpyStore((state) => state.options)
-  const setScrcpyOptions = useScrcpyStore((state) => state.setOptions)
   const setEncoderSupport = useScrcpyStore((state) => state.setEncoderSupport)
   const recordingStartedAt = useScrcpyStore(
     (state) => state.recordingStartedAt,
@@ -144,7 +145,7 @@ export default function ScrcpyPage() {
             size="icon"
             variant="ghost"
             className="h-8 w-8 text-muted-foreground dark:text-muted-foreground hover:bg-[var(--muted)] dark:hover:bg-[var(--muted)] rounded-full"
-            onClick={() => useScrcpyStore.getState().reset()}
+            onClick={resetScrcpy}
             aria-label="Reset scrcpy state"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -302,7 +303,7 @@ export default function ScrcpyPage() {
                     <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
                       <QualityControls
                         options={scrcpyOptions}
-                        onOptionChange={(key, val) => setScrcpyOptions({ ...scrcpyOptions, [key]: val })}
+                        onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
                       />
                     </Card>
                   </TabsContent>
@@ -311,7 +312,7 @@ export default function ScrcpyPage() {
                     <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
                       <AudioControls
                         options={scrcpyOptions}
-                        onOptionChange={(key, val) => setScrcpyOptions({ ...scrcpyOptions, [key]: val })}
+                        onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
                       />
                     </Card>
                   </TabsContent>
@@ -320,7 +321,7 @@ export default function ScrcpyPage() {
                     <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
                       <DeviceOptionsControls
                         options={scrcpyOptions}
-                        onOptionChange={(key, val) => setScrcpyOptions({ ...scrcpyOptions, [key]: val })}
+                        onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
                       />
                     </Card>
                   </TabsContent>
@@ -329,7 +330,7 @@ export default function ScrcpyPage() {
                     <PresetsManager
                       currentOptions={scrcpyOptions}
                       presets={presets}
-                      onApplyPreset={setScrcpyOptions}
+                      onApplyPreset={updateOptions}
                       onSavePreset={handleSavePreset}
                       onDeletePreset={handleDeletePreset}
                     />

@@ -11,7 +11,7 @@ import (
 
 	"ADBKit/internal/core"
 
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 const (
@@ -218,7 +218,7 @@ func (s *Service) emitProgress(name string, pct float64, received, total int64, 
 	if s.ctx == nil {
 		return
 	}
-	wailsruntime.EventsEmit(s.ctx, eventName, ProgressEvent{
+	application.Get().Event.Emit(eventName, ProgressEvent{
 		Name:          name,
 		Percent:       pct,
 		BytesReceived: received,
