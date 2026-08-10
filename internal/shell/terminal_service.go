@@ -42,10 +42,10 @@ type terminalProcess struct {
 }
 
 type TerminalService struct {
-	ctx                 context.Context
-	binaryService       *binary.Service
-	getConfig           func() *core.AppConfig
-	resolveActiveSerial func(context.Context) (string, error)
+	ctx           context.Context
+	binaryService *binary.Service
+	getConfig     func() *core.AppConfig
+	resolveSerial func(context.Context, string) (string, error)
 
 	mu       sync.Mutex
 	sessions map[string]*terminalProcess
@@ -55,14 +55,14 @@ func NewTerminalService(
 	ctx context.Context,
 	binaryService *binary.Service,
 	getConfig func() *core.AppConfig,
-	resolveActiveSerial func(context.Context) (string, error),
+	resolveSerial func(context.Context, string) (string, error),
 ) *TerminalService {
 	return &TerminalService{
-		ctx:                 ctx,
-		binaryService:       binaryService,
-		getConfig:           getConfig,
-		resolveActiveSerial: resolveActiveSerial,
-		sessions:            make(map[string]*terminalProcess),
+		ctx:           ctx,
+		binaryService: binaryService,
+		getConfig:     getConfig,
+		resolveSerial: resolveSerial,
+		sessions:      make(map[string]*terminalProcess),
 	}
 }
 
@@ -84,26 +84,20 @@ func (s *TerminalService) StartSessionWithMode(ctx context.Context, mode string,
 
 	if resolvedSerial == "" {
 		var err error
-		resolvedSerial, err = s.resolveActiveSerial(ctx)
+		if s.resolveSerial == nil {
+			return nil, core.NewOperationError("start_terminal_session", "Terminal serial resolver is unavailable", "resolver callback is nil", false)
+		}
+		resolvedSerial, err = s.resolveSerial(ctx, trimmedMode)
 		if err != nil {
-			log.Printf("terminal: resolveActiveSerial failed: %v", err)
+			log.Printf("terminal: resolveSerial failed: %v", err)
 			return nil, err
 		}
 	}
 
-	adbPath, err := s.resolveBinaryPath(core.BinaryNameAdb)
+	binaryPath, err := s.resolveBinaryPath(terminalBinaryName(trimmedMode))
 	if err != nil {
-		log.Printf("terminal: resolveBinaryPath adb failed: %v", err)
+		log.Printf("terminal: resolveBinaryPath %s failed: %v", terminalBinaryName(trimmedMode), err)
 		return nil, err
-	}
-
-	binaryPath := adbPath
-	if trimmedMode == ModeFastboot {
-		binaryPath, err = s.resolveBinaryPath(core.BinaryNameFastboot)
-		if err != nil {
-			log.Printf("terminal: resolveBinaryPath fastboot failed: %v", err)
-			return nil, err
-		}
 	}
 
 	session := Session{
@@ -177,16 +171,7 @@ func (s *TerminalService) runCommand(process *terminalProcess, input string) {
 		return
 	}
 
-	var commandArgs []string
-
-	switch process.session.Mode {
-	case ModeShell:
-		commandArgs = append([]string{"-s", process.session.Serial, "shell"}, args...)
-	case ModeADBHost:
-		commandArgs = append([]string{"-s", process.session.Serial}, args...)
-	case ModeFastboot:
-		commandArgs = args
-	}
+	commandArgs := buildTerminalCommandArgs(process.session.Mode, process.session.Serial, args)
 
 	s.emitSessionOutput(process.session, fmt.Sprintf("$ %s\r\n", input))
 
@@ -324,4 +309,22 @@ func splitTerminalArgs(input string) []string {
 	}
 
 	return strings.Fields(trimmedInput)
+}
+
+func terminalBinaryName(mode string) string {
+	if mode == ModeFastboot {
+		return core.BinaryNameFastboot
+	}
+	return core.BinaryNameAdb
+}
+
+func buildTerminalCommandArgs(mode, serial string, args []string) []string {
+	switch mode {
+	case ModeShell:
+		return append([]string{"-s", serial, "shell"}, args...)
+	case ModeADBHost, ModeFastboot:
+		return append([]string{"-s", serial}, args...)
+	default:
+		return nil
+	}
 }

@@ -26,21 +26,21 @@ type App struct {
 	activeSerial string
 	mu           sync.Mutex
 
-	binSvc  *binary.Service
-	devSvc  *device.Service
-	wireSvc *device.WirelessService
-	monSvc  *device.MonitorService
-	diaSvc  *dialog.Service
-	pkgSvc  *packagemgr.Service
-	fileSvc *file.Service
-	termSvc *shell.TerminalService
-	logSvc  *shell.LogcatService
-	fbSvc   *flasher.FastbootService
-	fpSvc   *flasher.PlanService
-	scrSvc  *scrcpy.Service
-	dlSvc   *download.Service
+	binSvc   *binary.Service
+	devSvc   *device.Service
+	wireSvc  *device.WirelessService
+	monSvc   *device.MonitorService
+	diaSvc   *dialog.Service
+	pkgSvc   *packagemgr.Service
+	fileSvc  *file.Service
+	termSvc  *shell.TerminalService
+	logSvc   *shell.LogcatService
+	fbSvc    *flasher.FastbootService
+	fpSvc    *flasher.PlanService
+	scrSvc   *scrcpy.Service
+	dlSvc    *download.Service
 	auditLog *audit.Log
-	cfg     *core.AppConfig
+	cfg      *core.AppConfig
 }
 
 func NewApp() *App {
@@ -81,7 +81,7 @@ func (a *App) startup(ctx context.Context) {
 	a.diaSvc = dialog.New(ctx)
 	a.pkgSvc = packagemgr.NewService(a.resolveActiveSerial, a.diaSvc.SelectSaveFile, getBinPath)
 	a.fileSvc = file.NewService(ctx, a.resolveActiveSerial, getBinPath)
-	a.termSvc = shell.NewTerminalService(ctx, a.binSvc, a.currentConfig, a.resolveActiveSerial)
+	a.termSvc = shell.NewTerminalService(ctx, a.binSvc, a.currentConfig, a.resolveTerminalSerial)
 	a.logSvc = shell.NewLogcatService(ctx, a.binSvc, a.currentConfig)
 	a.fbSvc = flasher.NewFastbootService(a.binSvc, a.currentConfig, a.resolveActiveSerial)
 	a.fpSvc = flasher.NewPlanService(a.fbSvc)
@@ -126,6 +126,43 @@ func (a *App) resolveActiveSerial(ctx context.Context) (string, error) {
 	}
 
 	return "", core.NewOperationError("resolve_active_serial", "No active device is available", "no ready ADB device found", true)
+}
+
+func (a *App) resolveTerminalSerial(ctx context.Context, mode string) (string, error) {
+	if mode != shell.ModeFastboot {
+		return a.resolveActiveSerial(ctx)
+	}
+
+	devices, err := a.devSvc.ListDevices(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	a.mu.Lock()
+	activeSerial := a.activeSerial
+	a.mu.Unlock()
+
+	for _, d := range devices {
+		if d.Serial == activeSerial && d.Mode == device.ModeFastboot {
+			return activeSerial, nil
+		}
+	}
+
+	for _, d := range devices {
+		if d.Mode == device.ModeFastboot {
+			a.mu.Lock()
+			a.activeSerial = d.Serial
+			a.mu.Unlock()
+			return d.Serial, nil
+		}
+	}
+
+	return "", core.NewOperationError(
+		"resolve_fastboot_serial",
+		"No Fastboot device is available",
+		"no connected Fastboot device found",
+		true,
+	)
 }
 
 func (a *App) currentConfig() *core.AppConfig {
