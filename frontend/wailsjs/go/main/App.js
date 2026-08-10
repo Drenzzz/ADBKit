@@ -374,6 +374,10 @@ export function UpdatePreferences(arg1) {
   return window['go']['main']['App']['UpdatePreferences'](arg1);
 }
 
+export function UpdateScrcpyOptions(arg1) {
+  return window['go']['main']['App']['UpdateScrcpyOptions'](arg1);
+}
+
 export function WakeAndUnlock(arg1) {
   return window['go']['main']['App']['WakeAndUnlock'](arg1);
 }

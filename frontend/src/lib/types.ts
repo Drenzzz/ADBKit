@@ -461,6 +461,7 @@ export interface AppConfigSnapshot {
   binary_versions: Record<string, string>
   device_nicknames: Record<string, string>
   logcat_buffer_limit: number
+  scrcpy_options: ScrcpyOptions
   scrcpy_presets: ScrcpyPresetSnapshot[]
   default_terminal_mode: string
   auto_refresh_devices: boolean

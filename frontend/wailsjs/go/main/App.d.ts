@@ -197,6 +197,8 @@ export function UninstallPackage(arg1:string):Promise<string>;
 
 export function UpdatePreferences(arg1:core.PreferencesPayload):Promise<core.AppConfigSnapshot>;
 
+export function UpdateScrcpyOptions(arg1:core.ScrcpyOptions):Promise<void>;
+
 export function WakeAndUnlock(arg1:string):Promise<string>;
 
 export function WakeScreen(arg1:string):Promise<string>;

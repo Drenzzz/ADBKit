@@ -1,6 +1,23 @@
 package main
 
-import "ADBKit/internal/scrcpy"
+import (
+	"ADBKit/internal/core"
+	"ADBKit/internal/scrcpy"
+)
+
+func (a *App) UpdateScrcpyOptions(options core.ScrcpyOptions) error {
+	return auditVoidAction(a, "update_scrcpy_options", func() error {
+		a.mu.Lock()
+		defer a.mu.Unlock()
+
+		if a.cfg == nil {
+			return core.NewOperationError("update_scrcpy_options", "app config is not available", "", false)
+		}
+
+		a.cfg.ScrcpyOptions = options
+		return core.SaveConfig(a.dataDir, a.cfg)
+	})
+}
 
 func (a *App) StartScrcpySession(serial string, opts scrcpy.Options) (*scrcpy.Session, error) {
 	return auditAction(a, "start_scrcpy_session", func() (*scrcpy.Session, error) {

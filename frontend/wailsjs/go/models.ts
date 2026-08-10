@@ -130,7 +130,39 @@ export namespace binary {
 }
 
 export namespace core {
+
+	export class ScrcpyPreset {
+	    name: string;
+	    options: ScrcpyOptions;
+
+	    static createFrom(source: any = {}) {
+	        return new ScrcpyPreset(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.options = this.convertValues(source["options"], ScrcpyOptions);
+	    }
 	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class ScrcpyOptions {
 	    max_size: number;
 	    bit_rate: number;
@@ -177,38 +209,6 @@ export namespace core {
 	        this.time_limit = source["time_limit"];
 	    }
 	}
-	export class ScrcpyPreset {
-	    name: string;
-	    options: ScrcpyOptions;
-	
-	    static createFrom(source: any = {}) {
-	        return new ScrcpyPreset(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.options = this.convertValues(source["options"], ScrcpyOptions);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
 	export class AppConfigSnapshot {
 	    adb_path: string;
 	    fastboot_path: string;
@@ -218,6 +218,7 @@ export namespace core {
 	    binary_versions: Record<string, string>;
 	    device_nicknames: Record<string, string>;
 	    logcat_buffer_limit: number;
+	    scrcpy_options: ScrcpyOptions;
 	    scrcpy_presets: ScrcpyPreset[];
 	    default_terminal_mode: string;
 	    auto_refresh_devices: boolean;
@@ -238,6 +239,7 @@ export namespace core {
 	        this.binary_versions = source["binary_versions"];
 	        this.device_nicknames = source["device_nicknames"];
 	        this.logcat_buffer_limit = source["logcat_buffer_limit"];
+	        this.scrcpy_options = this.convertValues(source["scrcpy_options"], ScrcpyOptions);
 	        this.scrcpy_presets = this.convertValues(source["scrcpy_presets"], ScrcpyPreset);
 	        this.default_terminal_mode = source["default_terminal_mode"];
 	        this.auto_refresh_devices = source["auto_refresh_devices"];
@@ -809,4 +811,3 @@ export namespace shell {
 	}
 
 }
-

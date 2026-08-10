@@ -151,6 +151,7 @@ func (a *App) snapshotConfigLocked() core.AppConfigSnapshot {
 		BinaryVersions:       cloneStringMap(a.cfg.BinaryVersions),
 		DeviceNicknames:      cloneStringMap(a.cfg.DeviceNicknames),
 		LogcatBufferLimit:    a.cfg.LogcatBufferLimit,
+		ScrcpyOptions:        a.cfg.ScrcpyOptions,
 		ScrcpyPresets:        cloneScrcpyPresets(a.cfg.ScrcpyPresets),
 		DefaultTerminalMode:  a.cfg.DefaultTerminalMode,
 		AutoRefreshDevices:   a.cfg.AutoRefreshDevices,
