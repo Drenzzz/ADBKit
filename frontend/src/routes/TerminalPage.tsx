@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import type { TerminalMode } from '@/lib/types'
+import { getTerminalTargetSerial } from '@/lib/terminalTarget'
 import { useTerminalStore } from '@/stores/useTerminalStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useDevices } from '@/hooks/useDevices'
@@ -89,7 +90,8 @@ export default function TerminalPage() {
   } = useTerminalStore()
 
   const activeSerial = useDeviceStore((state) => state.activeSerial)
-  const { refreshDevices, refreshing } = useDevices()
+  const { devices, deviceMode, refreshDevices, refreshing } = useDevices()
+  const targetSerial = getTerminalTargetSerial(mode, activeSerial, devices)
   const [command, setCommand] = useState('')
   const [showHistory, setShowHistory] = useState(false)
   const [activePanel, setActivePanel] =
@@ -99,6 +101,12 @@ export default function TerminalPage() {
   const outputBufferRef = useRef('')
   const flushTimerRef = useRef<number | null>(null)
   const history = useTerminalStore((state) => state.history)
+
+  useEffect(() => {
+    if (!connected && deviceMode === 'fastboot' && mode !== 'fastboot-host') {
+      setMode('fastboot-host')
+    }
+  }, [connected, deviceMode, mode, setMode])
 
   function modeLabel(m: TerminalMode): string {
     return MODE_OPTIONS.find((o) => o.value === m)?.label ?? 'ADB Shell'
@@ -120,8 +128,7 @@ export default function TerminalPage() {
   }
 
   function canConnect(nextMode: TerminalMode): boolean {
-    if (nextMode === 'fastboot-host') return true
-    return activeSerial !== ''
+    return getTerminalTargetSerial(nextMode, activeSerial, devices) !== ''
   }
 
   const handleResize = useCallback(() => {}, [])
@@ -147,7 +154,7 @@ export default function TerminalPage() {
     setError(null)
     clearOutput()
     try {
-      const newSession = await startTerminalSession(mode, activeSerial)
+      const newSession = await startTerminalSession(mode, targetSerial)
       setSession(newSession)
       setConnected(true)
       toast.success(
@@ -270,7 +277,7 @@ export default function TerminalPage() {
       animate="show"
       className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden pb-0 font-sans"
     >
-      {!activeSerial && !connected ? (
+      {!targetSerial && devices.length === 0 && !connected ? (
         <div className="flex-1 flex flex-col">
           <motion.div variants={itemVariants(reduced)} className="flex flex-col gap-1 mb-4">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Terminal</h1>
@@ -400,9 +407,9 @@ export default function TerminalPage() {
                   Connecting...
                 </span>
               )}
-              {!connected && !connecting && activeSerial && (
+              {!connected && !connecting && targetSerial && (
                 <span className="text-xs text-muted-foreground dark:text-zinc-500 font-mono">
-                  Target: {activeSerial}
+                  Target: {targetSerial}
                 </span>
               )}
 
@@ -524,7 +531,7 @@ export default function TerminalPage() {
             {!canConnect(mode) && !error && !connected && (
               <div className="px-5 py-2 border-t border-border dark:border-zinc-950 bg-zinc-50 dark:bg-zinc-950/30 text-xs text-muted-foreground font-medium">
                 {mode === 'fastboot-host'
-                  ? 'Fastboot mode does not require an active ADB device selection.'
+                  ? 'No Fastboot device detected. Connect a device in Fastboot mode first.'
                   : 'No device selected. Select a device first.'}
               </div>
             )}
