@@ -17,7 +17,7 @@ import {
   WakeAndUnlock,
   SetStayAwakeWhileCharging,
   GetStayAwakeWhileCharging,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import { Events } from '@wailsio/runtime'
 import type { FastbootDeviceInfo, FlashPlan } from '@/lib/types'
 

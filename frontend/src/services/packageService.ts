@@ -13,7 +13,7 @@ import {
   ForceStopPackage,
   GetPackageDetails,
   SelectApkFile,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import type {
   PackageDetails,
   PackageFilter,

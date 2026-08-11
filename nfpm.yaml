@@ -1,0 +1,38 @@
+name: adbkit
+arch: ${GOARCH}
+platform: linux
+version: "2.0.0-beta3"
+section: utils
+priority: optional
+maintainer: "Drenzzz <realdrenzzz@gmail.com>"
+description: "Modern desktop toolkit for ADB, Fastboot, and scrcpy"
+vendor: "Drenzzz"
+homepage: "https://github.com/drenzzz/ADBKit"
+license: "MIT"
+provides:
+  - adbkit
+
+contents:
+  - src: "./bin/ADBKit"
+    dst: /usr/bin/ADBKit
+  - src: "./build/linux/ADBKit.desktop"
+    dst: /usr/share/applications/ADBKit.desktop
+  - src: "./build/appicon.png"
+    dst: /usr/share/icons/hicolor/256x256/apps/ADBKit.png
+
+depends:
+  - libgtk-4-1
+  - libwebkitgtk-6.0-4
+
+overrides:
+  rpm:
+    depends:
+      - gtk4
+      - webkitgtk6.0
+  archlinux:
+    depends:
+      - gtk4
+      - webkitgtk-6.0
+
+scripts:
+  postinstall: "./build/linux/nfpm/scripts/postinstall.sh"

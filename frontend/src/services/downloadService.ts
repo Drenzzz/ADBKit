@@ -1,7 +1,7 @@
 import {
   DownloadPlatformTools,
   DownloadScrcpy,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import { Events } from '@wailsio/runtime'
 
 export interface DownloadProgressEvent {

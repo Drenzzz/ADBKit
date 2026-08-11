@@ -1,5 +1,5 @@
 import type { LogcatEntry, LogcatStatusEvent } from '@/lib/types'
-import { StartLogcat, StopLogcat, SaveLogcatToFile } from '../../bindings/ADBKit/app'
+import { StartLogcat, StopLogcat, SaveLogcatToFile } from '../../bindings/ADBKit/internal/app/app'
 import { Events } from '@wailsio/runtime'
 
 export const LOGCAT_LINE_EVENT = 'logcat_line'

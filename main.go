@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	appservice "ADBKit/internal/app"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
@@ -22,7 +23,7 @@ func main() {
 	_ = os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "0")
 	_ = os.Setenv("GDK_SYNCHRONIZE", "0")
 
-	service := NewApp()
+	service := appservice.NewApp()
 	app := application.New(application.Options{
 		Name:        "ADBKit",
 		Description: "Modern desktop toolkit for ADB, Fastboot, and scrcpy",

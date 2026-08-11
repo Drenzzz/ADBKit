@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>ADBKit</string>
+    <key>CFBundleExecutable</key>
+    <string>ADBKit</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.drenzzz.adbkit</string>
+    <key>CFBundleIconFile</key>
+    <string>icons.icns</string>
+    <key>CFBundleIconName</key>
+    <string>appicon</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>ADBKit</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>2.0.0-beta3</string>
+    <key>CFBundleVersion</key>
+    <string>2.0.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>12.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>(c) 2026, Drenzzz</string>
+</dict>
+</plist>

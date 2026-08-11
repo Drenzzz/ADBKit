@@ -1,0 +1,24 @@
+# Maintainer: Drenzzz <realdrenzzz@gmail.com>
+pkgname=adbkit
+pkgver=2.0.0beta3
+pkgrel=1
+pkgdesc="Modern desktop toolkit for ADB, Fastboot, and scrcpy"
+arch=('x86_64')
+url="https://github.com/drenzzz/ADBKit"
+license=('MIT')
+depends=('gtk4' 'webkitgtk-6.0')
+provides=('adbkit')
+source=()
+sha256sums=()
+
+build() {
+  cd "$startdir/../.."
+  :
+}
+
+package() {
+  cd "$startdir/../.."
+  install -Dm755 bin/ADBKit "$pkgdir/usr/bin/ADBKit"
+  install -Dm644 build/linux/ADBKit.desktop "$pkgdir/usr/share/applications/ADBKit.desktop"
+  install -Dm644 build/appicon.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/ADBKit.png"
+}

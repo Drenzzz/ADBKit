@@ -16,7 +16,7 @@ import {
   GetScrcpyClipboard,
   SelectSavePath,
   UpdateScrcpyOptions,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import { Events } from '@wailsio/runtime'
 
 export const SCRCPY_SESSION_STARTED_EVENT = 'scrcpy_session_started'

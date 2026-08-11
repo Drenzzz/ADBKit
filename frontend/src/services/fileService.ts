@@ -14,7 +14,7 @@ import {
   SelectDirectory,
   SelectMultipleFiles,
   CancelFileTransfer,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import { Events } from '@wailsio/runtime'
 import type { FileEntry, StorageInfo } from '@/lib/types'
 

@@ -12,7 +12,7 @@ import {
   SelectPlatformToolsDirectory,
   SelectSavePath,
   SelectFile,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import type {
   BinaryName,
   BinarySetupResult,

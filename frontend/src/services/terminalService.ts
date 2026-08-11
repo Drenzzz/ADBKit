@@ -8,7 +8,7 @@ import {
   StartTerminalSession,
   SendTerminalInput,
   CloseTerminal,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import { Events } from '@wailsio/runtime'
 
 export const TERMINAL_OUTPUT_EVENT = 'terminal_output'

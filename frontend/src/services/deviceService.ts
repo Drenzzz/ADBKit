@@ -12,7 +12,7 @@ import {
   GetDeviceNicknames,
   SetDeviceNickname,
   ClearDeviceNickname,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import type {
   DeviceSummary,
   DeviceInfo,

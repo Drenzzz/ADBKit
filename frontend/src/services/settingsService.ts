@@ -6,7 +6,7 @@ import {
   GetRuntimeDiagnostics,
   ImportAuditLogs,
   UpdatePreferences,
-} from '../../bindings/ADBKit/app'
+} from '../../bindings/ADBKit/internal/app/app'
 import type {
   AppConfigSnapshot,
   AuditLogEntry,

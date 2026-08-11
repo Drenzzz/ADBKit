@@ -9,13 +9,15 @@ description: "Modern desktop toolkit for ADB, Fastboot, and scrcpy"
 vendor: "Drenzzz"
 homepage: "https://github.com/drenzzz/ADBKit"
 license: "MIT"
+provides:
+  - adbkit
 
 contents:
   - src: "./bin/ADBKit"
     dst: /usr/bin/ADBKit
   - src: "./build/linux/ADBKit.desktop"
     dst: /usr/share/applications/ADBKit.desktop
-  - src: "./build/appicon.png"
+  - src: "./build/linux/appicon.png"
     dst: /usr/share/icons/hicolor/256x256/apps/ADBKit.png
 
 depends:
