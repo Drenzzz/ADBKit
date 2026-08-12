@@ -51,7 +51,15 @@ func (s *Service) StartRecording(serial, outputPath string, opts Options) error 
 
 	adbPath, _ := s.resolveADBPath()
 
-	args := []string{"--no-playback", "--record=" + trimmedPath, "--serial=" + trimmedSerial}
+	args := []string{"--no-window", "--record", trimmedPath, "--serial", trimmedSerial}
+
+	s.mu.Lock()
+	activeSession := s.process
+	s.mu.Unlock()
+	if activeSession != nil && activeSession.session.Serial == trimmedSerial {
+		args = append(args, "--port", "27199:27209")
+	}
+
 	if opts.BitRate > 0 {
 		args = append(args, "--video-bit-rate", fmt.Sprintf("%d", opts.BitRate))
 	}
@@ -134,6 +142,8 @@ func (s *Service) monitorRecordingProcess(cmd *exec.Cmd, stderrPipe io.ReadClose
 			Status:  StatusError,
 			Message: "Recording stopped unexpectedly: " + detail,
 		})
+	} else if exitErr != nil {
+		s.logAudit("recording_exit", "", false, fmt.Sprintf("exit_err=%v stderr=%s", exitErr, stderrBuf.String()))
 	}
 }
 
@@ -168,12 +178,23 @@ func (s *Service) StopRecording() (string, error) {
 		}
 	}
 
+	// Give a tiny bit of time for the filesystem to catch up if needed
+	time.Sleep(100 * time.Millisecond)
+
 	info, statErr := os.Stat(outputPath)
-	if statErr != nil || info.Size() == 0 {
+	if statErr != nil {
 		return "", core.NewOperationError(
 			"stop_scrcpy_recording",
-			"Recording file was not created",
-			"scrcpy may have failed to capture video",
+			"Recording file not found",
+			fmt.Sprintf("path=%s err=%v", outputPath, statErr),
+			true,
+		)
+	}
+	if info.Size() == 0 {
+		return "", core.NewOperationError(
+			"stop_scrcpy_recording",
+			"Recording file is empty",
+			"scrcpy failed to capture any frames. Ensure the device screen is on and no other scrcpy instance is using the same encoder.",
 			true,
 		)
 	}
