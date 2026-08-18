@@ -1,7 +1,7 @@
 name: adbkit
 arch: ${GOARCH}
 platform: linux
-version: "2.0.0-beta3"
+version: "2.0.0-beta4"
 section: utils
 priority: optional
 maintainer: "Drenzzz <realdrenzzz@gmail.com>"
