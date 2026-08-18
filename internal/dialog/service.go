@@ -5,13 +5,18 @@ import (
 	"context"
 	"path/filepath"
 
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 type PlatformToolsSelection struct {
 	Directory    string `json:"directory"`
 	AdbPath      string `json:"adbPath"`
 	FastbootPath string `json:"fastbootPath"`
+}
+
+type ScrcpyDirectorySelection struct {
+	Directory string `json:"directory"`
+	ScrcpyPath string `json:"scrcpyPath"`
 }
 
 type Service struct {
@@ -33,13 +38,13 @@ func (s *Service) SelectBinaryFile(name string) (string, error) {
 	if !core.IsSupportedBinaryName(name) {
 		return "", core.NewOperationError("select_binary_file", "unsupported binary name", name, false)
 	}
-	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+	path, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
 		Title:           "Select " + name + " binary",
 		ShowHiddenFiles: true,
-		Filters: []wailsruntime.FileFilter{
+		Filters: []application.FileFilter{
 			{DisplayName: "Executable files", Pattern: "*"},
 		},
-	})
+	}).PromptForSingleSelection()
 	if err != nil {
 		return "", err
 	}
@@ -50,9 +55,11 @@ func (s *Service) SelectPlatformToolsDirectory() (*PlatformToolsSelection, error
 	if s.ctx == nil {
 		return nil, core.NewOperationError("select_platform_tools_directory", "application context is not initialized", "", true)
 	}
-	dir, err := wailsruntime.OpenDirectoryDialog(s.ctx, wailsruntime.OpenDialogOptions{
-		Title: "Select platform-tools directory",
-	})
+	dir, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
+		Title:                "Select platform-tools directory",
+		CanChooseDirectories: true,
+		CanChooseFiles:       false,
+	}).PromptForSingleSelection()
 	if err != nil {
 		return nil, err
 	}
@@ -73,17 +80,42 @@ func (s *Service) SelectPlatformToolsDirectory() (*PlatformToolsSelection, error
 	}, nil
 }
 
+func (s *Service) SelectScrcpyDirectory() (*ScrcpyDirectorySelection, error) {
+	if s.ctx == nil {
+		return nil, core.NewOperationError("select_scrcpy_directory", "application context is not initialized", "", true)
+	}
+	dir, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
+		Title:                "Select scrcpy directory",
+		CanChooseDirectories: true,
+		CanChooseFiles:       false,
+	}).PromptForSingleSelection()
+	if err != nil {
+		return nil, err
+	}
+	if dir == "" {
+		return &ScrcpyDirectorySelection{}, nil
+	}
+	scrcpyPath := filepath.Join(dir, core.BinaryExecutableName(core.BinaryNameScrcpy))
+	if core.ValidateExecutable(scrcpyPath) != nil {
+		return nil, core.NewOperationError("select_scrcpy_directory", "no scrcpy binary found in selected directory", dir, false)
+	}
+	return &ScrcpyDirectorySelection{
+		Directory:  dir,
+		ScrcpyPath: scrcpyPath,
+	}, nil
+}
+
 func (s *Service) SelectApkFile() (string, error) {
 	if s.ctx == nil {
 		return "", core.NewOperationError("select_apk_file", "application context is not initialized", "", true)
 	}
-	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+	path, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
 		Title:           "Select APK file",
 		ShowHiddenFiles: false,
-		Filters: []wailsruntime.FileFilter{
+		Filters: []application.FileFilter{
 			{DisplayName: "APK files", Pattern: "*.apk"},
 		},
-	})
+	}).PromptForSingleSelection()
 	if err != nil {
 		return "", err
 	}
@@ -94,10 +126,10 @@ func (s *Service) SelectSaveFile(defaultFilename string) (string, error) {
 	if s.ctx == nil {
 		return "", core.NewOperationError("select_save_file", "application context is not initialized", "", true)
 	}
-	path, err := wailsruntime.SaveFileDialog(s.ctx, wailsruntime.SaveDialogOptions{
-		Title:           "Save file",
-		DefaultFilename: defaultFilename,
-	})
+	path, err := application.Get().Dialog.SaveFileWithOptions(&application.SaveFileDialogOptions{
+		Title:    "Save file",
+		Filename: defaultFilename,
+	}).PromptForSingleSelection()
 	if err != nil {
 		return "", err
 	}
@@ -108,9 +140,9 @@ func (s *Service) SelectFile() (string, error) {
 	if s.ctx == nil {
 		return "", core.NewOperationError("select_file", "application context is not initialized", "", true)
 	}
-	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+	path, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
 		Title: "Select file",
-	})
+	}).PromptForSingleSelection()
 	if err != nil {
 		return "", err
 	}
@@ -121,9 +153,11 @@ func (s *Service) SelectDirectory() (string, error) {
 	if s.ctx == nil {
 		return "", core.NewOperationError("select_directory", "application context is not initialized", "", true)
 	}
-	dir, err := wailsruntime.OpenDirectoryDialog(s.ctx, wailsruntime.OpenDialogOptions{
-		Title: "Select directory",
-	})
+	dir, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
+		Title:                "Select directory",
+		CanChooseDirectories: true,
+		CanChooseFiles:       false,
+	}).PromptForSingleSelection()
 	if err != nil {
 		return "", err
 	}
@@ -134,9 +168,10 @@ func (s *Service) SelectMultipleFiles() ([]string, error) {
 	if s.ctx == nil {
 		return nil, core.NewOperationError("select_multiple_files", "application context is not initialized", "", true)
 	}
-	files, err := wailsruntime.OpenMultipleFilesDialog(s.ctx, wailsruntime.OpenDialogOptions{
-		Title: "Select files",
-	})
+	files, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
+		Title:                   "Select files",
+		AllowsMultipleSelection: true,
+	}).PromptForMultipleSelection()
 	if err != nil {
 		return nil, err
 	}
@@ -147,13 +182,13 @@ func (s *Service) SelectFlashImageFile() (string, error) {
 	if s.ctx == nil {
 		return "", core.NewOperationError("select_flash_image_file", "application context is not initialized", "", true)
 	}
-	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+	path, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
 		Title:           "Select flash image file",
 		ShowHiddenFiles: false,
-		Filters: []wailsruntime.FileFilter{
+		Filters: []application.FileFilter{
 			{DisplayName: "Flash images", Pattern: "*.img;*.bin"},
 		},
-	})
+	}).PromptForSingleSelection()
 	if err != nil {
 		return "", err
 	}
@@ -164,13 +199,13 @@ func (s *Service) SelectSideloadFile() (string, error) {
 	if s.ctx == nil {
 		return "", core.NewOperationError("select_sideload_file", "application context is not initialized", "", true)
 	}
-	path, err := wailsruntime.OpenFileDialog(s.ctx, wailsruntime.OpenDialogOptions{
+	path, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
 		Title:           "Select package for sideload",
 		ShowHiddenFiles: false,
-		Filters: []wailsruntime.FileFilter{
+		Filters: []application.FileFilter{
 			{DisplayName: "ZIP packages", Pattern: "*.zip"},
 		},
-	})
+	}).PromptForSingleSelection()
 	if err != nil {
 		return "", err
 	}

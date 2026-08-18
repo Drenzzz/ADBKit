@@ -16,6 +16,7 @@ type AppConfig struct {
 	BinaryVersions       map[string]string `json:"binary_versions"`
 	DeviceNicknames      map[string]string `json:"device_nicknames"`
 	LogcatBufferLimit    int               `json:"logcat_buffer_limit"`
+	ScrcpyOptions        ScrcpyOptions     `json:"scrcpy_options"`
 	ScrcpyPresets        []ScrcpyPreset    `json:"scrcpy_presets"`
 	DefaultTerminalMode  string            `json:"default_terminal_mode"`
 	AutoRefreshDevices   bool              `json:"auto_refresh_devices"`
@@ -39,6 +40,7 @@ func DefaultConfig() *AppConfig {
 		BinaryVersions:       make(map[string]string),
 		DeviceNicknames:      make(map[string]string),
 		LogcatBufferLimit:    DefaultLogcatBufferLimit,
+		ScrcpyOptions:        DefaultScrcpyOptions(),
 		ScrcpyPresets:        []ScrcpyPreset{},
 		DefaultTerminalMode:  DefaultTerminalMode,
 		AutoRefreshDevices:   true,

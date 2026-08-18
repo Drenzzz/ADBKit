@@ -2,51 +2,62 @@ package main
 
 import (
 	"embed"
+
+	"log"
 	"os"
 
-	"github.com/wailsapp/wails/v2"
-	"github.com/wailsapp/wails/v2/pkg/options"
-	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	"github.com/wailsapp/wails/v2/pkg/options/linux"
+	appservice "ADBKit/internal/app"
+	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 )
+
+// Wails uses Go's `embed` package to embed the frontend files into the binary.
+// Any files in the frontend/dist folder will be embedded into the binary and
+// made available to the frontend.
+// See https://pkg.go.dev/embed for more information.
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
 func main() {
-	// Force WebKitGTK hardware compositing for smooth scroll and blur on Linux
-	os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "0")
-	os.Setenv("GDK_SYNCHRONIZE", "0")
+	_ = os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "0")
+	_ = os.Setenv("GDK_SYNCHRONIZE", "0")
 
-	// Create an instance of the app structure
-	app := NewApp()
+	service := appservice.NewApp()
+	app := application.New(application.Options{
+		Name:        "ADBKit",
+		Description: "Modern desktop toolkit for ADB, Fastboot, and scrcpy",
+		Services: []application.Service{
+			application.NewService(service),
+		},
+		Assets: application.AssetOptions{
+			Handler: application.AssetFileServerFS(assets),
+		},
+		Mac: application.MacOptions{
+			ApplicationShouldTerminateAfterLastWindowClosed: true,
+		},
+	})
 
-	// Create application with options
-	err := wails.Run(&options.App{
+	window := app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:            "ADBKit",
 		Width:            1280,
 		Height:           800,
 		MinWidth:         1024,
 		MinHeight:        720,
-		WindowStartState: options.Maximised,
-		AssetServer: &assetserver.Options{
-			Assets: assets,
+		StartState:       application.WindowStateMaximised,
+		BackgroundColour: application.NewRGBA(27, 38, 54, 255),
+		EnableFileDrop:   true,
+		Linux: application.LinuxWindow{
+			WebviewGpuPolicy: application.WebviewGpuPolicyAlways,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
-		OnShutdown:       app.shutdown,
-		Linux: &linux.Options{
-			WebviewGpuPolicy: linux.WebviewGpuPolicyAlways,
-		},
-		DragAndDrop: &options.DragAndDrop{
-			EnableFileDrop: true,
-		},
-		Bind: []interface{}{
-			app,
-		},
+		URL: "/",
+	})
+	window.OnWindowEvent(events.Common.WindowFilesDropped, func(event *application.WindowEvent) {
+		app.Event.Emit(fileDropEvent, event.Context().DroppedFiles())
 	})
 
+	err := app.Run()
 	if err != nil {
-		println("Error:", err.Error())
+		log.Fatal(err)
 	}
 }

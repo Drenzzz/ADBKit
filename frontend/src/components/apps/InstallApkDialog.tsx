@@ -10,10 +10,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import {
-  canResolveFilePaths,
-  resolveFilePaths,
-} from '@/services/fileDropService'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface InstallApkDialogProps {
@@ -81,15 +77,6 @@ export function InstallApkDialog({
     setErrorMsg(null)
   }
 
-  function tryResolveDroppedFiles(files: FileList | null) {
-    if (!files || files.length === 0 || !canResolveFilePaths()) return
-    const apkFiles = Array.from(files).filter((f) =>
-      f.name.toLowerCase().endsWith('.apk'),
-    )
-    if (apkFiles.length === 0) return
-    resolveFilePaths(apkFiles)
-  }
-
   const fileName = filePath ? filePath.split(/[\\/]/).pop() : null
   const isInstalling = status === 'installing'
   const isDone = status === 'success' || status === 'error'
@@ -116,7 +103,7 @@ export function InstallApkDialog({
         <div className="flex flex-col gap-4 py-2 w-full min-w-0">
           {/* Dropzone Container */}
           <div
-            style={{ ['--wails-drop-target' as string]: 'drop' }}
+            data-file-drop-target="drop"
             onDragOver={(e) => {
               e.preventDefault()
               if (status === 'idle') setIsDragOver(true)
@@ -125,8 +112,6 @@ export function InstallApkDialog({
             onDrop={(e) => {
               e.preventDefault()
               setIsDragOver(false)
-              if (status !== 'idle') return
-              tryResolveDroppedFiles(e.dataTransfer.files)
             }}
             className="relative w-full min-w-0"
           >

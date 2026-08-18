@@ -1,89 +1,60 @@
-APP_NAME     := ADBKit
-VERSION      := 2.0.0-beta3
-VERSION_DEB  := 2.0.0~beta3
-VERSION_ARCH := 2.0.0beta3
-BUILD_DIR    := build/bin
-BINARY       := $(BUILD_DIR)/$(APP_NAME)
-PLATFORM     := linux/amd64
-DIST_DIR     := dist
-# WebKitGTK build tag. Many modern distros ship webkit2gtk-4.1 instead of 4.0;
-# override on the CLI if needed:  make dev WEBKIT_TAG=
-WEBKIT_TAG   := webkit2_41
-WAILS_TAGS   := $(if $(WEBKIT_TAG),-tags $(WEBKIT_TAG),)
+APP_NAME := ADBKit
+VERSION := 2.0.0-beta4
 
-.PHONY: help dev build build-upx windows clean lint typecheck check all deb rpm arch appimage frontend-install deps doctor run
+.PHONY: help deps frontend-install doctor dev build build-upx windows run lint typecheck test test-coverage check check-all package deb rpm arch appimage all
 
 .DEFAULT_GOAL := help
 
-# ── Help ─────────────────────────────────────────
 help:
-	@echo "$(APP_NAME) $(VERSION) - make targets:"
-	@echo ""
-	@echo "  Development"
-	@echo "    make dev              Run app in dev mode (hot reload)"
-	@echo "    make run              Build then run the binary"
-	@echo "    make deps             Install Go + frontend deps"
-	@echo "    make doctor           Check required tools are installed"
-	@echo ""
-	@echo "  Build"
-	@echo "    make build            Production build ($(PLATFORM))"
-	@echo "    make build-upx        Production build, UPX-compressed"
-	@echo "    make windows          Portable Windows amd64 executable"
-	@echo ""
-	@echo "  Quality"
-	@echo "    make lint             Lint frontend"
-	@echo "    make typecheck        Typecheck frontend"
-	@echo "    make check            lint + typecheck"
-	@echo ""
-	@echo "  Packaging"
-	@echo "    make deb rpm arch appimage    Build individual packages"
-	@echo "    make all              Build all packages into $(DIST_DIR)/"
-	@echo ""
-	@echo "  Cleanup"
-	@echo "    make clean            Remove build + dist artifacts"
+	@echo "$(APP_NAME) $(VERSION)"
+	@echo "  make deps       Install Go and frontend dependencies"
+	@echo "  make frontend-install  Install frontend dependencies"
+	@echo "  make doctor     Check required local tools"
+	@echo "  make dev        Run Wails v3 development mode"
+	@echo "  make build      Build the current platform"
+	@echo "  make build-upx  Build then compress with UPX"
+	@echo "  make windows    Build the Windows target task"
+	@echo "  make run        Run the current platform build"
+	@echo "  make check      Run frontend and Go checks"
+	@echo "  make package    Package the current platform"
+	@echo "  make deb rpm arch appimage  Build Linux package targets"
 
-# ── Setup ────────────────────────────────────────
-deps: frontend-install
+deps:
 	go mod download
-
-doctor:
-	@echo "Checking required tools..."
-	@command -v go >/dev/null 2>&1 && echo "  ok  go"     || echo "  MISSING go"
-	@command -v wails >/dev/null 2>&1 && echo "  ok  wails"  || echo "  MISSING wails (go install github.com/wailsapp/wails/v2/cmd/wails@latest)"
-	@command -v bun >/dev/null 2>&1 && echo "  ok  bun"    || echo "  MISSING bun (https://bun.sh)"
-	@command -v adb >/dev/null 2>&1 && echo "  ok  adb"    || echo "  MISSING adb (android-platform-tools)"
-	@command -v nfpm >/dev/null 2>&1 && echo "  ok  nfpm"   || echo "  optional: nfpm (deb/rpm packaging)"
-	@command -v makepkg >/dev/null 2>&1 && echo "  ok  makepkg" || echo "  optional: makepkg (arch packaging)"
-	@command -v upx >/dev/null 2>&1 && echo "  ok  upx"    || echo "  optional: upx (build-upx)"
+	$(MAKE) frontend-install
 
 frontend-install:
 	cd frontend && bun install
 
-# ── Development ──────────────────────────────────
+doctor:
+	@command -v go >/dev/null 2>&1 && echo "ok: go" || echo "missing: go"
+	@command -v wails3 >/dev/null 2>&1 && echo "ok: wails3" || echo "missing: wails3"
+	@command -v bun >/dev/null 2>&1 && echo "ok: bun" || echo "missing: bun"
+	@command -v adb >/dev/null 2>&1 && echo "ok: adb" || echo "missing: adb"
+	@command -v fastboot >/dev/null 2>&1 && echo "ok: fastboot" || echo "missing: fastboot"
+	@command -v scrcpy >/dev/null 2>&1 && echo "ok: scrcpy" || echo "missing: scrcpy"
+	@command -v makensis >/dev/null 2>&1 && echo "ok: makensis" || echo "optional: makensis"
+
 dev:
-	wails dev $(WAILS_TAGS)
+	wails3 dev
 
-run: build
-	$(BINARY)
-
-# ── Core Build ───────────────────────────────────
 build:
-	wails build -platform $(PLATFORM) $(WAILS_TAGS) -clean
+	wails3 build
 
-build-upx:
-	wails build -platform $(PLATFORM) $(WAILS_TAGS) -clean -upx
+build-upx: build
+	upx bin/ADBKit$(if $(filter Windows_NT,$(OS)),.exe,)
 
 windows:
-	wails build -platform windows/amd64 -clean
+	wails3 task windows:build
 
-# ── Quality ──────────────────────────────────────
+run:
+	wails3 task run
+
 lint:
 	cd frontend && bun run lint
 
 typecheck:
 	cd frontend && bun run typecheck
-
-check: lint typecheck
 
 test:
 	cd frontend && bun run test
@@ -91,36 +62,25 @@ test:
 
 test-coverage:
 	go test -coverprofile=coverage.out ./...
-	go tool cover -func=coverage.out
 
-check-all: check test
+check: lint typecheck test
 
-# ── Packaging ────────────────────────────────────
-deb: build
-	mkdir -p $(DIST_DIR)
-	sed 's/^version: .*/version: "$(VERSION_DEB)"/' nfpm.yaml > /tmp/nfpm-deb.yaml
-	nfpm package -p deb -f /tmp/nfpm-deb.yaml -t $(DIST_DIR)/
-	rm -f /tmp/nfpm-deb.yaml
+check-all: check test-coverage
 
-rpm: build
-	mkdir -p $(DIST_DIR)
-	sed 's/^version: .*/version: "$(VERSION_DEB)"/' nfpm.yaml > /tmp/nfpm-rpm.yaml
-	nfpm package -p rpm -f /tmp/nfpm-rpm.yaml -t $(DIST_DIR)/
-	rm -f /tmp/nfpm-rpm.yaml
+package:
+	wails3 package
 
-arch: build
-	cd packaging/arch && sed 's/^pkgver=.*/pkgver=$(VERSION_ARCH)/' PKGBUILD > PKGBUILD.tmp && mv PKGBUILD.tmp PKGBUILD
-	cd packaging/arch && makepkg -f --noconfirm
+deb:
+	wails3 task linux:create:deb
 
-appimage: build
-	VERSION=$(VERSION) bash scripts/build-appimage.sh
+rpm:
+	wails3 task linux:create:rpm
 
-# ── All ──────────────────────────────────────────
-all: deb rpm arch appimage
-	@echo "All packages in $(DIST_DIR)/"
+arch:
+	wails3 task linux:create:aur
 
-# ── Clean ────────────────────────────────────────
-clean:
-	rm -rf $(DIST_DIR) $(BUILD_DIR)/$(APP_NAME) build/*.deb build/*.rpm
-	rm -rf build/pkg packaging/arch/pkg packaging/arch/src packaging/arch/*.pkg.tar.*
-	rm -rf build/AppImage-out build/tools
+appimage:
+	wails3 task linux:create:appimage
+
+all:
+	wails3 task linux:package

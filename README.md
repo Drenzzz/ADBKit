@@ -1,277 +1,212 @@
-<div align="center">
-
-<img src="build/appicon.png" alt="ADBKit logo" width="128" height="128" />
-
 # ADBKit
 
-A modern, unified desktop GUI for **ADB**, **Fastboot**, and **scrcpy** — built with [Wails v2](https://wails.io) (Go + React) for native performance and lightweight resource usage.
+ADBKit is a desktop toolkit for Android device workflows built around ADB,
+Fastboot, and scrcpy. It provides device management, app and file operations,
+terminal and logcat tools, ROM flashing, scrcpy control, and binary setup in one
+native application.
 
-> Android device management, visualized. From flashing ROMs to mirroring screens, ADBKit brings every terminal-heavy workflow into one structured desktop app.
+## Stack
 
-</div>
+- Wails v3 beta.6 with Go 1.25+
+- React 19, TypeScript, Vite, and Bun
+- Tailwind CSS v4, shadcn/ui, Zustand, and TanStack libraries
+- Generated Wails bindings in `frontend/bindings/`
 
----
+## Development
+
+Install dependencies:
+
+```bash
+go mod download
+cd frontend && bun install
+```
+
+Run the desktop app with hot reload:
+
+```bash
+wails3 dev
+```
+
+Build a production executable:
+
+```bash
+wails3 build
+```
+
+The executable is written to `bin/`.
+
+Run checks:
+
+```bash
+cd frontend && bun run typecheck && bun run lint && bun run test && bun run build
+cd .. && go test ./...
+```
+
+Package for the current platform:
+
+```bash
+wails3 package
+```
+
+Windows packaging uses the Wails NSIS task and requires `makensis`. Linux
+packaging produces AppImage, DEB, RPM, and Arch packages when the platform
+toolchain is available.
+
+## Project Layout
+
+- `main.go`: Wails application shell and window configuration
+- `app*.go`: root binding facade for product services
+- `internal/`: domain services and process integrations
+- `events.go`: typed Wails v3 event registration
+- `frontend/src/`: product UI, routes, stores, hooks, and service adapters
+- `frontend/bindings/`: generated TypeScript bindings; do not edit manually
+- `build/`: Wails v3 build, icon, and packaging assets
+- `build/config.yml`: application metadata and Wails build configuration
+
+## Runtime Requirements
+
+ADBKit expects ADB, Fastboot, and scrcpy. The setup wizard can detect existing
+installations, accept custom paths, or download managed packages. All three
+tools are required to finish setup.
+
+See `../ADBKit-v2.0-Planning.md` and `../DESIGN.md` for product scope and UI rules.
 
 ## Features
 
-**Dashboard**
-- Active device summary with editable nicknames
-- Quick health overview (battery, storage, RAM, connection state)
-- Wireless ADB connect shortcut
-- Binary setup status indicator
-- Quick actions to all domains
+### Dashboard and Devices
 
-**Device Manager**
-- Full device specs (model, codename, Android version, build ID, security patch)
-- Reboot actions: System, Recovery, Bootloader, Fastboot
-- Device mode detection (ADB / Fastboot / Sideload)
-- Live performance monitor (CPU, RAM, network RX/TX, battery, uptime)
-- Screenshot quick action
+- Active device summary and editable device nicknames
+- Battery, storage, RAM, connection, and performance overview
+- USB and wireless ADB workflows
+- Device specifications, mode detection, reboot actions, and screenshots
 
-**App Manager**
-- Virtualized package list for smooth handling of thousands of packages
-- Install APK via file picker or drag-and-drop
-- Uninstall, enable/disable, clear data — single or batch
-- Pull APK from device to host
-- Search, filter (User/System/All), sort (A-Z, Z-A, Size)
-- Detailed package info: version, APK size, data size
+### App Manager
 
-**File Explorer**
-- Directory navigation with breadcrumb
-- Push/pull files — single or batch
-- Create folder, delete file/folder, rename
-- Transfer progress with cancel support
-- Storage usage bar
-- Search and hidden file toggle
+- Virtualized package list for large device inventories
+- Install APK from a picker or native drag-and-drop
+- Uninstall, enable, disable, clear data, and batch actions
+- Pull APK files, search, filter, sort, and inspect package details
 
-**Flasher**
-- Flash single partition with image validation
-- Flash ROM folder via Flash Plan (auto-scan, partition mapping)
-- A/B slot management (get/set active slot)
-- Wipe data with confirmation guardrail
-- Sideload ZIP packages
-- Custom Fastboot command input with argument sanitization
-- **Wake on Fastboot (WOF)** — power-button replacement for devices with a broken/dead power button:
-  - Stay Awake While Charging toggle (screen never sleeps on any charger)
-  - Wake + Unlock (KEYCODE_WAKEUP + non-secure keyguard dismiss)
-  - Continue Boot (`fastboot continue` to exit the bootloader hands-free)
-- Extra confirmation for all destructive actions
+### File Explorer
 
-**Terminal**
-- Interactive ADB Shell, ADB Host, and Fastboot Host modes
-- Command history with re-execute
-- Session output with monospace rendering
-- Collapsible Logcat viewer with real-time streaming
-- Log filtering by level, tag, and text
-- Export logcat to file
+- Browse device storage with breadcrumbs and hidden-file support
+- Push, pull, create, delete, and rename files or folders
+- Transfer progress and cancellation support
+- Storage usage information
 
-**Scrcpy Hub**
-- Screen mirror in native window (not embedded)
-- Headless recording with timer and file size estimate
-- Screenshot capture with preview and save
-- Clipboard sync (push/pull between host and device)
-- Configurable: resolution, FPS, bitrate, codec, audio, rotation
-- Preset management for quick settings switching
-- Process exit detection when scrcpy is closed externally
+### Flasher
 
-**Binary Manager**
-- Auto-detection cascade: config path → system PATH → managed package → common paths
-- Managed download for Platform Tools and scrcpy (full folder package, not standalone executable)
-- Custom path support via file picker or folder picker
-- Version display per binary
-- Broken path detection and recovery flow
+- Flash individual partitions with validation
+- Scan and flash ROM folders through a Flash Plan
+- A/B slot management and wipe-data guardrails
+- Sideload ZIP packages and run validated Fastboot commands
+- Wake on Fastboot actions for continue, wake, unlock, and stay-awake flows
 
-**Setup Wizard**
-- First-run wizard with macOS-style assistant layout
-- 4 steps: Welcome → Platform Tools → scrcpy → Summary
-- Auto-detect, manual select, or download automatically
-- All three binaries (ADB, Fastboot, scrcpy) required to complete setup
+### Terminal and Logcat
 
-**Settings & Auditability**
-- Theme toggle (Dark / Light)
-- Terminal default mode
-- Device sync interval
-- Audit log toggle (off by default)
-- Audit log viewer with filtering, search, export/import
-- Runtime diagnostics (OS, arch, data dir, capabilities)
+- Interactive ADB shell, ADB host, and Fastboot host modes
+- Command history and session output
+- Streaming Logcat with level, tag, and text filters
+- Export Logcat output to a file
+
+### Scrcpy Hub
+
+- Native-window screen mirroring
+- Recording with timer and size estimate
+- Screenshot capture and save
+- Clipboard synchronization
+- Resolution, FPS, bitrate, codec, audio, rotation, and preset controls
+
+### Binary Manager and Setup Wizard
+
+- Detection order: saved config, system PATH, managed package, and common paths
+- Full Platform Tools and scrcpy package management
+- Custom binary and directory selection
+- First-run setup for ADB, Fastboot, and scrcpy
+- All three binaries are required to finish setup
+
+### Settings and Auditability
+
+- Dark and light themes
+- Terminal defaults and device sync interval
 - Binary Manager integration
-
----
+- Optional audit logging with search, filtering, export, and import
+- Runtime diagnostics for OS, architecture, data directory, and capabilities
 
 ## Screenshots
 
-Screenshots of each module are available in [here](screenshots/README.md).
-
----
+Screenshots for each product area are available in `screenshots/`.
 
 ## Installation
 
-### Windows portable release
+For a Windows portable release, run `bin/ADBKit.exe` or download the release
+artifact. Windows 11 normally includes WebView2. Install the Evergreen WebView2
+Runtime on Windows 10 or managed machines if the app does not start.
 
-Download and run `ADBKit.exe`; no installer is required. Windows 11 normally
-includes Microsoft Edge WebView2 Runtime. On Windows 10 or managed machines,
-install the Evergreen WebView2 Runtime before launching ADBKit if the app does
-not start. Managed binaries and configuration are stored in
-`%APPDATA%\adbkit\`.
+ADBKit stores managed binaries and configuration under the platform application
+data directory. The setup wizard will guide you through detection, custom paths,
+or managed downloads.
 
-Official Windows releases are Authenticode-signed. Verify the signer in the
-file's Properties > Digital Signatures tab before running it.
+## Managed Binary Layout
 
-1. Go to the [Releases](https://github.com/drenzzz/ADBKit/releases) page
-2. Download the latest release for your OS
-3. Install or extract the package
-4. Run the application
+Managed downloads preserve the full release package instead of extracting only
+one executable:
 
-> **Note:** ADBKit requires ADB, Fastboot, and scrcpy binaries. The Setup Wizard will guide you through detection or download on first launch. All three are required — scrcpy is not optional.
-
----
-
-## Binary Management
-
-ADBKit manages binaries through a detection-first approach:
-
-| Priority | Method | Description |
-|----------|--------|-------------|
-| 1 | Config path | Previously saved custom path |
-| 2 | System PATH | `exec.LookPath()` discovery |
-| 3 | Managed package | Downloaded via Setup Wizard |
-| 4 | Common paths | OS-specific default locations |
-
-**Managed download** preserves the full release archive structure:
-
-```
-~/.local/share/adbkit/bin/
-├── platform-tools/
-│   ├── adb
-│   ├── fastboot
-│   ├── lib64/
-│   ├── source.properties
-│   └── ...
-└── scrcpy/
-    ├── scrcpy
-    ├── scrcpy-server
-    ├── scrcpy.1
-    └── ...
+```text
+platform-tools/
+  adb
+  fastboot
+  lib64/
+  source.properties
+scrcpy/
+  scrcpy
+  scrcpy-server
+  scrcpy.1
 ```
 
-> Standalone executables are not extracted. Supporting files (lib64, scrcpy-server, etc.) are required for full functionality.
+Supporting files are required for complete ADB, Fastboot, and scrcpy behavior.
 
----
+## Build Commands
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Core | [Wails v2](https://wails.io) |
-| Backend | Go 1.23 — Domain-package architecture (`internal/<domain>/`) |
-| Frontend | React 19 + TypeScript |
-| Build | Vite 8 + Bun |
-| State | Zustand + TanStack React Query v5 |
-| UI | [shadcn/ui](https://ui.shadcn.com) (base-rhea) + Tailwind CSS v4 |
-| Animation | [motion](https://motion.dev) (single engine, no GSAP/Lenis) |
-| Icons | Lucide React |
-| Toast | Sonner |
-| Command Palette | cmdk |
-| Virtualization | TanStack Virtual v3 |
-| Charts | Recharts |
-| Validation | Zod |
-
----
-
-## Building from Source
-
-**Prerequisites:** Go 1.25+, Bun, [Wails CLI](https://wails.io/docs/gettingstarted/installation)
-
-A `Makefile` wraps the common workflows. Run `make` (or `make help`) to list all targets.
+The legacy `make` interface is retained as a wrapper around Wails v3 tasks:
 
 ```bash
-# Check that required tools are installed (go, wails, bun, adb, ...)
 make doctor
-
-# Install Go + frontend dependencies
 make deps
-
-# Development (hot reload)
 make dev
-
-# Production build
-make build          # -> build/bin/ADBKit
-make build-upx      # UPX-compressed build
-
-# Build then run the binary
-make run
-
-# Quality
-make lint           # frontend lint
-make typecheck      # frontend typecheck
-make check          # lint + typecheck
-
-# Packaging (Linux)
-make deb rpm arch appimage   # individual packages
-make all                     # all packages -> dist/
+make build
+make windows
+make check
+make package
+make deb rpm arch appimage
 ```
 
-<details>
-<summary>Manual (without make)</summary>
+The canonical commands are `wails3 dev`, `wails3 build`, and `wails3 package`.
+Generated bindings belong in `frontend/bindings/` and must be regenerated with
+`wails3 generate bindings -clean -ts` after exported Go services change.
 
-```bash
-# Install frontend dependencies
-cd frontend && bun install && cd ..
+## Signing Windows Releases
 
-# Development
-wails dev
-
-# Production build
-wails build
-
-# Frontend typecheck
-cd frontend && bun run typecheck
-
-# Frontend lint
-cd frontend && bun run lint
-
-# Go tests
-go test ./...
-```
-
-</details>
-
-### Signing Windows releases
-
-The manual `windows-signed-release` GitHub Actions job signs the portable EXE
-and verifies it before upload. Configure these repository secrets first:
-
-- `WINDOWS_SIGNING_CERTIFICATE_BASE64`: Base64-encoded PFX certificate.
-- `WINDOWS_SIGNING_CERTIFICATE_PASSWORD`: PFX password.
-
-Optionally set the `WINDOWS_TIMESTAMP_URL` repository variable to the RFC 3161
-timestamp endpoint supplied by your certificate authority. The PFX must never
-be committed to this repository.
-
----
+The `windows-signed-release` CI job signs and verifies the portable executable.
+Configure `WINDOWS_SIGNING_CERTIFICATE_BASE64` and
+`WINDOWS_SIGNING_CERTIFICATE_PASSWORD` repository secrets. Optionally configure
+`WINDOWS_TIMESTAMP_URL`. Never commit the PFX certificate or its password.
 
 ## Troubleshooting
 
 | Issue | Fix |
-|-------|-----|
-| Device not found | Enable USB Debugging in Developer Options; install required USB drivers |
-| Unauthorized device | Accept the RSA fingerprint prompt on your device screen |
-| Wireless ADB not working | Ensure device and computer are on the same network; check IP/port |
-| Linux USB access denied | Configure `udev` rules for your device vendor |
-| Windows app does not open | Install or repair Microsoft Edge WebView2 Runtime, then launch `ADBKit.exe` again |
-| scrcpy exits immediately | Check if `scrcpy-server` exists in the scrcpy package folder; re-download if missing |
-| Binary shows "Invalid path" | Binary may be incomplete; re-download via Settings → Binary Manager |
-| Setup wizard won't finish | All three binaries (ADB, Fastboot, scrcpy) must be `ready` — none can be skipped |
-| Flash operation fails | Ensure device is in Fastboot mode; verify partition name is valid |
-
----
+| --- | --- |
+| Device not found | Enable USB debugging and install the required USB driver. |
+| Unauthorized device | Accept the RSA prompt on the device. |
+| Wireless ADB fails | Check that both devices share the same network and port. |
+| Linux USB access denied | Configure udev rules for the device vendor. |
+| Windows app does not open | Install or repair Microsoft Edge WebView2 Runtime. |
+| scrcpy exits immediately | Confirm `scrcpy-server` exists in the managed package. |
+| Invalid binary path | Re-select or re-download the complete binary package. |
+| Setup cannot finish | ADB, Fastboot, and scrcpy must all be ready. |
+| Flash fails | Check Fastboot mode and validate the partition name. |
 
 ## Contributing
 
-Contributions are welcome — open an issue or submit a pull request.
-
----
-
-## License
-
-MIT
+Contributions are welcome. Open an issue or submit a pull request with tests for
+behavioral changes.

@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import type { ScrcpyOptions, ScrcpySessionEvent } from '@/lib/types'
 import { useScrcpyStore } from '@/stores/scrcpyStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
+import { getAppConfig } from '@/services/settingsService'
 import {
   getActiveScrcpySession,
   getScrcpyEncoderSupport,
@@ -17,6 +18,7 @@ import {
   takeScrcpyScreenshot,
   getScrcpyClipboard,
   pushScrcpyClipboard,
+  updateScrcpyOptions,
 } from '@/services/scrcpyService'
 
 function timestampedFilename(prefix: string, extension: string): string {
@@ -71,6 +73,8 @@ export function useScrcpy() {
   const setEncoderSupport = useScrcpyStore((state) => state.setEncoderSupport)
   const setIsFetchingEncoder = useScrcpyStore((state) => state.setIsFetchingEncoder)
   const setError = useScrcpyStore((state) => state.setError)
+  const setOptions = useScrcpyStore((state) => state.setOptions)
+  const reset = useScrcpyStore((state) => state.reset)
   const applyStartedEvent = useScrcpyStore((state) => state.applyStartedEvent)
   const applyStoppedEvent = useScrcpyStore((state) => state.applyStoppedEvent)
   const applyErrorEvent = useScrcpyStore((state) => state.applyErrorEvent)
@@ -81,6 +85,10 @@ export function useScrcpy() {
 
   const activeSerialRef = useRef(activeSerial)
   const sessionRef = useRef(session)
+  const optionsHydratedRef = useRef(false)
+  const optionsDirtyRef = useRef(false)
+  const pendingOptionsRef = useRef<ScrcpyOptions | null>(null)
+  const saveTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     activeSerialRef.current = activeSerial
@@ -89,6 +97,93 @@ export function useScrcpy() {
   useEffect(() => {
     sessionRef.current = session
   }, [session])
+
+  const saveOptions = useCallback(async (nextOptions: ScrcpyOptions) => {
+    try {
+      await updateScrcpyOptions(nextOptions)
+    } catch (err) {
+      console.error('failed to save scrcpy options', err)
+      toast.error('Failed to save Scrcpy settings', {
+        description: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }, [])
+
+  const scheduleOptionsSave = useCallback(
+    (nextOptions: ScrcpyOptions) => {
+      pendingOptionsRef.current = nextOptions
+      if (saveTimerRef.current !== null) {
+        window.clearTimeout(saveTimerRef.current)
+      }
+      saveTimerRef.current = window.setTimeout(() => {
+        const pending = pendingOptionsRef.current
+        pendingOptionsRef.current = null
+        saveTimerRef.current = null
+        if (pending) void saveOptions(pending)
+      }, 250)
+    },
+    [saveOptions],
+  )
+
+  useEffect(() => {
+    let cancelled = false
+    optionsHydratedRef.current = false
+    optionsDirtyRef.current = false
+
+    getAppConfig()
+      .then((config) => {
+        if (cancelled) return
+        if (!optionsDirtyRef.current && config.scrcpy_options) {
+          setOptions(config.scrcpy_options)
+        }
+        optionsHydratedRef.current = true
+        if (optionsDirtyRef.current) {
+          scheduleOptionsSave(useScrcpyStore.getState().options)
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return
+        console.error('failed to load scrcpy options', err)
+        optionsHydratedRef.current = true
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [scheduleOptionsSave, setOptions])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current !== null) {
+        window.clearTimeout(saveTimerRef.current)
+      }
+      const pending = pendingOptionsRef.current
+      pendingOptionsRef.current = null
+      if (pending && optionsHydratedRef.current) {
+        void saveOptions(pending)
+      }
+    }
+  }, [saveOptions])
+
+  const updateOptions = useCallback(
+    (nextOptions: ScrcpyOptions) => {
+      optionsDirtyRef.current = true
+      setOptions(nextOptions)
+      if (optionsHydratedRef.current) {
+        scheduleOptionsSave(nextOptions)
+      }
+    },
+    [scheduleOptionsSave, setOptions],
+  )
+
+  const resetScrcpy = useCallback(() => {
+    reset()
+    optionsDirtyRef.current = true
+    const nextOptions = useScrcpyStore.getState().options
+    if (optionsHydratedRef.current) {
+      scheduleOptionsSave(nextOptions)
+    }
+  }, [reset, scheduleOptionsSave])
 
   useEffect(() => {
     if (!activeSerial) {
@@ -324,5 +419,7 @@ export function useScrcpy() {
     handleDeletePreset,
     handlePushClipboard,
     handlePullClipboard,
+    updateOptions,
+    resetScrcpy,
   }
 }

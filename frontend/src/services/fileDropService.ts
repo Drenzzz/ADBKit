@@ -1,25 +1,11 @@
-import {
-  OnFileDrop,
-  OnFileDropOff,
-  CanResolveFilePaths,
-  ResolveFilePaths,
-} from '../../wailsjs/runtime/runtime'
+import { Events } from '@wailsio/runtime'
+
+export const FILE_DROP_EVENT = 'files-dropped'
 
 export function onFileDrop(
   callback: (paths: string[]) => void,
-  useDropTarget = true,
 ): () => void {
-  OnFileDrop((_x, _y, paths) => {
-    callback(paths)
-  }, useDropTarget)
-
-  return () => OnFileDropOff()
-}
-
-export function canResolveFilePaths(): boolean {
-  return CanResolveFilePaths()
-}
-
-export function resolveFilePaths(files: File[]): void {
-  ResolveFilePaths(files)
+  return Events.On(FILE_DROP_EVENT, (event) => {
+    callback(event.data)
+  })
 }

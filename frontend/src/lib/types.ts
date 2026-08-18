@@ -40,6 +40,11 @@ export interface PlatformToolsSelection {
   fastbootPath: string
 }
 
+export interface ScrcpyDirectorySelection {
+  directory: string
+  scrcpyPath: string
+}
+
 export interface Capabilities {
   adbAvailable: boolean
   fastbootAvailable: boolean
@@ -50,7 +55,7 @@ export interface Capabilities {
   clipboardSyncSupported: boolean
 }
 
-export type SetupWizardStep = 'welcome' | 'platform-tools' | 'scrcpy' | 'summary'
+export type SetupWizardStep = 'welcome' | 'setup-binary' | 'finish'
 
 export interface SetupWizardState {
   currentStep: SetupWizardStep
@@ -461,6 +466,7 @@ export interface AppConfigSnapshot {
   binary_versions: Record<string, string>
   device_nicknames: Record<string, string>
   logcat_buffer_limit: number
+  scrcpy_options: ScrcpyOptions
   scrcpy_presets: ScrcpyPresetSnapshot[]
   default_terminal_mode: string
   auto_refresh_devices: boolean

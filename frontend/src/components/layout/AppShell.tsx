@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { BottomDock } from './BottomDock'
-import { CommandPalette } from '@/components/common/CommandPalette'
 import { SetupWizard } from '@/components/setup/SetupWizard'
 import { getSetupState } from '@/services/binaryService'
 import { getAppConfig } from '@/services/settingsService'
 import { useUIStore } from '@/stores/useUIStore'
 import { cn } from '@/lib/utils'
+
+const CommandPalette = lazy(() =>
+  import('@/components/common/CommandPalette').then(({ CommandPalette: Component }) => ({ default: Component })),
+)
 
 function applyThemeClass(theme: 'dark' | 'light') {
   document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -63,18 +66,16 @@ export function AppShell() {
 
   if (!setupComplete) {
     return (
-      <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-        <main className="flex-1 overflow-y-auto pb-16">
+      <div data-file-drop-target="app" className="flex min-h-[100dvh] flex-col overflow-hidden bg-background text-foreground">
+        <main className="min-h-0 flex-1 overflow-y-auto">
           <SetupWizard onComplete={() => setSetupComplete(true)} />
         </main>
-        <BottomDock />
-        <CommandPalette />
       </div>
     )
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+    <div data-file-drop-target="app" className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <main className="flex-1 min-h-0 flex flex-col">
         <div className={cn(
           "flex-1 min-h-0 w-full flex flex-col p-6 pb-24 perf-scroll",
@@ -84,7 +85,9 @@ export function AppShell() {
         </div>
       </main>
       <BottomDock />
-      <CommandPalette />
+      <Suspense fallback={null}>
+        <CommandPalette />
+      </Suspense>
     </div>
   )
 }

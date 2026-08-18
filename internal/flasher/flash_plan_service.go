@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 const FlashStepStatusEvent = "flash_step_status"
@@ -82,7 +82,7 @@ func NewPlanService(fastbootService *FastbootService) *PlanService {
 	return &PlanService{fastbootService: fastbootService}
 }
 
-// SetWailsContext wires the runtime context used to emit per-step flash events.
+// SetWailsContext keeps event emission disabled until the application is ready.
 func (s *PlanService) SetWailsContext(ctx context.Context) {
 	s.wailsCtx = ctx
 }
@@ -91,7 +91,7 @@ func (s *PlanService) emitStepStatus(partition, status, message string) {
 	if s.wailsCtx == nil {
 		return
 	}
-	wailsruntime.EventsEmit(s.wailsCtx, FlashStepStatusEvent, StepStatus{
+	application.Get().Event.Emit(FlashStepStatusEvent, StepStatus{
 		Partition: partition,
 		Status:    status,
 		Message:   message,

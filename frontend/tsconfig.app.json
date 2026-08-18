@@ -26,5 +26,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-    "include": ["src"]
+    "include": ["src"],
+    "exclude": ["bindings", "node_modules"]
 }

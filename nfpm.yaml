@@ -1,23 +1,38 @@
-name: ADBKit
-arch: amd64
+name: adbkit
+arch: ${GOARCH}
 platform: linux
-version: "0.0.0"
+version: "2.0.0-beta4"
 section: utils
 priority: optional
 maintainer: "Drenzzz <realdrenzzz@gmail.com>"
-description: "ADBKit — modern Android device management desktop app"
+description: "Modern desktop toolkit for ADB, Fastboot, and scrcpy"
 vendor: "Drenzzz"
-homepage: "https://github.com/drenzzz/adbkit"
+homepage: "https://github.com/drenzzz/ADBKit"
 license: "MIT"
-
-depends:
-  - libgtk-3-0
-  - libwebkit2gtk-4.1-0
+provides:
+  - adbkit
 
 contents:
-  - src: ./build/bin/ADBKit
+  - src: "./bin/ADBKit"
     dst: /usr/bin/ADBKit
-  - src: ./build/linux/ADBKit.desktop
+  - src: "./build/linux/ADBKit.desktop"
     dst: /usr/share/applications/ADBKit.desktop
-  - src: ./build/appicon.png
+  - src: "./build/appicon.png"
     dst: /usr/share/icons/hicolor/256x256/apps/ADBKit.png
+
+depends:
+  - libgtk-4-1
+  - libwebkitgtk-6.0-4
+
+overrides:
+  rpm:
+    depends:
+      - gtk4
+      - webkitgtk6.0
+  archlinux:
+    depends:
+      - gtk4
+      - webkitgtk-6.0
+
+scripts:
+  postinstall: "./build/linux/nfpm/scripts/postinstall.sh"

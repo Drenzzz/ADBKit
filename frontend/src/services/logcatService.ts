@@ -1,6 +1,6 @@
 import type { LogcatEntry, LogcatStatusEvent } from '@/lib/types'
-import { StartLogcat, StopLogcat, SaveLogcatToFile } from '../../wailsjs/go/main/App'
-import { EventsOn } from '../../wailsjs/runtime/runtime'
+import { StartLogcat, StopLogcat, SaveLogcatToFile } from '../../bindings/ADBKit/internal/app/app'
+import { Events } from '@wailsio/runtime'
 
 export const LOGCAT_LINE_EVENT = 'logcat_line'
 export const LOGCAT_STATUS_EVENT = 'logcat_status'
@@ -27,15 +27,15 @@ export async function saveLogcatToFile(
 export function onLogcatLine(
   callback: (entry: LogcatEntry) => void,
 ): () => void {
-  return EventsOn(LOGCAT_LINE_EVENT, (entry: LogcatEntry) => {
-    callback(entry)
+  return Events.On(LOGCAT_LINE_EVENT, (event) => {
+    callback(event.data)
   })
 }
 
 export function onLogcatStatus(
   callback: (event: LogcatStatusEvent) => void,
 ): () => void {
-  return EventsOn(LOGCAT_STATUS_EVENT, (event: LogcatStatusEvent) => {
-    callback(event)
+  return Events.On(LOGCAT_STATUS_EVENT, (event) => {
+    callback(event.data)
   })
 }

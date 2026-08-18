@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 const (
@@ -247,7 +247,7 @@ func (s *Service) StartSession(ctx context.Context, serial string, opts Options)
 	active := process.session
 	s.mu.Unlock()
 
-	wailsruntime.EventsEmit(s.ctx, EventSessionStarted, SessionEvent{
+	application.Get().Event.Emit(EventSessionStarted, SessionEvent{
 		SessionID: active.ID,
 		Serial:    active.Serial,
 		Status:    active.Status,
@@ -328,10 +328,10 @@ func (s *Service) closeSession(process *scrcpyProcess, status SessionStatus, emi
 		}
 
 		if status == StatusError {
-			wailsruntime.EventsEmit(s.ctx, EventError, event)
+			application.Get().Event.Emit(EventError, event)
 			return
 		}
-		wailsruntime.EventsEmit(s.ctx, EventSessionStopped, event)
+		application.Get().Event.Emit(EventSessionStopped, event)
 	})
 }
 
@@ -417,7 +417,7 @@ func (s *Service) resolveADBPath() (string, error) {
 }
 
 func (s *Service) emitErrorEvent(session Session, message string) {
-	wailsruntime.EventsEmit(s.ctx, EventError, SessionEvent{
+	application.Get().Event.Emit(EventError, SessionEvent{
 		SessionID: session.ID,
 		Serial:    session.Serial,
 		Status:    StatusError,

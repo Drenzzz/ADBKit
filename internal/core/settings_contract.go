@@ -26,6 +26,16 @@ type ScrcpyOptions struct {
 	TimeLimit          int    `json:"time_limit"`
 }
 
+func DefaultScrcpyOptions() ScrcpyOptions {
+	return ScrcpyOptions{
+		BitRate:      8_000_000,
+		AudioBitRate: 128_000,
+		AudioCodec:   "opus",
+		VideoCodec:   "h264",
+		StayAwake:    true,
+	}
+}
+
 type PreferencesPayload struct {
 	Theme                string            `json:"theme"`
 	DeviceNicknames      map[string]string `json:"device_nicknames"`
@@ -46,6 +56,7 @@ type AppConfigSnapshot struct {
 	BinaryVersions       map[string]string `json:"binary_versions"`
 	DeviceNicknames      map[string]string `json:"device_nicknames"`
 	LogcatBufferLimit    int               `json:"logcat_buffer_limit"`
+	ScrcpyOptions        ScrcpyOptions     `json:"scrcpy_options"`
 	ScrcpyPresets        []ScrcpyPreset    `json:"scrcpy_presets"`
 	DefaultTerminalMode  string            `json:"default_terminal_mode"`
 	AutoRefreshDevices   bool              `json:"auto_refresh_devices"`

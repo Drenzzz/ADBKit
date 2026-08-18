@@ -15,8 +15,9 @@ import {
   PushScrcpyClipboard,
   GetScrcpyClipboard,
   SelectSavePath,
-} from '../../wailsjs/go/main/App'
-import { EventsOn } from '../../wailsjs/runtime/runtime'
+  UpdateScrcpyOptions,
+} from '../../bindings/ADBKit/internal/app/app'
+import { Events } from '@wailsio/runtime'
 
 export const SCRCPY_SESSION_STARTED_EVENT = 'scrcpy_session_started'
 export const SCRCPY_SESSION_STOPPED_EVENT = 'scrcpy_session_stopped'
@@ -82,13 +83,17 @@ export async function getScrcpyClipboard(serial: string): Promise<string> {
   return GetScrcpyClipboard(serial)
 }
 
+export async function updateScrcpyOptions(options: ScrcpyOptions): Promise<void> {
+  await UpdateScrcpyOptions(options as never)
+}
+
 export function onScrcpySessionStarted(
   callback: (event: ScrcpySessionEvent) => void,
 ): () => void {
-  return EventsOn(
+  return Events.On(
     SCRCPY_SESSION_STARTED_EVENT,
-    (event: ScrcpySessionEvent) => {
-      callback(event)
+    (event) => {
+      callback(event.data)
     },
   )
 }
@@ -96,10 +101,10 @@ export function onScrcpySessionStarted(
 export function onScrcpySessionStopped(
   callback: (event: ScrcpySessionEvent) => void,
 ): () => void {
-  return EventsOn(
+  return Events.On(
     SCRCPY_SESSION_STOPPED_EVENT,
-    (event: ScrcpySessionEvent) => {
-      callback(event)
+    (event) => {
+      callback(event.data)
     },
   )
 }
@@ -107,7 +112,7 @@ export function onScrcpySessionStopped(
 export function onScrcpyError(
   callback: (event: ScrcpySessionEvent) => void,
 ): () => void {
-  return EventsOn(SCRCPY_ERROR_EVENT, (event: ScrcpySessionEvent) => {
-    callback(event)
+  return Events.On(SCRCPY_ERROR_EVENT, (event) => {
+    callback(event.data)
   })
 }

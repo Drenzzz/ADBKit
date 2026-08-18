@@ -14,7 +14,7 @@ import (
 	"sync/atomic"
 
 	"github.com/google/uuid"
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 const (
@@ -124,7 +124,7 @@ func (s *LogcatService) StartStream(ctx context.Context, serial string, levels s
 	go s.readLogcatOutput(stream, stderrPipe, true)
 	go s.waitForStreamExit(stream)
 
-	wailsruntime.EventsEmit(s.ctx, EventStatus, LogcatStatusEvent{
+	application.Get().Event.Emit(EventStatus, LogcatStatusEvent{
 		Serial: trimmedSerial,
 		Status: "started",
 	})
@@ -177,11 +177,11 @@ func (s *LogcatService) readLogcatOutput(stream *logcatStream, pipe io.ReadClose
 		if isError && entry.Tag == "" {
 			entry.Level = "W"
 		}
-		wailsruntime.EventsEmit(s.ctx, EventLine, entry)
+		application.Get().Event.Emit(EventLine, entry)
 	}
 
 	if err := scanner.Err(); err != nil {
-		wailsruntime.EventsEmit(s.ctx, EventLine, LogcatEntry{
+		application.Get().Event.Emit(EventLine, LogcatEntry{
 			ID:      uuid.NewString(),
 			Serial:  stream.serial,
 			Level:   "E",
@@ -205,7 +205,7 @@ func (s *LogcatService) waitForStreamExit(stream *logcatStream) {
 }
 
 func (s *LogcatService) emitError(stream *logcatStream, err error) {
-	wailsruntime.EventsEmit(s.ctx, EventLine, LogcatEntry{
+	application.Get().Event.Emit(EventLine, LogcatEntry{
 		ID:      uuid.NewString(),
 		Serial:  stream.serial,
 		Level:   "E",
@@ -232,7 +232,7 @@ func (s *LogcatService) closeStream(stream *logcatStream, status string) {
 			_ = stream.cmd.Process.Kill()
 		}
 
-		wailsruntime.EventsEmit(s.ctx, EventStatus, LogcatStatusEvent{
+		application.Get().Event.Emit(EventStatus, LogcatStatusEvent{
 			Serial: stream.serial,
 			Status: status,
 		})

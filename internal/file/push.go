@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 func (s *Service) PushFile(ctx context.Context, localPath string, remotePath string) (string, error) {
@@ -131,7 +131,7 @@ func (s *Service) emitTransferProgress(fileName, direction string, percent int) 
 	if s.wailsCtx == nil {
 		return
 	}
-	wailsruntime.EventsEmit(s.wailsCtx, TransferProgressEvent, TransferProgress{
+	application.Get().Event.Emit(TransferProgressEvent, TransferProgress{
 		FileName:  fileName,
 		Direction: direction,
 		Percent:   percent,

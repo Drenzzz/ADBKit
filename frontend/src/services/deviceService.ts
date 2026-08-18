@@ -12,7 +12,7 @@ import {
   GetDeviceNicknames,
   SetDeviceNickname,
   ClearDeviceNickname,
-} from '../../wailsjs/go/main/App'
+} from '../../bindings/ADBKit/internal/app/app'
 import type {
   DeviceSummary,
   DeviceInfo,

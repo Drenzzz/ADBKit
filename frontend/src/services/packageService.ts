@@ -13,7 +13,7 @@ import {
   ForceStopPackage,
   GetPackageDetails,
   SelectApkFile,
-} from '../../wailsjs/go/main/App'
+} from '../../bindings/ADBKit/internal/app/app'
 import type {
   PackageDetails,
   PackageFilter,

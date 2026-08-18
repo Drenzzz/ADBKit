@@ -10,14 +10,16 @@ import {
   GetCapabilities,
   SelectBinaryFile,
   SelectPlatformToolsDirectory,
+  SelectScrcpyDirectory,
   SelectSavePath,
   SelectFile,
-} from '../../wailsjs/go/main/App'
+} from '../../bindings/ADBKit/internal/app/app'
 import type {
   BinaryName,
   BinarySetupResult,
   SetupState,
   PlatformToolsSelection,
+  ScrcpyDirectorySelection,
   Capabilities,
 } from '@/lib/types'
 
@@ -57,7 +59,7 @@ export async function getManagedBinaryDir(): Promise<string> {
 }
 
 export async function listManagedBinaries(): Promise<string[]> {
-  return ListManagedBinaries()
+  return (await ListManagedBinaries()) ?? []
 }
 
 export async function getCapabilities(): Promise<Capabilities> {
@@ -74,6 +76,11 @@ export async function selectBinaryFile(
 export async function selectPlatformToolsDirectory(): Promise<PlatformToolsSelection> {
   const raw = await SelectPlatformToolsDirectory()
   return raw as unknown as PlatformToolsSelection
+}
+
+export async function selectScrcpyDirectory(): Promise<ScrcpyDirectorySelection> {
+  const raw = await SelectScrcpyDirectory()
+  return raw as unknown as ScrcpyDirectorySelection
 }
 
 export async function selectSaveFile(defaultFilename: string): Promise<string> {

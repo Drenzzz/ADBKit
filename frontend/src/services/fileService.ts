@@ -14,8 +14,8 @@ import {
   SelectDirectory,
   SelectMultipleFiles,
   CancelFileTransfer,
-} from '../../wailsjs/go/main/App'
-import { EventsOn } from '../../wailsjs/runtime/runtime'
+} from '../../bindings/ADBKit/internal/app/app'
+import { Events } from '@wailsio/runtime'
 import type { FileEntry, StorageInfo } from '@/lib/types'
 
 export const FILE_TRANSFER_PROGRESS_EVENT = 'file_transfer_progress'
@@ -29,8 +29,8 @@ export interface FileTransferProgress {
 export function onFileTransferProgress(
   callback: (progress: FileTransferProgress) => void,
 ): () => void {
-  return EventsOn(FILE_TRANSFER_PROGRESS_EVENT, (progress: FileTransferProgress) => {
-    callback(progress)
+  return Events.On(FILE_TRANSFER_PROGRESS_EVENT, (event) => {
+    callback(event.data)
   })
 }
 
