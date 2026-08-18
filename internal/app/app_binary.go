@@ -95,3 +95,7 @@ func (a *App) SelectBinaryFile(name string) (string, error) {
 func (a *App) SelectPlatformToolsDirectory() (*dialog.PlatformToolsSelection, error) {
 	return a.diaSvc.SelectPlatformToolsDirectory()
 }
+
+func (a *App) SelectScrcpyDirectory() (*dialog.ScrcpyDirectorySelection, error) {
+	return a.diaSvc.SelectScrcpyDirectory()
+}

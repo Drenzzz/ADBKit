@@ -6,3 +6,8 @@ export interface PlatformToolsSelection {
     "adbPath": string;
     "fastbootPath": string;
 }
+
+export interface ScrcpyDirectorySelection {
+    "directory": string;
+    "scrcpyPath": string;
+}

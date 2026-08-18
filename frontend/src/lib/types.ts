@@ -40,6 +40,11 @@ export interface PlatformToolsSelection {
   fastbootPath: string
 }
 
+export interface ScrcpyDirectorySelection {
+  directory: string
+  scrcpyPath: string
+}
+
 export interface Capabilities {
   adbAvailable: boolean
   fastbootAvailable: boolean
@@ -50,7 +55,7 @@ export interface Capabilities {
   clipboardSyncSupported: boolean
 }
 
-export type SetupWizardStep = 'welcome' | 'platform-tools' | 'scrcpy' | 'summary'
+export type SetupWizardStep = 'welcome' | 'setup-binary' | 'finish'
 
 export interface SetupWizardState {
   currentStep: SetupWizardStep

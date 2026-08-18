@@ -1,40 +1,50 @@
+import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { WelcomeStep } from './WelcomeStep'
-import { PlatformToolsStep } from './PlatformToolsStep'
-import { ScrcpyStep } from './ScrcpyStep'
+import { BinarySetupStep } from './BinarySetupStep'
 import { SummaryStep } from './SummaryStep'
 import type { SetupWizardStep } from '@/lib/types'
-import { Monitor, Terminal, HelpCircle, CheckCircle2, type LucideIcon } from 'lucide-react'
+import { CheckCircle2, HelpCircle, Terminal, type LucideIcon } from 'lucide-react'
 
 const STEPS: { key: SetupWizardStep; label: string; icon: LucideIcon }[] = [
   { key: 'welcome', label: 'Welcome', icon: HelpCircle },
-  { key: 'platform-tools', label: 'Platform Tools', icon: Terminal },
-  { key: 'scrcpy', label: 'Scrcpy', icon: Monitor },
-  { key: 'summary', label: 'Summary', icon: CheckCircle2 },
+  { key: 'setup-binary', label: 'Setup binary', icon: Terminal },
+  { key: 'finish', label: 'Finish', icon: CheckCircle2 },
 ]
 
 function SidebarStepper({ current }: { current: SetupWizardStep }) {
   const currentIdx = STEPS.findIndex((s) => s.key === current)
+  const reduced = useReducedMotion()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-      <div className="flex items-center gap-2.5 px-2 py-4 border-b border-border/20">
-        <img src="/logo.webp" alt="ADBKit" className="h-6 w-6 object-contain" />
+    <div className="flex flex-col gap-6">
+      <div
+        className="flex items-center gap-3 px-1"
+        style={{
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(6px)',
+          transition: reduced
+            ? 'none'
+            : 'opacity 320ms cubic-bezier(0.32, 0.72, 0, 1), transform 320ms cubic-bezier(0.32, 0.72, 0, 1)',
+        }}
+      >
+        <img src="/logo.webp" alt="ADBKit" className="h-8 w-8 object-contain" />
         <div className="flex flex-col">
-          <span className="text-xs font-semibold text-foreground tracking-tight select-none">
-            ADBKit Setup
+          <span className="select-none text-sm font-semibold tracking-tight text-foreground">
+            ADBKit
           </span>
-          <span className="text-[9px] text-muted-foreground/60 tracking-wider">
-            ASSISTANT v2.0
-          </span>
+          <span className="select-none text-xs text-muted-foreground">Setup</span>
         </div>
       </div>
 
-      <nav className="flex flex-col gap-2 relative">
-        {/* Connector vertical line */}
-        <div className="absolute left-[25px] top-[18px] bottom-[18px] w-[1px] bg-border/30" />
-
+      <nav className="relative flex gap-2 overflow-x-auto lg:flex-col lg:gap-1">
         {STEPS.map((step, i) => {
           const active = i === currentIdx
           const done = i < currentIdx
@@ -44,26 +54,38 @@ function SidebarStepper({ current }: { current: SetupWizardStep }) {
             <div
               key={step.key}
               className={cn(
-                'flex items-center gap-3.5 px-3 py-2.5 rounded-lg transition-colors duration-200 select-none relative z-10',
-                active ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground/75',
+                'relative flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-2 select-none transition-colors duration-200 lg:flex-none lg:px-1.5',
+                active
+                  ? 'text-foreground'
+                  : done
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground/55',
               )}
+              aria-current={active ? 'step' : undefined}
+              style={{
+                opacity: mounted ? 1 : 0,
+                transform: mounted ? 'translateY(0)' : 'translateY(6px)',
+                transition: reduced
+                  ? 'none'
+                  : `opacity 320ms cubic-bezier(0.32, 0.72, 0, 1) ${80 + i * 60}ms, transform 320ms cubic-bezier(0.32, 0.72, 0, 1) ${80 + i * 60}ms`,
+              }}
             >
               <div
                 className={cn(
-                  'h-6 w-6 rounded-full flex items-center justify-center border transition-colors duration-200 shadow-sm',
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors duration-200',
                   active
-                    ? 'border-primary bg-primary text-primary-foreground font-semibold'
+                    ? 'border-foreground bg-foreground text-background'
                     : done
-                      ? 'border-success bg-success/15 text-success'
-                      : 'border-border bg-muted/40 text-muted-foreground/50',
+                      ? 'border-foreground/40 text-foreground/70'
+                      : 'border-border text-muted-foreground/55',
                 )}
               >
                 <Icon className="h-3.5 w-3.5" />
               </div>
               <span
                 className={cn(
-                  'text-xs tracking-tight transition-colors duration-200',
-                  active ? 'text-foreground font-medium' : 'text-muted-foreground/70',
+                  'whitespace-nowrap text-sm transition-colors duration-200 lg:whitespace-normal',
+                  active ? 'font-medium' : 'font-normal',
                 )}
               >
                 {step.label}
@@ -80,11 +102,9 @@ function StepContent({ step, onComplete }: { step: SetupWizardStep; onComplete?:
   switch (step) {
     case 'welcome':
       return <WelcomeStep />
-    case 'platform-tools':
-      return <PlatformToolsStep />
-    case 'scrcpy':
-      return <ScrcpyStep />
-    case 'summary':
+    case 'setup-binary':
+      return <BinarySetupStep />
+    case 'finish':
       return <SummaryStep onComplete={onComplete} />
   }
 }
@@ -93,23 +113,17 @@ export function SetupWizard({ onComplete }: { onComplete?: () => void }) {
   const currentStep = useSetupWizardStore((s) => s.currentStep)
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-[#0a0b0d]/40 p-4">
-      <div className="flex w-full max-w-3xl min-h-[500px] h-[540px] rounded-2xl border border-border/60 bg-card shadow-[var(--shadow-floating)] overflow-hidden">
-        {/* Left Sidebar */}
-        <div className="w-[240px] bg-muted/15 border-r border-border/40 p-5 flex flex-col justify-between shrink-0">
+    <div className="flex min-h-[100dvh] w-full items-center justify-center bg-background px-4 py-6 text-foreground sm:px-6 lg:px-10">
+      <div className="grid min-h-[min(640px,calc(100dvh-3rem))] w-full max-w-5xl overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[var(--shadow-floating)] lg:grid-cols-[220px_minmax(0,1fr)]">
+        <aside className="flex flex-col justify-between border-b border-border/50 p-5 lg:border-b-0 lg:border-r">
           <SidebarStepper current={currentStep} />
-          
-          <div className="px-2 py-2 border-t border-border/20 text-[10px] text-muted-foreground/45 font-mono select-none">
-            OS: {navigator.userAgent.toLowerCase().includes('linux') ? 'Linux' : 'Darwin/Windows'}
-          </div>
-        </div>
+        </aside>
 
-        {/* Right Workspace */}
-        <div className="flex-1 p-8 flex flex-col justify-center overflow-y-auto bg-card">
-          <div className="flex-1 flex flex-col justify-center max-w-xl mx-auto w-full">
+        <main className="min-w-0 overflow-y-auto px-6 py-8 sm:px-10 sm:py-10 lg:px-14 lg:py-12">
+          <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col justify-center">
             <StepContent step={currentStep} onComplete={onComplete} />
           </div>
-        </div>
+        </main>
       </div>
     </div>
   )

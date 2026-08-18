@@ -1,18 +1,22 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { completeSetup } from '@/services/binaryService'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { BinaryInfo } from '@/lib/types'
 
 function BinarySummaryRow({ label, info }: { label: string; info?: BinaryInfo }) {
   return (
-    <div className="flex flex-col gap-1 py-1 px-2 hover:bg-muted/10 rounded transition-colors duration-150">
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="font-semibold text-foreground">{label}</span>
-        <span className="font-semibold text-success">{info?.version ?? 'ready'}</span>
+    <div className="flex flex-col gap-1 py-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium text-foreground">{label}</span>
+        <span className="inline-flex items-center gap-1.5 text-foreground">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+          {info?.version ?? 'ready'}
+        </span>
       </div>
-      <div className="text-[10px] text-muted-foreground/60 font-mono truncate select-all">
+      <div className="truncate text-xs text-muted-foreground">
         {info?.path ?? 'not configured'}
       </div>
     </div>
@@ -23,6 +27,12 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
   const { setupState, prevStep, setSetupState, setError } = useSetupWizardStore()
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
+  const reduced = useReducedMotion()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleFinish = async () => {
     setSubmitting(true)
@@ -38,23 +48,35 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
     }
   }
 
+  const transition = reduced
+    ? 'none'
+    : 'opacity 320ms cubic-bezier(0.32, 0.72, 0, 1), transform 320ms cubic-bezier(0.32, 0.72, 0, 1)'
+
   if (done) {
     return (
-      <div className="flex flex-col gap-5 text-left w-full">
+      <div
+        className="flex w-full flex-col gap-5 text-left"
+        aria-live="polite"
+        style={{
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(8px)',
+          transition,
+        }}
+      >
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-full bg-success/15 flex items-center justify-center text-success">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-emerald-500/35 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
               <Check className="h-3.5 w-3.5" />
             </div>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">Setup Complete</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">You are ready.</h2>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
-            ADBKit environment has been successfully configured. You can now access the full suite.
+          <p className="max-w-lg text-sm leading-6 text-muted-foreground">
+            The local toolchain is configured. Launch ADBKit to start managing connected devices.
           </p>
         </div>
 
-        <div className="border-t border-border/10 pt-5 mt-2 flex justify-end">
-          <Button onClick={onComplete} size="sm" className="px-5">
+        <div className="flex justify-end border-t border-border/30 pt-5">
+          <Button onClick={onComplete} size="sm" className="h-8 px-5">
             Launch ADBKit
           </Button>
         </div>
@@ -63,30 +85,33 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-left w-full">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">Configuration Summary</h2>
-        <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
-          Please review the final local paths and versions of your developer tools before finalizing.
+    <div
+      className="flex w-full flex-col gap-6 text-left"
+      style={{
+        opacity: mounted ? 1 : 0,
+        transform: mounted ? 'translateY(0)' : 'translateY(8px)',
+        transition,
+      }}
+    >
+      <header className="flex flex-col gap-2">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.6rem]">Finish setup.</h1>
+        <p className="max-w-lg text-sm leading-6 text-muted-foreground">
+          Review the resolved paths, then write the configuration locally.
         </p>
-      </div>
+      </header>
 
-      <div className="rounded-xl border border-border/50 bg-[#0c0d10] p-4 flex flex-col gap-3 font-mono">
-        <div className="text-[10px] text-muted-foreground/45 border-b border-border/15 pb-2 mb-1 uppercase tracking-wider select-none">
-          Local Environment Diagnostics
+      <div className="flex flex-col gap-3 rounded-xl border border-border/50 bg-background p-5">
+        <div className="border-b border-border/30 pb-2 text-xs text-muted-foreground">
+          Local Environment
         </div>
-        <div className="flex flex-col gap-2.5 divide-y divide-border/10">
+        <div className="flex flex-col divide-y divide-border/30">
           <BinarySummaryRow label="ADB" info={setupState?.status?.adb} />
-          <div className="pt-2">
-            <BinarySummaryRow label="Fastboot" info={setupState?.status?.fastboot} />
-          </div>
-          <div className="pt-2">
-            <BinarySummaryRow label="Scrcpy" info={setupState?.status?.scrcpy} />
-          </div>
+          <BinarySummaryRow label="Fastboot" info={setupState?.status?.fastboot} />
+          <BinarySummaryRow label="Scrcpy" info={setupState?.status?.scrcpy} />
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-border/10 pt-4 mt-2">
+      <footer className="flex items-center justify-between border-t border-border/30 pt-5">
         <Button variant="ghost" size="sm" onClick={prevStep} disabled={submitting} className="h-8">
           Back
         </Button>
@@ -94,11 +119,11 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
           onClick={handleFinish}
           disabled={submitting || !setupState?.canFinish}
           size="sm"
-          className="px-5 h-8 font-medium"
+          className="h-8 px-5"
         >
-          {submitting ? 'Writing Config...' : 'Finish Setup'}
+          {submitting ? 'Writing config...' : 'Finish Setup'}
         </Button>
-      </div>
+      </footer>
     </div>
   )
 }

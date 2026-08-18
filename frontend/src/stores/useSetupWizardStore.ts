@@ -6,13 +6,29 @@ import type {
   SetupWizardStep,
 } from '@/lib/types'
 
-const STEPS: SetupWizardStep[] = ['welcome', 'platform-tools', 'scrcpy', 'summary']
+const STEPS: SetupWizardStep[] = ['welcome', 'setup-binary', 'finish']
 
 const DRAFT_KEY = 'adbkit-setup-draft'
 
 interface DraftPayload {
   selectedPaths: Partial<Record<BinaryName, string>>
-  currentStep: SetupWizardStep
+  currentStep: SetupWizardStep | 'platform-tools' | 'scrcpy' | 'summary'
+}
+
+function normalizeStep(step: unknown): SetupWizardStep {
+  switch (step) {
+    case 'setup-binary':
+    case 'platform-tools':
+    case 'scrcpy':
+      return 'setup-binary'
+    case 'finish':
+    case 'summary':
+      return 'finish'
+    case 'welcome':
+      return 'welcome'
+    default:
+      return 'welcome'
+  }
 }
 
 function readDraft(): DraftPayload | null {
@@ -48,7 +64,7 @@ function restoreDraft(): Partial<SetupWizardState> {
   if (!draft) return {}
   return {
     selectedPaths: draft.selectedPaths ?? {},
-    currentStep: draft.currentStep ?? 'welcome',
+    currentStep: normalizeStep(draft.currentStep),
   }
 }
 

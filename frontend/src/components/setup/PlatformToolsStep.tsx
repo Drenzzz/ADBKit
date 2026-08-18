@@ -1,37 +1,72 @@
 import { useState, useEffect } from 'react'
-import { Search, FolderOpen, FileSearch, Download, CheckCircle2, AlertCircle } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import {
+  FileSearch,
+  Download,
+  CheckCircle2,
+  AlertTriangle,
+  Terminal,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { useBinaryDownload } from '@/hooks/useBinaryDownload'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
   getSetupState,
   selectBinaryFile,
-  selectPlatformToolsDirectory,
   setCustomBinary,
 } from '@/services/binaryService'
 import type { BinaryInfo } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
+type RowState = 'ready' | 'missing' | 'downloading'
+
+function StatusPill({ state }: { state: RowState }) {
+  const map: Record<RowState, { classes: string; dot: string; label: string }> = {
+    ready: {
+      classes: 'text-emerald-600 dark:text-emerald-300',
+      dot: 'bg-emerald-500',
+      label: 'Ready',
+    },
+    missing: {
+      classes: 'text-muted-foreground',
+      dot: 'bg-muted-foreground/40',
+      label: 'Missing',
+    },
+    downloading: {
+      classes: 'text-primary',
+      dot: 'bg-primary',
+      label: 'Downloading',
+    },
+  }
+  const entry = map[state]
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-[11px] font-medium transition-colors duration-200',
+        entry.classes,
+      )}
+    >
+      <span className={cn('h-1.5 w-1.5 rounded-full', entry.dot)} aria-hidden />
+      {entry.label}
+    </span>
+  )
+}
+
 function CandidatePicker({
-  label,
   candidates,
   selected,
   onSelect,
 }: {
-  label: string
   candidates: BinaryInfo[]
   selected: string
   onSelect: (path: string) => void
 }) {
   return (
-    <div className="flex flex-col gap-2 bg-muted/5 border border-border/40 p-3.5 rounded-xl">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-        Multiple candidates found for {label}:
-      </span>
-      <div className="flex flex-col gap-1.5 max-h-[140px] overflow-y-auto">
+    <div className="flex flex-col gap-2 rounded-lg border border-border/40 bg-background p-3">
+      <div className="flex flex-col gap-1.5">
         {candidates.map((candidate) => {
           const isSelected = selected === candidate.path
           return (
@@ -40,31 +75,18 @@ function CandidatePicker({
               type="button"
               onClick={() => onSelect(candidate.path)}
               className={cn(
-                'flex items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors duration-150',
+                'flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-left transition-colors duration-150',
                 isSelected
-                  ? 'border-primary/45 bg-primary/5 text-foreground'
-                  : 'border-border/40 hover:border-border bg-card/40',
+                  ? 'border-foreground/40 bg-foreground/[0.04] text-foreground'
+                  : 'border-border/30 text-muted-foreground hover:border-border/60 hover:text-foreground',
               )}
             >
-              <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-semibold text-primary/75 uppercase tracking-wide">
-                    {candidate.source}
-                  </span>
-                  {candidate.version && (
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-border">
-                      {candidate.version}
-                    </Badge>
-                  )}
-                </div>
-                <span className="truncate font-mono text-[10px] text-muted-foreground">
-                  {candidate.path}
-                </span>
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-xs text-foreground">{candidate.source}</span>
+                <span className="truncate text-xs text-muted-foreground">{candidate.path}</span>
               </div>
               {isSelected && (
-                <Badge variant="default" className="text-[8px] uppercase tracking-wider shrink-0 select-none">
-                  Active
-                </Badge>
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-foreground" />
               )}
             </button>
           )
@@ -74,20 +96,109 @@ function CandidatePicker({
   )
 }
 
+function BinaryRow({
+  label,
+  hint,
+  state,
+  version,
+  candidates,
+  selected,
+  onPickCandidate,
+  actions,
+}: {
+  label: string
+  hint?: string
+  state: RowState
+  version?: string
+  candidates: BinaryInfo[]
+  selected: string
+  onPickCandidate: (path: string) => void
+  actions: React.ReactNode
+}) {
+  const reduced = useReducedMotion()
+  return (
+    <motion.div
+      initial={reduced ? false : { opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={reduced ? { duration: 0 } : { duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+      className="flex flex-col gap-3 p-4"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm font-semibold text-foreground">{label}</span>
+          {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <StatusPill state={state} />
+          {state === 'ready' && version && (
+            <span className="text-[11px] text-muted-foreground">{version}</span>
+          )}
+        </div>
+      </div>
+
+      {!reduced && state === 'downloading' && (
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Progress value={50} className="h-1 rounded-full" />
+        </motion.div>
+      )}
+      {reduced && state === 'downloading' && (
+        <Progress value={50} className="h-1 rounded-full" />
+      )}
+
+      <AnimatePresence initial={false}>
+        {state === 'missing' && candidates.length > 1 && (
+          <motion.div
+            key="candidates"
+            initial={reduced ? false : { opacity: 0, height: 0 }}
+            animate={reduced ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.22, ease: 'easeOut' }}
+            className="overflow-hidden"
+          >
+            <CandidatePicker
+              candidates={candidates}
+              selected={selected}
+              onSelect={onPickCandidate}
+            />
+          </motion.div>
+        )}
+
+        {state === 'missing' && candidates.length <= 1 && (
+          <motion.div
+            key="actions"
+            initial={reduced ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.2 }}
+          >
+            {actions}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
 function LoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-2.5">
-      <Skeleton className="h-14 w-full rounded-xl" />
-      <Skeleton className="h-14 w-full rounded-xl" />
+    <div className="flex flex-col gap-3">
+      <Skeleton className="h-20 w-full rounded-xl" />
+      <Skeleton className="h-20 w-full rounded-xl" />
     </div>
   )
 }
 
-export function PlatformToolsStep() {
-  const { setupState, loading, error, nextStep, prevStep, setSetupState, setLoading, setError } =
+export function PlatformToolsStep({ embedded = false }: { embedded?: boolean }) {
+  const { setupState, loading, error, setSetupState, setLoading, setError } =
     useSetupWizardStore()
   const { getState, download } = useBinaryDownload()
   const [scanned, setScanned] = useState(false)
+  const reduced = useReducedMotion()
 
   const handleScan = async () => {
     setLoading(true)
@@ -103,7 +214,6 @@ export function PlatformToolsStep() {
     }
   }
 
-  // Perform auto-scan if not scanned yet
   useEffect(() => {
     if (!scanned && !loading && !setupState) {
       void handleScan()
@@ -122,20 +232,6 @@ export function PlatformToolsStep() {
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Selection failed')
-    }
-  }
-
-  const handleSelectFolder = async () => {
-    try {
-      const sel = await selectPlatformToolsDirectory()
-      if (sel.directory) {
-        await setCustomBinary('adb', sel.adbPath)
-        await setCustomBinary('fastboot', sel.fastbootPath)
-        const state = await getSetupState()
-        setSetupState(state)
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Folder selection failed')
     }
   }
 
@@ -158,7 +254,6 @@ export function PlatformToolsStep() {
   const status = setupState?.status
   const adbReady = status?.adb?.status === 'ready'
   const fastbootReady = status?.fastboot?.status === 'ready'
-  const canContinue = adbReady && fastbootReady
 
   const adbCandidates = status?.adbCandidates ?? []
   const fastbootCandidates = status?.fastbootCandidates ?? []
@@ -166,158 +261,109 @@ export function PlatformToolsStep() {
   const adbDownload = getState('adb')
   const fastbootDownload = getState('fastboot')
 
+  const adbState: RowState = adbDownload.downloading
+    ? 'downloading'
+    : adbReady
+      ? 'ready'
+      : 'missing'
+  const fastbootState: RowState = fastbootDownload.downloading
+    ? 'downloading'
+    : fastbootReady
+      ? 'ready'
+      : 'missing'
+
   return (
-    <div className="flex flex-col gap-6 text-left w-full">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold tracking-tight text-foreground">Platform Tools</h2>
-        <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
-          Configure ADB and Fastboot binaries. You can automatically download managed versions or link existing local system tools.
-        </p>
+    <motion.section
+      initial={reduced ? false : { opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={reduced ? { duration: 0 } : { duration: 0.32, ease: [0.32, 0.72, 0, 1] }}
+      className={cn('flex w-full flex-col gap-4 text-left', embedded && 'gap-3')}
+    >
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-muted/40 text-muted-foreground">
+          <Terminal className="h-4 w-4" />
+        </div>
+        <div className="flex flex-col gap-0.5">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">Platform tools</h2>
+          <p className="text-sm text-muted-foreground">ADB and Fastboot</p>
+        </div>
       </div>
 
       {loading && <LoadingSkeleton />}
 
+      <AnimatePresence initial={false}>
+        {error && !scanned && !loading && (
+          <motion.div
+            key="scan-error"
+            initial={reduced ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.2 }}
+            className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2"
+          >
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <p className="text-sm text-amber-700 dark:text-amber-300">{error}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleScan} className="h-7 shrink-0 text-xs">
+              Retry
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {scanned && !loading && (
-        <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-border/50 bg-muted/5 divide-y divide-border/20 overflow-hidden">
-            {/* ADB Row */}
-            <div className="flex flex-col gap-2 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">ADB</span>
-                  <span className="text-[10px] text-muted-foreground/60">(Android Debug Bridge)</span>
-                </div>
-                <div>
-                  {adbReady ? (
-                    <Badge variant="outline" className="text-[9px] border-success/20 text-success bg-success/5 flex items-center gap-1 font-medium px-2 py-0">
-                      <CheckCircle2 className="h-3 w-3" />
-                      {status?.adb?.version ?? 'ready'}
-                    </Badge>
-                  ) : adbDownload.downloading ? (
-                    <span className="text-[9px] uppercase tracking-wider text-primary font-medium">Downloading...</span>
-                  ) : (
-                    <Badge variant="outline" className="text-[9px] border-destructive/20 text-destructive bg-destructive/5 flex items-center gap-1 font-medium px-2 py-0">
-                      <AlertCircle className="h-3 w-3" />
-                      Not Configured
-                    </Badge>
-                  )}
-                </div>
+        <div className="overflow-hidden rounded-xl border border-border/50 bg-card">
+          <BinaryRow
+            label="ADB"
+            hint="Android Debug Bridge"
+            state={adbState}
+            version={status?.adb?.version}
+            candidates={adbCandidates}
+            selected={status?.adb?.path ?? ''}
+            onPickCandidate={(path) => void handlePickCandidate('adb', path)}
+            actions={
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleDownloadPlatformTools} className="h-7 text-xs">
+                  <Download className="h-3.5 w-3.5 mr-1" />
+                  Download
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => void handleSelectFile('adb')} className="h-7 text-xs text-muted-foreground hover:text-foreground">
+                  <FileSearch className="h-3.5 w-3.5 mr-1" />
+                  Link local file
+                </Button>
               </div>
-
-              {adbDownload.downloading && (
-                <div className="mt-1">
-                  <Progress value={adbDownload.percent} className="h-1 rounded-full" />
-                </div>
-              )}
-
-              {!adbReady && !adbDownload.downloading && adbCandidates.length > 1 && (
-                <CandidatePicker
-                  label="ADB"
-                  candidates={adbCandidates}
-                  selected={status?.adb?.path ?? ''}
-                  onSelect={(path) => void handlePickCandidate('adb', path)}
-                />
-              )}
-
-              {!adbReady && !adbDownload.downloading && adbCandidates.length <= 1 && (
-                <div className="flex items-center gap-2 mt-1">
-                  <Button variant="outline" size="sm" onClick={handleDownloadPlatformTools} className="h-7 text-[10px] px-2.5">
+            }
+          />
+          <div className="border-t border-border/40">
+            <BinaryRow
+              label="Fastboot"
+              hint="Bootloader flasher"
+              state={fastbootState}
+              version={status?.fastboot?.version}
+              candidates={fastbootCandidates}
+              selected={status?.fastboot?.path ?? ''}
+              onPickCandidate={(path) => void handlePickCandidate('fastboot', path)}
+              actions={
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={handleDownloadPlatformTools} className="h-7 text-xs">
                     <Download className="h-3.5 w-3.5 mr-1" />
-                    Download Tools
+                    Download
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => void handleSelectFile('adb')} className="h-7 text-[10px] px-2.5 text-muted-foreground hover:text-foreground">
+                  <Button variant="ghost" size="sm" onClick={() => void handleSelectFile('fastboot')} className="h-7 text-xs text-muted-foreground hover:text-foreground">
                     <FileSearch className="h-3.5 w-3.5 mr-1" />
-                    Link Local File...
+                    Link local file
                   </Button>
                 </div>
-              )}
-            </div>
-
-            {/* Fastboot Row */}
-            <div className="flex flex-col gap-2 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">Fastboot</span>
-                  <span className="text-[10px] text-muted-foreground/60">(Bootloader Flasher)</span>
-                </div>
-                <div>
-                  {fastbootReady ? (
-                    <Badge variant="outline" className="text-[9px] border-success/20 text-success bg-success/5 flex items-center gap-1 font-medium px-2 py-0">
-                      <CheckCircle2 className="h-3 w-3" />
-                      {status?.fastboot?.version ?? 'ready'}
-                    </Badge>
-                  ) : fastbootDownload.downloading ? (
-                    <span className="text-[9px] uppercase tracking-wider text-primary font-medium">Downloading...</span>
-                  ) : (
-                    <Badge variant="outline" className="text-[9px] border-destructive/20 text-destructive bg-destructive/5 flex items-center gap-1 font-medium px-2 py-0">
-                      <AlertCircle className="h-3 w-3" />
-                      Not Configured
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {fastbootDownload.downloading && (
-                <div className="mt-1">
-                  <Progress value={fastbootDownload.percent} className="h-1 rounded-full" />
-                </div>
-              )}
-
-              {!fastbootReady && !fastbootDownload.downloading && fastbootCandidates.length > 1 && (
-                <CandidatePicker
-                  label="Fastboot"
-                  candidates={fastbootCandidates}
-                  selected={status?.fastboot?.path ?? ''}
-                  onSelect={(path) => void handlePickCandidate('fastboot', path)}
-                />
-              )}
-
-              {!fastbootReady && !fastbootDownload.downloading && fastbootCandidates.length <= 1 && (
-                <div className="flex items-center gap-2 mt-1">
-                  <Button variant="outline" size="sm" onClick={handleDownloadPlatformTools} className="h-7 text-[10px] px-2.5">
-                    <Download className="h-3.5 w-3.5 mr-1" />
-                    Download Tools
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => void handleSelectFile('fastboot')} className="h-7 text-[10px] px-2.5 text-muted-foreground hover:text-foreground">
-                    <FileSearch className="h-3.5 w-3.5 mr-1" />
-                    Link Local File...
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {error && (
-            <p className="text-xs text-destructive mt-1">{error}</p>
-          )}
-
-          <div className="flex items-center justify-between border-t border-border/10 pt-4 mt-2">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={handleScan} disabled={loading} className="h-7 text-[10px] text-muted-foreground hover:text-foreground">
-                <Search className="h-3.5 w-3.5 mr-1" />
-                Refresh Scan
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleSelectFolder} disabled={loading} className="h-7 text-[10px] text-muted-foreground hover:text-foreground">
-                <FolderOpen className="h-3.5 w-3.5 mr-1" />
-                Select platform-tools folder
-              </Button>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={prevStep} className="h-8">
-                Back
-              </Button>
-              <Button
-                onClick={nextStep}
-                disabled={!canContinue || loading || adbDownload.downloading || fastbootDownload.downloading}
-                size="sm"
-                className="px-5 h-8 font-medium"
-              >
-                Continue
-              </Button>
-            </div>
+              }
+            />
           </div>
         </div>
       )}
-    </div>
+
+      {error && scanned && (
+        <p className="text-sm text-muted-foreground">{error}</p>
+      )}
+    </motion.section>
   )
 }

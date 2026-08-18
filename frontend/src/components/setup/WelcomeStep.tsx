@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { getSetupState } from '@/services/binaryService'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Monitor, Smartphone, Terminal } from 'lucide-react'
 
 function detectOS(): string {
@@ -14,16 +14,21 @@ function detectOS(): string {
 }
 
 const REQUIRED_BINARIES = [
-  { name: 'ADB', description: 'Android Debug Bridge — device detection & shell', icon: Terminal },
-  { name: 'Fastboot', description: 'Bootloader operations — flashing & wipe', icon: Smartphone },
-  { name: 'scrcpy', description: 'Screen mirroring & clipboard sync', icon: Monitor },
+  { name: 'ADB', description: 'Device detection and shell access', icon: Terminal },
+  { name: 'Fastboot', description: 'Bootloader operations and flashing', icon: Smartphone },
+  { name: 'scrcpy', description: 'Screen mirroring and clipboard sync', icon: Monitor },
 ]
 
 export function WelcomeStep() {
   const { nextStep, setSetupState } = useSetupWizardStore()
   const osName = detectOS()
+  const reduced = useReducedMotion()
+  const [mounted, setMounted] = useState(false)
 
-  // Pre-fetch setup state silently on mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     let active = true
     const silentScan = async () => {
@@ -42,53 +47,66 @@ export function WelcomeStep() {
     }
   }, [setSetupState])
 
+  const transition = reduced
+    ? 'none'
+    : 'opacity 320ms cubic-bezier(0.32, 0.72, 0, 1), transform 320ms cubic-bezier(0.32, 0.72, 0, 1)'
+
   return (
-    <div className="flex flex-col gap-6 text-left w-full">
-      <div className="flex flex-col gap-2">
-        <img src="/logo.webp" alt="ADBKit" className="h-14 w-14 object-contain mb-1" />
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Welcome to ADBKit
-        </h1>
-        <p className="text-xs text-muted-foreground leading-relaxed max-w-lg">
-          ADBKit requires Android Debug Bridge (ADB), Fastboot, and Scrcpy. This assistant will help you verify or install these tools to configure your environment.
-        </p>
-      </div>
-
-      <div className="w-full">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-3">
-          Required Components
-        </p>
-        <div className="grid grid-cols-1 gap-2.5">
-          {REQUIRED_BINARIES.map(({ name, description, icon: Icon }) => (
-            <div
-              key={name}
-              className="flex items-center gap-3.5 rounded-xl border border-border/50 bg-muted/5 px-4 py-3"
-            >
-              <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground shrink-0 border border-border/20">
-                <Icon className="h-4 w-4" />
-              </div>
-              <div className="flex flex-col flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-foreground">{name}</span>
-                  <Badge variant="outline" className="text-[8px] uppercase tracking-wider border-primary/20 text-primary bg-primary/5 px-1 py-0 select-none">
-                    Required
-                  </Badge>
-                </div>
-                <span className="text-[10px] text-muted-foreground/75 truncate mt-0.5">{description}</span>
-              </div>
-            </div>
-          ))}
+    <div className="flex w-full flex-col gap-8 text-left">
+      <header
+        className="flex flex-col gap-3"
+        style={{
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(8px)',
+          transition,
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <img src="/logo.webp" alt="ADBKit" className="h-12 w-12 object-contain" />
+          <div className="flex flex-col">
+            <span className="text-lg font-semibold tracking-tight text-foreground">Welcome to ADBKit.</span>
+            <span className="text-xs text-muted-foreground">One quick pass to connect the local Android tools ADBKit uses every day.</span>
+          </div>
         </div>
+      </header>
+
+      <div className="flex flex-col gap-3">
+        {REQUIRED_BINARIES.map(({ name, description, icon: Icon }, i) => (
+          <div
+            key={name}
+            className="flex items-center gap-3 rounded-xl border border-border/50 bg-background px-4 py-3"
+            style={{
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? 'translateY(0)' : 'translateY(8px)',
+              transition: `${transition} ${80 + i * 60}ms`,
+            }}
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/40 bg-muted text-muted-foreground">
+              <Icon className="h-4 w-4" />
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="text-sm font-medium text-foreground">{name}</span>
+              <span className="truncate text-xs text-muted-foreground">{description}</span>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="flex items-center justify-between border-t border-border/10 pt-5 mt-2">
-        <span className="text-[10px] text-muted-foreground/50">
-          Detected Platform: <span className="font-semibold text-muted-foreground/70">{osName}</span>
+      <footer
+        className="flex flex-col gap-3 border-t border-border/30 pt-5 sm:flex-row sm:items-center sm:justify-between"
+        style={{
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? 'translateY(0)' : 'translateY(8px)',
+          transition: `${transition} 220ms`,
+        }}
+      >
+        <span className="text-xs text-muted-foreground">
+          Host detected: <span className="text-foreground">{osName}</span>
         </span>
-        <Button onClick={nextStep} size="sm" className="px-5">
-          Get Started
+        <Button onClick={nextStep} size="sm" className="h-8 self-end gap-1.5 px-4 sm:self-auto">
+          Continue
         </Button>
-      </div>
+      </footer>
     </div>
   )
 }

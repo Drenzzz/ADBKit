@@ -335,6 +335,10 @@ export function SelectSavePath(defaultFilename: string): $CancellablePromise<str
     return $Call.ByID(982728465, defaultFilename);
 }
 
+export function SelectScrcpyDirectory(): $CancellablePromise<dialog$0.ScrcpyDirectorySelection | null> {
+    return $Call.ByID(1616760728);
+}
+
 export function SelectSideloadFile(): $CancellablePromise<string> {
     return $Call.ByID(1641148886);
 }

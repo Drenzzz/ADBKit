@@ -14,6 +14,11 @@ type PlatformToolsSelection struct {
 	FastbootPath string `json:"fastbootPath"`
 }
 
+type ScrcpyDirectorySelection struct {
+	Directory string `json:"directory"`
+	ScrcpyPath string `json:"scrcpyPath"`
+}
+
 type Service struct {
 	ctx context.Context
 }
@@ -72,6 +77,31 @@ func (s *Service) SelectPlatformToolsDirectory() (*PlatformToolsSelection, error
 		Directory:    dir,
 		AdbPath:      adbPath,
 		FastbootPath: fastbootPath,
+	}, nil
+}
+
+func (s *Service) SelectScrcpyDirectory() (*ScrcpyDirectorySelection, error) {
+	if s.ctx == nil {
+		return nil, core.NewOperationError("select_scrcpy_directory", "application context is not initialized", "", true)
+	}
+	dir, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
+		Title:                "Select scrcpy directory",
+		CanChooseDirectories: true,
+		CanChooseFiles:       false,
+	}).PromptForSingleSelection()
+	if err != nil {
+		return nil, err
+	}
+	if dir == "" {
+		return &ScrcpyDirectorySelection{}, nil
+	}
+	scrcpyPath := filepath.Join(dir, core.BinaryExecutableName(core.BinaryNameScrcpy))
+	if core.ValidateExecutable(scrcpyPath) != nil {
+		return nil, core.NewOperationError("select_scrcpy_directory", "no scrcpy binary found in selected directory", dir, false)
+	}
+	return &ScrcpyDirectorySelection{
+		Directory:  dir,
+		ScrcpyPath: scrcpyPath,
 	}, nil
 }
 
