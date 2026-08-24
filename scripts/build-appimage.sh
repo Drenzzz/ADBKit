@@ -6,7 +6,7 @@ VERSION="${VERSION:-2.0.0-beta4}"
 BUILD_DIR="bin"
 APPIMAGE_TOOL="build/tools/appimagetool-x86_64.AppImage"
 APPIMAGE_OUT="build/AppImage-out"
-DIST_DIR="dist"
+DIST_DIR="bin"
 
 if [ ! -f "$BUILD_DIR/$APP_NAME" ]; then
     echo "Error: Binary not found at $BUILD_DIR/$APP_NAME"
@@ -44,5 +44,6 @@ APPRUN
 chmod +x "$APPDIR/AppRun"
 
 mkdir -p "$DIST_DIR"
-ARCH=x86_64 "$APPIMAGE_TOOL" "$APPDIR" "$DIST_DIR/$APP_NAME-$VERSION-linux-x86_64.AppImage"
-echo "AppImage: $DIST_DIR/$APP_NAME-$VERSION-linux-x86_64.AppImage"
+OUTPUT="$DIST_DIR/$APP_NAME-$VERSION-linux-x86_64-system.AppImage"
+ARCH=x86_64 "$APPIMAGE_TOOL" "$APPDIR" "$OUTPUT"
+echo "AppImage: $OUTPUT"

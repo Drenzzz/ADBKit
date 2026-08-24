@@ -52,6 +52,13 @@ Windows packaging uses the Wails NSIS task and requires `makensis`. Linux
 packaging produces AppImage, DEB, RPM, and Arch packages when the platform
 toolchain is available.
 
+Linux builds provide two AppImage variants:
+
+- `make appimage`: creates a larger dependency-bundled AppImage for better portability.
+- `make appimage-lite`: creates a smaller system-dependency AppImage using
+  `scripts/build-appimage.sh`. The target system must provide GTK4, WebKitGTK 6,
+  and their runtime dependencies.
+
 ## Project Layout
 
 - `main.go`: Wails application shell and window configuration
@@ -179,6 +186,7 @@ make windows
 make check
 make package
 make deb rpm arch appimage
+make appimage-lite
 ```
 
 The canonical commands are `wails3 dev`, `wails3 build`, and `wails3 package`.

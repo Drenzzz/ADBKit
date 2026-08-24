@@ -1,7 +1,7 @@
 APP_NAME := ADBKit
 VERSION := 2.0.0-beta4
 
-.PHONY: help deps frontend-install doctor dev build build-upx windows run lint typecheck test test-coverage check check-all package deb rpm arch appimage all
+.PHONY: help deps frontend-install doctor dev build build-upx windows run lint typecheck test test-coverage check check-all package deb rpm arch appimage appimage-lite all
 
 .DEFAULT_GOAL := help
 
@@ -18,6 +18,7 @@ help:
 	@echo "  make check      Run frontend and Go checks"
 	@echo "  make package    Package the current platform"
 	@echo "  make deb rpm arch appimage  Build Linux package targets"
+	@echo "  make appimage-lite  Build a smaller system-dependency AppImage"
 
 deps:
 	go mod download
@@ -81,6 +82,9 @@ arch:
 
 appimage:
 	wails3 task linux:create:appimage
+
+appimage-lite:
+	bash scripts/build-appimage.sh
 
 all:
 	wails3 task linux:package
