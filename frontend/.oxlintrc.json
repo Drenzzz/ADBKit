@@ -1,0 +1,34 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "env": {
+    "browser": true
+  },
+  "ignorePatterns": ["dist/**", "bindings/**"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/exhaustive-deps": "warn",
+    "react/incompatible-library": "warn",
+    "react/only-export-components": [
+      "error",
+      { "allowConstantExport": true }
+    ],
+    "react/purity": "warn",
+    "react/refs": "warn",
+    "react/rules-of-hooks": "error",
+    "react/set-state-in-effect": "warn"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/components/ui/**/*.{ts,tsx}",
+        "src/App.tsx",
+        "src/components/scrcpy/EncoderBadge.tsx"
+      ],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    }
+  ]
+}
