@@ -254,6 +254,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
+            curl \
             pkg-config \
             libgtk-4-dev \
             libwebkitgtk-6.0-dev
@@ -261,8 +262,15 @@ jobs:
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
 
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
+
       - name: Build Linux packages
-        run: wails3 package
+        run: make deb rpm arch appimage
+
+      - name: Build system-dependent AppImage
+        run: make appimage-lite
 
       - name: Upload packages
         uses: actions/upload-artifact@v4
