@@ -100,6 +100,39 @@ func (s *WirelessService) Disconnect(ctx context.Context, address string) (strin
 	return message, nil
 }
 
+// Pair performs `adb pair <host:port> <code>` to authorize a wireless debugging
+// session on a device. The device must already be in pairing mode (it shows
+// the host:port and a one-time pairing code in Developer Options).
+func (s *WirelessService) Pair(ctx context.Context, address string, code string) (string, error) {
+	trimmedAddress := strings.TrimSpace(address)
+	trimmedCode := strings.TrimSpace(code)
+
+	if trimmedAddress == "" || !strings.Contains(trimmedAddress, ":") {
+		return "", core.NewOperationError("pair_wireless", "wireless address is invalid", "address must use host:port format", false)
+	}
+	if trimmedCode == "" {
+		return "", core.NewOperationError("pair_wireless", "pairing code is required", "code must not be empty", false)
+	}
+
+	result, err := core.RunCommand(ctx, core.ExecRequest{
+		Command: s.getBinPath().Adb,
+		Args:    []string{"pair", trimmedAddress, trimmedCode},
+		Timeout: 15e9,
+	})
+	if err != nil {
+		return "", core.NewOperationError("pair_wireless", "failed to pair wireless device", err.Error(), true)
+	}
+	if result.ExitCode != 0 {
+		return "", core.NewOperationError("pair_wireless", "wireless pairing failed", strings.TrimSpace(result.Stderr), true)
+	}
+
+	message := extractFirstOutputLine(result.Stdout)
+	if message == "" {
+		message = fmt.Sprintf("Paired with %s", trimmedAddress)
+	}
+	return message, nil
+}
+
 func extractFirstOutputLine(output string) string {
 	for _, line := range strings.Split(output, "\n") {
 		trimmed := strings.TrimSpace(line)

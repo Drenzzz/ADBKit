@@ -4,6 +4,8 @@ import (
 	"ADBKit/internal/binary"
 	"ADBKit/internal/core"
 	"ADBKit/internal/dialog"
+	"regexp"
+	"strconv"
 )
 
 func (a *App) GetBinaryStatus() *binary.BinarySetupResult {
@@ -82,10 +84,55 @@ func (a *App) GetCapabilities() map[string]bool {
 		"fastbootAvailable":        status.Fastboot.Status == core.BinaryReady,
 		"scrcpyAvailable":          status.Scrcpy.Status == core.BinaryReady,
 		"setupCompleted":           a.cfg.SetupCompleted && status.Ready,
-		"wirelessPairingSupported": status.Adb.Status == core.BinaryReady,
+		"wirelessPairingSupported": wirelessPairingSupported(status.Adb),
 		"audioCaptureSupported":    status.Scrcpy.Status == core.BinaryReady,
 		"clipboardSyncSupported":   status.Scrcpy.Status == core.BinaryReady,
 	}
+}
+
+// wirelessPairingSupported reports whether the adb binary supports the
+// `adb pair <host:port> <code>` flow. `adb pair` was introduced in
+// platform-tools 30.0.0. We accept anything that parses to >= 30, fall back
+// to "supported" when the version string is missing or unparseable (modern
+// installs are widespread and the runtime call will fail with a clear error
+// if not supported).
+func wirelessPairingSupported(adb *core.BinaryInfo) bool {
+	if adb == nil || adb.Status != core.BinaryReady {
+		return false
+	}
+	if adb.Version == "" {
+		return true
+	}
+	major, ok := parseAdbMajorVersion(adb.Version)
+	if !ok {
+		return true
+	}
+	return major >= 30
+}
+
+// parseAdbMajorVersion extracts the major component from the platform-tools
+// version in the adb version string (which also includes the smaller adb
+// client version, e.g. "Android Debug Bridge version 1.0.41 (Version
+// 35.0.1-12147458)"). We prefer the bracketed "Version N.N.N" component
+// because that maps to the platform-tools release that introduced `adb pair`.
+func parseAdbMajorVersion(version string) (int, bool) {
+	bracketed := regexp.MustCompile(`Version\s+(\d+)\.(\d+)(?:\.(\d+))?`)
+	if match := bracketed.FindStringSubmatch(version); len(match) >= 2 {
+		n, err := strconv.Atoi(match[1])
+		if err == nil {
+			return n, true
+		}
+	}
+	fallback := regexp.MustCompile(`(\d+)\.(\d+)(?:\.(\d+))?`)
+	match := fallback.FindStringSubmatch(version)
+	if len(match) < 2 {
+		return 0, false
+	}
+	n, err := strconv.Atoi(match[1])
+	if err != nil {
+		return 0, false
+	}
+	return n, true
 }
 
 func (a *App) SelectBinaryFile(name string) (string, error) {

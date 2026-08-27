@@ -93,6 +93,12 @@ func (a *App) DisconnectWireless(address string) (string, error) {
 	})
 }
 
+func (a *App) PairWireless(address string, code string) (string, error) {
+	return auditAction(a, "pair_wireless", func() (string, error) {
+		return a.wireSvc.Pair(a.ctx, address, code)
+	})
+}
+
 func (a *App) GetPerformanceSnapshot(serial string) (device.PerformanceSnapshot, error) {
 	resolved := serial
 	if resolved == "" {
