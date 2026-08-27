@@ -92,6 +92,9 @@ func (s *Service) PullMultipleFiles(ctx context.Context, remotePaths []string, l
 		}
 		name := path.Base(strings.TrimSpace(remotePath))
 		if _, err := s.PullFile(ctx, remotePath, filepath.Join(trimmedLocalDir, name)); err != nil {
+			if isCancelledError(err) || ctx.Err() != nil {
+				return "", core.NewOperationError("pull_multiple_files", "Pull batch cancelled", "transfer context cancelled", false)
+			}
 			return "", err
 		}
 		completed++

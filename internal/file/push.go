@@ -3,6 +3,7 @@ package file
 import (
 	"ADBKit/internal/core"
 	"context"
+	"errors"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -113,6 +114,9 @@ func (s *Service) PushMultipleFiles(ctx context.Context, localPaths []string, re
 		fileName := filepath.Base(trimmed)
 		remotePath := path.Join(normalizedRemoteDir, fileName)
 		if _, err := s.PushFile(ctx, trimmed, remotePath); err != nil {
+			if isCancelledError(err) || ctx.Err() != nil {
+				return "", core.NewOperationError("push_multiple_files", "Push batch cancelled", "transfer context cancelled", false)
+			}
 			failures = append(failures, fmt.Sprintf("%s: %s", fileName, err.Error()))
 			continue
 		}
@@ -125,6 +129,15 @@ func (s *Service) PushMultipleFiles(ctx context.Context, localPaths []string, re
 	}
 
 	return message, nil
+}
+
+func isCancelledError(err error) bool {
+	if err == nil || errors.Is(err, context.Canceled) {
+		return err != nil
+	}
+
+	var operationErr *core.OperationError
+	return errors.As(err, &operationErr) && strings.Contains(strings.ToLower(operationErr.Message), "cancel")
 }
 
 func (s *Service) emitTransferProgress(fileName, direction string, percent int) {
