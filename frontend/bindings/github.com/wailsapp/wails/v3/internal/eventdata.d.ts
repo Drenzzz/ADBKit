@@ -26,15 +26,15 @@ declare module "@wailsio/runtime" {
         interface CustomEvents {
             "binary_download_progress": download$0.ProgressEvent;
             "file_transfer_progress": file$0.TransferProgress;
-            "files-dropped": string[] | null;
+            "files-dropped": string[];
             "flash_step_status": flasher$0.StepStatus;
             "logcat_line": shell$0.LogcatEntry;
             "logcat_status": shell$0.LogcatStatusEvent;
             "scrcpy_error": scrcpy$0.SessionEvent;
             "scrcpy_session_started": scrcpy$0.SessionEvent;
             "scrcpy_session_stopped": scrcpy$0.SessionEvent;
-            "terminal_closed": { [_ in string]?: string } | null;
-            "terminal_output": { [_ in string]?: string } | null;
+            "terminal_closed": { [_ in string]?: string };
+            "terminal_output": { [_ in string]?: string };
         }
     }
 }
