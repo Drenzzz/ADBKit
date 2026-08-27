@@ -62,7 +62,11 @@ test:
 	go test ./...
 
 test-coverage:
-	go test -coverprofile=coverage.out ./...
+	go test -coverprofile=coverage.out -covermode=atomic ./...
+	@total=$$(go tool cover -func=coverage.out | awk '/^total:/ {gsub("%","",$$3); print $$3}'); \
+	echo "Go line coverage: $${total}%"; \
+	awk -v t="$${total}" 'BEGIN{exit !(t+0 >= 20)}' \
+		|| { echo "::error::Go line coverage $${total}% is below the 20% gate"; exit 1; }
 
 check: lint typecheck test
 

@@ -24,6 +24,32 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
     css: false,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.{test,spec}.{ts,tsx}",
+        "src/test-setup.ts",
+        "src/test-utils.tsx",
+        "src/main.tsx",
+        "src/bindings-app.d.ts",
+        "src/vite-env.d.ts",
+        "src/routes/__tests__/**",
+        "src/stores/__tests__/**",
+        "src/lib/__tests__/**",
+        "src/**/index.ts",
+      ],
+      thresholds: {
+        // Conservative baseline set just below the current smoke-test
+        // coverage so the gate fails future regressions but allows the
+        // existing suite to pass. Tighten as meaningful tests land.
+        lines: 20,
+        functions: 15,
+        statements: 18,
+        branches: 10,
+      },
+    },
   },
   build: {
     rollupOptions: {
