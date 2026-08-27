@@ -1,7 +1,6 @@
 package binary
 
 import (
-	"ADBKit/internal/core"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -10,19 +9,10 @@ import (
 )
 
 func TestValidatePackageCompleteness_RejectsIncompleteScrcpy(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("requires real scrcpy binary to verify version")
-	}
 	dir := t.TempDir()
-	// Create scrcpy executable but no scrcpy-server
-	binaryPath := filepath.Join(dir, "scrcpy")
-	if err := os.WriteFile(binaryPath, []byte("fake"), 0o755); err != nil {
-		t.Fatal(err)
-	}
 
 	svc := NewService(dir)
-	cfg := &core.AppConfig{}
-	err := svc.SetCustomBinary(cfg, BinaryNameScrcpy, binaryPath)
+	err := svc.validatePackageCompleteness(BinaryNameScrcpy, filepath.Join(dir, "scrcpy"))
 	if err == nil {
 		t.Fatal("expected error for missing scrcpy-server")
 	}
@@ -32,40 +22,27 @@ func TestValidatePackageCompleteness_RejectsIncompleteScrcpy(t *testing.T) {
 }
 
 func TestValidatePackageCompleteness_AcceptsCompleteScrcpy(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("requires real scrcpy binary to verify version")
-	}
 	dir := t.TempDir()
-	binaryPath := filepath.Join(dir, "scrcpy")
-	if err := os.WriteFile(binaryPath, []byte("fake"), 0o755); err != nil {
-		t.Fatal(err)
-	}
 	serverPath := filepath.Join(dir, "scrcpy-server")
-	if err := os.WriteFile(serverPath, []byte("fake-server"), 0o755); err != nil {
+	if err := os.WriteFile(serverPath, []byte("fake-server"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
 	svc := NewService(dir)
-	info := svc.Detect(BinaryNameScrcpy, binaryPath)
-	if info.Status != BinaryReady {
-		t.Errorf("expected ready status for complete scrcpy package, got %v (reason=%q)", info.Status, info.Reason)
+	if err := svc.validatePackageCompleteness(BinaryNameScrcpy, filepath.Join(dir, "scrcpy")); err != nil {
+		t.Errorf("expected complete scrcpy package to be accepted, got %v", err)
 	}
 }
 
 func TestValidatePackageCompleteness_LinuxRequiresLib64(t *testing.T) {
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS != "linux" {
 		t.Skip("linux-only test")
 	}
 	dir := t.TempDir()
-	binaryPath := filepath.Join(dir, "adb")
-	if err := os.WriteFile(binaryPath, []byte("fake"), 0o755); err != nil {
-		t.Fatal(err)
-	}
 	// No lib64 directory
 
 	svc := NewService(dir)
-	cfg := &core.AppConfig{}
-	err := svc.SetCustomBinary(cfg, BinaryNameAdb, binaryPath)
+	err := svc.validatePackageCompleteness(BinaryNameAdb, filepath.Join(dir, "adb"))
 	if err == nil {
 		t.Fatal("expected error for missing lib64 on Linux")
 	}
@@ -74,36 +51,17 @@ func TestValidatePackageCompleteness_LinuxRequiresLib64(t *testing.T) {
 	}
 }
 
-// TestValidatePackageCompleteness_WindowsDLLsPresent covers the happy-path
-// Windows check by mocking out the version command via Detect's
-// resolveCandidate path. Because Windows rejects fake executables outright,
-// we exercise only the DLL-missing branch (which short-circuits version).
 func TestValidatePackageCompleteness_WindowsDLLsAbsent(t *testing.T) {
 	if runtime.GOOS != "windows" {
 		t.Skip("windows-only test")
 	}
 	dir := t.TempDir()
-	binaryPath := filepath.Join(dir, "adb.exe")
-	if err := os.WriteFile(binaryPath, []byte("fake"), 0o755); err != nil {
-		t.Fatal(err)
-	}
-
-	// Write a real-looking adb.exe stub? Not feasible in this environment;
-	// instead we exercise the DLL completeness branch directly via the
-	// unexported helper. To reach it, we construct a path that the version
-	// check would otherwise short-circuit on; here we just confirm the
-	// validatePackageCompleteness helper reports the missing DLL by
-	// calling it through Detect with a controlled state.
 	svc := NewService(dir)
-	cfg := &core.AppConfig{
-		AdbPath: binaryPath,
+	err := svc.validatePackageCompleteness(BinaryNameAdb, filepath.Join(dir, "adb.exe"))
+	if err == nil {
+		t.Fatal("expected error when Windows runtime DLLs are absent")
 	}
-	info := svc.Detect(BinaryNameAdb, cfg.AdbPath)
-	if info.Status == BinaryReady {
-		t.Fatal("expected non-ready when DLLs absent and binary is fake")
+	if !strings.Contains(err.Error(), "Windows runtime DLL") {
+		t.Errorf("expected error to mention Windows runtime DLL, got %v", err)
 	}
-	// We do not assert on the exact reason (fake binary cannot be executed on
-	// Windows); the production code path is verified separately by code
-	// review and manual smoke test on a real adb.exe.
-	_ = info
 }

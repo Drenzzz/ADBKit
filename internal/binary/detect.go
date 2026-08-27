@@ -41,7 +41,7 @@ func (bs *Service) Detect(name string, configPath string) *BinaryInfo {
 		return resolved
 	}
 
-	for _, candidate := range bs.commonPaths(name) {
+	for _, candidate := range bs.candidateCommonPaths(name) {
 		resolved := bs.resolveCandidate(name, candidate, "common-path", false)
 		if resolved.Status == BinaryReady {
 			return resolved
@@ -49,6 +49,13 @@ func (bs *Service) Detect(name string, configPath string) *BinaryInfo {
 	}
 
 	return info
+}
+
+func (bs *Service) candidateCommonPaths(name string) []string {
+	if bs.commonPathsOverride != nil {
+		return bs.commonPathsOverride(name)
+	}
+	return bs.commonPaths(name)
 }
 
 func (bs *Service) resolveCandidate(name, path, source string, explicit bool) *BinaryInfo {
@@ -188,7 +195,7 @@ func (bs *Service) DetectAllCandidates(name string, configPath string) []BinaryI
 	managedPath := joinManagedPath(bs.dataDir, name)
 	addIfValid(bs.resolveCandidate(name, managedPath, "app-data", false))
 
-	for _, candidatePath := range bs.commonPaths(name) {
+	for _, candidatePath := range bs.candidateCommonPaths(name) {
 		addIfValid(bs.resolveCandidate(name, candidatePath, "common-path", false))
 	}
 

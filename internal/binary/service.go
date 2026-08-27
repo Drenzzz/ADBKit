@@ -42,7 +42,8 @@ type RevalidationResult struct {
 }
 
 type Service struct {
-	dataDir string
+	dataDir             string
+	commonPathsOverride func(string) []string
 }
 
 func NewService(dataDir string) *Service {

@@ -18,7 +18,9 @@ func TestService_Detect_RejectsUnsupportedName(t *testing.T) {
 }
 
 func TestService_Detect_ReturnsMissingWhenNoCandidates(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
 	svc := NewService(t.TempDir())
+	svc.commonPathsOverride = func(string) []string { return nil }
 	info := svc.Detect(BinaryNameAdb, "")
 	if info.Status != BinaryMissing {
 		t.Errorf("expected missing status, got %v", info.Status)
