@@ -25,6 +25,11 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback
 }
 
+function isCancelledMessage(message: string): boolean {
+  const normalized = message.toLowerCase()
+  return normalized.includes('cancelled') || normalized.includes('canceled')
+}
+
 function normalizePath(value: string): string {
   const trimmed = value.trim()
   if (trimmed === '' || trimmed === '/') return '/sdcard'
@@ -248,7 +253,7 @@ export function useFileExplorer() {
       return true
     } catch (err) {
       const msg = getErrorMessage(err, 'Failed to pull file')
-      if (msg.includes('cancelled')) {
+      if (isCancelledMessage(msg)) {
         toast.info('Pull cancelled — partial data may remain on your computer')
       } else {
         store.setError(msg)
@@ -274,7 +279,7 @@ export function useFileExplorer() {
       return true
     } catch (err) {
       const msg = getErrorMessage(err, 'Failed to push file')
-      if (msg.includes('cancelled')) {
+      if (isCancelledMessage(msg)) {
         toast.info('Push cancelled — partial data may remain on the device')
       } else {
         store.setError(msg)
@@ -384,7 +389,7 @@ export function useFileExplorer() {
       return true
     } catch (err) {
       const msg = getErrorMessage(err, 'Failed to pull files')
-      if (msg.includes('cancelled')) {
+      if (isCancelledMessage(msg)) {
         toast.info('Pull batch cancelled — partial data may remain on your computer')
       } else {
         store.setError(msg)
@@ -431,7 +436,7 @@ export function useFileExplorer() {
       return true
     } catch (err) {
       const msg = getErrorMessage(err, 'Failed to push files')
-      if (msg.includes('cancelled')) {
+      if (isCancelledMessage(msg)) {
         toast.info('Push batch cancelled — partial data may remain on the device')
       } else {
         store.setError(msg)
@@ -455,7 +460,6 @@ export function useFileExplorer() {
 
   function cancelTransfer() {
     cancelFileTransfer()
-    store.setTransferProgress(null)
   }
 
   function dismissError() { store.setError(null) }
