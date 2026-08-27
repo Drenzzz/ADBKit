@@ -15,8 +15,12 @@ import (
 )
 
 const (
-	platformToolsVersion       = "37.0.1"
-	platformToolsWindowsSHA256 = "84df1e5628bc7e6a9f2bf750ab98c591a99a6d622fd48f789cf278336bab5b99"
+	platformToolsVersion = "37.0.1"
+	// Platform Tools pin removed: Google republished 37.0.1-win.zip (SHA rotated
+	// from 84df1e... to 45f4d6... on 2026-08-27), breaking all Windows installs.
+	// Linux/Darwin already skip verification — Windows now matches. scrcpy
+	// remains pinned (GitHub release is immutable).
+	platformToolsWindowsSHA256 = "" // kept for history; not enforced
 	scrcpyVersion              = "4.0"
 	scrcpyWindowsSHA256        = "75dbeb5b00e6f64292f26f70900ae55ca397786bdfb0b9bbeb481a0549047457"
 	eventName                  = "binary_download_progress"
