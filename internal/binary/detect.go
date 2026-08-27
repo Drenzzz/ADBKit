@@ -87,11 +87,21 @@ func (bs *Service) validatePackageCompleteness(name, path string) error {
 			return core.NewOperationError("validate_package", "incomplete package: missing scrcpy-server", dir, false)
 		}
 	case BinaryNameAdb, BinaryNameFastboot:
-		if runtime.GOOS != "windows" {
-			libDir := filepath.Join(dir, "lib64")
-			if _, err := os.Stat(libDir); os.IsNotExist(err) {
-				return core.NewOperationError("validate_package", "incomplete package: missing lib64 directory", dir, false)
+		if runtime.GOOS == "windows" {
+			// Platform Tools on Windows ships with two DLLs (AdbWinApi.dll and
+			// AdbWinUsbApi.dll) that adb.exe loads at runtime. Without them,
+			// adb launches but exits immediately with no output.
+			for _, dll := range []string{"AdbWinApi.dll", "AdbWinUsbApi.dll"} {
+				dllPath := filepath.Join(dir, dll)
+				if _, err := os.Stat(dllPath); os.IsNotExist(err) {
+					return core.NewOperationError("validate_package", "incomplete package: missing Windows runtime DLL", dll, false)
+				}
 			}
+			return nil
+		}
+		libDir := filepath.Join(dir, "lib64")
+		if _, err := os.Stat(libDir); os.IsNotExist(err) {
+			return core.NewOperationError("validate_package", "incomplete package: missing lib64 directory", dir, false)
 		}
 	}
 	return nil
