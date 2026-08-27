@@ -25,6 +25,9 @@ const (
 	chunkSize       = 64 * 1024
 	permExecutable  = 0o755
 	permDir         = 0o700
+
+	maxRetries    = 3
+	retryBaseWait = time.Second
 )
 
 type ProgressFunc func(bytesReceived int64, bytesTotal int64)
@@ -43,8 +46,41 @@ func NewDownloader(onProgress ProgressFunc) *Downloader {
 	}
 }
 
-// Fetch downloads a URL to a local file path, reporting progress.
+// Fetch downloads a URL to a local file path, reporting progress. Transient
+// HTTP failures (5xx, network resets) are retried up to maxRetries with
+// exponential backoff; context cancellation and 4xx errors fail fast.
 func (d *Downloader) Fetch(ctx context.Context, url string, destPath string) error {
+	if err := os.MkdirAll(filepath.Dir(destPath), permDir); err != nil {
+		return core.NewOperationError("download", "failed to create directory", err.Error(), true)
+	}
+
+	var lastErr error
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		if ctx.Err() != nil {
+			return core.NewOperationError("download", "download cancelled", ctx.Err().Error(), false)
+		}
+		err := d.fetchOnce(ctx, url, destPath)
+		if err == nil {
+			return nil
+		}
+		lastErr = err
+		if !isTransientDownloadError(err) {
+			return err
+		}
+		if attempt < maxRetries {
+			wait := retryBaseWait << (attempt - 1)
+			select {
+			case <-time.After(wait):
+			case <-ctx.Done():
+				return core.NewOperationError("download", "download cancelled during retry", ctx.Err().Error(), false)
+			}
+		}
+	}
+	return lastErr
+}
+
+// fetchOnce performs a single download attempt (no retry).
+func (d *Downloader) fetchOnce(ctx context.Context, url string, destPath string) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return core.NewOperationError("download", "failed to create request", err.Error(), true)
@@ -58,10 +94,6 @@ func (d *Downloader) Fetch(ctx context.Context, url string, destPath string) err
 
 	if resp.StatusCode != http.StatusOK {
 		return core.NewOperationError("download", fmt.Sprintf("server returned %d", resp.StatusCode), url, true)
-	}
-
-	if err := os.MkdirAll(filepath.Dir(destPath), permDir); err != nil {
-		return core.NewOperationError("download", "failed to create directory", err.Error(), true)
 	}
 
 	tmpPath := destPath + ".tmp"
@@ -108,6 +140,29 @@ func (d *Downloader) Fetch(ctx context.Context, url string, destPath string) err
 	}
 
 	return nil
+}
+
+// isTransientDownloadError decides whether a download error should be retried.
+// 5xx and network-level errors are transient; 4xx (and "finalized" errors)
+// fail fast because they indicate the request itself is wrong.
+func isTransientDownloadError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	if strings.Contains(msg, "server returned 5") {
+		return true
+	}
+	if strings.Contains(msg, "server returned 429") {
+		return true
+	}
+	if strings.Contains(msg, "connection reset") ||
+		strings.Contains(msg, "broken pipe") ||
+		strings.Contains(msg, "EOF") ||
+		strings.Contains(msg, "timeout") {
+		return true
+	}
+	return false
 }
 
 // VerifySHA256 confirms a downloaded archive matches its pinned SHA-256 digest.

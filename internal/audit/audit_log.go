@@ -46,7 +46,7 @@ type Log struct {
 }
 
 const (
-	defaultMaxEntries = 1000
+	defaultMaxEntries = 5000
 	saveDebounce      = 500 * time.Millisecond
 )
 

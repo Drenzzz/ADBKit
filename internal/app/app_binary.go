@@ -85,7 +85,6 @@ func (a *App) GetCapabilities() map[string]bool {
 		"scrcpyAvailable":          status.Scrcpy.Status == core.BinaryReady,
 		"setupCompleted":           a.cfg.SetupCompleted && status.Ready,
 		"wirelessPairingSupported": wirelessPairingSupported(status.Adb),
-		"audioCaptureSupported":    status.Scrcpy.Status == core.BinaryReady,
 		"clipboardSyncSupported":   status.Scrcpy.Status == core.BinaryReady,
 	}
 }

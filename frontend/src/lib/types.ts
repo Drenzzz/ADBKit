@@ -51,7 +51,6 @@ export interface Capabilities {
   scrcpyAvailable: boolean
   setupCompleted: boolean
   wirelessPairingSupported: boolean
-  audioCaptureSupported: boolean
   clipboardSyncSupported: boolean
 }
 
