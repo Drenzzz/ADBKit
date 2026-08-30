@@ -7,6 +7,7 @@ import (
 	"os"
 
 	appservice "ADBKit/internal/app"
+	platform "ADBKit/internal/platform"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
@@ -22,6 +23,7 @@ var assets embed.FS
 func main() {
 	_ = os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "0")
 	_ = os.Setenv("GDK_SYNCHRONIZE", "0")
+	platform.ConfigureWebKitRenderer()
 
 	service := appservice.NewApp()
 	app := application.New(application.Options{
