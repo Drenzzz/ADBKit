@@ -25,7 +25,7 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
     <div
       ref={containerRef}
       className={cn(
-        'h-full w-full overflow-auto bg-white dark:bg-[var(--terminal-bg)] px-5 py-4 font-mono text-xs leading-5 text-zinc-700 dark:text-zinc-300 perf-scroll select-text selection:bg-primary/20 dark:selection:bg-primary/30 selection:text-zinc-900 dark:selection:text-white',
+        'h-full w-full overflow-auto bg-white dark:bg-[var(--terminal-bg)] px-5 py-4 font-mono text-xs leading-5 text-zinc-700 dark:text-zinc-300 select-text selection:bg-primary/20 dark:selection:bg-primary/30 selection:text-zinc-900 dark:selection:text-white',
         className,
       )}
     >
