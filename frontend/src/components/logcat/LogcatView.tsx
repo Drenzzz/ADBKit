@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useLogcatStore } from '@/stores/useLogcatStore'
 import { LogcatEntry } from './LogcatEntry'
 
 const ROW_HEIGHT = 24
 
-export function LogcatView() {
+interface LogcatViewProps {
+  scrollContainerRef: RefObject<HTMLDivElement | null>
+}
+
+export function LogcatView({ scrollContainerRef }: LogcatViewProps) {
   const logs = useLogcatStore((state) => state.logs)
   const filter = useLogcatStore((state) => state.filter)
   const autoScroll = useLogcatStore((state) => state.autoScroll)
-  const parentRef = useRef<HTMLDivElement>(null)
   const autoScrollRef = useRef(autoScroll)
   const scrollThrottleRef = useRef(false)
 
@@ -42,7 +45,7 @@ export function LogcatView() {
 
   const virtualizer = useVirtualizer({
     count: filteredLogs.length,
-    getScrollElement: () => parentRef.current,
+    getScrollElement: () => scrollContainerRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 10,
   })
@@ -90,38 +93,33 @@ export function LogcatView() {
 
   return (
     <div
-      ref={parentRef}
-      className="h-full overflow-auto"
+      style={{
+        height: `${virtualizer.getTotalSize()}px`,
+        width: '100%',
+        position: 'relative',
+      }}
     >
-      <div
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          width: '100%',
-          position: 'relative',
-        }}
-      >
-        {virtualizer.getVirtualItems().map((virtualRow) => {
-          const entry = filteredLogs[virtualRow.index]
-          if (!entry) return null
+      {virtualizer.getVirtualItems().map((virtualRow) => {
+        const entry = filteredLogs[virtualRow.index]
+        if (!entry) return null
 
-          return (
-            <div
-              key={entry.id}
-              data-index={virtualRow.index}
-              ref={virtualizer.measureElement}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                transform: `translate3d(0, ${virtualRow.start}px, 0)`,
-              }}
-            >
-              <LogcatEntry entry={entry} />
-            </div>
-          )
-        })}
-      </div>
+        return (
+          <div
+            key={entry.id}
+            data-index={virtualRow.index}
+            ref={virtualizer.measureElement}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              transform: `translate3d(0, ${virtualRow.start}px, 0)`,
+            }}
+          >
+            <LogcatEntry entry={entry} />
+          </div>
+        )
+      })}
     </div>
   )
 }
