@@ -131,7 +131,7 @@ export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
 
       <div className="flex-1 min-h-0 relative bg-[var(--terminal-bg)]">
         <div ref={scrollContainerRef} className="h-full overflow-auto">
-          <LogcatView />
+          <LogcatView scrollContainerRef={scrollContainerRef} />
         </div>
 
         {showScrollButton && (
