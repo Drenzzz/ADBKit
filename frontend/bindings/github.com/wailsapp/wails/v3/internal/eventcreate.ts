@@ -6,46 +6,4 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
-import * as download$0 from "../../../../../ADBKit/internal/download/models.js";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
-import * as file$0 from "../../../../../ADBKit/internal/file/models.js";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
-import * as flasher$0 from "../../../../../ADBKit/internal/flasher/models.js";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
-import * as scrcpy$0 from "../../../../../ADBKit/internal/scrcpy/models.js";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
-import * as shell$0 from "../../../../../ADBKit/internal/shell/models.js";
-
-function configure() {
-    Object.freeze(Object.assign($Create.Events, {
-        "binary_download_progress": $$createType0,
-        "file_transfer_progress": $$createType1,
-        "files-dropped": $$createType2,
-        "flash_step_status": $$createType3,
-        "logcat_line": $$createType4,
-        "logcat_status": $$createType5,
-        "scrcpy_error": $$createType6,
-        "scrcpy_session_started": $$createType6,
-        "scrcpy_session_stopped": $$createType6,
-        "terminal_closed": $$createType7,
-        "terminal_output": $$createType7,
-    }));
-}
-
-// Private type creation functions
-const $$createType0 = download$0.ProgressEvent.createFrom;
-const $$createType1 = file$0.TransferProgress.createFrom;
-const $$createType2 = $Create.Array($Create.Any);
-const $$createType3 = flasher$0.StepStatus.createFrom;
-const $$createType4 = shell$0.LogcatEntry.createFrom;
-const $$createType5 = shell$0.LogcatStatusEvent.createFrom;
-const $$createType6 = scrcpy$0.SessionEvent.createFrom;
-const $$createType7 = $Create.Map($Create.Any, $Create.Any);
-
-configure();
+Object.freeze($Create.Events);
