@@ -1,4 +1,8 @@
-import { Smartphone, FolderOpen, Search } from 'lucide-react'
+import {
+  IconDeviceMobile as Smartphone,
+  IconFolderOpen as FolderOpen,
+  IconSearch as Search
+} from "@tabler/icons-react"
 
 export function NoDeviceState() {
   return (

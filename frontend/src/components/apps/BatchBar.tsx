@@ -1,4 +1,12 @@
-import { Trash2, Eye, EyeOff, Square, Eraser, Download, X } from 'lucide-react'
+import {
+  IconTrash as Trash2,
+  IconEye as Eye,
+  IconEyeOff as EyeOff,
+  IconSquare as Square,
+  IconEraser as Eraser,
+  IconDownload as Download,
+  IconX as X
+} from "@tabler/icons-react"
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'

@@ -1,7 +1,11 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import {
+  IconCircleCheck as CheckCircle2,
+  IconCircleXFilled as XCircle,
+  IconLoader2 as Loader2
+} from "@tabler/icons-react"
 import type { FlashPlanStepStatus } from '@/lib/types'
 
 interface RomPartitionListProps {

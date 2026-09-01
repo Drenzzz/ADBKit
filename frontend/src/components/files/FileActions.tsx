@@ -1,14 +1,14 @@
 import {
-  MoreHorizontal,
-  FolderOpen,
-  Download,
-  Pencil,
-  Trash2,
-  HardDrive,
-  FolderInput,
-  FolderUp,
-  Files,
-} from 'lucide-react'
+  IconDots as MoreHorizontal,
+  IconFolderOpen as FolderOpen,
+  IconDownload as Download,
+  IconPencil as Pencil,
+  IconTrash as Trash2,
+  IconDeviceUsb as HardDrive,
+  IconFolderDown as FolderInput,
+  IconFolderUp as FolderUp,
+  IconCopy as Files
+} from "@tabler/icons-react"
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -1,4 +1,8 @@
-import { Smartphone, Zap, HelpCircle } from 'lucide-react'
+import {
+  IconDeviceMobile as Smartphone,
+  IconBolt as Zap,
+  IconHelp as HelpCircle
+} from "@tabler/icons-react"
 import { Badge } from '@/components/ui/badge'
 import { useDevices } from '@/hooks/useDevices'
 import type { DeviceMode } from '@/lib/types'

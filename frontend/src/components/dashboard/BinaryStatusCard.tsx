@@ -1,5 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
-import { CheckCircle2, AlertTriangle, ShieldCheck, Terminal, Cpu } from 'lucide-react'
+import {
+  IconCircleCheck as CheckCircle2,
+  IconAlertTriangle as AlertTriangle,
+  IconShieldCheck as ShieldCheck,
+  IconTerminal as Terminal,
+  IconCpu as Cpu
+} from "@tabler/icons-react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getBinaryStatus } from '@/services/binaryService'
 import type { BinaryInfo, BinarySetupResult } from '@/lib/types'

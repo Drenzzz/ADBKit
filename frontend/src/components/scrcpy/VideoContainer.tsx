@@ -1,5 +1,9 @@
 import type { ScrcpySessionStatus, ScrcpyOptions } from '@/lib/types'
-import { Loader2, AlertTriangle, MonitorPlay } from 'lucide-react'
+import {
+  IconLoader2 as Loader2,
+  IconAlertTriangle as AlertTriangle,
+  IconCast as MonitorPlay
+} from "@tabler/icons-react"
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface VideoContainerProps {

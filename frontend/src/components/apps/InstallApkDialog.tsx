@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Upload, FileCode, CheckCircle2, XCircle, Loader2, X } from 'lucide-react'
+import {
+  IconUpload as Upload,
+  IconFileCode as FileCode,
+  IconCircleCheck as CheckCircle2,
+  IconCircleXFilled as XCircle,
+  IconLoader2 as Loader2,
+  IconX as X
+} from "@tabler/icons-react"
 import { motion } from 'motion/react'
 import {
   Dialog,

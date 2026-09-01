@@ -1,15 +1,15 @@
 import {
-  Folder,
-  FileText,
-  FileCode,
-  FileCode2,
-  Image,
-  Video,
-  Music,
-  Archive,
-  Link,
-  File,
-} from 'lucide-react'
+  IconFolder as Folder,
+  IconFileText as FileText,
+  IconFileCode as FileCode,
+  IconFileCode as FileCode2,
+  IconPhoto as Image,
+  IconVideo as Video,
+  IconMusic as Music,
+  IconArchive as Archive,
+  IconLink as Link,
+  IconFile as File
+} from "@tabler/icons-react"
 import { Checkbox } from '@/components/ui/checkbox'
 import { FileActions } from './FileActions'
 import type { FileEntry } from '@/lib/types'

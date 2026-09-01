@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronDown, Check, Smartphone } from 'lucide-react'
+import {
+  IconChevronDown as ChevronDown,
+  IconCheck as Check,
+  IconDeviceMobile as Smartphone
+} from "@tabler/icons-react"
 import { useDevices } from '@/hooks/useDevices'
 
 export function ActiveDeviceSelector() {

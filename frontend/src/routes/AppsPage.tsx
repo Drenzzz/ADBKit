@@ -1,7 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { RefreshCw, Package, Upload, Loader2, ArrowUpDown } from 'lucide-react'
+import {
+  IconRefresh as RefreshCw,
+  IconBox as Package,
+  IconUpload as Upload,
+  IconLoader2 as Loader2,
+  IconArrowsSort as ArrowUpDown
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {

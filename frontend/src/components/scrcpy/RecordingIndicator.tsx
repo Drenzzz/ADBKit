@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Circle } from 'lucide-react'
+import {
+  IconCircle as Circle
+} from "@tabler/icons-react"
 import { Badge } from '@/components/ui/badge'
 
 interface RecordingIndicatorProps {

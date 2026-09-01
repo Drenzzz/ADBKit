@@ -1,5 +1,13 @@
 import { useState } from 'react'
-import { RotateCw, Shield, Power, RefreshCw, ArrowRight, Loader2, WifiOff } from 'lucide-react'
+import {
+  IconRotate as RotateCw,
+  IconShield as Shield,
+  IconPower as Power,
+  IconRefresh as RefreshCw,
+  IconArrowRight as ArrowRight,
+  IconLoader2 as Loader2,
+  IconWifiOff as WifiOff
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { rebootDevice, disconnectWireless } from '@/services/deviceService'

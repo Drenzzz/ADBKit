@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { Pencil, Smartphone, Clock } from 'lucide-react'
+import {
+  IconPencil as Pencil,
+  IconDeviceMobile as Smartphone,
+  IconClock as Clock
+} from "@tabler/icons-react"
 import { motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Button } from '@/components/ui/button'

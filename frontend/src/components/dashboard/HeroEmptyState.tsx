@@ -1,4 +1,7 @@
-import { Smartphone, RefreshCw } from 'lucide-react'
+import {
+  IconDeviceMobile as Smartphone,
+  IconRefresh as RefreshCw
+} from "@tabler/icons-react"
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'

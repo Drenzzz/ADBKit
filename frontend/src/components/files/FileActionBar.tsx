@@ -1,4 +1,12 @@
-import { Search, ArrowUpDown, Files, FolderPlus, LayoutList, Folder, File } from 'lucide-react'
+import {
+  IconSearch as Search,
+  IconArrowsSort as ArrowUpDown,
+  IconCopy as Files,
+  IconFolderPlus as FolderPlus,
+  IconList as LayoutList,
+  IconFolder as Folder,
+  IconFile as File
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'

@@ -4,7 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { useFlasher } from '@/hooks/useFlasher'
-import { Power, PlayCircle, Cpu, Unlock, BatteryCharging, Info } from 'lucide-react'
+import {
+  IconPower as Power,
+  IconCircleFilled as PlayCircle,
+  IconCpu as Cpu,
+  IconLockOpen as Unlock,
+  IconBatteryCharging as BatteryCharging,
+  IconInfoCircle as Info
+} from "@tabler/icons-react"
 
 interface WakeOnFastbootCardProps {
   disabled?: boolean

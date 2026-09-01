@@ -1,4 +1,10 @@
-import { ArrowDownToLine, Trash2, Play, FileDown, FileJson } from 'lucide-react'
+import {
+  IconArrowBarToDown as ArrowDownToLine,
+  IconTrash as Trash2,
+  IconPlayerPlay as Play,
+  IconFileDownload as FileDown,
+  IconBraces as FileJson
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Kbd } from '@/components/ui/kbd'

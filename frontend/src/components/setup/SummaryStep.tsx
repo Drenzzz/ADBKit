@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Check } from 'lucide-react'
+import {
+  IconCheck as Check
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { completeSetup } from '@/services/binaryService'

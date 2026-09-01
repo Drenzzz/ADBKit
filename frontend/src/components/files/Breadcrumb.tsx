@@ -1,4 +1,7 @@
-import { ChevronRight, Home } from 'lucide-react'
+import {
+  IconChevronRight as ChevronRight,
+  IconHome as Home
+} from "@tabler/icons-react"
 
 interface BreadcrumbItem {
   label: string

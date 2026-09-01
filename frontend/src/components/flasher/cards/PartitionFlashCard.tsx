@@ -5,7 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PartitionChips } from '@/components/flasher/shared/PartitionChips'
 import { FilePicker } from '@/components/flasher/shared/FilePicker'
 import { useFlasher } from '@/hooks/useFlasher'
-import { AlertTriangle, Zap, Cpu } from 'lucide-react'
+import {
+  IconAlertTriangle as AlertTriangle,
+  IconBolt as Zap,
+  IconCpu as Cpu
+} from "@tabler/icons-react"
 
 const LOGICAL_PARTITIONS = ['system', 'system_ext', 'vendor', 'product', 'odm', 'super', 'userdata']
 

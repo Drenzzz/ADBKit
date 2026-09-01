@@ -1,4 +1,7 @@
-import { RefreshCw, Smartphone } from 'lucide-react'
+import {
+  IconRefresh as RefreshCw,
+  IconDeviceMobile as Smartphone
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'

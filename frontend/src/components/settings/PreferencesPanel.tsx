@@ -4,7 +4,14 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { Check, Sun, Moon, RotateCcw, Save, Settings } from 'lucide-react'
+import {
+  IconCheck as Check,
+  IconSun as Sun,
+  IconMoon as Moon,
+  IconRotate2 as RotateCcw,
+  IconDeviceFloppy as Save,
+  IconSettings as Settings
+} from "@tabler/icons-react"
 import type { PreferencesPayload } from '@/lib/types'
 
 interface PreferencesPanelProps {

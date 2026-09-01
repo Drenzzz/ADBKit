@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
+import {
+  IconX as X
+} from "@tabler/icons-react"
 
 interface TransferProgressOverlayProps {
   fileName: string

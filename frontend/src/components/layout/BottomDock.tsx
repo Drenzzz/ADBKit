@@ -3,17 +3,17 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
-  LayoutDashboard,
-  Smartphone,
-  Package,
-  FolderOpen,
-  Zap,
-  Terminal,
-  MonitorPlay,
-  Settings,
-  Sun,
-  Moon,
-} from 'lucide-react'
+  IconLayoutDashboard as LayoutDashboard,
+  IconDeviceMobile as Smartphone,
+  IconBox as Package,
+  IconFolderOpen as FolderOpen,
+  IconBolt as Zap,
+  IconTerminal as Terminal,
+  IconCast as MonitorPlay,
+  IconSettings as Settings,
+  IconSun as Sun,
+  IconMoon as Moon
+} from "@tabler/icons-react"
 import { useUIStore } from '@/stores/useUIStore'
 import { useSettings } from '@/hooks/useSettings'
 import { DeviceModeBadge } from '@/components/devices/DeviceModeBadge'

@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
-  Smartphone,
-  RefreshCw,
-  Camera,
-  Package,
-  ScrollText,
-  FolderOpen,
-  ChevronRight,
-  Power,
-} from 'lucide-react'
+  IconDeviceMobile as Smartphone,
+  IconRefresh as RefreshCw,
+  IconCamera as Camera,
+  IconBox as Package,
+  IconArticle as ScrollText,
+  IconFolderOpen as FolderOpen,
+  IconChevronRight as ChevronRight,
+  IconPower as Power
+} from "@tabler/icons-react"
 import { Card, CardContent } from '@/components/ui/card'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {

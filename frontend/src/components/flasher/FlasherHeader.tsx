@@ -10,7 +10,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { RefreshCw } from 'lucide-react'
+import {
+  IconRefresh as RefreshCw
+} from "@tabler/icons-react"
 import { useFlasher } from '@/hooks/useFlasher'
 import { cn } from '@/lib/utils'
 

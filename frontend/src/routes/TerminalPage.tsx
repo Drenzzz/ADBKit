@@ -3,17 +3,17 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { NoDeviceEmptyState } from '@/components/common/NoDeviceEmptyState'
 import {
-  CornerDownLeft,
-  Terminal as TerminalIcon,
-  Trash2,
-  Loader2,
-  Wifi,
-  History,
-  X,
-  ScrollText,
-  ChevronDown,
-  RotateCw,
-} from 'lucide-react'
+  IconCornerDownLeft as CornerDownLeft,
+  IconTerminal as TerminalIcon,
+  IconTrash as Trash2,
+  IconLoader2 as Loader2,
+  IconWifi as Wifi,
+  IconHistory as History,
+  IconX as X,
+  IconArticle as ScrollText,
+  IconChevronDown as ChevronDown,
+  IconRotate as RotateCw
+} from "@tabler/icons-react"
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

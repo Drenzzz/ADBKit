@@ -5,7 +5,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FileRow } from './FileRow'
 import { EmptyFolderState, NoSearchResultsState } from './EmptyStates'
 import type { FileEntry, FileSortField, FileSortDirection } from '@/lib/types'
-import { ArrowUp, ArrowDown } from 'lucide-react'
+import {
+  IconArrowUp as ArrowUp,
+  IconArrowDown as ArrowDown
+} from "@tabler/icons-react"
 
 interface SortHeaderProps {
   label: string

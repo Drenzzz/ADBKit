@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { Download, Pencil, Trash2, X } from 'lucide-react'
+import {
+  IconDownload as Download,
+  IconPencil as Pencil,
+  IconTrash as Trash2,
+  IconX as X
+} from "@tabler/icons-react"
 import { useDevices } from '@/hooks/useDevices'
 import { useFileExplorer } from '@/hooks/useFileExplorer'
 import { getStorageInfo, pushMultipleFiles } from '@/services/fileService'

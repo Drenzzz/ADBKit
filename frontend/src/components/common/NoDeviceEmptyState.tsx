@@ -1,4 +1,6 @@
-import { Smartphone } from 'lucide-react'
+import {
+  IconDeviceMobile as Smartphone
+} from "@tabler/icons-react"
 
 export function NoDeviceEmptyState({ feature }: { feature: string }) {
   return (

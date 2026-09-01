@@ -2,7 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { getRuntimeDiagnostics } from '@/services/settingsService'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity } from 'lucide-react'
+import {
+  IconActivity as Activity
+} from "@tabler/icons-react"
 
 function BinaryVersions({ versions }: { versions: Record<string, string> }) {
   return (

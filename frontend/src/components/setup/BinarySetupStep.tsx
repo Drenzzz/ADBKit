@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, ArrowRight, CheckCircle2, Search, FolderOpen, FileSearch } from 'lucide-react'
+import {
+  IconArrowLeft as ArrowLeft,
+  IconArrowRight as ArrowRight,
+  IconCircleCheck as CheckCircle2,
+  IconSearch as Search,
+  IconFolderOpen as FolderOpen,
+  IconFileSearch as FileSearch
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { useReducedMotion } from '@/hooks/useReducedMotion'

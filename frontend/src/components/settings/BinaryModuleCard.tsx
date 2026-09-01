@@ -4,7 +4,15 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { BinarySourceBadge } from './BinarySourceBadge'
-import { Check, ChevronDown, FileSearch, FolderOpen, RefreshCw, Trash2, XCircle } from 'lucide-react'
+import {
+  IconCheck as Check,
+  IconChevronDown as ChevronDown,
+  IconFileSearch as FileSearch,
+  IconFolderOpen as FolderOpen,
+  IconRefresh as RefreshCw,
+  IconTrash as Trash2,
+  IconCircleXFilled as XCircle
+} from "@tabler/icons-react"
 import type { BinaryInfo } from '@/lib/types'
 
 interface BinaryModuleCardProps {
