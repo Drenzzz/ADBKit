@@ -1,11 +1,10 @@
 [Desktop Entry]
 Type=Application
 Name=ADBKit
-GenericName=Android Device Manager
-Comment=Modern desktop toolkit for ADB, Fastboot, and scrcpy
-Exec=ADBKit %U
+Exec=ADBKit
 Icon=ADBKit
+Categories=Development;
 Terminal=false
-Categories=Development;Utility;System;
-Keywords=android;adb;fastboot;scrcpy;device;flash;
-StartupWMClass=ADBKit
+Keywords=wails
+Version=1.0
+StartupNotify=false
