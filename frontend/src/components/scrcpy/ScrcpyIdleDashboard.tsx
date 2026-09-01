@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { Play, Smartphone, AlertTriangle } from 'lucide-react'
+import {
+  IconPlayerPlay as Play,
+  IconDeviceMobile as Smartphone,
+  IconAlertTriangle as AlertTriangle
+} from "@tabler/icons-react"
 import type {
   ScrcpyEncoderSupport,
   ScrcpyOptions,

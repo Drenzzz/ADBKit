@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { Bookmark, Trash2 } from 'lucide-react'
+import {
+  IconBookmark as Bookmark,
+  IconTrash as Trash2
+} from "@tabler/icons-react"
 import type { ScrcpyOptions, ScrcpyPreset } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

@@ -14,7 +14,11 @@ import {
 } from '@/components/ui/alert-dialog'
 import { FilePicker } from '@/components/flasher/shared/FilePicker'
 import { useFlasher } from '@/hooks/useFlasher'
-import { Package, Loader2, Cpu } from 'lucide-react'
+import {
+  IconBox as Package,
+  IconLoader2 as Loader2,
+  IconCpu as Cpu
+} from "@tabler/icons-react"
 import { cn } from '@/lib/utils'
 
 interface SideloadCardProps {

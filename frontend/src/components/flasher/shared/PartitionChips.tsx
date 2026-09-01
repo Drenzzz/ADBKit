@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import {
+  IconChevronDown as ChevronDown,
+  IconChevronUp as ChevronUp
+} from "@tabler/icons-react"
 
 const COMMON_PARTITIONS = ['boot', 'recovery', 'dtbo', 'vbmeta', 'system', 'vendor']
 

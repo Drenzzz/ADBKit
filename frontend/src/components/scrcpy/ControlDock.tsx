@@ -1,4 +1,8 @@
-import { Camera, Circle, Square } from 'lucide-react'
+import {
+  IconCamera as Camera,
+  IconCircle as Circle,
+  IconSquare as Square
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Separator } from '@/components/ui/separator'

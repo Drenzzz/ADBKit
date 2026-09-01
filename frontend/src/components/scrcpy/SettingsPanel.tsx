@@ -1,5 +1,8 @@
 import { useState } from 'react'
-import { ClipboardCopy, RefreshCw } from 'lucide-react'
+import {
+  IconClipboardCopy as ClipboardCopy,
+  IconRefresh as RefreshCw
+} from "@tabler/icons-react"
 import type { ScrcpyEncoderSupport } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'

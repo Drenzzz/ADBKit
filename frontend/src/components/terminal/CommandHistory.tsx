@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Clock, Trash2, X, Send, History } from 'lucide-react'
+import {
+  IconClock as Clock,
+  IconTrash as Trash2,
+  IconX as X,
+  IconSend as Send,
+  IconHistory as History
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useTerminalStore } from '@/stores/useTerminalStore'

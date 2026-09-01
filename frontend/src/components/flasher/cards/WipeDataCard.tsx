@@ -12,7 +12,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useFlasher } from '@/hooks/useFlasher'
-import { Trash2, Loader2, Cpu } from 'lucide-react'
+import {
+  IconTrash as Trash2,
+  IconLoader2 as Loader2,
+  IconCpu as Cpu
+} from "@tabler/icons-react"
 
 interface WipeDataCardProps {
   disabled?: boolean

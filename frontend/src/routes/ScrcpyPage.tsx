@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { RefreshCw, Play, Smartphone, AlertTriangle, Loader2 } from 'lucide-react'
+import {
+  IconRefresh as RefreshCw,
+  IconPlayerPlay as Play,
+  IconDeviceMobile as Smartphone,
+  IconAlertTriangle as AlertTriangle,
+  IconLoader2 as Loader2
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useScrcpy } from '@/hooks/useScrcpy'

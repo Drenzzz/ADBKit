@@ -10,7 +10,9 @@ import {
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Binary } from 'lucide-react'
+import {
+  IconBinary as Binary
+} from "@tabler/icons-react"
 import { toast } from 'sonner'
 import type { BinaryInfo } from '@/lib/types'
 

@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { Pencil, X, Loader2 } from 'lucide-react'
+import {
+  IconPencil as Pencil,
+  IconX as X,
+  IconLoader2 as Loader2
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setDeviceNickname, clearDeviceNickname } from '@/services/deviceService'

@@ -1,5 +1,8 @@
 import { cn } from '@/lib/utils'
-import { Upload, FolderOpen } from 'lucide-react'
+import {
+  IconUpload as Upload,
+  IconFolderOpen as FolderOpen
+} from "@tabler/icons-react"
 import { basename } from '@/lib/utils'
 
 interface FilePickerProps {

@@ -2,19 +2,19 @@ import { useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Command } from 'cmdk'
 import {
-  LayoutDashboard,
-  Smartphone,
-  Package,
-  FolderOpen,
-  Zap,
-  Terminal,
-  MonitorPlay,
-  Settings,
-  Sun,
-  Moon,
-  RefreshCw,
-  Camera,
-} from 'lucide-react'
+  IconLayoutDashboard as LayoutDashboard,
+  IconDeviceMobile as Smartphone,
+  IconBox as Package,
+  IconFolderOpen as FolderOpen,
+  IconBolt as Zap,
+  IconTerminal as Terminal,
+  IconCast as MonitorPlay,
+  IconSettings as Settings,
+  IconSun as Sun,
+  IconMoon as Moon,
+  IconRefresh as RefreshCw,
+  IconCamera as Camera
+} from "@tabler/icons-react"
 import { useUIStore } from '@/stores/useUIStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { getDevices } from '@/services/deviceService'

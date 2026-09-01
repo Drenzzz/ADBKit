@@ -15,7 +15,11 @@ import {
 import { FilePicker } from '@/components/flasher/shared/FilePicker'
 import { RomPartitionList } from '@/components/flasher/shared/RomPartitionList'
 import { useFlasher } from '@/hooks/useFlasher'
-import { FolderSearch, Loader2, Cpu } from 'lucide-react'
+import {
+  IconFolderSearch as FolderSearch,
+  IconLoader2 as Loader2,
+  IconCpu as Cpu
+} from "@tabler/icons-react"
 
 interface RomFlashCardProps {
   disabled?: boolean

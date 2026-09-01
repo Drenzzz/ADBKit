@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { RefreshCw, Wifi, Loader2 } from 'lucide-react'
+import {
+  IconRefresh as RefreshCw,
+  IconWifi as Wifi,
+  IconLoader2 as Loader2
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'

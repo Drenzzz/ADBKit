@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  FileSearch,
-  Download,
-  CheckCircle2,
-  AlertTriangle,
-  Monitor,
-} from 'lucide-react'
+  IconFileSearch as FileSearch,
+  IconDownload as Download,
+  IconCircleCheck as CheckCircle2,
+  IconAlertTriangle as AlertTriangle,
+  IconDeviceDesktop as Monitor
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'

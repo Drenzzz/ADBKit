@@ -6,9 +6,14 @@ import { WelcomeStep } from './WelcomeStep'
 import { BinarySetupStep } from './BinarySetupStep'
 import { SummaryStep } from './SummaryStep'
 import type { SetupWizardStep } from '@/lib/types'
-import { CheckCircle2, HelpCircle, Terminal, type LucideIcon } from 'lucide-react'
+import {
+  IconCircleCheck as CheckCircle2,
+  IconHelp as HelpCircle,
+  IconTerminal as Terminal,
+  type Icon as TablerIcon
+} from "@tabler/icons-react"
 
-const STEPS: { key: SetupWizardStep; label: string; icon: LucideIcon }[] = [
+const STEPS: { key: SetupWizardStep; label: string; icon: TablerIcon }[] = [
   { key: 'welcome', label: 'Welcome', icon: HelpCircle },
   { key: 'setup-binary', label: 'Setup binary', icon: Terminal },
   { key: 'finish', label: 'Finish', icon: CheckCircle2 },

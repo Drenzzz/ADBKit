@@ -1,4 +1,9 @@
-import { Battery, Database, Cpu, HardDrive } from 'lucide-react'
+import {
+  IconBattery as Battery,
+  IconDatabase as Database,
+  IconCpu as Cpu,
+  IconDeviceUsb as HardDrive
+} from "@tabler/icons-react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { PerformanceSnapshot } from '@/lib/types'

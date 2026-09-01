@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { RotateCw, Shield, Power, Loader2 } from 'lucide-react'
+import {
+  IconRotate as RotateCw,
+  IconShield as Shield,
+  IconPower as Power,
+  IconLoader2 as Loader2
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { rebootDevice } from '@/services/deviceService'

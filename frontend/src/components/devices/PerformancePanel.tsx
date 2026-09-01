@@ -1,4 +1,10 @@
-import { Cpu, MemoryStick, Wifi, Activity, Loader2 } from 'lucide-react'
+import {
+  IconCpu as Cpu,
+  IconDeviceSdCard as MemoryStick,
+  IconWifi as Wifi,
+  IconActivity as Activity,
+  IconLoader2 as Loader2
+} from "@tabler/icons-react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatTile } from '@/components/ui/stat-tile'
 import { useMetricsHistoryStore } from '@/stores/metricsHistoryStore'

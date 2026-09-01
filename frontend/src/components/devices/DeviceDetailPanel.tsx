@@ -3,24 +3,24 @@ import { motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { toast } from 'sonner'
 import {
-  Smartphone,
-  Layers,
-  Hash,
-  Shield,
-  Cpu,
-  Factory,
-  KeyRound,
-  Wifi,
-  Battery,
-  HardDrive,
-  MemoryStick,
-  Tag,
-  Info,
-  Cable,
-  Check,
-  Copy,
-  RefreshCw,
-} from 'lucide-react'
+  IconDeviceMobile as Smartphone,
+  IconStack2 as Layers,
+  IconHash as Hash,
+  IconShield as Shield,
+  IconCpu as Cpu,
+  IconBuildingFactory as Factory,
+  IconKey as KeyRound,
+  IconWifi as Wifi,
+  IconBattery as Battery,
+  IconDeviceUsb as HardDrive,
+  IconDeviceSdCard as MemoryStick,
+  IconTag as Tag,
+  IconInfoCircle as Info,
+  IconPlugConnected as Cable,
+  IconCheck as Check,
+  IconCopy as Copy,
+  IconRefresh as RefreshCw
+} from "@tabler/icons-react"
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

@@ -3,7 +3,11 @@ import { Button } from '@/components/ui/button'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { getSetupState } from '@/services/binaryService'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { Monitor, Smartphone, Terminal } from 'lucide-react'
+import {
+  IconDeviceDesktop as Monitor,
+  IconDeviceMobile as Smartphone,
+  IconTerminal as Terminal
+} from "@tabler/icons-react"
 
 function detectOS(): string {
   const ua = navigator.userAgent.toLowerCase()

@@ -1,14 +1,14 @@
 import {
-  MoreHorizontal,
-  Info,
-  Play,
-  Square,
-  Eye,
-  EyeOff,
-  Trash2,
-  Download,
-  Eraser,
-} from 'lucide-react'
+  IconDots as MoreHorizontal,
+  IconInfoCircle as Info,
+  IconPlayerPlay as Play,
+  IconSquare as Square,
+  IconEye as Eye,
+  IconEyeOff as EyeOff,
+  IconTrash as Trash2,
+  IconDownload as Download,
+  IconEraser as Eraser
+} from "@tabler/icons-react"
 import {
   DropdownMenu,
   DropdownMenuContent,

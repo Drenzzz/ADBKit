@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { Wifi, Usb, PlugZap, Loader2 } from 'lucide-react'
+import {
+  IconWifi as Wifi,
+  IconUsb as Usb,
+  IconBolt as PlugZap,
+  IconLoader2 as Loader2
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

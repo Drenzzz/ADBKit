@@ -27,19 +27,19 @@ import { AUDIT_LOG_LIMIT_OPTIONS } from '@/services/settingsService'
 import { selectSaveFile, selectFile } from '@/services/binaryService'
 import { toast } from 'sonner'
 import {
-  AlertTriangle,
-  CheckCircle2,
-  ChevronDown,
-  Download,
-  FileText,
-  Filter,
-  Info,
-  RefreshCw,
-  Trash2,
-  Upload,
-  XCircle,
-  ScrollText,
-} from 'lucide-react'
+  IconAlertTriangle as AlertTriangle,
+  IconCircleCheck as CheckCircle2,
+  IconChevronDown as ChevronDown,
+  IconDownload as Download,
+  IconFileText as FileText,
+  IconFilter as Filter,
+  IconInfoCircle as Info,
+  IconRefresh as RefreshCw,
+  IconTrash as Trash2,
+  IconUpload as Upload,
+  IconCircleXFilled as XCircle,
+  IconArticle as ScrollText
+} from "@tabler/icons-react"
 
 const LEVEL_ICON: Record<AuditLogLevel, React.ReactNode> = {
   info: <Info className="h-3 w-3" />,

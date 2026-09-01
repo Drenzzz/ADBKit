@@ -1,4 +1,7 @@
-import { Info, RefreshCw } from 'lucide-react'
+import {
+  IconInfoCircle as Info,
+  IconRefresh as RefreshCw
+} from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
