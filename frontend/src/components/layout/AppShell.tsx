@@ -5,6 +5,7 @@ import { SetupWizard } from '@/components/setup/SetupWizard'
 import { getSetupState } from '@/services/binaryService'
 import { getAppConfig } from '@/services/settingsService'
 import { useUIStore } from '@/stores/useUIStore'
+import { useDeviceSync } from '@/hooks/useDeviceSync'
 import { cn } from '@/lib/utils'
 
 const CommandPalette = lazy(() =>
@@ -27,6 +28,10 @@ function StartupLoader() {
   )
 }
 
+function DeviceSync() {
+  useDeviceSync()
+  return null
+}
 export function AppShell() {
   const location = useLocation()
   const isNoGlobalScroll = ['/apps', '/files', '/devices', '/terminal', '/scrcpy', '/settings'].includes(location.pathname)
@@ -75,19 +80,22 @@ export function AppShell() {
   }
 
   return (
-    <div data-file-drop-target="app" className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-      <main className="flex-1 min-h-0 flex flex-col">
-        <div className={cn(
-          "flex-1 min-h-0 w-full flex flex-col p-6 pb-24 perf-scroll",
-          isNoGlobalScroll ? "overflow-hidden" : "overflow-y-auto"
-        )}>
-          <Outlet />
-        </div>
-      </main>
-      <BottomDock />
-      <Suspense fallback={null}>
-        <CommandPalette />
-      </Suspense>
-    </div>
+    <>
+      <DeviceSync />
+      <div data-file-drop-target="app" className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+        <main className="flex-1 min-h-0 flex flex-col">
+          <div className={cn(
+            "flex-1 min-h-0 w-full flex flex-col p-6 pb-24",
+            isNoGlobalScroll ? "overflow-hidden" : "overflow-y-auto"
+          )}>
+            <Outlet />
+          </div>
+        </main>
+        <BottomDock />
+        <Suspense fallback={null}>
+          <CommandPalette />
+        </Suspense>
+      </div>
+    </>
   )
 }

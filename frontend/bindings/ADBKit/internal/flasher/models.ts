@@ -3,120 +3,25 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
-import { Create as $Create } from "@wailsio/runtime";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
 import * as device$0 from "../device/models.js";
 
-export class FastbootDeviceInfo {
+export interface FastbootDeviceInfo {
     "serial": string;
     "state": device$0.State;
     "mode": device$0.Mode;
-
-    /** Creates a new FastbootDeviceInfo instance. */
-    constructor($$source: Partial<FastbootDeviceInfo> = {}) {
-        if (!("serial" in $$source)) {
-            this["serial"] = "";
-        }
-        if (!("state" in $$source)) {
-            this["state"] = device$0.State.$zero;
-        }
-        if (!("mode" in $$source)) {
-            this["mode"] = device$0.Mode.$zero;
-        }
-
-        Object.assign(this, $$source);
-    }
-
-    /**
-     * Creates a new FastbootDeviceInfo instance from a string or object.
-     */
-    static createFrom($$source: any = {}): FastbootDeviceInfo {
-        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        return new FastbootDeviceInfo($$parsedSource as Partial<FastbootDeviceInfo>);
-    }
 }
 
-export class Plan {
-    "steps": Step[];
-
-    /** Creates a new Plan instance. */
-    constructor($$source: Partial<Plan> = {}) {
-        if (!("steps" in $$source)) {
-            this["steps"] = [];
-        }
-
-        Object.assign(this, $$source);
-    }
-
-    /**
-     * Creates a new Plan instance from a string or object.
-     */
-    static createFrom($$source: any = {}): Plan {
-        const $$createField0_0 = $$createType1;
-        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        if ("steps" in $$parsedSource) {
-            $$parsedSource["steps"] = $$createField0_0($$parsedSource["steps"]);
-        }
-        return new Plan($$parsedSource as Partial<Plan>);
-    }
+export interface Plan {
+    "steps": Step[] | null;
 }
 
-export class Step {
+export interface Step {
     "partition": string;
     "image_file": string;
-
-    /** Creates a new Step instance. */
-    constructor($$source: Partial<Step> = {}) {
-        if (!("partition" in $$source)) {
-            this["partition"] = "";
-        }
-        if (!("image_file" in $$source)) {
-            this["image_file"] = "";
-        }
-
-        Object.assign(this, $$source);
-    }
-
-    /**
-     * Creates a new Step instance from a string or object.
-     */
-    static createFrom($$source: any = {}): Step {
-        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        return new Step($$parsedSource as Partial<Step>);
-    }
 }
 
-export class StepStatus {
+export interface StepStatus {
     "partition": string;
     "status": string;
     "message": string;
-
-    /** Creates a new StepStatus instance. */
-    constructor($$source: Partial<StepStatus> = {}) {
-        if (!("partition" in $$source)) {
-            this["partition"] = "";
-        }
-        if (!("status" in $$source)) {
-            this["status"] = "";
-        }
-        if (!("message" in $$source)) {
-            this["message"] = "";
-        }
-
-        Object.assign(this, $$source);
-    }
-
-    /**
-     * Creates a new StepStatus instance from a string or object.
-     */
-    static createFrom($$source: any = {}): StepStatus {
-        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        return new StepStatus($$parsedSource as Partial<StepStatus>);
-    }
 }
-
-// Private type creation functions
-const $$createType0 = Step.createFrom;
-const $$createType1 = $Create.Array($$createType0);

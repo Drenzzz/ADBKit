@@ -117,7 +117,7 @@ export function CommandHistory({ onReExecute }: CommandHistoryProps) {
       </div>
 
       {/* History List */}
-      <div className="flex-1 overflow-y-auto perf-scroll">
+      <div className="flex-1 overflow-y-auto">
         {groups.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
             <Clock className="h-7 w-7 text-zinc-600 mb-2" />

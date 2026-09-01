@@ -3,120 +3,22 @@
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
-import { Create as $Create } from "@wailsio/runtime";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
 import * as core$0 from "../core/models.js";
 
-export const BinaryInfo = core$0.BinaryInfo;
 export type BinaryInfo = core$0.BinaryInfo;
 
-export class BinarySetupResult {
+export interface BinarySetupResult {
     "adb": BinaryInfo | null;
     "fastboot": BinaryInfo | null;
     "scrcpy": BinaryInfo | null;
     "ready": boolean;
-    "adbCandidates": BinaryInfo[];
-    "fastbootCandidates": BinaryInfo[];
-    "scrcpyCandidates": BinaryInfo[];
-
-    /** Creates a new BinarySetupResult instance. */
-    constructor($$source: Partial<BinarySetupResult> = {}) {
-        if (!("adb" in $$source)) {
-            this["adb"] = null;
-        }
-        if (!("fastboot" in $$source)) {
-            this["fastboot"] = null;
-        }
-        if (!("scrcpy" in $$source)) {
-            this["scrcpy"] = null;
-        }
-        if (!("ready" in $$source)) {
-            this["ready"] = false;
-        }
-        if (!("adbCandidates" in $$source)) {
-            this["adbCandidates"] = [];
-        }
-        if (!("fastbootCandidates" in $$source)) {
-            this["fastbootCandidates"] = [];
-        }
-        if (!("scrcpyCandidates" in $$source)) {
-            this["scrcpyCandidates"] = [];
-        }
-
-        Object.assign(this, $$source);
-    }
-
-    /**
-     * Creates a new BinarySetupResult instance from a string or object.
-     */
-    static createFrom($$source: any = {}): BinarySetupResult {
-        const $$createField0_0 = $$createType1;
-        const $$createField1_0 = $$createType1;
-        const $$createField2_0 = $$createType1;
-        const $$createField4_0 = $$createType2;
-        const $$createField5_0 = $$createType2;
-        const $$createField6_0 = $$createType2;
-        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        if ("adb" in $$parsedSource) {
-            $$parsedSource["adb"] = $$createField0_0($$parsedSource["adb"]);
-        }
-        if ("fastboot" in $$parsedSource) {
-            $$parsedSource["fastboot"] = $$createField1_0($$parsedSource["fastboot"]);
-        }
-        if ("scrcpy" in $$parsedSource) {
-            $$parsedSource["scrcpy"] = $$createField2_0($$parsedSource["scrcpy"]);
-        }
-        if ("adbCandidates" in $$parsedSource) {
-            $$parsedSource["adbCandidates"] = $$createField4_0($$parsedSource["adbCandidates"]);
-        }
-        if ("fastbootCandidates" in $$parsedSource) {
-            $$parsedSource["fastbootCandidates"] = $$createField5_0($$parsedSource["fastbootCandidates"]);
-        }
-        if ("scrcpyCandidates" in $$parsedSource) {
-            $$parsedSource["scrcpyCandidates"] = $$createField6_0($$parsedSource["scrcpyCandidates"]);
-        }
-        return new BinarySetupResult($$parsedSource as Partial<BinarySetupResult>);
-    }
+    "adbCandidates": BinaryInfo[] | null;
+    "fastbootCandidates": BinaryInfo[] | null;
+    "scrcpyCandidates": BinaryInfo[] | null;
 }
 
-export class SetupState {
+export interface SetupState {
     "status": BinarySetupResult | null;
     "setupCompleted": boolean;
     "canFinish": boolean;
-
-    /** Creates a new SetupState instance. */
-    constructor($$source: Partial<SetupState> = {}) {
-        if (!("status" in $$source)) {
-            this["status"] = null;
-        }
-        if (!("setupCompleted" in $$source)) {
-            this["setupCompleted"] = false;
-        }
-        if (!("canFinish" in $$source)) {
-            this["canFinish"] = false;
-        }
-
-        Object.assign(this, $$source);
-    }
-
-    /**
-     * Creates a new SetupState instance from a string or object.
-     */
-    static createFrom($$source: any = {}): SetupState {
-        const $$createField0_0 = $$createType4;
-        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        if ("status" in $$parsedSource) {
-            $$parsedSource["status"] = $$createField0_0($$parsedSource["status"]);
-        }
-        return new SetupState($$parsedSource as Partial<SetupState>);
-    }
 }
-
-// Private type creation functions
-const $$createType0 = core$0.BinaryInfo.createFrom;
-const $$createType1 = $Create.Nullable($$createType0);
-const $$createType2 = $Create.Array($$createType0);
-const $$createType3 = BinarySetupResult.createFrom;
-const $$createType4 = $Create.Nullable($$createType3);
