@@ -4,7 +4,9 @@ import {
   GetAppConfig,
   GetAuditLogs,
   GetRuntimeDiagnostics,
+  GetWindowState,
   ImportAuditLogs,
+  SetWindowState,
   UpdatePreferences,
 } from '../../bindings/ADBKit/internal/app/app'
 import type {
@@ -47,6 +49,27 @@ export async function updatePreferences(
 export async function getRuntimeDiagnostics(): Promise<RuntimeDiagnostics> {
   const raw = await GetRuntimeDiagnostics()
   return raw as unknown as RuntimeDiagnostics
+}
+
+export type WindowStateOption = 'maximised' | 'normal' | 'fullscreen'
+
+export const WINDOW_STATE_OPTIONS: WindowStateOption[] = [
+  'maximised',
+  'normal',
+  'fullscreen',
+]
+
+export async function getWindowState(): Promise<WindowStateOption> {
+  const raw = await GetWindowState()
+  const state = (raw as WindowStateOption) ?? 'maximised'
+  if (state === 'normal' || state === 'fullscreen' || state === 'maximised') {
+    return state
+  }
+  return 'maximised'
+}
+
+export async function setWindowState(state: WindowStateOption): Promise<void> {
+  await SetWindowState(state)
 }
 
 export const AUDIT_LOG_LIMIT_OPTIONS = [50, 100, 200, 500, 1000] as const

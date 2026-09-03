@@ -2,7 +2,10 @@ import { useEffect, useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getAppConfig,
+  getWindowState,
+  setWindowState,
   updatePreferences,
+  type WindowStateOption,
 } from '@/services/settingsService'
 import { useSettingsStore } from '@/stores/useSettingsStore'
 import type { AppConfigSnapshot, PreferencesPayload } from '@/lib/types'
@@ -113,6 +116,23 @@ export function useSettings() {
     }
   }
 
+  const windowStateQuery = useQuery({
+    queryKey: ['settings', 'window-state'] as const,
+    queryFn: getWindowState,
+    staleTime: 60_000,
+  })
+
+  const windowStateMutation = useMutation({
+    mutationFn: (state: WindowStateOption) => setWindowState(state),
+    onSuccess: (next) => {
+      queryClient.setQueryData(['settings', 'window-state'], next)
+    },
+  })
+
+  async function setPreferredWindowState(state: WindowStateOption) {
+    await windowStateMutation.mutateAsync(state)
+  }
+
   const hasPreferenceChanges = useMemo(() => {
     if (!appConfig) return false
     return !configsAreEqual(preferencesDraft, appConfig)
@@ -130,5 +150,8 @@ export function useSettings() {
     savePreferences,
     resetPreferencesDraft,
     setTheme,
+    windowState: windowStateQuery.data,
+    setPreferredWindowState,
+    savingWindowState: windowStateMutation.isPending,
   }
 }
