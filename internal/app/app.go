@@ -15,8 +15,6 @@ import (
 	"context"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
 	"sync"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -176,33 +174,5 @@ func (a *App) currentConfig() *core.AppConfig {
 }
 
 func appDataDir() (string, error) {
-	switch runtime.GOOS {
-	case "linux":
-		base := os.Getenv("XDG_DATA_HOME")
-		if base == "" {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return "", err
-			}
-			base = filepath.Join(home, ".local", "share")
-		}
-		return filepath.Join(base, "adbkit"), nil
-	case "windows":
-		base := os.Getenv("APPDATA")
-		if base != "" {
-			return filepath.Join(base, "adbkit"), nil
-		}
-	case "darwin":
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", err
-		}
-		return filepath.Join(home, "Library", "Application Support", "adbkit"), nil
-	}
-
-	dir, err := os.UserConfigDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(dir, "adbkit"), nil
+	return core.ResolveDataDir()
 }

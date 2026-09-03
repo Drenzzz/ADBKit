@@ -41,6 +41,9 @@ export function SettingsShell() {
     setPreferencesDraft,
     savePreferences,
     resetPreferencesDraft,
+    windowState,
+    setPreferredWindowState,
+    savingWindowState,
   } = useSettings()
 
   if (loadingConfig && !appConfig) {
@@ -86,6 +89,9 @@ export function SettingsShell() {
             onDraftChange={setPreferencesDraft}
             onSave={() => void savePreferences()}
             onReset={resetPreferencesDraft}
+            windowState={windowState}
+            savingWindowState={savingWindowState}
+            onWindowStateChange={(state) => void setPreferredWindowState(state)}
           />
         </motion.div>
 

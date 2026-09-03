@@ -10,9 +10,14 @@ import {
   IconMoon as Moon,
   IconRotate2 as RotateCcw,
   IconDeviceFloppy as Save,
-  IconSettings as Settings
+  IconSettings as Settings,
+  IconArrowsMaximize as Maximize,
+  IconArrowsMinimize as Windowed,
+  IconRectangle as Rectangle,
+  IconInfoCircle as InfoCircle,
 } from "@tabler/icons-react"
 import type { PreferencesPayload } from '@/lib/types'
+import type { WindowStateOption } from '@/services/settingsService'
 
 interface PreferencesPanelProps {
   preferencesDraft: PreferencesPayload
@@ -22,6 +27,9 @@ interface PreferencesPanelProps {
   onDraftChange: (draft: Partial<PreferencesPayload>) => void
   onSave: () => void
   onReset: () => void
+  windowState?: WindowStateOption
+  savingWindowState?: boolean
+  onWindowStateChange?: (state: WindowStateOption) => void
 }
 
 const THEME_OPTIONS: { value: 'dark' | 'light'; label: string; description: string; Icon: typeof Sun }[] = [
@@ -35,6 +43,17 @@ const TERMINAL_MODES = [
   { value: 'fastboot-host', label: 'Fastboot Host' },
 ]
 
+const WINDOW_STATE_OPTIONS: {
+  value: WindowStateOption
+  label: string
+  description: string
+  Icon: typeof Sun
+}[] = [
+  { value: 'maximised', label: 'Maximized', description: 'Fill the screen', Icon: Maximize },
+  { value: 'normal', label: 'Windowed', description: 'Default 1280×800', Icon: Windowed },
+  { value: 'fullscreen', label: 'Fullscreen', description: 'No chrome', Icon: Rectangle },
+]
+
 export function PreferencesPanel({
   preferencesDraft,
   saving,
@@ -43,6 +62,9 @@ export function PreferencesPanel({
   onDraftChange,
   onSave,
   onReset,
+  windowState,
+  savingWindowState,
+  onWindowStateChange,
 }: PreferencesPanelProps) {
   return (
     <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)] h-full flex flex-col justify-between">
@@ -97,6 +119,57 @@ export function PreferencesPanel({
               })}
             </div>
           </div>
+
+          {/* Window Section */}
+          {onWindowStateChange && (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                Window
+              </span>
+              <div className="inline-flex w-full items-center gap-1 rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/50 dark:bg-[var(--muted)]/20 p-1">
+                {WINDOW_STATE_OPTIONS.map(({ value, label, description, Icon }) => {
+                  const active = windowState === value
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => onWindowStateChange(value)}
+                      disabled={savingWindowState}
+                      aria-label={`Window state: ${label}`}
+                      className={cn(
+                        'flex flex-1 items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+                        active
+                          ? 'bg-card dark:bg-card text-foreground shadow-sm'
+                          : 'text-muted-foreground hover:bg-[var(--muted)]/50 dark:hover:bg-[var(--muted)]/30 hover:text-foreground',
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-md transition-colors',
+                          active ? 'bg-[var(--muted)] dark:bg-[var(--muted)]' : 'bg-transparent',
+                        )}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-semibold">{label}</span>
+                        <span className="text-[9px] text-muted-foreground/60 text-left">
+                          {description}
+                        </span>
+                      </div>
+                      {active && (
+                        <Check className="ml-auto h-3 w-3 text-primary" />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/60 px-1">
+                <InfoCircle className="h-3 w-3 shrink-0" />
+                <span>Takes effect on next launch.</span>
+              </div>
+            </div>
+          )}
 
           {/* Terminal Section */}
           <div className="flex flex-col gap-1.5">

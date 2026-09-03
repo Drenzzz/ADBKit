@@ -65,3 +65,17 @@ func TestWirelessPairingSupported(t *testing.T) {
 		t.Fatal("expected true for unparseable version (modern-assumed)")
 	}
 }
+
+func TestAudioCaptureSupported(t *testing.T) {
+	if audioCaptureSupported(nil) {
+		t.Fatal("expected false for nil")
+	}
+	missing := core.BinaryInfo{Name: "scrcpy", Status: core.BinaryMissing}
+	if audioCaptureSupported(&missing) {
+		t.Fatal("expected false for missing status")
+	}
+	ready := core.BinaryInfo{Name: "scrcpy", Path: "/usr/bin/scrcpy", Status: core.BinaryReady}
+	if !audioCaptureSupported(&ready) {
+		t.Fatal("expected true for ready scrcpy")
+	}
+}

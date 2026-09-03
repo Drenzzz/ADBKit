@@ -112,7 +112,7 @@
   /* Chart */
   --chart-primary: oklch(0.623 0.214 257);
   --chart-secondary: oklch(0.72 0.19 152);
-  --chart-tertiary: oklch(0.6 0.15 280);
+  --chart-tertiary: oklch(0.77 0.17 62);
 
   /* Glow (low-opacity state indicators) */
   --glow-info: oklch(0.623 0.214 257 / 35%);
@@ -176,7 +176,7 @@
   /* Chart */
   --chart-primary: oklch(0.656 0.196 257);
   --chart-secondary: oklch(0.76 0.19 152);
-  --chart-tertiary: oklch(0.65 0.15 280);
+  --chart-tertiary: oklch(0.80 0.16 64);
 
   /* Glow (low-opacity state indicators) */
   --glow-info: oklch(0.656 0.196 257 / 35%);
@@ -383,7 +383,7 @@
   opacity: 1 !important;
 }
 .dark [data-sonner-toast] [data-close-button] {
-  background-color: #27272a !important;
-  border-color: #3f3f46 !important;
-  color: #f4f4f5 !important;
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
 }

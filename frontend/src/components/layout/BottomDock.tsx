@@ -113,7 +113,7 @@ export function BottomDock() {
             className={cn(
               'fixed bottom-2 left-1/2 z-40 -translate-x-1/2',
               'flex items-center gap-1.5 rounded-full px-3 py-1',
-              'border border-border/50 bg-background/90 dark:bg-zinc-900/90 shadow-md backdrop-blur-sm',
+              'border border-border/50 bg-popover/80 dark:bg-popover/80 shadow-md backdrop-blur-sm',
               'text-muted-foreground hover:text-foreground transition-colors cursor-pointer',
             )}
           >
@@ -135,7 +135,7 @@ export function BottomDock() {
             className={cn(
               'fixed bottom-3 left-1/2 z-50 -translate-x-1/2',
               'flex items-center gap-0.5 px-3 py-1.5',
-              'rounded-2xl border border-border/50 bg-background/95 dark:bg-zinc-900/95 shadow-lg backdrop-blur-sm',
+              'rounded-2xl border border-border/50 bg-popover/80 dark:bg-popover/80 shadow-lg backdrop-blur-sm',
             )}
             onMouseEnter={handleDockMouseEnter}
             onMouseLeave={handleDockMouseLeave}
