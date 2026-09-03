@@ -86,7 +86,19 @@ func (a *App) GetCapabilities() map[string]bool {
 		"setupCompleted":           a.cfg.SetupCompleted && status.Ready,
 		"wirelessPairingSupported": wirelessPairingSupported(status.Adb),
 		"clipboardSyncSupported":   status.Scrcpy.Status == core.BinaryReady,
+		"audioCaptureSupported":    audioCaptureSupported(status.Scrcpy),
 	}
+}
+
+// audioCaptureSupported reports whether scrcpy-based audio capture is available.
+// Conservative v1: gated on scrcpy being Ready (same prerequisite as recording).
+// A future revision will probe the host audio backend (PulseAudio/PipeWire on
+// Linux, core audio on macOS, WASAPI on Windows) before reporting true.
+func audioCaptureSupported(scrcpy *core.BinaryInfo) bool {
+	if scrcpy == nil {
+		return false
+	}
+	return scrcpy.Status == core.BinaryReady
 }
 
 // wirelessPairingSupported reports whether the adb binary supports the
