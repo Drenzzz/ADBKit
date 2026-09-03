@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"ADBKit/internal/core"
 	appservice "ADBKit/internal/app"
 	platform "ADBKit/internal/platform"
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -19,6 +20,24 @@ import (
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+// resolveStartState reads the user's persisted window state synchronously
+// from the data directory so the WebviewWindow can be created with the
+// correct StartState. Defaults to maximised when no preference exists.
+func resolveStartState() application.WindowState {
+	dataDir, err := core.ResolveDataDir()
+	if err != nil {
+		return application.WindowStateMaximised
+	}
+	switch core.LoadWindowState(dataDir) {
+	case core.WindowStateNormal:
+		return application.WindowStateNormal
+	case core.WindowStateFullscreen:
+		return application.WindowStateFullscreen
+	default:
+		return application.WindowStateMaximised
+	}
+}
 
 func main() {
 	_ = os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "0")
@@ -46,7 +65,7 @@ func main() {
 		Height:           800,
 		MinWidth:         1024,
 		MinHeight:        720,
-		StartState:       application.WindowStateMaximised,
+		StartState:       resolveStartState(),
 		BackgroundColour: application.NewRGBA(27, 38, 54, 255),
 		EnableFileDrop:   true,
 		Linux: application.LinuxWindow{

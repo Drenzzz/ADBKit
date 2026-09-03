@@ -25,6 +25,38 @@ func (a *App) ClearAuditLogs() {
 	a.auditLog.Log(audit.LogLevelInfo, "audit_logs", "Audit logs cleared")
 }
 
+// GetWindowState returns the user's preferred window state ("maximised",
+// "normal", or "fullscreen"). The state is read from a small window.json
+// file in the data directory so main.go can also read it synchronously
+// before the Wails WebviewWindow is created.
+func (a *App) GetWindowState() string {
+	if a.dataDir == "" {
+		return core.DefaultWindowState
+	}
+	return core.LoadWindowState(a.dataDir)
+}
+
+// SetWindowState persists the user's preference and returns a snapshot.
+// Empty or invalid input falls back to DefaultWindowState. The change takes
+// effect on the next app launch — live window mutation is flaky across OSes
+// and we keep this UX consistent (UI shows "takes effect on next launch").
+func (a *App) SetWindowState(state string) error {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
+	normalized := core.NormalizeWindowState(state)
+	if a.dataDir == "" {
+		return core.NewOperationError("set_window_state", "app data directory is not available", "", false)
+	}
+	if err := core.SaveWindowState(a.dataDir, normalized); err != nil {
+		return err
+	}
+	if a.auditLog != nil {
+		a.auditLog.Log(audit.LogLevelInfo, "window_state_change", "Window state set to "+normalized)
+	}
+	return nil
+}
+
 func (a *App) ExportAuditLogs(path string) error {
 	if a.auditLog == nil {
 		return core.NewOperationError("export_audit_logs", "audit log is not available", "", false)
