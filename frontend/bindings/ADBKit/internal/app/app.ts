@@ -227,6 +227,16 @@ export function GetStorageInfo(): $CancellablePromise<file$0.StorageInfo> {
     return $Call.ByID(671426754);
 }
 
+/**
+ * GetWindowState returns the user's preferred window state ("maximised",
+ * "normal", or "fullscreen"). The state is read from a small window.json
+ * file in the data directory so main.go can also read it synchronously
+ * before the Wails WebviewWindow is created.
+ */
+export function GetWindowState(): $CancellablePromise<string> {
+    return $Call.ByID(3341756802);
+}
+
 export function ImportAuditLogs(path: string): $CancellablePromise<number> {
     return $Call.ByID(3429852810, path);
 }
@@ -373,6 +383,16 @@ export function SetDeviceNickname(serial: string, nickname: string): $Cancellabl
  */
 export function SetStayAwakeWhileCharging(serial: string, enabled: boolean): $CancellablePromise<string> {
     return $Call.ByID(3852606227, serial, enabled);
+}
+
+/**
+ * SetWindowState persists the user's preference and returns a snapshot.
+ * Empty or invalid input falls back to DefaultWindowState. The change takes
+ * effect on the next app launch — live window mutation is flaky across OSes
+ * and we keep this UX consistent (UI shows "takes effect on next launch").
+ */
+export function SetWindowState(state: string): $CancellablePromise<void> {
+    return $Call.ByID(3635998518, state);
 }
 
 export function SideloadPackage(serial: string, zipPath: string): $CancellablePromise<string> {
