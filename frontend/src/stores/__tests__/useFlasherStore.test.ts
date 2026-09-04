@@ -1,145 +1,174 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useFlasherStore } from '../useFlasherStore'
 import type { FlashPlan } from '@/lib/types'
 
-describe('useFlasherStore', () => {
+const makePlan = (steps: { partition: string; image_file: string }[]): FlashPlan => ({
+  steps,
+})
+
+const THREE_PARTITION_PLAN = makePlan([
+  { partition: 'boot', image_file: '/boot.img' },
+  { partition: 'system', image_file: '/system.img' },
+  { partition: 'vendor', image_file: '/vendor.img' },
+])
+
+describe('Flash Plan state machine', () => {
   beforeEach(() => {
     useFlasherStore.getState().reset()
   })
 
-  it('starts with empty state', () => {
-    const state = useFlasherStore.getState()
-    expect(state.fastbootDevices).toEqual([])
-    expect(state.selectedPartition).toBe('')
-    expect(state.flashPlan).toBeNull()
-    expect(state.error).toBeNull()
-    expect(state.runningFlash).toBe(false)
-  })
-
-  it('sets fastboot devices', () => {
-    const devices = [
-      { serial: 'DEV001', state: 'fastboot' as const, mode: 'fastboot' as const },
-    ]
-    useFlasherStore.getState().setFastbootDevices(devices)
-    expect(useFlasherStore.getState().fastbootDevices).toHaveLength(1)
-  })
-
-  it('sets selected partition and image', () => {
-    useFlasherStore.getState().setSelectedPartition('boot')
-    expect(useFlasherStore.getState().selectedPartition).toBe('boot')
-
-    useFlasherStore.getState().setSelectedImagePath('/tmp/boot.img')
-    expect(useFlasherStore.getState().selectedImagePath).toBe('/tmp/boot.img')
-  })
-
-  it('sets flash plan and creates steps', () => {
-    const plan: FlashPlan = {
-      steps: [
-        { partition: 'boot', image_file: '/tmp/rom/boot.img' },
-        { partition: 'system', image_file: '/tmp/rom/system.img' },
-        { partition: 'vendor', image_file: '/tmp/rom/vendor.img' },
-      ],
-    }
-    useFlasherStore.getState().setFlashPlan(plan)
-
-    const state = useFlasherStore.getState()
-    expect(state.flashPlan).not.toBeNull()
-    expect(state.flashPlanSteps).toHaveLength(3)
-    expect(state.selectedPartitions).toEqual(['boot', 'system', 'vendor'])
-    expect(state.flashPlanSteps[0].status).toBe('idle')
-  })
-
-  it('clears flash plan when null', () => {
-    const plan: FlashPlan = {
-      steps: [{ partition: 'boot', image_file: '/tmp/boot.img' }],
-    }
-    useFlasherStore.getState().setFlashPlan(plan)
-    useFlasherStore.getState().setFlashPlan(null)
-
-    const state = useFlasherStore.getState()
-    expect(state.flashPlan).toBeNull()
-    expect(state.flashPlanSteps).toEqual([])
-    expect(state.selectedPartitions).toEqual([])
-  })
-
-  it('updates flash plan step status', () => {
-    const plan: FlashPlan = {
-      steps: [{ partition: 'boot', image_file: '/tmp/boot.img' }],
-    }
-    useFlasherStore.getState().setFlashPlan(plan)
-    useFlasherStore.getState().setFlashPlanStepStatus('boot', 'running')
-
-    expect(useFlasherStore.getState().flashPlanSteps[0].status).toBe('running')
-  })
-
-  it('toggles partition selection', () => {
-    const plan: FlashPlan = {
-      steps: [
-        { partition: 'boot', image_file: '/tmp/boot.img' },
-        { partition: 'system', image_file: '/tmp/system.img' },
-      ],
-    }
-    useFlasherStore.getState().setFlashPlan(plan)
-
-    useFlasherStore.getState().togglePartitionSelection('boot')
-    expect(useFlasherStore.getState().selectedPartitions).not.toContain('boot')
-
-    useFlasherStore.getState().togglePartitionSelection('boot')
-    expect(useFlasherStore.getState().selectedPartitions).toContain('boot')
-  })
-
-  it('selects and deselects all partitions', () => {
-    const plan: FlashPlan = {
-      steps: [
-        { partition: 'boot', image_file: '/tmp/boot.img' },
-        { partition: 'system', image_file: '/tmp/system.img' },
-      ],
-    }
-    useFlasherStore.getState().setFlashPlan(plan)
-    useFlasherStore.getState().deselectAllPartitions()
-    expect(useFlasherStore.getState().selectedPartitions).toEqual([])
-
-    useFlasherStore.getState().selectAllPartitions()
-    expect(useFlasherStore.getState().selectedPartitions).toEqual(['boot', 'system'])
-  })
-
-  it('sets loading and running states', () => {
+  it('reset restores initial state', () => {
+    useFlasherStore.getState().setFlashPlan(makePlan([
+      { partition: 'boot', image_file: '/boot.img' },
+    ]))
     useFlasherStore.getState().setRunningFlash(true)
-    expect(useFlasherStore.getState().runningFlash).toBe(true)
-
-    useFlasherStore.getState().setRunningWipe(true)
-    expect(useFlasherStore.getState().runningWipe).toBe(true)
-
-    useFlasherStore.getState().setLoadingDevices(true)
-    expect(useFlasherStore.getState().loadingDevices).toBe(true)
-  })
-
-  it('sets and clears error', () => {
-    useFlasherStore.getState().setError('flash failed')
-    expect(useFlasherStore.getState().error).toBe('flash failed')
-
-    useFlasherStore.getState().setError(null)
-    expect(useFlasherStore.getState().error).toBeNull()
-  })
-
-  it('sets custom command and output', () => {
-    useFlasherStore.getState().setCustomCommand('getvar:all')
-    expect(useFlasherStore.getState().customCommand).toBe('getvar:all')
-
-    useFlasherStore.getState().setCustomCommandOutput('result line 1\nresult line 2')
-    expect(useFlasherStore.getState().customCommandOutput).toContain('result line 1')
-  })
-
-  it('resets to initial state', () => {
-    useFlasherStore.getState().setSelectedPartition('boot')
-    useFlasherStore.getState().setRunningFlash(true)
-    useFlasherStore.getState().setError('error')
-
+    useFlasherStore.getState().setError('test error')
     useFlasherStore.getState().reset()
+    const s = useFlasherStore.getState()
+    expect(s.flashPlan).toBeNull()
+    expect(s.flashPlanSteps).toEqual([])
+    expect(s.selectedPartitions).toEqual([])
+    expect(s.runningFlash).toBe(false)
+    expect(s.error).toBeNull()
+  })
 
-    const state = useFlasherStore.getState()
-    expect(state.selectedPartition).toBe('')
-    expect(state.runningFlash).toBe(false)
-    expect(state.error).toBeNull()
+  describe('setFlashPlan', () => {
+    it('sets flashPlan and creates steps with idle status', () => {
+      const plan = makePlan([
+        { partition: 'boot', image_file: '/boot.img' },
+        { partition: 'system', image_file: '/system.img' },
+      ])
+      useFlasherStore.getState().setFlashPlan(plan)
+      const s = useFlasherStore.getState()
+      expect(s.flashPlan).toEqual(plan)
+      expect(s.flashPlanSteps).toHaveLength(2)
+      expect(s.flashPlanSteps[0]).toMatchObject({
+        partition: 'boot',
+        imageFile: '/boot.img',
+        status: 'idle',
+        detail: null,
+      })
+      expect(s.flashPlanSteps[1]).toMatchObject({
+        partition: 'system',
+        imageFile: '/system.img',
+        status: 'idle',
+      })
+    })
+
+    it('selects all partitions by default when plan is set', () => {
+      const plan = makePlan([
+        { partition: 'boot', image_file: '/boot.img' },
+        { partition: 'system', image_file: '/system.img' },
+      ])
+      useFlasherStore.getState().setFlashPlan(plan)
+      expect(useFlasherStore.getState().selectedPartitions).toEqual(['boot', 'system'])
+    })
+
+    it('null plan clears flashPlan, steps, and selection', () => {
+      useFlasherStore.getState().setFlashPlan(makePlan([
+        { partition: 'boot', image_file: '/boot.img' },
+      ]))
+      useFlasherStore.getState().setFlashPlan(null)
+      const s = useFlasherStore.getState()
+      expect(s.flashPlan).toBeNull()
+      expect(s.flashPlanSteps).toEqual([])
+      expect(s.selectedPartitions).toEqual([])
+    })
+  })
+
+  describe('setFlashPlanStepStatus', () => {
+    it('updates step status and detail', () => {
+      useFlasherStore.getState().setFlashPlan(makePlan([
+        { partition: 'boot', image_file: '/boot.img' },
+      ]))
+      useFlasherStore.getState().setFlashPlanStepStatus('boot', 'running', 'Flashing boot…')
+      const step = useFlasherStore.getState().flashPlanSteps[0]
+      expect(step.status).toBe('running')
+      expect(step.detail).toBe('Flashing boot…')
+    })
+
+    it('ignores unknown partition', () => {
+      useFlasherStore.getState().setFlashPlan(makePlan([
+        { partition: 'boot', image_file: '/boot.img' },
+      ]))
+      useFlasherStore.getState().setFlashPlanStepStatus('unknown', 'success', 'done')
+      const step = useFlasherStore.getState().flashPlanSteps[0]
+      expect(step.status).toBe('idle')
+      expect(step.detail).toBeNull()
+    })
+
+    it('updates multiple steps independently', () => {
+      useFlasherStore.getState().setFlashPlan(makePlan([
+        { partition: 'boot', image_file: '/boot.img' },
+        { partition: 'system', image_file: '/system.img' },
+      ]))
+      useFlasherStore.getState().setFlashPlanStepStatus('boot', 'success', 'OK')
+      useFlasherStore.getState().setFlashPlanStepStatus('system', 'running', 'Flashing…')
+      const [boot, system] = useFlasherStore.getState().flashPlanSteps
+      expect(boot.status).toBe('success')
+      expect(system.status).toBe('running')
+    })
+  })
+
+  describe('partition selection', () => {
+    it('togglePartitionSelection removes selected partition', () => {
+      useFlasherStore.getState().setFlashPlan(THREE_PARTITION_PLAN)
+      useFlasherStore.getState().togglePartitionSelection('boot')
+      expect(useFlasherStore.getState().selectedPartitions).toEqual(['system', 'vendor'])
+    })
+
+    it('togglePartitionSelection adds unselected partition', () => {
+      useFlasherStore.getState().setFlashPlan(THREE_PARTITION_PLAN)
+      useFlasherStore.getState().togglePartitionSelection('boot')
+      useFlasherStore.getState().togglePartitionSelection('boot')
+      expect(useFlasherStore.getState().selectedPartitions).toEqual(['system', 'vendor', 'boot'])
+    })
+
+    it('selectAllPartitions selects all partitions', () => {
+      useFlasherStore.getState().setFlashPlan(THREE_PARTITION_PLAN)
+      useFlasherStore.getState().togglePartitionSelection('boot')
+      useFlasherStore.getState().selectAllPartitions()
+      expect(useFlasherStore.getState().selectedPartitions).toEqual(['boot', 'system', 'vendor'])
+    })
+
+    it('deselectAllPartitions clears selection', () => {
+      useFlasherStore.getState().setFlashPlan(THREE_PARTITION_PLAN)
+      useFlasherStore.getState().deselectAllPartitions()
+      expect(useFlasherStore.getState().selectedPartitions).toEqual([])
+    })
+  })
+
+  describe('running flags', () => {
+    it('runningFlash can be set independently', () => {
+      useFlasherStore.getState().setRunningFlash(true)
+      expect(useFlasherStore.getState().runningFlash).toBe(true)
+      useFlasherStore.getState().setRunningFlash(false)
+      expect(useFlasherStore.getState().runningFlash).toBe(false)
+    })
+
+    it('runningBatchFlash can be set independently', () => {
+      useFlasherStore.getState().setRunningBatchFlash(true)
+      expect(useFlasherStore.getState().runningBatchFlash).toBe(true)
+      useFlasherStore.getState().setRunningBatchFlash(false)
+      expect(useFlasherStore.getState().runningBatchFlash).toBe(false)
+    })
+
+    it('runningSideload can be set independently', () => {
+      useFlasherStore.getState().setRunningSideload(true)
+      expect(useFlasherStore.getState().runningSideload).toBe(true)
+    })
+
+    it('runningWipe can be set independently', () => {
+      useFlasherStore.getState().setRunningWipe(true)
+      expect(useFlasherStore.getState().runningWipe).toBe(true)
+    })
+
+    it('multiple running flags can be true simultaneously', () => {
+      useFlasherStore.getState().setRunningFlash(true)
+      useFlasherStore.getState().setRunningWipe(true)
+      const s = useFlasherStore.getState()
+      expect(s.runningFlash).toBe(true)
+      expect(s.runningWipe).toBe(true)
+    })
   })
 })
