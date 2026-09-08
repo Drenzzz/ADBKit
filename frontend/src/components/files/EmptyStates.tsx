@@ -1,11 +1,8 @@
 import {
   IconDeviceMobile as Smartphone,
   IconFolderOpen as FolderOpen,
-  IconSearch as Search,
-  IconRefresh as Refresh,
-  IconUsb as Usb
+  IconSearch as Search
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
 
 export function NoDeviceState() {
   return (
