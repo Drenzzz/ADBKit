@@ -14,8 +14,8 @@ import {
   SelectDirectory,
   SelectMultipleFiles,
   CancelFileTransfer,
-  // ponytail: bindings regenerated on wails3 build; these imports will
-  // resolve once bindings are regenerated (end of session build).
+  ListSdCards,
+  UnblockPath,
 } from '../../bindings/ADBKit/internal/app/app'
 import { Events } from '@wailsio/runtime'
 import type { FileEntry, StorageInfo, SdCard, UnblockResult } from '@/lib/types'
@@ -102,14 +102,14 @@ export function cancelFileTransfer(): void {
 // listSdCards calls adb shell sm list-volumes and returns mounted volumes.
 export async function listSdCards(): Promise<SdCard[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const raw = await (ListSdCards as (...args: unknown[]) => Promise<SdCard[]>)('')
-  return raw
+  const raw = await (ListSdCards as (...args: unknown[]) => Promise<unknown>)('')
+  return raw as SdCard[]
 }
 
 // unblockPath returns honest guidance for recovering access to a blocked path.
 // No fake bypass — tells the user exactly what they need to do on their device.
 export async function unblockPath(remotePath: string): Promise<UnblockResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const raw = await (UnblockPath as (...args: unknown[]) => Promise<UnblockResult>)(remotePath)
-  return raw
+  const raw = await (UnblockPath as (...args: unknown[]) => Promise<unknown>)(remotePath)
+  return raw as UnblockResult
 }

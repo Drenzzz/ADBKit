@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { IconDeviceSdCard } from '@tabler/icons-react'
-import { Button } from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
@@ -18,7 +17,6 @@ export function SdCardPicker({ onSelect, disabled }: SdCardPickerProps) {
   const [cards, setCards] = useState<SdCard[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -29,22 +27,16 @@ export function SdCardPicker({ onSelect, disabled }: SdCardPickerProps) {
       .finally(() => setLoading(false))
   }, [open])
 
-  if (timerRef.current) clearTimeout(timerRef.current)
-
   const externalCards = cards.filter((c) => c.isExternal)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          className="gap-1.5 text-xs font-medium cursor-pointer"
-        >
-          <IconDeviceSdCard className="h-3.5 w-3.5" />
-          Storage
-        </Button>
+      <PopoverTrigger
+        disabled={disabled}
+        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <IconDeviceSdCard className="h-3.5 w-3.5" />
+        Storage
       </PopoverTrigger>
       <PopoverContent align="end" className="w-64 p-2">
         {loading && (

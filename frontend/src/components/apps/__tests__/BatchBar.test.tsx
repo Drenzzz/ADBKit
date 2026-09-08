@@ -1,11 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { BatchBar } from '../BatchBar'
+import type { PackageBatchAction } from '@/lib/types'
 
 describe('BatchBar', () => {
   const defaultProps = {
     count: 2,
-    busyAction: null as string | null,
+    busyAction: null as PackageBatchAction | null,
     onUninstall: vi.fn(),
     onEnable: vi.fn(),
     onDisable: vi.fn(),
