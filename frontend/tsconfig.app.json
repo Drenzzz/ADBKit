@@ -26,6 +26,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-    "include": ["src"],
-    "exclude": ["bindings", "node_modules"]
+  "include": ["src"],
+  "exclude": ["bindings", "node_modules", "src/**/*.test.ts", "src/**/*.test.tsx"]
 }

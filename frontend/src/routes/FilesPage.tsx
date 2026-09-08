@@ -9,7 +9,8 @@ import {
 } from "@tabler/icons-react"
 import { useDevices } from '@/hooks/useDevices'
 import { useFileExplorer } from '@/hooks/useFileExplorer'
-import { getStorageInfo, pushMultipleFiles } from '@/services/fileService'
+import { useFileExplorerStore } from '@/stores/useFileExplorerStore'
+import { getStorageInfo, pushMultipleFiles, unblockPath } from '@/services/fileService'
 import { toast } from 'sonner'
 import { Breadcrumb } from '@/components/files/Breadcrumb'
 import { StorageBar } from '@/components/files/StorageBar'
@@ -17,15 +18,24 @@ import { FileActionBar } from '@/components/files/FileActionBar'
 import { FileTable } from '@/components/files/FileTable'
 import { FileActionDialogs } from '@/components/files/FileActionDialogs'
 import { TransferProgressOverlay } from '@/components/files/TransferProgressOverlay'
-import { NoDeviceState } from '@/components/files/EmptyStates'
+import { NoDeviceState, EmptyFolderState } from '@/components/files/EmptyStates'
+import { UnblockPathDialog } from '@/components/files/UnblockPathDialog'
+import { UnmountedSdCardState } from '@/components/files/EmptyStates'
 import { Button } from '@/components/ui/button'
-import type { StorageInfo } from '@/lib/types'
+import type { StorageInfo, UnblockResult } from '@/lib/types'
+
+function isSdCardMountPath(path: string): boolean {
+  return /^\/storage\/[a-f0-9]{4,}-[a-f0-9]{4,}(\/|$)/i.test(path) ||
+    /^\/mnt\/media_rw\/[a-f0-9]{4,}-[a-f0-9]{4,}(\/|$)/i.test(path)
+}
 
 export default function FilesPage() {
   const reduced = useReducedMotion()
   const { activeSerial } = useDevices()
   const fe = useFileExplorer()
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null)
+  const [unblockResult, setUnblockResult] = useState<UnblockResult | null>(null)
+  const [isUnblockDialogOpen, setIsUnblockDialogOpen] = useState(false)
 
   useEffect(() => {
     if (!activeSerial) {
@@ -36,6 +46,27 @@ export default function FilesPage() {
       .then(setStorageInfo)
       .catch(() => setStorageInfo(null))
   }, [activeSerial, fe.lastUpdatedAt])
+
+  // When the file explorer surfaces an error that looks like a protected-path
+  // failure, call unblockPath to get honest recovery guidance.
+  useEffect(() => {
+    if (!fe.error) return
+    const lower = fe.error.toLowerCase()
+    const isProtected =
+      lower.includes('protected') ||
+      lower.includes('permission') ||
+      lower.includes('access denied') ||
+      lower.includes('scoped storage')
+    if (!isProtected) return
+    const pathMatch = fe.error.match(/\/[^\s]+/)
+    const path = pathMatch ? pathMatch[0] : fe.currentPath
+    unblockPath(path)
+      .then(setUnblockResult)
+      .catch(() => setUnblockResult(null))
+      .finally(() => {
+        if (isProtected) setIsUnblockDialogOpen(true)
+      })
+  }, [fe.error])
 
   if (!activeSerial) {
     return (
@@ -111,6 +142,9 @@ export default function FilesPage() {
           onNewFolder={fe.openNewFolderDialog}
           onPushFiles={fe.handlePushFilesToCurrentDirectory}
           onPushFolder={fe.openPushFolderDialog}
+          onSdCardSelect={(mountPoint) => {
+            fe.navigateTo(mountPoint)
+          }}
           totalItems={fe.totalItems}
           folderCount={fe.folderCount}
           fileCount={fe.fileCount}
@@ -198,6 +232,15 @@ export default function FilesPage() {
         variants={itemVariants}
         className="overflow-hidden rounded-2xl border border-border/50 bg-card flex-1 min-h-0 flex flex-col"
       >
+        {fe.files.length === 0 && !fe.loading && isSdCardMountPath(fe.currentPath) && (
+          <UnmountedSdCardState
+            mountPoint={fe.currentPath}
+            onRetry={fe.refreshFiles}
+          />
+        )}
+        {fe.files.length === 0 && !fe.loading && !isSdCardMountPath(fe.currentPath) && (
+          <EmptyFolderState />
+        )}
         <FileTable
           files={fe.visibleFiles}
           selectedFiles={fe.selectedFiles}
@@ -285,6 +328,25 @@ export default function FilesPage() {
           onCancel={fe.cancelTransfer}
         />
       )}
+
+      {/* Protected-path unblock guidance dialog */}
+      <UnblockPathDialog
+        result={unblockResult}
+        open={isUnblockDialogOpen}
+        onOpenChange={(open) => {
+          setIsUnblockDialogOpen(open)
+          if (!open) {
+            setUnblockResult(null)
+            useFileExplorerStore.getState().setError(null)
+          }
+        }}
+        onRetry={() => {
+          setIsUnblockDialogOpen(false)
+          setUnblockResult(null)
+          useFileExplorerStore.getState().setError(null)
+          fe.refreshFiles()
+        }}
+      />
     </motion.div>
   )
 }

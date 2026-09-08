@@ -14,9 +14,11 @@ import {
   SelectDirectory,
   SelectMultipleFiles,
   CancelFileTransfer,
+  ListSdCards,
+  UnblockPath,
 } from '../../bindings/ADBKit/internal/app/app'
 import { Events } from '@wailsio/runtime'
-import type { FileEntry, StorageInfo } from '@/lib/types'
+import type { FileEntry, StorageInfo, SdCard, UnblockResult } from '@/lib/types'
 
 export const FILE_TRANSFER_PROGRESS_EVENT = 'file_transfer_progress'
 
@@ -95,4 +97,19 @@ export async function renameFile(oldRemotePath: string, newRemotePath: string): 
 
 export function cancelFileTransfer(): void {
   CancelFileTransfer()
+}
+
+// listSdCards calls adb shell sm list-volumes and returns mounted volumes.
+export async function listSdCards(): Promise<SdCard[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = await (ListSdCards as (...args: unknown[]) => Promise<unknown>)('')
+  return raw as SdCard[]
+}
+
+// unblockPath returns honest guidance for recovering access to a blocked path.
+// No fake bypass — tells the user exactly what they need to do on their device.
+export async function unblockPath(remotePath: string): Promise<UnblockResult> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = await (UnblockPath as (...args: unknown[]) => Promise<unknown>)(remotePath)
+  return raw as UnblockResult
 }

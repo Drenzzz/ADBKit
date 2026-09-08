@@ -3,6 +3,8 @@
 
 export type {
     Entry,
+    SdCard,
     StorageInfo,
-    TransferProgress
+    TransferProgress,
+    UnblockResult
 } from "./models.js";
