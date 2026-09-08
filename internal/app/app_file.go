@@ -74,6 +74,18 @@ func (a *App) CancelFileTransfer() {
 	}
 }
 
+func (a *App) ListSdCards() ([]file.SdCard, error) {
+	return auditAction(a, "list_sd_cards", func() ([]file.SdCard, error) {
+		return a.fileSvc.ListSdCards(a.ctx)
+	})
+}
+
+func (a *App) UnblockPath(remotePath string) (file.UnblockResult, error) {
+	return auditAction(a, "unblock_path", func() (file.UnblockResult, error) {
+		return a.fileSvc.UnblockPath(a.ctx, remotePath)
+	})
+}
+
 func (a *App) SelectFile() (string, error) {
 	return a.diaSvc.SelectFile()
 }

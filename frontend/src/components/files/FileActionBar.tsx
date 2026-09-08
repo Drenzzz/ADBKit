@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { FileSortField, FileSortDirection } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { SdCardPicker } from './SdCardPicker'
 
 interface FileActionBarProps {
   searchTerm: string
@@ -33,6 +34,7 @@ interface FileActionBarProps {
   onNewFolder: () => void
   onPushFiles: () => void
   onPushFolder: () => void
+  onSdCardSelect: (mountPoint: string) => void
 
   // Stats props for alignment
   totalItems: number
@@ -60,6 +62,7 @@ export function FileActionBar({
   onNewFolder,
   onPushFiles,
   onPushFolder,
+  onSdCardSelect,
   totalItems,
   folderCount,
   fileCount,
@@ -160,6 +163,8 @@ export function FileActionBar({
             <FolderPlus className="h-3.5 w-3.5 text-primary-foreground" />
             New Folder
           </Button>
+
+          <SdCardPicker onSelect={onSdCardSelect} disabled={refreshing} />
         </div>
 
         {/* Right: Apple-like Stats Capsule */}

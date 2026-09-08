@@ -171,6 +171,21 @@ export interface StorageInfo {
   usedPct: number
 }
 
+export interface SdCard {
+  id: string
+  mountPoint: string
+  description: string
+  isExternal: boolean
+}
+
+export type UnblockType = 'public' | 'protected' | 'system'
+
+export interface UnblockResult {
+  type: UnblockType
+  path: string
+  reason: string
+}
+
 export type FileSortField = 'name' | 'size' | 'date'
 
 export type FileSortDirection = 'asc' | 'desc'
