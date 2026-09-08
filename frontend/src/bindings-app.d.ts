@@ -1,4 +1,4 @@
-declare module '../../bindings/ADBKit/internal/app/app.js' {
+declare module '../../bindings/ADBKit/internal/app/app' {
   export const SelectScrcpyDirectory: () => Promise<unknown>
   export const SelectPlatformToolsDirectory: () => Promise<unknown>
   export const SelectBinaryFile: (name: string) => Promise<string>
@@ -13,4 +13,6 @@ declare module '../../bindings/ADBKit/internal/app/app.js' {
   export const GetManagedBinaryDir: () => Promise<string>
   export const ListManagedBinaries: () => Promise<string[]>
   export const GetCapabilities: () => Promise<unknown>
+  export const ListSdCards: () => Promise<unknown>
+  export const UnblockPath: (remotePath: string) => Promise<unknown>
 }

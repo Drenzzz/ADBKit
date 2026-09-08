@@ -1,6 +1,5 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { toast } from 'sonner'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useAppManagerStore } from '@/stores/useAppManagerStore'
 

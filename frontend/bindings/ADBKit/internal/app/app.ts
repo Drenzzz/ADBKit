@@ -265,6 +265,10 @@ export function ListPackages(filterType: string): $CancellablePromise<packagemgr
     return $Call.ByID(3630353506, filterType);
 }
 
+export function ListSdCards(): $CancellablePromise<file$0.SdCard[] | null> {
+    return $Call.ByID(1531114407);
+}
+
 export function PairWireless(address: string, code: string): $CancellablePromise<string> {
     return $Call.ByID(2112472723, address, code);
 }
@@ -433,6 +437,10 @@ export function StopScrcpySession(sessionID: string): $CancellablePromise<void> 
 
 export function TakeScrcpyScreenshot(sessionID: string, outputPath: string): $CancellablePromise<string> {
     return $Call.ByID(2289098450, sessionID, outputPath);
+}
+
+export function UnblockPath(remotePath: string): $CancellablePromise<file$0.UnblockResult> {
+    return $Call.ByID(1740768098, remotePath);
 }
 
 export function UninstallMultiplePackages(packageNames: string[] | null): $CancellablePromise<string> {

@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-react"
 import { useDevices } from '@/hooks/useDevices'
 import { useFileExplorer } from '@/hooks/useFileExplorer'
+import { useFileExplorerStore } from '@/stores/useFileExplorerStore'
 import { getStorageInfo, pushMultipleFiles, unblockPath } from '@/services/fileService'
 import { toast } from 'sonner'
 import { Breadcrumb } from '@/components/files/Breadcrumb'
@@ -336,13 +337,13 @@ export default function FilesPage() {
           setIsUnblockDialogOpen(open)
           if (!open) {
             setUnblockResult(null)
-            fe.setError(null)
+            useFileExplorerStore.getState().setError(null)
           }
         }}
         onRetry={() => {
           setIsUnblockDialogOpen(false)
           setUnblockResult(null)
-          fe.setError(null)
+          useFileExplorerStore.getState().setError(null)
           fe.refreshFiles()
         }}
       />

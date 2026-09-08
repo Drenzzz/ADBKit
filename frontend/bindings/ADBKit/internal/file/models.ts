@@ -12,6 +12,34 @@ export interface Entry {
     "isHidden": boolean;
 }
 
+/**
+ * SdCard describes a removable storage volume reported by the device, either
+ * the emulated internal SD card (`/sdcard`) or a physical external SD card
+ * under `/storage/<volume-uuid>/`.
+ */
+export interface SdCard {
+    /**
+     * ID is the volume identifier (e.g. "primary", "external_SD1",
+     * "1234-5678"). Stable across boots for the same physical card.
+     */
+    "id": string;
+
+    /**
+     * MountPoint is the canonical path, e.g. "/storage/1234-5678".
+     */
+    "mountPoint": string;
+
+    /**
+     * Description is a human-friendly label for UI display.
+     */
+    "description": string;
+
+    /**
+     * IsExternal flags physical SD cards vs the emulated internal SD.
+     */
+    "isExternal": boolean;
+}
+
 export interface StorageInfo {
     "mountPoint": string;
     "totalBytes": number;
@@ -25,3 +53,44 @@ export interface TransferProgress {
     "direction": string;
     "percent": number;
 }
+
+/**
+ * UnblockResult is returned by Service.UnblockPath to surface the honest
+ * "what we can do for you" answer. We never pretend to bypass scoped storage;
+ * we explain what the user needs to do on their own device.
+ */
+export interface UnblockResult {
+    "type": UnblockType;
+    "path": string;
+    "reason": string;
+}
+
+/**
+ * UnblockType tells the caller how to recover access to a path the user is
+ * trying to read or mutate.
+ */
+export enum UnblockType {
+    /**
+     * The Go zero value for the underlying type of the enum.
+     */
+    $zero = 0,
+
+    /**
+     * UnblockNotNeeded: the path is publicly accessible.
+     */
+    UnblockNotNeeded = 0,
+
+    /**
+     * UnblockOpenSettings: scoped storage requires the user to grant
+     * MANAGE_EXTERNAL_STORAGE or enable legacy storage via system Settings —
+     * ADBKit cannot do this for them.
+     */
+    UnblockOpenSettings = 1,
+
+    /**
+     * UnblockVolumeMissing: the previously-seen volume is no longer mounted
+     * (SD card ejected, USB unplugged). The action is to ask the user to
+     * reconnect the storage and retry.
+     */
+    UnblockVolumeMissing = 2,
+};
