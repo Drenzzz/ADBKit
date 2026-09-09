@@ -92,3 +92,8 @@ export interface ScrcpyPreset {
     "name": string;
     "options": ScrcpyOptions;
 }
+
+export interface WirelessHistoryEntry {
+    "address": string;
+    "name": string;
+}

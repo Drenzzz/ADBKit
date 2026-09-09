@@ -8,20 +8,26 @@ import (
 
 // AppConfig holds the persistent configuration for ADBKit.
 type AppConfig struct {
-	AdbPath              string            `json:"adb_path"`
-	FastbootPath         string            `json:"fastboot_path"`
-	ScrcpyPath           string            `json:"scrcpy_path"`
-	SetupCompleted       bool              `json:"setup_completed"`
-	Theme                string            `json:"theme"`
-	BinaryVersions       map[string]string `json:"binary_versions"`
-	DeviceNicknames      map[string]string `json:"device_nicknames"`
-	LogcatBufferLimit    int               `json:"logcat_buffer_limit"`
-	ScrcpyOptions        ScrcpyOptions     `json:"scrcpy_options"`
-	ScrcpyPresets        []ScrcpyPreset    `json:"scrcpy_presets"`
-	DefaultTerminalMode  string            `json:"default_terminal_mode"`
-	AutoRefreshDevices   bool              `json:"auto_refresh_devices"`
-	DeviceRefreshSeconds int               `json:"device_refresh_seconds"`
-	AuditEnabled         bool              `json:"audit_enabled"`
+	AdbPath              string                 `json:"adb_path"`
+	FastbootPath         string                 `json:"fastboot_path"`
+	ScrcpyPath           string                 `json:"scrcpy_path"`
+	SetupCompleted       bool                   `json:"setup_completed"`
+	Theme                string                 `json:"theme"`
+	BinaryVersions       map[string]string      `json:"binary_versions"`
+	DeviceNicknames      map[string]string      `json:"device_nicknames"`
+	WirelessHistory      []WirelessHistoryEntry `json:"wireless_history"`
+	LogcatBufferLimit    int                    `json:"logcat_buffer_limit"`
+	ScrcpyOptions        ScrcpyOptions          `json:"scrcpy_options"`
+	ScrcpyPresets        []ScrcpyPreset         `json:"scrcpy_presets"`
+	DefaultTerminalMode  string                 `json:"default_terminal_mode"`
+	AutoRefreshDevices   bool                   `json:"auto_refresh_devices"`
+	DeviceRefreshSeconds int                    `json:"device_refresh_seconds"`
+	AuditEnabled         bool                   `json:"audit_enabled"`
+}
+
+type WirelessHistoryEntry struct {
+	Address string `json:"address"`
+	Name    string `json:"name"`
 }
 
 const (
@@ -39,6 +45,7 @@ func DefaultConfig() *AppConfig {
 		Theme:                ThemeDark,
 		BinaryVersions:       make(map[string]string),
 		DeviceNicknames:      make(map[string]string),
+		WirelessHistory:      []WirelessHistoryEntry{},
 		LogcatBufferLimit:    DefaultLogcatBufferLimit,
 		ScrcpyOptions:        DefaultScrcpyOptions(),
 		ScrcpyPresets:        []ScrcpyPreset{},
@@ -71,6 +78,9 @@ func LoadConfig(dataDir string) (*AppConfig, error) {
 	}
 	if cfg.DeviceNicknames == nil {
 		cfg.DeviceNicknames = make(map[string]string)
+	}
+	if cfg.WirelessHistory == nil {
+		cfg.WirelessHistory = []WirelessHistoryEntry{}
 	}
 	if cfg.LogcatBufferLimit <= 0 {
 		cfg.LogcatBufferLimit = DefaultLogcatBufferLimit

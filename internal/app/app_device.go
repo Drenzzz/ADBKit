@@ -4,6 +4,8 @@ import (
 	"ADBKit/internal/core"
 	"ADBKit/internal/device"
 	"fmt"
+	"net"
+	"strings"
 )
 
 func (a *App) GetDevices() ([]device.Summary, error) {
@@ -97,6 +99,55 @@ func (a *App) PairWireless(address string, code string) (string, error) {
 	return auditAction(a, "pair_wireless", func() (string, error) {
 		return a.wireSvc.Pair(a.ctx, address, code)
 	})
+}
+
+func (a *App) GetWirelessHistory() []core.WirelessHistoryEntry {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.cfg == nil {
+		return []core.WirelessHistoryEntry{}
+	}
+	return cloneWirelessHistory(a.cfg.WirelessHistory)
+}
+
+func (a *App) SaveWirelessHistory(entries []core.WirelessHistoryEntry) error {
+	return auditVoidAction(a, "save_wireless_history", func() error {
+		normalized := make([]core.WirelessHistoryEntry, 0, len(entries))
+		seen := make(map[string]struct{}, len(entries))
+		for _, entry := range entries {
+			address := strings.TrimSpace(entry.Address)
+			if _, _, err := net.SplitHostPort(address); err != nil {
+				return core.NewOperationError("save_wireless_history", "wireless address is invalid", address, false)
+			}
+			key := strings.ToLower(address)
+			if _, exists := seen[key]; exists {
+				continue
+			}
+			seen[key] = struct{}{}
+			name := strings.TrimSpace(entry.Name)
+			if name == "" {
+				name = address
+			}
+			normalized = append(normalized, core.WirelessHistoryEntry{Address: address, Name: name})
+		}
+
+		a.mu.Lock()
+		defer a.mu.Unlock()
+		if a.cfg == nil {
+			return core.NewOperationError("save_wireless_history", "app config is not available", "", false)
+		}
+		a.cfg.WirelessHistory = normalized
+		return core.SaveConfig(a.dataDir, a.cfg)
+	})
+}
+
+func cloneWirelessHistory(input []core.WirelessHistoryEntry) []core.WirelessHistoryEntry {
+	if input == nil {
+		return []core.WirelessHistoryEntry{}
+	}
+	out := make([]core.WirelessHistoryEntry, len(input))
+	copy(out, input)
+	return out
 }
 
 func (a *App) GetPerformanceSnapshot(serial string) (device.PerformanceSnapshot, error) {

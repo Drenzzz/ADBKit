@@ -5,6 +5,7 @@ import (
 	"ADBKit/internal/core"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -188,5 +189,40 @@ func TestSaveConfigPersistsFile(t *testing.T) {
 	// Sanity: file exists at expected location
 	if _, err := os.Stat(filepath.Join(dataDir, "config.json")); err != nil {
 		t.Fatalf("config.json missing: %v", err)
+	}
+}
+
+func TestSaveWirelessHistoryNormalizesEntries(t *testing.T) {
+	a, dataDir := newTestApp(t)
+	entries := []core.WirelessHistoryEntry{
+		{Address: " 192.168.1.5:5555 ", Name: " Pixel "},
+		{Address: "10.0.0.8:5555"},
+	}
+
+	if err := a.SaveWirelessHistory(entries); err != nil {
+		t.Fatalf("SaveWirelessHistory: %v", err)
+	}
+
+	want := []core.WirelessHistoryEntry{
+		{Address: "192.168.1.5:5555", Name: "Pixel"},
+		{Address: "10.0.0.8:5555", Name: "10.0.0.8:5555"},
+	}
+	if got := a.GetWirelessHistory(); !reflect.DeepEqual(got, want) {
+		t.Fatalf("wireless history = %#v, want %#v", got, want)
+	}
+
+	loaded, err := core.LoadConfig(dataDir)
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if !reflect.DeepEqual(loaded.WirelessHistory, want) {
+		t.Fatalf("persisted wireless history = %#v, want %#v", loaded.WirelessHistory, want)
+	}
+}
+
+func TestSaveWirelessHistoryRejectsInvalidAddress(t *testing.T) {
+	a, _ := newTestApp(t)
+	if err := a.SaveWirelessHistory([]core.WirelessHistoryEntry{{Address: "not-an-address"}}); err == nil {
+		t.Fatal("expected invalid wireless address to be rejected")
 	}
 }

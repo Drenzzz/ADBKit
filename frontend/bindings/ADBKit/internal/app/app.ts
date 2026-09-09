@@ -237,6 +237,10 @@ export function GetWindowState(): $CancellablePromise<string> {
     return $Call.ByID(3341756802);
 }
 
+export function GetWirelessHistory(): $CancellablePromise<core$0.WirelessHistoryEntry[] | null> {
+    return $Call.ByID(2096684807);
+}
+
 export function ImportAuditLogs(path: string): $CancellablePromise<number> {
     return $Call.ByID(3429852810, path);
 }
@@ -315,6 +319,10 @@ export function RunCustomFastbootCommand(serial: string, args: string): $Cancell
 
 export function SaveLogcatToFile(content: string, defaultFilename: string): $CancellablePromise<void> {
     return $Call.ByID(4261422803, content, defaultFilename);
+}
+
+export function SaveWirelessHistory(entries: core$0.WirelessHistoryEntry[] | null): $CancellablePromise<void> {
+    return $Call.ByID(280639586, entries);
 }
 
 export function ScanRomFolder(folderPath: string): $CancellablePromise<flasher$0.Plan | null> {

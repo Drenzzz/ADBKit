@@ -16,6 +16,8 @@ vi.mock('@/services/deviceService', () => ({
   connectWireless: vi.fn().mockResolvedValue('connected'),
   enableWirelessTCPIP: vi.fn().mockResolvedValue('tcpip'),
   disconnectWireless: vi.fn().mockResolvedValue('disconnected'),
+  getWirelessHistory: vi.fn().mockResolvedValue([]),
+  saveWirelessHistory: vi.fn().mockResolvedValue(undefined),
   getPerformanceSnapshot: vi.fn().mockResolvedValue({}),
   getDeviceNicknames: vi.fn().mockResolvedValue({}),
   setDeviceNickname: vi.fn().mockResolvedValue(undefined),

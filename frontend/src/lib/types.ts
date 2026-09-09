@@ -129,6 +129,11 @@ export interface PerformanceSnapshot {
 
 export type DeviceNicknames = Record<string, string>
 
+export interface WirelessHistoryEntry {
+  address: string
+  name: string
+}
+
 export type PackageFilter = 'user' | 'system' | 'all'
 
 export type PackageStatusFilter = 'all' | 'enabled' | 'disabled'

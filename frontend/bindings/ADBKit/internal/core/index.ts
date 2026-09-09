@@ -11,5 +11,6 @@ export type {
     PreferencesPayload,
     RuntimeDiagnostics,
     ScrcpyOptions,
-    ScrcpyPreset
+    ScrcpyPreset,
+    WirelessHistoryEntry
 } from "./models.js";

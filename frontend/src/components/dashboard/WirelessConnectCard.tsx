@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   IconWifi as Wifi,
   IconUsb as Usb,
@@ -8,19 +8,41 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { connectWireless, enableWirelessTCPIP, disconnectWireless } from '@/services/deviceService'
+import {
+  connectWireless,
+  disconnectWireless,
+  enableWirelessTCPIP,
+  getWirelessHistory,
+  saveWirelessHistory,
+} from '@/services/deviceService'
 import { useDeviceStore } from '@/stores/useDeviceStore'
+import type { WirelessHistoryEntry } from '@/lib/types'
 import { toast } from 'sonner'
 
 export function WirelessConnectCard() {
   const { devices } = useDeviceStore()
   const [ip, setIp] = useState('')
   const [port, setPort] = useState('5555')
+  const [deviceName, setDeviceName] = useState('')
+  const [wirelessHistory, setWirelessHistory] = useState<WirelessHistoryEntry[]>([])
+  const [selectedHistoryAddress, setSelectedHistoryAddress] = useState('')
   const [isEnabling, setIsEnabling] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
   const [isDisconnecting, setIsDisconnecting] = useState(false)
 
   const hasUsbDevice = devices.some((d) => d.mode === 'adb' && d.state === 'device')
+
+  useEffect(() => {
+    let cancelled = false
+    void getWirelessHistory()
+      .then((entries) => {
+        if (!cancelled) setWirelessHistory(entries)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleEnableTCPIP = async () => {
     setIsEnabling(true)
@@ -43,9 +65,27 @@ export function WirelessConnectCard() {
     }
     setIsConnecting(true)
     try {
-      const address = `${ip}:${port}`
+      const address = `${ip.trim()}:${port.trim()}`
       const message = await connectWireless(address)
       toast.success('Wireless ADB connected successfully', { description: message })
+
+      const entry = {
+        address,
+        name: deviceName.trim() || address,
+      }
+      const nextHistory = [
+        entry,
+        ...wirelessHistory.filter((saved) => saved.address.toLowerCase() !== address.toLowerCase()),
+      ]
+      setWirelessHistory(nextHistory)
+      setSelectedHistoryAddress(address)
+      try {
+        await saveWirelessHistory(nextHistory)
+      } catch (historyError) {
+        toast.error('Failed to save wireless device', {
+          description: historyError instanceof Error ? historyError.message : String(historyError),
+        })
+      }
     } catch (e) {
       toast.error('Wireless connection failed', {
         description: e instanceof Error ? e.message : String(e),
@@ -62,7 +102,7 @@ export function WirelessConnectCard() {
     }
     setIsDisconnecting(true)
     try {
-      const address = `${ip}:${port}`
+      const address = `${ip.trim()}:${port.trim()}`
       const message = await disconnectWireless(address)
       toast.success('Wireless ADB disconnected', { description: message })
     } catch (e) {
@@ -72,6 +112,19 @@ export function WirelessConnectCard() {
     } finally {
       setIsDisconnecting(false)
     }
+  }
+
+  function handleHistoryChange(address: string) {
+    setSelectedHistoryAddress(address)
+    const entry = wirelessHistory.find((saved) => saved.address === address)
+    if (!entry) return
+
+    const separator = address.lastIndexOf(':')
+    if (separator > 0) {
+      setIp(address.slice(0, separator))
+      setPort(address.slice(separator + 1))
+    }
+    setDeviceName(entry.name)
   }
 
   return (
@@ -116,11 +169,30 @@ export function WirelessConnectCard() {
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 2. Wireless Linker
               </span>
+              {wirelessHistory.length > 0 && (
+                <select
+                  aria-label="Saved wireless devices"
+                  value={selectedHistoryAddress}
+                  onChange={(e) => handleHistoryChange(e.target.value)}
+                  disabled={isConnecting || isDisconnecting}
+                  className="h-8 w-full rounded-2xl border border-input bg-background px-2 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring/30"
+                >
+                  <option value="">Saved devices</option>
+                  {wirelessHistory.map((entry) => (
+                    <option key={entry.address} value={entry.address}>
+                      {entry.name} ({entry.address})
+                    </option>
+                  ))}
+                </select>
+              )}
               <div className="flex gap-2">
                 <Input
                   placeholder="Device IP (e.g. 192.168.1.5)"
                   value={ip}
-                  onChange={(e) => setIp(e.target.value)}
+                  onChange={(e) => {
+                    setIp(e.target.value)
+                    setSelectedHistoryAddress('')
+                  }}
                   disabled={isConnecting || isDisconnecting}
                   className="h-8 text-xs flex-1"
                 />
@@ -132,6 +204,13 @@ export function WirelessConnectCard() {
                   className="h-8 text-xs w-16"
                 />
               </div>
+              <Input
+                placeholder="Device name (optional)"
+                value={deviceName}
+                onChange={(e) => setDeviceName(e.target.value)}
+                disabled={isConnecting || isDisconnecting}
+                className="h-8 text-xs"
+              />
             </div>
             <div className="grid grid-cols-2 gap-2 mt-2">
               <Button

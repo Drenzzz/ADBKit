@@ -58,3 +58,23 @@ func TestScrcpyOptionsRoundTrip(t *testing.T) {
 		t.Fatal("config.json does not contain scrcpy_options")
 	}
 }
+
+func TestWirelessHistoryRoundTrip(t *testing.T) {
+	dataDir := t.TempDir()
+	expected := DefaultConfig()
+	expected.WirelessHistory = []WirelessHistoryEntry{
+		{Address: "192.168.1.5:5555", Name: "Pixel"},
+	}
+
+	if err := SaveConfig(dataDir, expected); err != nil {
+		t.Fatal(err)
+	}
+
+	loaded, err := LoadConfig(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(loaded.WirelessHistory, expected.WirelessHistory) {
+		t.Fatalf("loaded wireless history = %#v, want %#v", loaded.WirelessHistory, expected.WirelessHistory)
+	}
+}

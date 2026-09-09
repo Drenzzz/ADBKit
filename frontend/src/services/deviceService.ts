@@ -8,6 +8,8 @@ import {
   ConnectWireless,
   EnableWirelessTCPIP,
   DisconnectWireless,
+  GetWirelessHistory,
+  SaveWirelessHistory,
   GetPerformanceSnapshot,
   GetDeviceNicknames,
   SetDeviceNickname,
@@ -19,6 +21,7 @@ import type {
   DeviceMode,
   PerformanceSnapshot,
   DeviceNicknames,
+  WirelessHistoryEntry,
 } from '@/lib/types'
 
 export async function getDevices(): Promise<DeviceSummary[]> {
@@ -64,6 +67,15 @@ export async function enableWirelessTCPIP(
 
 export async function disconnectWireless(address: string): Promise<string> {
   return DisconnectWireless(address)
+}
+
+export async function getWirelessHistory(): Promise<WirelessHistoryEntry[]> {
+  const raw = await GetWirelessHistory()
+  return (raw as unknown as WirelessHistoryEntry[]) ?? []
+}
+
+export async function saveWirelessHistory(entries: WirelessHistoryEntry[]): Promise<void> {
+  await SaveWirelessHistory(entries as never)
 }
 
 export async function getPerformanceSnapshot(
