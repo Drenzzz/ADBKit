@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -11,7 +12,7 @@ import (
 // Wails bootstraps). The directories follow convention:
 //
 //	Linux   → $XDG_DATA_HOME/adbkit or $HOME/.local/share/adbkit
-//	Windows → %APPDATA%\adbkit
+//	Windows → directory containing ADBKit.exe, with %APPDATA%\adbkit as a fallback
 //	macOS   → ~/Library/Application Support/adbkit
 func ResolveDataDir() (string, error) {
 	switch runtime.GOOS {
@@ -26,8 +27,12 @@ func ResolveDataDir() (string, error) {
 		}
 		return filepath.Join(base, "adbkit"), nil
 	case "windows":
-		base := os.Getenv("APPDATA")
-		if base != "" {
+		if executable, err := os.Executable(); err == nil {
+			if dataDir, err := executableDataDir(executable); err == nil {
+				return dataDir, nil
+			}
+		}
+		if base := os.Getenv("APPDATA"); base != "" {
 			return filepath.Join(base, "adbkit"), nil
 		}
 	case "darwin":
@@ -43,4 +48,11 @@ func ResolveDataDir() (string, error) {
 		return "", err
 	}
 	return filepath.Join(dir, "adbkit"), nil
+}
+
+func executableDataDir(executablePath string) (string, error) {
+	if executablePath == "" {
+		return "", errors.New("executable path is empty")
+	}
+	return filepath.Dir(executablePath), nil
 }

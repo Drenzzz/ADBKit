@@ -5,9 +5,11 @@ import (
 
 	"log"
 	"os"
+	"path/filepath"
+	"runtime"
 
-	"ADBKit/internal/core"
 	appservice "ADBKit/internal/app"
+	"ADBKit/internal/core"
 	platform "ADBKit/internal/platform"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
@@ -39,6 +41,17 @@ func resolveStartState() application.WindowState {
 	}
 }
 
+func resolveWebviewUserDataPath() string {
+	if runtime.GOOS != "windows" {
+		return ""
+	}
+	dataDir, err := core.ResolveDataDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(dataDir, "webview")
+}
+
 func main() {
 	_ = os.Setenv("WEBKIT_DISABLE_COMPOSITING_MODE", "0")
 	_ = os.Setenv("GDK_SYNCHRONIZE", "0")
@@ -56,6 +69,9 @@ func main() {
 		},
 		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
+		},
+		Windows: application.WindowsOptions{
+			WebviewUserDataPath: resolveWebviewUserDataPath(),
 		},
 	})
 

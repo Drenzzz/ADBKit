@@ -29,20 +29,24 @@ Unicode true
 ## !define UNINST_KEY_NAME     "UninstKeyInRegistry"  # Default "${INFO_COMPANYNAME}${INFO_PRODUCTNAME}"
 ####
 ## !define REQUEST_EXECUTION_LEVEL "admin"            # Default "admin"  see also https://nsis.sourceforge.io/Docs/Chapter4.html
-## !define WAILS_INSTALL_SCOPE     "user"             # Default "machine" - set to "user" for per-user install ($LOCALAPPDATA) without UAC prompt
+## !define WAILS_INSTALL_SCOPE     "user"             # Default from the Windows Taskfile is "user"
 ####
 ## Include the wails tools
 ####
 !include "wails_tools.nsh"
 
-# The version information for this two must consist of 4 parts
-VIProductVersion "${INFO_PRODUCTVERSION}.0"
-VIFileVersion    "${INFO_PRODUCTVERSION}.0"
+# Windows fixed file versions must be numeric; keep the prerelease label in the
+# string version keys below.
+!ifndef INFO_PRODUCTVERSION_NUMERIC
+!define INFO_PRODUCTVERSION_NUMERIC "2.0.0.0"
+!endif
+VIProductVersion "${INFO_PRODUCTVERSION_NUMERIC}"
+VIFileVersion    "${INFO_PRODUCTVERSION_NUMERIC}"
 
 VIAddVersionKey "CompanyName"     "${INFO_COMPANYNAME}"
 VIAddVersionKey "FileDescription" "${INFO_PRODUCTNAME} Installer"
 VIAddVersionKey "ProductVersion"  "${INFO_PRODUCTVERSION}"
-VIAddVersionKey "FileVersion"     "${INFO_PRODUCTVERSION}"
+VIAddVersionKey "FileVersion"     "${INFO_PRODUCTVERSION_NUMERIC}"
 VIAddVersionKey "LegalCopyright"  "${INFO_COPYRIGHT}"
 VIAddVersionKey "ProductName"     "${INFO_PRODUCTNAME}"
 
@@ -73,10 +77,11 @@ ManifestDPIAware true
 
 Name "${INFO_PRODUCTNAME}"
 OutFile "..\..\..\bin\${INFO_PROJECTNAME}-${ARCH}-installer.exe" # Name of the installer's file.
+InstallDir "$APPDATA\adbkit"
 !if "${WAILS_INSTALL_SCOPE}" == "user"
-    InstallDir "$LOCALAPPDATA\Programs\${INFO_PRODUCTNAME}"
+    InstallDirRegKey HKCU "${UNINST_KEY}" "InstallLocation"
 !else
-    InstallDir "$PROGRAMFILES64\${INFO_COMPANYNAME}\${INFO_PRODUCTNAME}"
+    InstallDirRegKey HKLM "${UNINST_KEY}" "InstallLocation"
 !endif
 ShowInstDetails show # This will always show the installation details.
 
@@ -100,6 +105,11 @@ Section
     !insertmacro wails.associateCustomProtocols
     
     !insertmacro wails.writeUninstaller
+!if "${WAILS_INSTALL_SCOPE}" == "user"
+    WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
+!else
+    WriteRegStr HKLM "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
+!endif
 SectionEnd
 
 Section "uninstall" 
