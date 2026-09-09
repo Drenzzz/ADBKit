@@ -11,6 +11,7 @@ import {
   CreateDirectory,
   RenameFile,
   SelectFile,
+  SelectSavePath,
   SelectDirectory,
   SelectMultipleFiles,
   CancelFileTransfer,
@@ -52,6 +53,10 @@ export async function getStorageInfo(): Promise<StorageInfo> {
 
 export async function selectFile(): Promise<string> {
   return SelectFile()
+}
+
+export async function selectSaveFile(defaultFilename: string): Promise<string> {
+  return SelectSavePath(defaultFilename)
 }
 
 export async function selectMultipleFiles(): Promise<string[]> {

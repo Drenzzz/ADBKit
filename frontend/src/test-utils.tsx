@@ -75,6 +75,7 @@ vi.mock('@/services/fileService', () => ({
   createDirectory: vi.fn().mockResolvedValue('OK'),
   renameFile: vi.fn().mockResolvedValue('OK'),
   getStorageInfo: vi.fn().mockResolvedValue({}),
+  selectSaveFile: vi.fn().mockResolvedValue(''),
   cancelTransfer: vi.fn(),
 }))
 

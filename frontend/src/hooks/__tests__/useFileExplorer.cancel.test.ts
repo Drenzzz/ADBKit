@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   createDirectory: vi.fn().mockResolvedValue('OK'),
   renameFile: vi.fn().mockResolvedValue('OK'),
   selectFile: vi.fn().mockResolvedValue(''),
+  selectSaveFile: vi.fn().mockResolvedValue(''),
   selectMultipleFiles: vi.fn().mockResolvedValue([]),
   selectDirectory: vi.fn().mockResolvedValue(''),
   onFileTransferProgress: vi.fn(() => () => {}),
@@ -69,5 +70,18 @@ describe('useFileExplorer transfer cancellation', () => {
 
     expect(mocks.cancelFileTransfer).toHaveBeenCalledOnce()
     expect(result.current.transferProgress).toMatchObject({ fileName: 'file.bin', percent: 42, active: true })
+  })
+
+  it('uses the native save picker for a single-file export', async () => {
+    mocks.selectSaveFile.mockResolvedValueOnce('/tmp/file.bin')
+    const { result } = renderHook(() => useFileExplorer())
+
+    let selectedPath = ''
+    await act(async () => {
+      selectedPath = await result.current.chooseLocalSaveFile('file.bin')
+    })
+
+    expect(selectedPath).toBe('/tmp/file.bin')
+    expect(mocks.selectSaveFile).toHaveBeenCalledWith('file.bin')
   })
 })

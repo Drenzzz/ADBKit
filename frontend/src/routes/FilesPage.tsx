@@ -316,6 +316,7 @@ export default function FilesPage() {
         onBatchPullConfirm={fe.handleBatchPullConfirm}
         onBatchDeleteConfirm={fe.handleBatchDeleteConfirm}
         chooseLocalFile={fe.chooseLocalFile}
+        chooseLocalSaveFile={fe.chooseLocalSaveFile}
         chooseLocalDirectory={fe.chooseLocalDirectory}
       />
 

@@ -45,7 +45,7 @@ interface FileActionDialogsProps {
   setIsBatchPullDialogOpen: (open: boolean) => void
   setIsBatchDeleteDialogOpen: (open: boolean) => void
 
-  onPullConfirm: (localPath: string) => void
+  onPullConfirm: (localPath: string) => Promise<void>
   onPushConfirm: (localPath: string) => void
   onPushFolderConfirm: (localPath: string) => void
   onRenameConfirm: (newName: string) => void
@@ -56,6 +56,7 @@ interface FileActionDialogsProps {
   onBatchDeleteConfirm: () => void
 
   chooseLocalFile: () => Promise<string>
+  chooseLocalSaveFile: (defaultFilename: string) => Promise<string>
   chooseLocalDirectory: () => Promise<string>
 }
 
@@ -90,6 +91,7 @@ export function FileActionDialogs({
   onBatchPullConfirm,
   onBatchDeleteConfirm,
   chooseLocalFile,
+  chooseLocalSaveFile,
   chooseLocalDirectory,
 }: FileActionDialogsProps) {
   const [renameValue, setRenameValue] = useState('')
@@ -109,8 +111,8 @@ export function FileActionDialogs({
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsPullDialogOpen(false)}>Cancel</Button>
             <Button onClick={async () => {
-              const path = await chooseLocalFile()
-              if (path) { onPullConfirm(path); setIsPullDialogOpen(false) }
+              const path = await chooseLocalSaveFile(dialogTargetFile?.name ?? 'exported-file')
+              if (path) await onPullConfirm(path)
             }}>Choose Location</Button>
           </DialogFooter>
         </DialogContent>

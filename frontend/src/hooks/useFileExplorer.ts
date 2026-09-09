@@ -11,6 +11,7 @@ import {
   createDirectory,
   renameFile,
   selectFile,
+  selectSaveFile,
   selectMultipleFiles,
   selectDirectory,
   onFileTransferProgress,
@@ -231,6 +232,10 @@ export function useFileExplorer() {
 
   async function chooseLocalFile() {
     try { return await selectFile() } catch { return '' }
+  }
+
+  async function chooseLocalSaveFile(defaultFilename: string) {
+    try { return await selectSaveFile(defaultFilename) } catch { return '' }
   }
 
   async function chooseMultipleLocalFiles() {
@@ -588,6 +593,7 @@ export function useFileExplorer() {
     navigateUp,
     openDirectory,
     chooseLocalFile,
+    chooseLocalSaveFile,
     chooseMultipleLocalFiles,
     chooseLocalDirectory,
     pullSingleFile,
