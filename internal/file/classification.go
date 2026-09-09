@@ -127,14 +127,13 @@ func IsSdCardMountPoint(remotePath string) bool {
 	return false
 }
 
-// ParseSdCardList parses the output of `adb shell sm list-volumes`. The
-// format is one volume per line in the form "<id>:<state>" where id is a
-// short label like "primary", "private", "external_SD1", or a UUID-like
-// string. Example:
+// ParseSdCardList parses the output of `adb shell sm list-volumes`. AOSP emits
+// one volume per line in the form "<id> <state> <filesystem-uuid>", while
+// older devices may use "<id>: <state>". Example:
 //
-//	adb-1234: mounted
-//	private: unmounted
-//	1234-5678: mounted
+//	private mounted null
+//	public:179,65 mounted 1234-5678
+//	emulated;0 mounted null
 //
 // Lines that are blank, contain a header like "Volume list:", or fail to
 // parse are silently skipped — the caller gets the well-formed subset.
@@ -145,20 +144,24 @@ func ParseSdCardList(output string) []SdCard {
 		if line == "" || strings.HasPrefix(strings.ToLower(line), "volume") {
 			continue
 		}
-		volumeID, state, ok := splitVolumeLine(line)
+		volumeID, state, filesystemUUID, ok := splitVolumeLine(line)
 		if !ok {
 			continue
 		}
 		if state != "" && !strings.EqualFold(state, "mounted") {
 			continue
 		}
-		mount := sdCardMountPoint(volumeID)
+		mount := sdCardMountPoint(volumeID, filesystemUUID)
 		if mount == "" {
 			continue
 		}
 		desc := describeVolume(volumeID)
+		cardID := volumeID
+		if strings.HasPrefix(strings.ToLower(volumeID), "public:") {
+			cardID = filesystemUUID
+		}
 		cards = append(cards, SdCard{
-			ID:          volumeID,
+			ID:          cardID,
 			MountPoint:  mount,
 			Description: desc,
 			IsExternal:  isExternalVolume(volumeID),
@@ -167,36 +170,49 @@ func ParseSdCardList(output string) []SdCard {
 	return cards
 }
 
-func splitVolumeLine(line string) (volumeID string, state string, ok bool) {
-	idx := strings.Index(line, ":")
-	if idx <= 0 {
-		return "", "", false
+func splitVolumeLine(line string) (volumeID string, state string, filesystemUUID string, ok bool) {
+	fields := strings.Fields(line)
+	if len(fields) < 2 {
+		return "", "", "", false
 	}
-	volumeID = strings.TrimSpace(line[:idx])
-	state = strings.TrimSpace(line[idx+1:])
-	if volumeID == "" {
-		return "", "", false
+
+	volumeID = strings.TrimSuffix(fields[0], ":")
+	state = fields[1]
+	if volumeID == "" || state == "" {
+		return "", "", "", false
 	}
-	return volumeID, state, true
+	if len(fields) >= 3 && !strings.EqualFold(fields[2], "null") {
+		filesystemUUID = fields[2]
+	}
+	return volumeID, state, filesystemUUID, true
 }
 
-func sdCardMountPoint(volumeID string) string {
+func sdCardMountPoint(volumeID string, filesystemUUID string) string {
 	if volumeID == "" {
 		return ""
 	}
-	if strings.EqualFold(volumeID, "primary") {
+	if strings.EqualFold(volumeID, "primary") || strings.EqualFold(volumeID, "emulated;0") {
 		return "/storage/emulated/0"
+	}
+	if strings.EqualFold(volumeID, "private") {
+		return ""
+	}
+	if strings.HasPrefix(strings.ToLower(volumeID), "public:") {
+		if filesystemUUID == "" {
+			return ""
+		}
+		return path.Join("/storage", filesystemUUID)
 	}
 	return path.Join("/storage", volumeID)
 }
 
 func describeVolume(volumeID string) string {
 	switch {
-	case strings.EqualFold(volumeID, "primary"):
+	case strings.EqualFold(volumeID, "primary"), strings.EqualFold(volumeID, "emulated;0"):
 		return "Internal SD card"
 	case strings.EqualFold(volumeID, "private"):
 		return "Private volume"
-	case strings.HasPrefix(strings.ToLower(volumeID), "external"):
+	case strings.HasPrefix(strings.ToLower(volumeID), "external"), strings.HasPrefix(strings.ToLower(volumeID), "public:"):
 		return "External SD card"
 	}
 	if isExternalVolume(volumeID) {
@@ -209,7 +225,9 @@ func isExternalVolume(volumeID string) bool {
 	if volumeID == "" {
 		return false
 	}
-	if strings.EqualFold(volumeID, "primary") || strings.EqualFold(volumeID, "private") {
+	if strings.EqualFold(volumeID, "primary") ||
+		strings.EqualFold(volumeID, "emulated;0") ||
+		strings.EqualFold(volumeID, "private") {
 		return false
 	}
 	return true
@@ -260,4 +278,3 @@ type UnblockResult struct {
 func (r UnblockResult) IsUnblockable() bool {
 	return r.Type != UnblockNotNeeded
 }
-

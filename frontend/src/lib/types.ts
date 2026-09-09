@@ -178,7 +178,7 @@ export interface SdCard {
   isExternal: boolean
 }
 
-export type UnblockType = 'public' | 'protected' | 'system'
+export type UnblockType = 0 | 1 | 2
 
 export interface UnblockResult {
   type: UnblockType

@@ -119,6 +119,43 @@ func TestParseSdCardList_ExternalLabel(t *testing.T) {
 	}
 }
 
+func TestParseSdCardList_AOSPOutput(t *testing.T) {
+	output := "private mounted null\npublic:179,65 mounted 1234-5678\nemulated;0 mounted null\n"
+	got := ParseSdCardList(output)
+
+	if len(got) != 2 {
+		t.Fatalf("expected internal and external storage, got %d (%v)", len(got), got)
+	}
+
+	var external, internal *SdCard
+	for i := range got {
+		card := &got[i]
+		switch card.MountPoint {
+		case "/storage/1234-5678":
+			external = card
+		case "/storage/emulated/0":
+			internal = card
+		}
+	}
+
+	if external == nil || !external.IsExternal {
+		t.Fatalf("expected external volume at /storage/1234-5678, got %v", external)
+	}
+	if external.ID != "1234-5678" {
+		t.Errorf("external ID = %q, want %q", external.ID, "1234-5678")
+	}
+	if internal == nil || internal.IsExternal {
+		t.Fatalf("expected internal volume at /storage/emulated/0, got %v", internal)
+	}
+}
+
+func TestParseSdCardList_AOSPPublicWithoutUUIDIsSkipped(t *testing.T) {
+	got := ParseSdCardList("public:179,65 mounted null\n")
+	if len(got) != 0 {
+		t.Fatalf("expected public volume without UUID to be skipped, got %v", got)
+	}
+}
+
 func TestParseSdCardList_SkipsUnmounted(t *testing.T) {
 	output := "primary: mounted\nprivate: unmounted\n1234-5678: unmountable\n"
 	got := ParseSdCardList(output)

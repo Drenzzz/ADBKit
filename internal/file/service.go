@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	defaultPath   = "/sdcard/"
-	dirType       = "directory"
-	regularType   = "file"
-	symlinkType   = "symlink"
-	otherType     = "other"
-	sizeUnknown   = "-"
-	sizeDirNone   = "--"
+	defaultPath = "/sdcard/"
+	dirType     = "directory"
+	regularType = "file"
+	symlinkType = "symlink"
+	otherType   = "other"
+	sizeUnknown = "-"
+	sizeDirNone = "--"
 
 	transferRetries = 3
 	transferDelay   = 2 * time.Second
@@ -107,16 +107,24 @@ func (s *Service) ListSdCards(ctx context.Context) ([]SdCard, error) {
 func (s *Service) UnblockPath(ctx context.Context, remotePath string) (UnblockResult, error) {
 	class := ClassifyPath(remotePath)
 
-	if class == PathPublic {
-		return UnblockResult{Type: UnblockNotNeeded, Path: remotePath}, nil
-	}
-
 	if class == PathSystem {
 		return UnblockResult{
 			Type:   UnblockNotNeeded,
 			Path:   remotePath,
 			Reason: "System paths cannot be accessed through File Explorer.",
 		}, nil
+	}
+
+	if class == PathProtected {
+		return UnblockResult{
+			Type:   UnblockOpenSettings,
+			Path:   remotePath,
+			Reason: "This path is protected by Android scoped storage.",
+		}, nil
+	}
+
+	if !IsSdCardMountPoint(remotePath) {
+		return UnblockResult{Type: UnblockNotNeeded, Path: remotePath}, nil
 	}
 
 	cards, err := s.ListSdCards(ctx)

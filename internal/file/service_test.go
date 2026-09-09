@@ -78,3 +78,23 @@ func TestService_CreateDirectory_RejectsRestrictedPath(t *testing.T) {
 		t.Fatal("expected error for restricted path")
 	}
 }
+
+func TestService_UnblockPath_ProtectedPathSuggestsSettings(t *testing.T) {
+	result, err := (&Service{}).UnblockPath(context.Background(), "/sdcard/Android/data")
+	if err != nil {
+		t.Fatalf("UnblockPath returned error: %v", err)
+	}
+	if result.Type != UnblockOpenSettings {
+		t.Fatalf("result type = %d, want %d", result.Type, UnblockOpenSettings)
+	}
+}
+
+func TestService_UnblockPath_PublicPathNeedsNoDevice(t *testing.T) {
+	result, err := (&Service{}).UnblockPath(context.Background(), "/sdcard/Download")
+	if err != nil {
+		t.Fatalf("UnblockPath returned error: %v", err)
+	}
+	if result.Type != UnblockNotNeeded {
+		t.Fatalf("result type = %d, want %d", result.Type, UnblockNotNeeded)
+	}
+}

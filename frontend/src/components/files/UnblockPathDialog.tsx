@@ -25,7 +25,7 @@ export function UnblockPathDialog({
 }: UnblockPathDialogProps) {
   if (!result) return null
 
-  const isVolumeMissing = result.type === 'protected'
+  const isVolumeMissing = result.type === 2
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
