@@ -162,6 +162,17 @@ jobs:
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
 
+      - name: Install NSIS
+        shell: pwsh
+        run: |
+          if (-not (Get-Command makensis -ErrorAction SilentlyContinue)) {
+            winget install --id NSIS.NSIS --exact --silent --accept-package-agreements --accept-source-agreements
+            $nsisPath = Join-Path ${env:ProgramFiles(x86)} "NSIS"
+            $env:Path = "$nsisPath;$env:Path"
+            $nsisPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
+          makensis /VERSION
+
       - name: Install frontend dependencies
         working-directory: frontend
         run: bun install --frozen-lockfile
@@ -180,14 +191,21 @@ jobs:
       - name: Run Go tests
         run: go test ./...
 
-      - name: Build portable Windows executable
-        run: wails3 build
+      - name: Build Windows executable and NSIS installer
+        run: wails3 package GOOS=windows
 
       - name: Upload portable executable
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-windows-amd64
           path: bin/ADBKit.exe
+
+      - name: Upload NSIS installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: adbkit-windows-amd64-installer
+          path: bin/*-installer.exe
+          if-no-files-found: error
 
   windows-signed-release:
     if: github.event_name == 'workflow_dispatch'
