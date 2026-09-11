@@ -293,8 +293,19 @@ jobs:
         working-directory: frontend
         run: bun install --frozen-lockfile
 
-      - name: Build Linux packages
-        run: make deb rpm arch appimage
+      # One target per step: the wails tasks each run `bun install` in
+      # frontend/, and concurrent installs race on symlinks (EEXIST).
+      - name: Build Debian package
+        run: make deb
+
+      - name: Build RPM package
+        run: make rpm
+
+      - name: Build Arch package
+        run: make arch
+
+      - name: Build bundled AppImage
+        run: make appimage
 
       - name: Build system-dependent AppImage
         run: make appimage-lite
