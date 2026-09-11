@@ -1,7 +1,7 @@
 APP_NAME := ADBKit
 VERSION := 2.0.0
 
-.PHONY: help deps frontend-install doctor dev build build-upx windows run lint typecheck test test-coverage check check-all package deb rpm arch appimage appimage-lite all
+.PHONY: help deps frontend-install doctor dev build build-upx windows run lint typecheck test test-coverage check check-all package deb rpm arch appimage appimage-lite release-assets all
 
 .DEFAULT_GOAL := help
 
@@ -89,6 +89,9 @@ appimage:
 
 appimage-lite:
 	bash scripts/build-appimage.sh
+
+release-assets:
+	bash scripts/rename-release-assets.sh all
 
 all:
 	wails3 task linux:package

@@ -194,11 +194,15 @@ jobs:
       - name: Build Windows executable and NSIS installer
         run: wails3 package GOOS=windows
 
+      - name: Rename release assets
+        shell: bash
+        run: bash scripts/rename-release-assets.sh windows
+
       - name: Upload portable executable
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-windows-amd64
-          path: bin/ADBKit.exe
+          path: bin/ADBKit-*-windows-amd64.exe
 
       - name: Upload NSIS installer
         uses: actions/upload-artifact@v4
@@ -310,12 +314,15 @@ jobs:
       - name: Build system-dependent AppImage
         run: make appimage-lite
 
+      - name: Rename release assets
+        run: bash scripts/rename-release-assets.sh linux
+
       - name: Upload packages
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-linux-packages
           path: |
-            bin/*.deb
-            bin/*.rpm
-            bin/*.AppImage
-            bin/*.pkg.tar.zst
+            bin/ADBKit-*.deb
+            bin/ADBKit-*.rpm
+            bin/ADBKit-*.AppImage
+            bin/ADBKit-*.pkg.tar.zst
