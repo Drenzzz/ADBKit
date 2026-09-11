@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_NAME="ADBKit"
-VERSION="${VERSION:-2.0.0-beta5}"
+VERSION="${VERSION:-2.0.0}"
 BUILD_DIR="bin"
 APPIMAGE_TOOL="build/tools/appimagetool-x86_64.AppImage"
 APPIMAGE_OUT="build/AppImage-out"

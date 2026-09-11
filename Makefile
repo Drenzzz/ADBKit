@@ -1,5 +1,5 @@
 APP_NAME := ADBKit
-VERSION := 2.0.0-beta5
+VERSION := 2.0.0
 
 .PHONY: help deps frontend-install doctor dev build build-upx windows run lint typecheck test test-coverage check check-all package deb rpm arch appimage appimage-lite all
 

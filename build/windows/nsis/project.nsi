@@ -22,7 +22,7 @@ Unicode true
 ## !define INFO_PROJECTNAME    "ADBKit" # Default "ADBKit"
 ## !define INFO_COMPANYNAME    "Drenzzz" # Default "Drenzzz"
 ## !define INFO_PRODUCTNAME    "ADBKit" # Default "ADBKit"
-## !define INFO_PRODUCTVERSION "2.0.0-beta5" # Default "2.0.0-beta5"
+## !define INFO_PRODUCTVERSION "2.0.0" # Default "2.0.0"
 ## !define INFO_COPYRIGHT      "(c) 2026, Drenzzz" # Default "(c) 2026, Drenzzz"
 ###
 ## !define PRODUCT_EXECUTABLE  "Application.exe"      # Default "${INFO_PROJECTNAME}.exe"
