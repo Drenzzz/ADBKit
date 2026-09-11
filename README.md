@@ -19,6 +19,9 @@
   <a href="https://github.com/Drenzzz/ADBKit/releases">
     <img src="https://img.shields.io/github/v/tag/Drenzzz/ADBKit?style=flat&amp;label=Latest%20tag" alt="Latest Git tag">
   </a>
+  <a href="https://adbkit.netlify.app">
+    <img src="https://img.shields.io/badge/Website-adbkit.netlify.app-65aeff?style=flat&amp;logo=netlify&amp;logoColor=white" alt="ADBKit website">
+  </a>
   <a href="https://github.com/Drenzzz/ADBKit/actions/workflows/ci.yml">
     <img src="https://github.com/Drenzzz/ADBKit/actions/workflows/ci.yml/badge.svg" alt="CI status">
   </a>
@@ -146,7 +149,8 @@ the host system to provide GTK4, WebKitGTK 6, and their runtime dependencies.
 ## Installation
 
 Download the package for your platform from the
-[ADBKit releases page](https://github.com/Drenzzz/ADBKit/releases).
+[ADBKit releases page](https://github.com/Drenzzz/ADBKit/releases), or browse
+the [ADBKit website](https://adbkit.netlify.app) for release stats.
 
 ### Linux
 
