@@ -279,8 +279,12 @@ Generated bindings live in `frontend/bindings/`. Do not edit those files by hand
 
 ## Contributing
 
-Open an issue for a bug or feature request. Pull requests that change behavior
+Open an issue for a bug or feature request. Before opening a pull request, read
+the [contribution guide](CONTRIBUTING.md). Pull requests that change behavior
 should include tests for the affected path and pass `make check`.
+
+Report security vulnerabilities privately using the process in
+[SECURITY.md](SECURITY.md), not through a public issue.
 
 ## License
 
