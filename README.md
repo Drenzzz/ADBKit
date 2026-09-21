@@ -19,8 +19,8 @@
   <a href="https://github.com/Drenzzz/ADBKit/releases">
     <img src="https://img.shields.io/github/v/tag/Drenzzz/ADBKit?style=flat&amp;label=Latest%20tag" alt="Latest Git tag">
   </a>
-  <a href="https://adbkit.netlify.app">
-    <img src="https://img.shields.io/badge/Website-adbkit.netlify.app-65aeff?style=flat&amp;logo=netlify&amp;logoColor=white" alt="ADBKit website">
+  <a href="https://adbkit.pages.dev/">
+    <img src="https://img.shields.io/badge/Website-adbkit.pages.dev-65aeff?style=flat&amp;logo=netlify&amp;logoColor=white" alt="ADBKit website">
   </a>
   <a href="https://github.com/Drenzzz/ADBKit/actions/workflows/ci.yml">
     <img src="https://github.com/Drenzzz/ADBKit/actions/workflows/ci.yml/badge.svg" alt="CI status">
