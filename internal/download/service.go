@@ -16,12 +16,19 @@ import (
 
 const (
 	platformToolsVersion = "37.0.1"
-	// Platform Tools pin removed: Google republished 37.0.1-win.zip (SHA rotated
-	// from 84df1e... to 45f4d6... on 2026-08-27), breaking all Windows installs.
-	// Linux/Darwin already skip verification — Windows now matches. scrcpy
-	// remains pinned (GitHub release is immutable).
-	platformToolsWindowsSHA256 = "" // kept for history; not enforced
+	// Pin history: Google republished 37.0.1-win.zip (SHA rotated from
+	// 84df1e... to 45f4d6... on 2026-08-27). The pin was removed for a while,
+	// which silently disabled verification — pins below were re-derived from
+	// the live archives on 2026-10-14. Google can rotate pins on republish;
+	// when a download fails checksum, re-hash the official archive and update
+	// the pin (do not remove it). scrcpy pins come from the immutable GitHub
+	// release and its SHA256SUMS.txt.
+	platformToolsLinuxSHA256   = "d230f13842f60f782a8645f9c813f8f845bf36089ea7289f28c48f17979313f1"
+	platformToolsDarwinSHA256  = "ee39ad5967e95c2a07f04dbcbde96b1a0c916ba376096db5d2f498b7727a5d1d"
+	platformToolsWindowsSHA256 = "45f4d63113e895ebde0c90f194099a4676b6ac653bd28d54314a9e022bbc1a99"
 	scrcpyVersion              = "4.0"
+	scrcpyLinuxSHA256          = "7daf05af5d575862e62b068cf6852d6068faf7ef3178f3735e3953e778fbf0ab"
+	scrcpyDarwinSHA256         = "b83169f856d7022ed0e4428d98acea18dde2d63f49611b52ea137577ce4efe6b"
 	scrcpyWindowsSHA256        = "75dbeb5b00e6f64292f26f70900ae55ca397786bdfb0b9bbeb481a0549047457"
 	eventName                  = "binary_download_progress"
 )
@@ -43,20 +50,28 @@ func NewService(ctx context.Context, dataDir string) *Service {
 	return &Service{ctx: ctx, dataDir: dataDir}
 }
 
-func (s *Service) DownloadPlatformTools(ctx context.Context) error {
-	goos := runtime.GOOS
-	var url, expectedSHA256 string
+// resolvePlatformToolsArchive maps GOOS to the official archive name and its
+// pinned sha256. Unsupported OS values return an error instead of building a
+// bogus URL.
+func resolvePlatformToolsArchive(goos string) (archive string, sha256 string, err error) {
 	switch goos {
 	case "linux":
-		url = fmt.Sprintf("https://dl.google.com/android/repository/platform-tools_r%s-linux.zip", platformToolsVersion)
+		return fmt.Sprintf("platform-tools_r%s-linux.zip", platformToolsVersion), platformToolsLinuxSHA256, nil
 	case "darwin":
-		url = fmt.Sprintf("https://dl.google.com/android/repository/platform-tools_r%s-darwin.zip", platformToolsVersion)
+		return fmt.Sprintf("platform-tools_r%s-darwin.zip", platformToolsVersion), platformToolsDarwinSHA256, nil
 	case "windows":
-		url = fmt.Sprintf("https://dl.google.com/android/repository/platform-tools_r%s-win.zip", platformToolsVersion)
-		expectedSHA256 = platformToolsWindowsSHA256
+		return fmt.Sprintf("platform-tools_r%s-win.zip", platformToolsVersion), platformToolsWindowsSHA256, nil
 	default:
-		return core.NewOperationError("download_platform_tools", "unsupported OS", goos, false)
+		return "", "", core.NewOperationError("download_platform_tools", "unsupported OS", goos, false)
 	}
+}
+
+func (s *Service) DownloadPlatformTools(ctx context.Context) error {
+	archiveName, expectedSHA256, err := resolvePlatformToolsArchive(runtime.GOOS)
+	if err != nil {
+		return err
+	}
+	url := "https://dl.google.com/android/repository/" + archiveName
 
 	s.emitProgress("platform-tools", 0, 0, 0, "downloading")
 
@@ -120,10 +135,10 @@ func (s *Service) DownloadPlatformTools(ctx context.Context) error {
 	return nil
 }
 
-func (s *Service) DownloadScrcpy(ctx context.Context) error {
-	goos := runtime.GOOS
-	goarch := runtime.GOARCH
-
+// resolveScrcpyArchive maps GOOS/GOARCH to the official release asset and its
+// pinned sha256. Upstream publishes no linux-aarch64 asset (404), so that
+// combination is rejected explicitly instead of downloading an error page.
+func resolveScrcpyArchive(goos, goarch string) (archive string, sha256 string, err error) {
 	var archSlug string
 	switch goarch {
 	case "amd64":
@@ -131,23 +146,30 @@ func (s *Service) DownloadScrcpy(ctx context.Context) error {
 	case "arm64":
 		archSlug = "aarch64"
 	default:
-		return core.NewOperationError("download_scrcpy", "unsupported architecture", goarch, false)
+		return "", "", core.NewOperationError("download_scrcpy", "unsupported architecture", goarch, false)
 	}
 
-	var url, archiveName, expectedSHA256 string
 	switch goos {
 	case "linux":
-		archiveName = fmt.Sprintf("scrcpy-linux-%s-v%s.tar.gz", archSlug, scrcpyVersion)
+		if goarch == "arm64" {
+			return "", "", core.NewOperationError("download_scrcpy", "no upstream package for this platform", "linux-aarch64 is not published by scrcpy releases", false)
+		}
+		return fmt.Sprintf("scrcpy-linux-%s-v%s.tar.gz", archSlug, scrcpyVersion), scrcpyLinuxSHA256, nil
 	case "darwin":
-		archiveName = fmt.Sprintf("scrcpy-macos-%s-v%s.tar.gz", archSlug, scrcpyVersion)
+		return fmt.Sprintf("scrcpy-macos-%s-v%s.tar.gz", archSlug, scrcpyVersion), scrcpyDarwinSHA256, nil
 	case "windows":
-		archiveName = fmt.Sprintf("scrcpy-win64-v%s.zip", scrcpyVersion)
-		expectedSHA256 = scrcpyWindowsSHA256
+		return fmt.Sprintf("scrcpy-win64-v%s.zip", scrcpyVersion), scrcpyWindowsSHA256, nil
 	default:
-		return core.NewOperationError("download_scrcpy", "unsupported OS", goos, false)
+		return "", "", core.NewOperationError("download_scrcpy", "unsupported OS", goos, false)
 	}
+}
 
-	url = fmt.Sprintf("https://github.com/Genymobile/scrcpy/releases/download/v%s/%s", scrcpyVersion, archiveName)
+func (s *Service) DownloadScrcpy(ctx context.Context) error {
+	archiveName, expectedSHA256, err := resolveScrcpyArchive(runtime.GOOS, runtime.GOARCH)
+	if err != nil {
+		return err
+	}
+	url := fmt.Sprintf("https://github.com/Genymobile/scrcpy/releases/download/v%s/%s", scrcpyVersion, archiveName)
 
 	s.emitProgress("scrcpy", 0, 0, 0, "downloading")
 
@@ -179,7 +201,7 @@ func (s *Service) DownloadScrcpy(ctx context.Context) error {
 	tmpDir := filepath.Join(s.dataDir, "bin", ".extract-scrcpy")
 	defer os.RemoveAll(tmpDir)
 
-	if goos == "windows" {
+	if runtime.GOOS == "windows" {
 		if err := ExtractZip(archivePath, tmpDir); err != nil {
 			s.emitProgress("scrcpy", 0, 0, 0, "error")
 			return err
