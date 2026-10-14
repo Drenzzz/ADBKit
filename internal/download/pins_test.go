@@ -9,17 +9,17 @@ import (
 // removed instead of updated, silently disabling integrity verification for
 // every managed download.
 func TestPinnedChecksumsPresent(t *testing.T) {
-	if platformToolsVersion == "" {
-		t.Fatal("platformToolsVersion is empty")
+	if downloadManifest.PlatformToolsVersion == "" {
+		t.Fatal("platform_tools_version is empty")
 	}
-	if scrcpyVersion == "" {
-		t.Fatal("scrcpyVersion is empty")
+	if downloadManifest.ScrcpyVersion == "" {
+		t.Fatal("scrcpy_version is empty")
 	}
 
 	platformToolsPins := map[string]string{
-		"linux":   platformToolsLinuxSHA256,
-		"darwin":  platformToolsDarwinSHA256,
-		"windows": platformToolsWindowsSHA256,
+		"linux":   downloadManifest.PlatformToolsSHA256["linux"],
+		"darwin":  downloadManifest.PlatformToolsSHA256["darwin"],
+		"windows": downloadManifest.PlatformToolsSHA256["windows"],
 	}
 	for goos, pin := range platformToolsPins {
 		if len(pin) != 64 {
@@ -28,9 +28,9 @@ func TestPinnedChecksumsPresent(t *testing.T) {
 	}
 
 	scrcpyPins := map[string]string{
-		"linux":   scrcpyLinuxSHA256,
-		"darwin":  scrcpyDarwinSHA256,
-		"windows": scrcpyWindowsSHA256,
+		"linux":   downloadManifest.ScrcpySHA256["linux"],
+		"darwin":  downloadManifest.ScrcpySHA256["darwin"],
+		"windows": downloadManifest.ScrcpySHA256["windows"],
 	}
 	for goos, pin := range scrcpyPins {
 		if len(pin) != 64 {
@@ -39,12 +39,25 @@ func TestPinnedChecksumsPresent(t *testing.T) {
 	}
 }
 
+func TestPinnedChecksumsCoverHostPlatform(t *testing.T) {
+	goos := runtime.GOOS
+	if goos != "linux" && goos != "darwin" && goos != "windows" {
+		t.Skipf("unsupported host OS: %s", goos)
+	}
+	if got := downloadManifest.PlatformToolsSHA256[goos]; len(got) != 64 {
+		t.Errorf("platform-tools pin missing for host OS %s", goos)
+	}
+	if got := downloadManifest.ScrcpySHA256[goos]; len(got) != 64 {
+		t.Errorf("scrcpy pin missing for host OS %s", goos)
+	}
+}
+
 func TestResolvePlatformToolsArchive(t *testing.T) {
 	archive, pin, err := resolvePlatformToolsArchive("linux")
 	if err != nil {
 		t.Fatalf("linux should be supported: %v", err)
 	}
-	if archive != "platform-tools_r"+platformToolsVersion+"-linux.zip" {
+	if archive != "platform-tools_r"+downloadManifest.PlatformToolsVersion+"-linux.zip" {
 		t.Errorf("unexpected linux archive name: %q", archive)
 	}
 	if len(pin) != 64 {
@@ -74,7 +87,7 @@ func TestResolveScrcpyArchive(t *testing.T) {
 	if err != nil {
 		t.Fatalf("linux/amd64 should be supported: %v", err)
 	}
-	if archive != "scrcpy-linux-x86_64-v"+scrcpyVersion+".tar.gz" {
+	if archive != "scrcpy-linux-x86_64-v"+downloadManifest.ScrcpyVersion+".tar.gz" {
 		t.Errorf("unexpected linux archive name: %q", archive)
 	}
 	if len(pin) != 64 {

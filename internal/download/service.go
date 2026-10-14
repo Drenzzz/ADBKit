@@ -15,23 +15,16 @@ import (
 )
 
 const (
-	platformToolsVersion = "37.0.1"
-	// Pin history: Google republished 37.0.1-win.zip (SHA rotated from
-	// 84df1e... to 45f4d6... on 2026-08-27). The pin was removed for a while,
-	// which silently disabled verification — pins below were re-derived from
-	// the live archives on 2026-10-14. Google can rotate pins on republish;
-	// when a download fails checksum, re-hash the official archive and update
-	// the pin (do not remove it). scrcpy pins come from the immutable GitHub
-	// release and its SHA256SUMS.txt.
-	platformToolsLinuxSHA256   = "d230f13842f60f782a8645f9c813f8f845bf36089ea7289f28c48f17979313f1"
-	platformToolsDarwinSHA256  = "ee39ad5967e95c2a07f04dbcbde96b1a0c916ba376096db5d2f498b7727a5d1d"
-	platformToolsWindowsSHA256 = "45f4d63113e895ebde0c90f194099a4676b6ac653bd28d54314a9e022bbc1a99"
-	scrcpyVersion              = "4.0"
-	scrcpyLinuxSHA256          = "7daf05af5d575862e62b068cf6852d6068faf7ef3178f3735e3953e778fbf0ab"
-	scrcpyDarwinSHA256         = "b83169f856d7022ed0e4428d98acea18dde2d63f49611b52ea137577ce4efe6b"
-	scrcpyWindowsSHA256        = "75dbeb5b00e6f64292f26f70900ae55ca397786bdfb0b9bbeb481a0549047457"
-	eventName                  = "binary_download_progress"
+	eventName = "binary_download_progress"
 )
+
+// archiveOSSuffix maps GOOS to the platform-tools archive filename suffix.
+func archiveOSSuffix(goos string) string {
+	if goos == "windows" {
+		return "win"
+	}
+	return goos
+}
 
 type ProgressEvent struct {
 	Name          string  `json:"name"`
@@ -55,12 +48,8 @@ func NewService(ctx context.Context, dataDir string) *Service {
 // bogus URL.
 func resolvePlatformToolsArchive(goos string) (archive string, sha256 string, err error) {
 	switch goos {
-	case "linux":
-		return fmt.Sprintf("platform-tools_r%s-linux.zip", platformToolsVersion), platformToolsLinuxSHA256, nil
-	case "darwin":
-		return fmt.Sprintf("platform-tools_r%s-darwin.zip", platformToolsVersion), platformToolsDarwinSHA256, nil
-	case "windows":
-		return fmt.Sprintf("platform-tools_r%s-win.zip", platformToolsVersion), platformToolsWindowsSHA256, nil
+	case "linux", "darwin", "windows":
+		return fmt.Sprintf("platform-tools_r%s-%s.zip", downloadManifest.PlatformToolsVersion, archiveOSSuffix(goos)), downloadManifest.PlatformToolsSHA256[goos], nil
 	default:
 		return "", "", core.NewOperationError("download_platform_tools", "unsupported OS", goos, false)
 	}
@@ -154,11 +143,11 @@ func resolveScrcpyArchive(goos, goarch string) (archive string, sha256 string, e
 		if goarch == "arm64" {
 			return "", "", core.NewOperationError("download_scrcpy", "no upstream package for this platform", "linux-aarch64 is not published by scrcpy releases", false)
 		}
-		return fmt.Sprintf("scrcpy-linux-%s-v%s.tar.gz", archSlug, scrcpyVersion), scrcpyLinuxSHA256, nil
+		return fmt.Sprintf("scrcpy-linux-%s-v%s.tar.gz", archSlug, downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256[goos], nil
 	case "darwin":
-		return fmt.Sprintf("scrcpy-macos-%s-v%s.tar.gz", archSlug, scrcpyVersion), scrcpyDarwinSHA256, nil
+		return fmt.Sprintf("scrcpy-macos-%s-v%s.tar.gz", archSlug, downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256[goos], nil
 	case "windows":
-		return fmt.Sprintf("scrcpy-win64-v%s.zip", scrcpyVersion), scrcpyWindowsSHA256, nil
+		return fmt.Sprintf("scrcpy-win64-v%s.zip", downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256[goos], nil
 	default:
 		return "", "", core.NewOperationError("download_scrcpy", "unsupported OS", goos, false)
 	}
@@ -169,7 +158,7 @@ func (s *Service) DownloadScrcpy(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	url := fmt.Sprintf("https://github.com/Genymobile/scrcpy/releases/download/v%s/%s", scrcpyVersion, archiveName)
+	url := fmt.Sprintf("https://github.com/Genymobile/scrcpy/releases/download/v%s/%s", downloadManifest.ScrcpyVersion, archiveName)
 
 	s.emitProgress("scrcpy", 0, 0, 0, "downloading")
 
