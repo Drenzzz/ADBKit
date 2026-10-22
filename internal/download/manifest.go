@@ -23,10 +23,10 @@ var downloadManifest = manifest{
 		"darwin":  "ee39ad5967e95c2a07f04dbcbde96b1a0c916ba376096db5d2f498b7727a5d1d",
 		"windows": "45f4d63113e895ebde0c90f194099a4676b6ac653bd28d54314a9e022bbc1a99",
 	},
-	ScrcpyVersion: "4.0",
+	ScrcpyVersion: "5.0.1",
 	ScrcpySHA256: map[string]string{
-		"linux":   "7daf05af5d575862e62b068cf6852d6068faf7ef3178f3735e3953e778fbf0ab",
-		"darwin":  "b83169f856d7022ed0e4428d98acea18dde2d63f49611b52ea137577ce4efe6b",
-		"windows": "75dbeb5b00e6f64292f26f70900ae55ca397786bdfb0b9bbeb481a0549047457",
+		"linux":   "9f969d30cc574816077edecda65719c1c70b0aee1df1ba5fa00779ac07b8fd6e",
+		"darwin":  "31a5467a9e907f162b093267cbbab1276b15c6e709c2ea8159566a8d165beb50",
+		"windows": "b12a2c4ee8be317422451fc7dcf8ee20a71b5ea7ef9ad73ddd825a25316227a5",
 	},
 }
