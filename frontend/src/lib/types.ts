@@ -1,6 +1,6 @@
 export type BinaryName = 'adb' | 'fastboot' | 'scrcpy'
 
-export type BinaryStatusValue = 'ready' | 'missing' | 'invalid_path' | 'downloading'
+export type BinaryStatusValue = 'ready' | 'missing' | 'invalid_path'
 
 export type BinarySource =
   | 'config'
@@ -52,6 +52,7 @@ export interface Capabilities {
   setupCompleted: boolean
   wirelessPairingSupported: boolean
   clipboardSyncSupported: boolean
+  audioCaptureSupported: boolean
 }
 
 export type SetupWizardStep = 'welcome' | 'setup-binary' | 'finish'
