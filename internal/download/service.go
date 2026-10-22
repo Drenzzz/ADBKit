@@ -125,8 +125,9 @@ func (s *Service) DownloadPlatformTools(ctx context.Context) error {
 }
 
 // resolveScrcpyArchive maps GOOS/GOARCH to the official release asset and its
-// pinned sha256. Upstream publishes no linux-aarch64 asset (404), so that
-// combination is rejected explicitly instead of downloading an error page.
+// pinned sha256. Combinations upstream does not publish, and platforms without
+// a verified package, are rejected explicitly instead of downloading an asset
+// that cannot work.
 func resolveScrcpyArchive(goos, goarch string) (archive string, sha256 string, err error) {
 	var archSlug string
 	switch goarch {
@@ -143,11 +144,17 @@ func resolveScrcpyArchive(goos, goarch string) (archive string, sha256 string, e
 		if goarch == "arm64" {
 			return "", "", core.NewOperationError("download_scrcpy", "no upstream package for this platform", "linux-aarch64 is not published by scrcpy releases", false)
 		}
-		return fmt.Sprintf("scrcpy-linux-%s-v%s.tar.gz", archSlug, downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256[goos], nil
+		return fmt.Sprintf("scrcpy-linux-%s-v%s.tar.gz", archSlug, downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256["linux/"+goarch], nil
 	case "darwin":
-		return fmt.Sprintf("scrcpy-macos-%s-v%s.tar.gz", archSlug, downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256[goos], nil
+		if goarch == "arm64" {
+			return "", "", core.NewOperationError("download_scrcpy", "macOS arm64 is not verified yet", "no tester has validated the macOS arm64 package", false)
+		}
+		return fmt.Sprintf("scrcpy-macos-%s-v%s.tar.gz", archSlug, downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256["darwin/"+goarch], nil
 	case "windows":
-		return fmt.Sprintf("scrcpy-win64-v%s.zip", downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256[goos], nil
+		if goarch == "arm64" {
+			return fmt.Sprintf("scrcpy-winarm64-v%s.zip", downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256["windows/arm64"], nil
+		}
+		return fmt.Sprintf("scrcpy-win64-v%s.zip", downloadManifest.ScrcpyVersion), downloadManifest.ScrcpySHA256["windows/amd64"], nil
 	default:
 		return "", "", core.NewOperationError("download_scrcpy", "unsupported OS", goos, false)
 	}
