@@ -3,10 +3,20 @@ import { immer } from 'zustand/middleware/immer'
 import type {
   FlasherState,
   FlasherActions,
+  FlasherOperations,
   FlashPlan,
   FlashPlanStepStatus,
   OperationStatus,
 } from '@/lib/types'
+
+const idleOperations: FlasherOperations = {
+  flash: 'idle',
+  batchFlash: 'idle',
+  wipe: 'idle',
+  sideload: 'idle',
+  slotChange: 'idle',
+  command: 'idle',
+}
 
 const initialState: FlasherState = {
   fastbootDevices: [],
@@ -26,12 +36,7 @@ const initialState: FlasherState = {
   loadingDevices: false,
   refreshingDevices: false,
   scanningPlan: false,
-  runningFlash: false,
-  runningBatchFlash: false,
-  runningWipe: false,
-  runningSideload: false,
-  runningSlotChange: false,
-  runningCommand: false,
+  operations: { ...idleOperations },
   error: null,
   lastUpdatedAt: null,
 }
@@ -105,14 +110,13 @@ export const useFlasherStore = create<FlasherState & FlasherActions>()(immer((se
   setLoadingDevices: (loading) => set({ loadingDevices: loading }),
   setRefreshingDevices: (refreshing) => set({ refreshingDevices: refreshing }),
   setScanningPlan: (scanning) => set({ scanningPlan: scanning }),
-  setRunningFlash: (running) => set({ runningFlash: running }),
-  setRunningBatchFlash: (running) => set({ runningBatchFlash: running }),
-  setRunningWipe: (running) => set({ runningWipe: running }),
-  setRunningSideload: (running) => set({ runningSideload: running }),
-  setRunningSlotChange: (running) => set({ runningSlotChange: running }),
-  setRunningCommand: (running) => set({ runningCommand: running }),
+  setOperationStatus: (operation, status) => {
+    set((state) => {
+      state.operations[operation] = status
+    })
+  },
   setError: (error) => set({ error }),
   setLastUpdatedAt: (time) => set({ lastUpdatedAt: time }),
 
-  reset: () => set(initialState),
+  reset: () => set({ ...initialState, operations: { ...idleOperations } }),
 })))

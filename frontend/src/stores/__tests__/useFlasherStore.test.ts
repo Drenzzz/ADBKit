@@ -21,14 +21,14 @@ describe('Flash Plan state machine', () => {
     useFlasherStore.getState().setFlashPlan(makePlan([
       { partition: 'boot', image_file: '/boot.img' },
     ]))
-    useFlasherStore.getState().setRunningFlash(true)
+    useFlasherStore.getState().setOperationStatus('flash', 'running')
     useFlasherStore.getState().setError('test error')
     useFlasherStore.getState().reset()
     const s = useFlasherStore.getState()
     expect(s.flashPlan).toBeNull()
     expect(s.flashPlanSteps).toEqual([])
     expect(s.selectedPartitions).toEqual([])
-    expect(s.runningFlash).toBe(false)
+    expect(s.operations.flash).toBe('idle')
     expect(s.error).toBeNull()
   })
 
@@ -138,37 +138,55 @@ describe('Flash Plan state machine', () => {
     })
   })
 
-  describe('running flags', () => {
-    it('runningFlash can be set independently', () => {
-      useFlasherStore.getState().setRunningFlash(true)
-      expect(useFlasherStore.getState().runningFlash).toBe(true)
-      useFlasherStore.getState().setRunningFlash(false)
-      expect(useFlasherStore.getState().runningFlash).toBe(false)
+  describe('operation status', () => {
+    it('starts every operation at idle', () => {
+      const { operations } = useFlasherStore.getState()
+      expect(operations).toEqual({
+        flash: 'idle',
+        batchFlash: 'idle',
+        wipe: 'idle',
+        sideload: 'idle',
+        slotChange: 'idle',
+        command: 'idle',
+      })
     })
 
-    it('runningBatchFlash can be set independently', () => {
-      useFlasherStore.getState().setRunningBatchFlash(true)
-      expect(useFlasherStore.getState().runningBatchFlash).toBe(true)
-      useFlasherStore.getState().setRunningBatchFlash(false)
-      expect(useFlasherStore.getState().runningBatchFlash).toBe(false)
-    })
-
-    it('runningSideload can be set independently', () => {
-      useFlasherStore.getState().setRunningSideload(true)
-      expect(useFlasherStore.getState().runningSideload).toBe(true)
-    })
-
-    it('runningWipe can be set independently', () => {
-      useFlasherStore.getState().setRunningWipe(true)
-      expect(useFlasherStore.getState().runningWipe).toBe(true)
-    })
-
-    it('multiple running flags can be true simultaneously', () => {
-      useFlasherStore.getState().setRunningFlash(true)
-      useFlasherStore.getState().setRunningWipe(true)
+    it('tracks each operation independently', () => {
+      useFlasherStore.getState().setOperationStatus('flash', 'running')
       const s = useFlasherStore.getState()
-      expect(s.runningFlash).toBe(true)
-      expect(s.runningWipe).toBe(true)
+      expect(s.operations.flash).toBe('running')
+      expect(s.operations.wipe).toBe('idle')
+    })
+
+    it('supports the full lifecycle per operation', () => {
+      const transitions = ['pending', 'running', 'success'] as const
+      for (const status of transitions) {
+        useFlasherStore.getState().setOperationStatus('wipe', status)
+        expect(useFlasherStore.getState().operations.wipe).toBe(status)
+      }
+
+      useFlasherStore.getState().setOperationStatus('wipe', 'error')
+      expect(useFlasherStore.getState().operations.wipe).toBe('error')
+
+      useFlasherStore.getState().setOperationStatus('wipe', 'cancelled')
+      expect(useFlasherStore.getState().operations.wipe).toBe('cancelled')
+    })
+
+    it('does not let one operation reset another', () => {
+      useFlasherStore.getState().setOperationStatus('flash', 'running')
+      useFlasherStore.getState().setOperationStatus('sideload', 'running')
+      useFlasherStore.getState().setOperationStatus('flash', 'idle')
+      const s = useFlasherStore.getState()
+      expect(s.operations.flash).toBe('idle')
+      expect(s.operations.sideload).toBe('running')
+    })
+
+    it('reset returns all operations to idle', () => {
+      useFlasherStore.getState().setOperationStatus('flash', 'running')
+      useFlasherStore.getState().setOperationStatus('command', 'error')
+      useFlasherStore.getState().reset()
+      const { operations } = useFlasherStore.getState()
+      expect(Object.values(operations).every((status) => status === 'idle')).toBe(true)
     })
   })
 })
