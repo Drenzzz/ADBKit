@@ -1,6 +1,6 @@
 export type BinaryName = 'adb' | 'fastboot' | 'scrcpy'
 
-export type BinaryStatusValue = 'ready' | 'missing' | 'invalid_path' | 'downloading'
+export type BinaryStatusValue = 'ready' | 'missing' | 'invalid_path'
 
 export type BinarySource =
   | 'config'
@@ -52,6 +52,7 @@ export interface Capabilities {
   setupCompleted: boolean
   wirelessPairingSupported: boolean
   clipboardSyncSupported: boolean
+  audioCaptureSupported: boolean
 }
 
 export type SetupWizardStep = 'welcome' | 'setup-binary' | 'finish'
@@ -286,6 +287,16 @@ export interface FlashPlan {
 
 export type OperationStatus = 'idle' | 'pending' | 'running' | 'success' | 'error' | 'cancelled'
 
+export type FlasherOperation =
+  | 'flash'
+  | 'batchFlash'
+  | 'wipe'
+  | 'sideload'
+  | 'slotChange'
+  | 'command'
+
+export type FlasherOperations = Record<FlasherOperation, OperationStatus>
+
 export interface FlashPlanStepStatus {
   partition: string
   imageFile: string
@@ -313,12 +324,7 @@ export interface FlasherState {
   loadingDevices: boolean
   refreshingDevices: boolean
   scanningPlan: boolean
-  runningFlash: boolean
-  runningBatchFlash: boolean
-  runningWipe: boolean
-  runningSideload: boolean
-  runningSlotChange: boolean
-  runningCommand: boolean
+  operations: FlasherOperations
   error: string | null
   lastUpdatedAt: number | null
 }
@@ -343,12 +349,7 @@ export interface FlasherActions {
   setLoadingDevices: (loading: boolean) => void
   setRefreshingDevices: (refreshing: boolean) => void
   setScanningPlan: (scanning: boolean) => void
-  setRunningFlash: (running: boolean) => void
-  setRunningBatchFlash: (running: boolean) => void
-  setRunningWipe: (running: boolean) => void
-  setRunningSideload: (running: boolean) => void
-  setRunningSlotChange: (running: boolean) => void
-  setRunningCommand: (running: boolean) => void
+  setOperationStatus: (operation: FlasherOperation, status: OperationStatus) => void
   setError: (error: string | null) => void
   setLastUpdatedAt: (time: number | null) => void
   reset: () => void

@@ -13,19 +13,25 @@ describe('useUIStore', () => {
     expect(['dark', 'light']).toContain(theme)
   })
 
-  it('toggles theme', () => {
-    const before = useUIStore.getState().theme
-    useUIStore.getState().toggleTheme()
-    const after = useUIStore.getState().theme
-    expect(after).not.toBe(before)
-  })
-
   it('sets theme explicitly', () => {
     useUIStore.getState().setTheme('light')
     expect(useUIStore.getState().theme).toBe('light')
 
     useUIStore.getState().setTheme('dark')
     expect(useUIStore.getState().theme).toBe('dark')
+  })
+
+  it('applies the theme class to the document root', () => {
+    useUIStore.getState().setTheme('light')
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+
+    useUIStore.getState().setTheme('dark')
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
+  })
+
+  it('does not persist theme to localStorage', () => {
+    useUIStore.getState().setTheme('light')
+    expect(localStorage.getItem('adbkit-theme')).toBeNull()
   })
 
   it('toggles command palette', () => {
