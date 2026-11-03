@@ -73,7 +73,7 @@ func (s *Service) PullFile(ctx context.Context, remotePath string, localPath str
 		}
 	}
 
-	return "", core.NewOperationError("pull_file", "Failed to pull file", cmdErr.Error(), true)
+	return "", core.NewOperationError("pull_file", "Failed to pull file", transferFailureDetail(result, cmdErr), true)
 }
 
 func (s *Service) PullMultipleFiles(ctx context.Context, remotePaths []string, localDirectory string) (string, error) {

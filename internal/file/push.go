@@ -84,7 +84,7 @@ func (s *Service) PushFile(ctx context.Context, localPath string, remotePath str
 		}
 	}
 
-	return "", core.NewOperationError("push_file", "Failed to push file", cmdErr.Error(), true)
+	return "", core.NewOperationError("push_file", "Failed to push file", transferFailureDetail(result, cmdErr), true)
 }
 
 func (s *Service) PushMultipleFiles(ctx context.Context, localPaths []string, remoteDirectory string) (string, error) {
