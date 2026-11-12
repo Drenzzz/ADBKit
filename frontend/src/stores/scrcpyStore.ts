@@ -27,6 +27,7 @@ const DEFAULT_OPTIONS: ScrcpyOptions = {
   rotation: 0,
   display_id: 0,
   time_limit: 0,
+  hw_dec: '',
 }
 
 interface ScrcpyActions {
