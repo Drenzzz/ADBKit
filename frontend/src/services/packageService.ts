@@ -1,6 +1,7 @@
 import {
   ListPackages,
   InstallPackage,
+  InspectAPK,
   UninstallPackage,
   UninstallMultiplePackages,
   EnablePackage,
@@ -15,6 +16,7 @@ import {
   SelectApkFile,
 } from '../../bindings/ADBKit/internal/app/app'
 import type {
+  APKPreview,
   PackageDetails,
   PackageFilter,
   PackageInfo,
@@ -27,6 +29,11 @@ export async function listPackages(filter: PackageFilter): Promise<PackageInfo[]
 
 export async function installPackage(filePath: string): Promise<string> {
   return InstallPackage(filePath)
+}
+
+export async function inspectAPK(filePath: string): Promise<APKPreview> {
+  const raw = await InspectAPK(filePath)
+  return raw as unknown as APKPreview
 }
 
 export async function uninstallPackage(packageName: string): Promise<string> {
