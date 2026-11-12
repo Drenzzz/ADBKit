@@ -44,7 +44,7 @@
     <img src="https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&amp;logo=go&amp;logoColor=white" alt="Go 1.25 or later">
   </a>
   <a href="#development">
-    <img src="https://img.shields.io/badge/Wails-v3.0.0--beta.9-4b5563?style=flat" alt="Wails v3.0.0 beta.9">
+    <img src="https://img.shields.io/badge/Wails-v3.1.0-4b5563?style=flat" alt="Wails v3.1.0">
   </a>
   <a href="#development">
     <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat&amp;logo=react&amp;logoColor=20232a" alt="React 19">
@@ -90,7 +90,7 @@ ADB, Fastboot, and scrcpy must all be ready before setup can finish.
 ### App manager
 
 - Browse installed packages in a virtualized list.
-- Install APKs from a picker or drag and drop them into the app.
+- Install APKs from a picker or drag and drop them into the app, with a preview of the real app name, package, version, and sizes before installing.
 - Uninstall, enable, disable, clear data, and run batch actions.
 - Pull APK files and inspect package details with search, filtering, and sorting.
 
@@ -124,12 +124,14 @@ ADB, Fastboot, and scrcpy must all be ready before setup can finish.
 - Capture screenshots and save them to the host.
 - Synchronize the clipboard between the device and computer.
 - Adjust resolution, FPS, bitrate, codec, audio, rotation, and saved presets.
+- Switch between hardware and software video decoding (scrcpy 5.x).
 
 ### Setup, settings, and diagnostics
 
 - Detect binaries in saved configuration, the system PATH, managed packages, and common paths.
+- Take device screenshots from the Devices page without a mirror session.
 - Select custom files or directories for ADB, Fastboot, and scrcpy.
-- Download and preserve complete Platform Tools and scrcpy packages.
+- Download and preserve complete Platform Tools and scrcpy packages, verified against pinned checksums on every platform.
 - Switch between dark and light themes and set terminal defaults.
 - Persist window state and configure the device synchronization interval.
 - Review optional audit logs and runtime diagnostics.
@@ -197,7 +199,7 @@ Terminal, Scrcpy, and Settings are in
 - Wails v3 CLI
 - Platform dependencies required by Wails and the target operating system
 
-The repository currently uses Wails `v3.0.0-beta.9`.
+The repository currently uses Wails `v3.1.0`.
 
 Clone the repository and install dependencies:
 
