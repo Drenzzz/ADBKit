@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="ADBKit"
+APP_NAME="adbkit"
 VERSION="${VERSION:-2.1.0}"
 BUILD_DIR="bin"
 APPIMAGE_TOOL="build/tools/appimagetool-x86_64.AppImage"
@@ -39,7 +39,7 @@ SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
 export PATH="${HERE}/usr/bin:${PATH}"
 export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH:-}"
-exec "${HERE}/usr/bin/ADBKit" "$@"
+exec "${HERE}/usr/bin/adbkit" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
 

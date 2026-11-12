@@ -13,12 +13,12 @@ provides:
   - adbkit
 
 contents:
-  - src: "./bin/ADBKit"
-    dst: /usr/bin/ADBKit
-  - src: "./build/linux/ADBKit.desktop"
-    dst: /usr/share/applications/ADBKit.desktop
+  - src: "./bin/adbkit"
+    dst: /usr/bin/adbkit
+  - src: "./build/linux/adbkit.desktop"
+    dst: /usr/share/applications/adbkit.desktop
   - src: "./build/linux/appicon.png"
-    dst: /usr/share/icons/hicolor/256x256/apps/ADBKit.png
+    dst: /usr/share/icons/hicolor/256x256/apps/adbkit.png
 
 depends:
   - libgtk-4-1

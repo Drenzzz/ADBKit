@@ -5,13 +5,13 @@
 !include "FileFunc.nsh"
 
 !ifndef INFO_PROJECTNAME
-    !define INFO_PROJECTNAME "ADBKit"
+    !define INFO_PROJECTNAME "adbkit"
 !endif
 !ifndef INFO_COMPANYNAME
     !define INFO_COMPANYNAME "Drenzzz"
 !endif
 !ifndef INFO_PRODUCTNAME
-    !define INFO_PRODUCTNAME "ADBKit"
+    !define INFO_PRODUCTNAME "adbkit"
 !endif
 !ifndef INFO_PRODUCTVERSION
     !define INFO_PRODUCTVERSION "2.0.0"

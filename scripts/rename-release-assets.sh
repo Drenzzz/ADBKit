@@ -29,7 +29,7 @@ rename() {
 }
 
 rename_windows() {
-  rename "ADBKit.exe" "ADBKit-$VERSION-windows-amd64.exe"
+  rename "adbkit.exe" "adbkit-$VERSION-windows-amd64.exe"
 }
 
 rename_linux() {
@@ -40,12 +40,12 @@ rename_linux() {
   if [ -z "$bundled" ]; then
     echo "Skipped bundled AppImage (not found in bin/)"
   else
-    rename "$bundled" "ADBKit-$VERSION-linux-x86_64.AppImage"
+    rename "$bundled" "adbkit-$VERSION-linux-x86_64.AppImage"
   fi
 
-  rename "ADBKit.deb" "ADBKit-${VERSION}_amd64.deb"
-  rename "ADBKit.rpm" "ADBKit-${VERSION}-1.x86_64.rpm"
-  rename "ADBKit.pkg.tar.zst" "ADBKit-${VERSION}-1-x86_64.pkg.tar.zst"
+  rename "adbkit.deb" "adbkit-${VERSION}_amd64.deb"
+  rename "adbkit.rpm" "adbkit-${VERSION}-1.x86_64.rpm"
+  rename "adbkit.pkg.tar.zst" "adbkit-${VERSION}-1-x86_64.pkg.tar.zst"
 }
 
 case "$TARGET" in

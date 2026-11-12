@@ -1,4 +1,4 @@
-APP_NAME := ADBKit
+APP_NAME := adbkit
 VERSION := 2.1.0
 
 .PHONY: help deps frontend-install doctor dev build build-upx windows run lint typecheck test test-coverage check check-all package deb rpm arch appimage appimage-lite release-assets all
@@ -43,7 +43,7 @@ build:
 	wails3 build
 
 build-upx: build
-	upx bin/ADBKit$(if $(filter Windows_NT,$(OS)),.exe,)
+	upx bin/adbkit$(if $(filter Windows_NT,$(OS)),.exe,)
 
 windows:
 	wails3 task windows:build

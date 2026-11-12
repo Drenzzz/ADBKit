@@ -140,7 +140,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-linux-amd64
-          path: bin/ADBKit
+          path: bin/adbkit
 
   windows-portable-build:
     runs-on: windows-latest
@@ -197,7 +197,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-windows-amd64
-          path: bin/ADBKit-*-windows-amd64.exe
+          path: bin/adbkit-*-windows-amd64.exe
 
       - name: Upload NSIS installer
         uses: actions/upload-artifact@v4
@@ -248,8 +248,8 @@ jobs:
             if ([string]::IsNullOrWhiteSpace($timestampUrl)) {
               $timestampUrl = "http://timestamp.digicert.com"
             }
-            signtool sign /fd SHA256 /f $certificatePath /p $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD /tr $timestampUrl /td SHA256 bin/ADBKit.exe
-            signtool verify /pa /all /v bin/ADBKit.exe
+            signtool sign /fd SHA256 /f $certificatePath /p $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD /tr $timestampUrl /td SHA256 bin/adbkit.exe
+            signtool verify /pa /all /v bin/adbkit.exe
           }
           finally {
             Remove-Item -Force -ErrorAction SilentlyContinue $certificatePath
@@ -259,7 +259,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: adbkit-windows-amd64-signed
-          path: bin/ADBKit.exe
+          path: bin/adbkit.exe
 
   linux-packages:
     runs-on: ubuntu-latest
@@ -317,7 +317,7 @@ jobs:
         with:
           name: adbkit-linux-packages
           path: |
-            bin/ADBKit-*.deb
-            bin/ADBKit-*.rpm
-            bin/ADBKit-*.AppImage
-            bin/ADBKit-*.pkg.tar.zst
+            bin/adbkit-*.deb
+            bin/adbkit-*.rpm
+            bin/adbkit-*.AppImage
+            bin/adbkit-*.pkg.tar.zst

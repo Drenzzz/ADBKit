@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 Name=ADBKit
-Exec=ADBKit
-Icon=ADBKit
+Exec=adbkit
+Icon=adbkit
 Categories=Development;
 Terminal=false
 Keywords=wails
