@@ -443,6 +443,10 @@ export function StopScrcpySession(sessionID: string): $CancellablePromise<void> 
     return $Call.ByID(2897003951, sessionID);
 }
 
+export function TakeDeviceScreenshot(serial: string, outputPath: string): $CancellablePromise<string> {
+    return $Call.ByID(1770298602, serial, outputPath);
+}
+
 export function TakeScrcpyScreenshot(sessionID: string, outputPath: string): $CancellablePromise<string> {
     return $Call.ByID(2289098450, sessionID, outputPath);
 }

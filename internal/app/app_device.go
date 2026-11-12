@@ -71,6 +71,18 @@ func (a *App) RebootDevice(serial string, mode string) (string, error) {
 	})
 }
 
+func (a *App) TakeDeviceScreenshot(serial string, outputPath string) (string, error) {
+	return auditAction(a, "take_device_screenshot", func() (string, error) {
+		resolved := serial
+		if resolved == "" {
+			a.mu.Lock()
+			resolved = a.activeSerial
+			a.mu.Unlock()
+		}
+		return a.devSvc.TakeScreenshot(a.ctx, resolved, outputPath)
+	})
+}
+
 func (a *App) ConnectWireless(address string) (string, error) {
 	return auditAction(a, "connect_wireless", func() (string, error) {
 		return a.wireSvc.Connect(a.ctx, address)
