@@ -36,6 +36,7 @@ export interface Options {
     "rotation": number;
     "display_id": number;
     "time_limit": number;
+    "hw_dec": string;
 }
 
 export interface Session {
