@@ -80,6 +80,12 @@ func (a *App) GetPackageDetails(packageName string) (packagemgr.Details, error) 
 	})
 }
 
+func (a *App) InspectAPK(filePath string) (packagemgr.APKPreview, error) {
+	return auditAction(a, "inspect_apk", func() (packagemgr.APKPreview, error) {
+		return a.pkgSvc.InspectAPK(filePath)
+	})
+}
+
 func (a *App) SelectApkFile() (string, error) {
 	return a.diaSvc.SelectApkFile()
 }

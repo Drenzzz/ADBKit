@@ -5,7 +5,8 @@ import {
   IconCircleCheck as CheckCircle2,
   IconCircleXFilled as XCircle,
   IconLoader2 as Loader2,
-  IconX as X
+  IconX as X,
+  IconAlertTriangle as AlertTriangle,
 } from "@tabler/icons-react"
 import { motion } from 'motion/react'
 import {
@@ -18,6 +19,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { inspectAPK } from '@/services/packageService'
+import type { APKPreview } from '@/lib/types'
 
 interface InstallApkDialogProps {
   open: boolean
@@ -28,6 +31,7 @@ interface InstallApkDialogProps {
 }
 
 type InstallStatus = 'idle' | 'installing' | 'success' | 'error'
+type PreviewStatus = 'idle' | 'loading' | 'ready' | 'error'
 
 export function InstallApkDialog({
   open,
@@ -41,6 +45,8 @@ export function InstallApkDialog({
   const [status, setStatus] = useState<InstallStatus>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [preview, setPreview] = useState<APKPreview | null>(null)
+  const [previewStatus, setPreviewStatus] = useState<PreviewStatus>('idle')
 
   useEffect(() => {
     if (open) {
@@ -48,6 +54,8 @@ export function InstallApkDialog({
       setStatus('idle')
       setErrorMsg(null)
       setIsDragOver(false)
+      setPreview(null)
+      setPreviewStatus('idle')
     }
   }, [open, initialFilePath])
 
@@ -55,6 +63,41 @@ export function InstallApkDialog({
     if (!open || status !== 'idle' || !initialFilePath) return
     setFilePath(initialFilePath)
   }, [open, status, initialFilePath])
+
+  useEffect(() => {
+    if (!open || !filePath || status !== 'idle') {
+      return
+    }
+    let cancelled = false
+    setPreviewStatus('loading')
+    setPreview(null)
+    inspectAPK(filePath)
+      .then((result) => {
+        if (cancelled) return
+        setPreview(result)
+        setPreviewStatus('ready')
+      })
+      .catch(() => {
+        if (cancelled) return
+        setPreview(null)
+        setPreviewStatus('error')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open, filePath, status])
+
+  function formatAPKSize(bytes: number): string {
+    if (bytes <= 0) return 'N/A'
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
+  }
+
+  function formatSdkLevel(sdk: number): string {
+    if (sdk <= 0) return 'N/A'
+    return `Android ${sdk}`
+  }
 
   async function handleInstall() {
     if (!filePath || status === 'installing') return
@@ -82,6 +125,8 @@ export function InstallApkDialog({
     setFilePath('')
     setStatus('idle')
     setErrorMsg(null)
+    setPreview(null)
+    setPreviewStatus('idle')
   }
 
   const fileName = filePath ? filePath.split(/[\\/]/).pop() : null
@@ -194,8 +239,13 @@ export function InstallApkDialog({
               </div>
               <div className="min-w-0 flex-1 overflow-hidden">
                 <p className="text-xs font-semibold break-all leading-snug text-foreground truncate w-full">
-                  {fileName}
+                  {previewStatus === 'ready' && preview?.appLabel ? preview.appLabel : fileName}
                 </p>
+                {previewStatus === 'ready' && preview && (
+                  <p className="text-[10px] font-mono text-muted-foreground/70 break-all mt-0.5 truncate w-full">
+                    {preview.packageName}
+                  </p>
+                )}
                 <p className="text-[9px] text-muted-foreground/50 break-all font-mono mt-0.5 truncate w-full leading-relaxed">
                   {filePath}
                 </p>
@@ -211,6 +261,61 @@ export function InstallApkDialog({
                 </Button>
               )}
             </motion.div>
+          )}
+
+          {/* APK Preview / metadata */}
+          {filePath && status === 'idle' && (
+            <div className="w-full min-w-0">
+              {previewStatus === 'loading' && (
+                <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-muted/10 px-3.5 py-2.5 text-xs text-muted-foreground w-full">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                  Reading APK metadata...
+                </div>
+              )}
+              {previewStatus === 'ready' && preview && (
+                <div className="rounded-xl border border-border/40 bg-muted/10 p-3.5 w-full">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-muted-foreground/60">Version</span>
+                      <span className="font-medium text-foreground truncate">
+                        {preview.versionName || 'N/A'}
+                        {preview.versionCode && (
+                          <span className="ml-1.5 text-[10px] text-muted-foreground/60 font-mono">
+                            ({preview.versionCode})
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-muted-foreground/60">APK size</span>
+                      <span className="font-medium text-foreground">
+                        {formatAPKSize(preview.sizeBytes)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-muted-foreground/60">Min Android</span>
+                      <span className="font-medium text-foreground">
+                        {formatSdkLevel(preview.minSdk)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-muted-foreground/60">Target SDK</span>
+                      <span className="font-medium text-foreground">
+                        {preview.targetSdk > 0 ? `API ${preview.targetSdk}` : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {previewStatus === 'error' && (
+                <div className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/5 px-3.5 py-2.5 text-[11px] text-muted-foreground leading-relaxed w-full">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-warning" />
+                  <span>
+                    Could not read APK metadata. You can still try installing this file.
+                  </span>
+                </div>
+              )}
+            </div>
           )}
 
           {isInstalling && (

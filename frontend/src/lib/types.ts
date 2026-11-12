@@ -158,6 +158,17 @@ export interface PackageDetails {
   totalSizeBytes: number
 }
 
+export interface APKPreview {
+  fileName: string
+  sizeBytes: number
+  packageName: string
+  appLabel: string
+  versionName: string
+  versionCode: string
+  minSdk: number
+  targetSdk: number
+}
+
 export interface FileEntry {
   name: string
   path: string

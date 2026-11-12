@@ -245,6 +245,10 @@ export function ImportAuditLogs(path: string): $CancellablePromise<number> {
     return $Call.ByID(3429852810, path);
 }
 
+export function InspectAPK(filePath: string): $CancellablePromise<packagemgr$0.APKPreview> {
+    return $Call.ByID(2473824945, filePath);
+}
+
 export function InstallPackage(filePath: string): $CancellablePromise<string> {
     return $Call.ByID(3740894366, filePath);
 }
