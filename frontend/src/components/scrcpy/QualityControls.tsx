@@ -57,6 +57,39 @@ export function QualityControls({ options, onOptionChange }: QualityControlsProp
         </Select>
       </div>
 
+      {/* Hardware Decoding (scrcpy 5.x) */}
+      <div className="space-y-1.5">
+        <Label htmlFor="hw-dec" className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+          Hardware Decoding
+        </Label>
+        <Select
+          value={options.hw_dec || 'auto'}
+          onValueChange={(value) => onOptionChange('hw_dec', value === 'auto' ? '' : String(value))}
+        >
+          <SelectTrigger id="hw-dec" className="h-8.5 rounded-full text-xs bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 focus:ring-1 focus:ring-zinc-400">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="min-w-[280px] rounded-2xl border-zinc-200 dark:border-zinc-800">
+            <SelectItem value="auto" className="py-2 cursor-pointer">
+              <div className="flex flex-col gap-0.5">
+                <span className="font-mono text-xs font-semibold">auto</span>
+                <span className="text-[10px] text-muted-foreground whitespace-normal">
+                  Let scrcpy pick the decoder (default)
+                </span>
+              </div>
+            </SelectItem>
+            <SelectItem value="disabled" className="py-2 cursor-pointer">
+              <div className="flex flex-col gap-0.5">
+                <span className="font-mono text-xs font-semibold">disabled</span>
+                <span className="text-[10px] text-muted-foreground whitespace-normal">
+                  Software decoding — use if the picture is black or glitchy
+                </span>
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Max Resolution */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">

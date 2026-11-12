@@ -381,6 +381,7 @@ export interface ScrcpyOptions {
   rotation: number
   display_id: number
   time_limit: number
+  hw_dec: string
 }
 
 export interface ScrcpySession {

@@ -52,6 +52,7 @@ type Options struct {
 	Rotation           int    `json:"rotation"`
 	DisplayID          int    `json:"display_id"`
 	TimeLimit          int    `json:"time_limit"`
+	HwDec              string `json:"hw_dec"`
 }
 
 func (o Options) ToArgs() []string {
@@ -109,6 +110,9 @@ func (o Options) ToArgs() []string {
 	}
 	if o.TimeLimit > 0 {
 		args = append(args, "--time-limit", fmt.Sprintf("%d", o.TimeLimit))
+	}
+	if o.HwDec != "" && o.HwDec != "auto" {
+		args = append(args, "--hwdec="+o.HwDec)
 	}
 	return args
 }
@@ -170,7 +174,27 @@ func New(
 	}
 }
 
+// validHwDecModes lists the modes scrcpy 5.x accepts for --hwdec. "auto" is
+// scrcpy's own default and is never sent.
+var validHwDecModes = map[string]bool{
+	"auto":         true,
+	"disabled":     true,
+	"vaapi":        true,
+	"d3d11va":      true,
+	"videotoolbox": true,
+}
+
 func (s *Service) StartSession(ctx context.Context, serial string, opts Options) (*Session, error) {
+	if opts.HwDec != "" && !validHwDecModes[strings.ToLower(opts.HwDec)] {
+		return nil, core.NewOperationError(
+			"start_scrcpy_session",
+			"hardware decoding mode is not supported",
+			fmt.Sprintf("unknown --hwdec mode %q; supported: auto, disabled, vaapi, d3d11va, videotoolbox", opts.HwDec),
+			false,
+		)
+	}
+	opts.HwDec = strings.ToLower(opts.HwDec)
+
 	resolvedSerial, err := s.resolveSerial(ctx, serial)
 	if err != nil {
 		return nil, err
