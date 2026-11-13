@@ -131,6 +131,55 @@ func (s *Service) PushMultipleFiles(ctx context.Context, localPaths []string, re
 	return message, nil
 }
 
+// PushMultiplePaths pushes a mixed list of local files and folders to
+// remoteDirectory. Directories are handed to adb directly — adb push recurses
+// into a directory source without any flag — so each entry is one adb call and
+// one progress stream. A failing entry is reported and does not abort the
+// batch.
+func (s *Service) PushMultiplePaths(ctx context.Context, localPaths []string, remoteDirectory string) (string, error) {
+	if len(localPaths) == 0 {
+		return "", core.NewOperationError("push_multiple_paths", "No paths were selected", "local path list is empty", false)
+	}
+
+	normalizedRemoteDir, err := normalizeRemotePath(remoteDirectory)
+	if err != nil {
+		return "", err
+	}
+	if err := validateRemoteMutationPath("push_multiple_paths", normalizedRemoteDir); err != nil {
+		return "", err
+	}
+
+	successCount := 0
+	failures := make([]string, 0)
+
+	for _, localPath := range localPaths {
+		if ctx.Err() != nil {
+			return "", core.NewOperationError("push_multiple_paths", "Push batch cancelled", "transfer context cancelled", false)
+		}
+		trimmed := strings.TrimSpace(localPath)
+		if trimmed == "" {
+			continue
+		}
+		name := filepath.Base(trimmed)
+		remotePath := path.Join(normalizedRemoteDir, name)
+		if _, err := s.PushFile(ctx, trimmed, remotePath); err != nil {
+			if isCancelledError(err) || ctx.Err() != nil {
+				return "", core.NewOperationError("push_multiple_paths", "Push batch cancelled", "transfer context cancelled", false)
+			}
+			failures = append(failures, fmt.Sprintf("%s: %s", name, err.Error()))
+			continue
+		}
+		successCount++
+	}
+
+	message := fmt.Sprintf("Pushed %d path(s) to %s", successCount, normalizedRemoteDir)
+	if len(failures) > 0 {
+		message = fmt.Sprintf("%s. Failed: %d. Details: %s", message, len(failures), strings.Join(failures, " | "))
+	}
+
+	return message, nil
+}
+
 func isCancelledError(err error) bool {
 	if err == nil || errors.Is(err, context.Canceled) {
 		return err != nil
