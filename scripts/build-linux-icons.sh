@@ -7,6 +7,9 @@
 # packaging tasks in parallel, and each of them calls this script. Never delete
 # the output tree, and write each icon through a temp file plus rename, so a
 # parallel reader never sees a missing or half-written PNG.
+#
+# ImageMagick 7 provides `magick`; Debian/Ubuntu still ship 6.x with only
+# `convert`, so accept either.
 set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -19,12 +22,21 @@ if [ ! -f "$SRC" ]; then
   exit 1
 fi
 
+if command -v magick >/dev/null 2>&1; then
+  IM="magick"
+elif command -v convert >/dev/null 2>&1; then
+  IM="convert"
+else
+  echo "Error: ImageMagick is required (magick or convert) but was not found." >&2
+  exit 1
+fi
+
 for size in 16 24 32 48 64 128 256 512; do
   dir="$OUT/${size}x${size}/apps"
   mkdir -p "$dir"
   tmp="$dir/.$APP_ID.$$.png"
-  magick "$SRC" -resize "${size}x${size}" "$tmp"
+  "$IM" "$SRC" -resize "${size}x${size}" "$tmp"
   mv -f "$tmp" "$dir/$APP_ID.png"
 done
 
-echo "Generated hicolor icon set in $OUT"
+echo "Generated hicolor icon set in $OUT (using $IM)"

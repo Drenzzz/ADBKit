@@ -47,6 +47,7 @@ build-upx: build
 
 windows:
 	wails3 task windows:build
+	bash scripts/rename-release-assets.sh windows
 
 run:
 	wails3 task run
@@ -73,20 +74,34 @@ check-all: check test-coverage
 package:
 	wails3 package
 
+# Packaging targets are serialized with flock. `make deb rpm arch appimage-lite`
+# is commonly run with -j, and two wails3 builds writing bin/adbkit (or two bun
+# installs) at the same time fail intermittently.
+LOCK := bin/.build.lock
+
 deb:
-	wails3 task linux:create:deb
+	@mkdir -p bin
+	@flock $(LOCK) wails3 task linux:create:deb
+	@bash scripts/rename-release-assets.sh linux
 
 rpm:
-	wails3 task linux:create:rpm
+	@mkdir -p bin
+	@flock $(LOCK) wails3 task linux:create:rpm
+	@bash scripts/rename-release-assets.sh linux
 
 arch:
-	wails3 task linux:create:aur
+	@mkdir -p bin
+	@flock $(LOCK) wails3 task linux:create:aur
+	@bash scripts/rename-release-assets.sh linux
 
 appimage:
-	wails3 task linux:create:appimage
+	@mkdir -p bin
+	@flock $(LOCK) wails3 task linux:create:appimage
+	@bash scripts/rename-release-assets.sh linux
 
 appimage-lite:
-	bash scripts/build-appimage.sh
+	@mkdir -p bin
+	@flock $(LOCK) sh -c 'test -x bin/adbkit || wails3 build; bash scripts/build-appimage.sh'
 
 release-assets:
 	bash scripts/rename-release-assets.sh all

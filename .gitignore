@@ -32,7 +32,7 @@ build/linux/appimage/ADBKit.png
 build/linux/appimage/adbkit
 build/linux/appimage/com.drenzzz.adbkit.png
 build/linux/icons
-build/linux/*.desktop.tmp
+build/linux/*.desktop.*
 build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
 # Mobile generated (per-machine; overlays hold absolute paths)
 build/ios/xcode/overlay.json

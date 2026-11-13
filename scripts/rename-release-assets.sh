@@ -21,10 +21,23 @@ rename() {
   local src="$1"
   local dst="$2"
   if [ ! -f "$BIN_DIR/$src" ]; then
-    echo "Skipped bin/$src (not found)"
+    # Another packaging target may have already renamed it (make deb rpm arch
+    # runs in parallel), which is not an error.
+    if [ -f "$BIN_DIR/$dst" ]; then
+      echo "Skipped bin/$src (already renamed to bin/$dst)"
+    else
+      echo "Skipped bin/$src (not found)"
+    fi
     return 0
   fi
-  mv "$BIN_DIR/$src" "$BIN_DIR/$dst"
+  if ! mv -f "$BIN_DIR/$src" "$BIN_DIR/$dst" 2>/dev/null; then
+    if [ -f "$BIN_DIR/$dst" ]; then
+      echo "Skipped bin/$src (renamed concurrently to bin/$dst)"
+      return 0
+    fi
+    echo "Error: failed to rename bin/$src" >&2
+    return 1
+  fi
   echo "Renamed bin/$src -> bin/$dst"
 }
 
@@ -34,9 +47,13 @@ rename_windows() {
 
 rename_linux() {
   # Bundled AppImage: take whatever wails emits, excluding the lite build
-  # which is already versioned by scripts/build-appimage.sh.
+  # (already versioned by scripts/build-appimage.sh) and any file renamed by a
+  # previous run, so a repeat build never tries to rename a file onto itself.
   local bundled
-  bundled="$(find "$BIN_DIR" -maxdepth 1 -name '*.AppImage' ! -name '*-system.AppImage' -printf '%f\n' | head -n 1)"
+  bundled="$(find "$BIN_DIR" -maxdepth 1 -name '*.AppImage' \
+    ! -name '*-system.AppImage' \
+    ! -name "adbkit-${VERSION}-*" \
+    -printf '%f\n' | head -n 1)"
   if [ -z "$bundled" ]; then
     echo "Skipped bundled AppImage (not found in bin/)"
   else

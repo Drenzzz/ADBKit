@@ -175,15 +175,23 @@ tasks:
     dir: build
     cmds:
       - mkdir -p {{.ROOT_DIR}}/build/linux/appimage
-      - sh {{.ROOT_DIR}}/scripts/build-linux-icons.sh
       # The desktop file must be named after the application id: GTK4 has no
       # runtime icon API, so the compositor resolves the icon by matching the
       # window app-id to <app-id>.desktop (plus StartupWMClass on X11).
-      # Write to a temp file and rename, so parallel packaging tasks never
-      # produce a truncated file or a duplicate StartupWMClass line.
-      - wails3 generate .desktop -name "{{.APP_DISPLAY}}" -exec "{{.EXEC}}" -icon "{{.ICON}}" -outputfile "{{.ROOT_DIR}}/build/linux/{{.APP_DESKTOP_ID}}.desktop.tmp" -categories "{{.CATEGORIES}}"
-      - printf 'StartupWMClass=%s\n' "{{.APP_DESKTOP_ID}}" >> "{{.ROOT_DIR}}/build/linux/{{.APP_DESKTOP_ID}}.desktop.tmp"
-      - mv -f "{{.ROOT_DIR}}/build/linux/{{.APP_DESKTOP_ID}}.desktop.tmp" "{{.ROOT_DIR}}/build/linux/{{.APP_DESKTOP_ID}}.desktop"
+      # All three steps run in ONE shell chained with &&, because Task runs
+      # every cmd in its own shell and $$ would expand to a different PID per
+      # line — the temp file would never be found again. Rename is atomic, so
+      # parallel packaging tasks never see a partial file.
+      - |
+        sh {{.ROOT_DIR}}/scripts/build-linux-icons.sh &&
+        wails3 generate .desktop \
+          -name "{{.APP_DISPLAY}}" \
+          -exec "{{.EXEC}}" \
+          -icon "{{.ICON}}" \
+          -outputfile "{{.ROOT_DIR}}/build/linux/{{.APP_DESKTOP_ID}}.desktop.$$" \
+          -categories "{{.CATEGORIES}}" &&
+        printf 'StartupWMClass=%s\n' "{{.APP_DESKTOP_ID}}" >> "{{.ROOT_DIR}}/build/linux/{{.APP_DESKTOP_ID}}.desktop.$$" &&
+        mv -f "{{.ROOT_DIR}}/build/linux/{{.APP_DESKTOP_ID}}.desktop.$$" "{{.ROOT_DIR}}/build/linux/{{.APP_DESKTOP_ID}}.desktop"
     vars:
       APP_NAME: '{{.APP_NAME}}'
       APP_DISPLAY: '{{.APP_DISPLAY | default "ADBKit"}}'
