@@ -34,7 +34,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_DOT: Record<string, string> = {
-  ready: 'bg-emerald-500',
+  ready: 'bg-success',
   missing: 'bg-red-400',
   invalid_path: 'bg-red-400',
 }
@@ -117,7 +117,7 @@ export function BinaryModuleCard({
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{displayName}</span>
-              {isReady && <Check className="h-3 w-3 text-emerald-500" />}
+              {isReady && <Check className="h-3 w-3 text-success" />}
             </div>
             <div className="flex items-center gap-2 text-[11px] text-muted-foreground/60">
               {status.version && (
@@ -136,7 +136,7 @@ export function BinaryModuleCard({
           <span
             className={cn(
               'text-[11px] font-medium',
-              isReady ? 'text-emerald-500' : 'text-muted-foreground/70',
+              isReady ? 'text-success' : 'text-muted-foreground/70',
             )}
           >
             {statusLabel}

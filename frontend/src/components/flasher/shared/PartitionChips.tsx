@@ -58,7 +58,7 @@ export function PartitionChips({ selected, onSelect, disabled }: PartitionChipsP
                 "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border transition-colors duration-200 cursor-pointer outline-none select-none",
                 isSelected
                   ? "bg-primary border-primary text-primary-foreground shadow-sm scale-[1.03]"
-                  : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900",
+                  : "bg-background dark:bg-card border-border text-muted-foreground hover:text-foreground hover:bg-accent",
                 disabled && "opacity-40 cursor-not-allowed pointer-events-none"
               )}
             >
@@ -70,7 +70,7 @@ export function PartitionChips({ selected, onSelect, disabled }: PartitionChipsP
       <button
         type="button"
         className={cn(
-          "inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-500 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed outline-none",
+          "inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed outline-none",
           disabled && "pointer-events-none"
         )}
         onClick={() => setExpanded(!expanded)}
