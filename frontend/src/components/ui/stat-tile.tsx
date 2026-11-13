@@ -22,7 +22,6 @@ const valueToneColor: Record<NonNullable<StatTileProps['valueTone']>, string> = 
   danger: 'text-destructive',
   info: 'text-info',
 }
-
 function StatTile({
   icon,
   label,

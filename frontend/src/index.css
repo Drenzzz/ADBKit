@@ -49,6 +49,8 @@
   --color-background: var(--background);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
   --shadow-card: var(--shadow-card-val);
   --shadow-raised: var(--shadow-raised-val);
   --shadow-floating: var(--shadow-floating-val);
@@ -100,6 +102,13 @@
   /* Terminal */
   --terminal-bg: #f5f5f5;
   --terminal-surface: #ebebeb;
+  --terminal-text: oklch(0.37 0.01 265);
+  --terminal-muted: oklch(0.55 0.01 265);
+  --terminal-border: oklch(0 0 0 / 12%);
+
+  /* Info (tertiary status, cyan-leaning blue) */
+  --info: oklch(0.68 0.14 230);
+  --info-foreground: oklch(1 0 0);
 
   /* Logcat levels */
   --logcat-verbose: oklch(0.55 0.01 265);
@@ -164,6 +173,13 @@
   /* Terminal */
   --terminal-bg: #0a0b10;
   --terminal-surface: #08090d;
+  --terminal-text: oklch(0.87 0.005 265);
+  --terminal-muted: oklch(0.6 0.008 265);
+  --terminal-border: oklch(1 0 0 / 12%);
+
+  /* Info (tertiary status, cyan-leaning blue) */
+  --info: oklch(0.72 0.13 230);
+  --info-foreground: oklch(0.13 0.01 265);
 
   /* Logcat levels */
   --logcat-verbose: oklch(0.65 0.01 265);
