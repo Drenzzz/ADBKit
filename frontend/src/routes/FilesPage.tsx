@@ -318,6 +318,7 @@ export default function FilesPage() {
         chooseLocalFile={fe.chooseLocalFile}
         chooseLocalSaveFile={fe.chooseLocalSaveFile}
         chooseLocalDirectory={fe.chooseLocalDirectory}
+        chooseMultipleLocalDirectories={fe.chooseMultipleLocalDirectories}
       />
 
       {/* Transfer Progress Overlay */}

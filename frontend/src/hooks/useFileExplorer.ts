@@ -7,6 +7,7 @@ import {
   pullMultipleFiles,
   pushFile,
   pushMultipleFiles,
+  pushMultiplePaths,
   deleteMultipleFiles,
   createDirectory,
   renameFile,
@@ -14,6 +15,7 @@ import {
   selectSaveFile,
   selectMultipleFiles,
   selectDirectory,
+  selectMultipleDirectories,
   onFileTransferProgress,
   cancelFileTransfer,
 } from '@/services/fileService'
@@ -246,6 +248,10 @@ export function useFileExplorer() {
     try { return await selectDirectory() } catch { return '' }
   }
 
+  async function chooseMultipleLocalDirectories(): Promise<string[]> {
+    try { return await selectMultipleDirectories() } catch { return [] }
+  }
+
   async function pullSingleFile(remotePath: string, localPath: string) {
     if (!localPath.trim()) { toast.error('Destination path is required'); return false }
     const name = remotePath.split('/').pop() ?? remotePath
@@ -454,6 +460,32 @@ export function useFileExplorer() {
     }
   }
 
+  async function pushMultipleFoldersToCurrentDir(localPaths: string[]) {
+    if (localPaths.length === 0) return false
+    const remoteDir = normalizePath(store.currentPath)
+    store.setBusyBatchAction('push')
+    store.setError(null)
+    store.setTransferProgress({ fileName: `${localPaths.length} folder(s)`, direction: 'push', percent: 0, active: true })
+    try {
+      const message = await pushMultiplePaths(localPaths, remoteDir)
+      toast.success(message || `Pushed ${localPaths.length} folder(s)`)
+      await loadFiles(store.currentPath, { background: true, force: true })
+      return true
+    } catch (err) {
+      const msg = getErrorMessage(err, 'Failed to push folders')
+      if (isCancelledMessage(msg)) {
+        toast.info('Push batch cancelled — partial data may remain on the device')
+      } else {
+        store.setError(msg)
+        toast.error(msg)
+      }
+      return false
+    } finally {
+      store.setBusyBatchAction(null)
+      store.setTransferProgress(null)
+    }
+  }
+
   function setSort(field: FileSortField) {
     if (store.sortField === field) {
       store.setSortDirection(store.sortDirection === 'asc' ? 'desc' : 'asc')
@@ -487,6 +519,14 @@ export function useFileExplorer() {
   }
   function openNewFolderDialog() { store.setIsNewFolderDialogOpen(true) }
   function openPushFolderDialog() { store.setIsPushFolderDialogOpen(true) }
+
+  // Multi-folder push: open the native picker in multi-directory mode and push
+  // everything in one batch. Cancelled pickers resolve empty and do nothing.
+  async function pushFoldersToCurrentDirectory() {
+    const paths = await chooseMultipleLocalDirectories()
+    if (paths.length === 0) return
+    await pushMultipleFoldersToCurrentDir(paths)
+  }
   function openBatchPullDialog() { store.setIsBatchPullDialogOpen(true) }
   function openBatchDeleteDialog() { store.setIsBatchDeleteDialogOpen(true) }
   function openMoveDialog(file: FileEntry) {
@@ -515,10 +555,8 @@ export function useFileExplorer() {
     const success = await pushSingleFile(localPath, store.dialogTargetFile.path)
     if (success) store.setIsPushDialogOpen(false)
   }
-  async function handlePushFolderConfirm(localPath: string) {
-    const remoteDir = normalizePath(store.currentPath)
-    const name = localPath.split(/[/\\]/).pop() ?? localPath
-    const success = await pushSingleFile(localPath, `${remoteDir}/${name}`)
+  async function handlePushFolderConfirm(localPaths: string[]) {
+    const success = await pushMultipleFoldersToCurrentDir(localPaths)
     if (success) store.setIsPushFolderDialogOpen(false)
   }
   async function handlePushFilesToCurrentDirectory() {
@@ -641,6 +679,8 @@ export function useFileExplorer() {
     handlePushConfirm,
     handlePushFolderConfirm,
     handlePushFilesToCurrentDirectory,
+    chooseMultipleLocalDirectories,
+    pushFoldersToCurrentDirectory,
     handleRenameConfirm,
     handleDeleteConfirm,
     handleNewFolderConfirm,
