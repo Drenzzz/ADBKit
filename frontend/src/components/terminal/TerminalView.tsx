@@ -51,7 +51,7 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
           key={idx}
         >
           <span className="text-[var(--logcat-info)] dark:text-[var(--logcat-info)] font-semibold select-none">$</span>
-          <span className="text-zinc-900 dark:text-zinc-100 font-semibold">{cmdPart}</span>
+          <span className="text-foreground dark:text-[var(--terminal-text)] font-semibold">{cmdPart}</span>
         </div>
       )
     }
@@ -85,7 +85,7 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
     }
 
     return (
-      <div key={idx} className="font-mono leading-5 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap break-words">
+      <div key={idx} className="font-mono leading-5 text-foreground dark:text-[var(--terminal-text)] whitespace-pre-wrap break-words">
         {line}
       </div>
     )
@@ -95,12 +95,12 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
     <div
       ref={containerRef}
       className={cn(
-        'h-full w-full overflow-auto bg-white dark:bg-[var(--terminal-bg)] px-5 py-4 font-mono text-xs leading-5 text-zinc-700 dark:text-zinc-300 select-text selection:bg-primary/20 dark:selection:bg-primary/30 selection:text-zinc-900 dark:selection:text-white',
+        'h-full w-full overflow-auto bg-background dark:bg-[var(--terminal-bg)] px-5 py-4 font-mono text-xs leading-5 text-foreground dark:text-[var(--terminal-text)] select-text selection:bg-primary/20 dark:selection:bg-primary/30 selection:text-foreground dark:selection:text-[var(--terminal-text)]',
         className,
       )}
     >
       {lines.length === 0 || (lines.length === 1 && lines[0] === '') ? (
-        <div className="text-zinc-400 dark:text-zinc-600 italic select-none">No terminal output yet.</div>
+        <div className="text-muted-foreground dark:text-[var(--terminal-muted)] italic select-none">No terminal output yet.</div>
       ) : shouldVirtualize ? (
         <div
           style={{

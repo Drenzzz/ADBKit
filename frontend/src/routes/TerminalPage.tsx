@@ -304,7 +304,7 @@ export default function TerminalPage() {
       >
         
         {/* macOS Window Header (Title Bar) */}
-        <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 dark:bg-zinc-900 border-b border-border dark:border-zinc-950 select-none">
+        <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 dark:bg-[var(--terminal-surface)] border-b border-border dark:border-[var(--terminal-border)] select-none">
           {/* Left: Window Dots (hover shows miniature symbols) */}
           <div className="flex items-center gap-2 group/dots w-20">
             <button
@@ -313,7 +313,7 @@ export default function TerminalPage() {
                 "w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold transition-colors relative border border-transparent outline-none",
                 connected 
                   ? "bg-[var(--traffic-light-red)] hover:bg-[var(--traffic-light-red)]/80 text-[color:var(--destructive)]/50 cursor-pointer" 
-                  : "bg-muted dark:bg-zinc-700 text-muted-foreground dark:text-zinc-800 cursor-not-allowed"
+                  : "bg-muted dark:bg-[var(--terminal-muted)] text-muted-foreground dark:text-[var(--terminal-bg)] cursor-not-allowed"
               )}
               title={connected ? "Disconnect session" : "No active session"}
             >
@@ -328,14 +328,14 @@ export default function TerminalPage() {
           </div>
 
           {/* Center: iOS Segmented Tabs */}
-          <div className="flex items-center gap-0.5 rounded-full border border-border dark:border-zinc-800 bg-muted/50 dark:bg-zinc-950 p-0.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center gap-0.5 rounded-full border border-border dark:border-[var(--terminal-border)] bg-muted/50 dark:bg-[var(--terminal-surface)] p-0.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
             <button
               onClick={() => setActivePanel('shell')}
               className={cn(
                 'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-colors duration-200 cursor-pointer',
                 activePanel === 'shell'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-foreground shadow-sm'
-                  : 'text-muted-foreground dark:text-muted-foreground hover:text-zinc-900 dark:hover:text-zinc-200',
+                  ? 'bg-background dark:bg-[var(--terminal-surface)] text-foreground dark:text-foreground shadow-sm'
+                  : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-[var(--terminal-text)]',
               )}
             >
               <TerminalIcon className="h-3.5 w-3.5" />
@@ -346,8 +346,8 @@ export default function TerminalPage() {
               className={cn(
                 'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-colors duration-200 cursor-pointer',
                 activePanel === 'logcat'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-foreground shadow-sm'
-                  : 'text-muted-foreground dark:text-muted-foreground hover:text-zinc-900 dark:hover:text-zinc-200',
+                  ? 'bg-background dark:bg-[var(--terminal-surface)] text-foreground dark:text-foreground shadow-sm'
+                  : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-[var(--terminal-text)]',
               )}
             >
               <ScrollText className="h-3.5 w-3.5" />
@@ -356,7 +356,7 @@ export default function TerminalPage() {
           </div>
 
           {/* Right: Window Session Label */}
-          <div className="text-[10px] font-mono text-muted-foreground dark:text-zinc-500 w-20 text-right truncate">
+          <div className="text-[10px] font-mono text-muted-foreground dark:text-[var(--terminal-muted)] w-20 text-right truncate">
             {connected && session ? `${session.serial}` : 'idle'}
           </div>
         </div>
@@ -365,26 +365,26 @@ export default function TerminalPage() {
         {activePanel === 'shell' ? (
           <div className="flex min-h-0 flex-1 flex-col">
             {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-3 bg-zinc-50 dark:bg-zinc-900/40 px-4 py-2 border-b border-border dark:border-zinc-950">
+            <div className="flex flex-wrap items-center gap-3 bg-muted dark:bg-[var(--terminal-bg)] px-4 py-2 border-b border-border dark:border-[var(--terminal-border)]">
               {/* Dropdown Mode Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger
                   disabled={connected}
                   className={cn(
-                    'inline-flex h-7 items-center gap-1.5 rounded-full border border-border dark:border-zinc-800 bg-white dark:bg-zinc-950/40 px-3 py-1 text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-[colors,transform] cursor-pointer shadow-sm active:scale-[0.97]',
+                    'inline-flex h-7 items-center gap-1.5 rounded-full border border-border dark:border-[var(--terminal-border)] bg-background dark:bg-[var(--terminal-surface)] px-3 py-1 text-xs font-semibold text-muted-foreground dark:text-[var(--terminal-text)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-surface)] transition-[colors,transform] cursor-pointer shadow-sm active:scale-[0.97]',
                     connected && 'opacity-50 cursor-not-allowed',
                   )}
                 >
                   {modeLabel(mode)}
                   <ChevronDown className="h-3.5 w-3.5" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-white dark:bg-zinc-900 border-border dark:border-zinc-800 text-zinc-800 dark:text-zinc-300 rounded-xl shadow-[var(--shadow-raised)]">
+                <DropdownMenuContent align="start" className="bg-background dark:bg-[var(--terminal-surface)] border-border dark:border-[var(--terminal-border)] text-foreground dark:text-[var(--terminal-text)] rounded-xl shadow-[var(--shadow-raised)]">
                   {MODE_OPTIONS.map((opt) => (
                     <DropdownMenuItem
                       key={opt.value}
                       onClick={() => handleModeChange(opt.value)}
                       className={cn(
-                        'text-xs rounded-lg cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:bg-zinc-100 dark:focus:bg-zinc-800 focus:text-foreground dark:focus:text-white',
+                        'text-xs rounded-lg cursor-pointer hover:bg-accent dark:hover:bg-[var(--terminal-surface)] focus:bg-accent dark:focus:bg-[var(--terminal-surface)] focus:text-foreground dark:focus:text-[var(--terminal-text)]',
                         mode === opt.value && 'font-bold text-primary',
                       )}
                     >
@@ -402,13 +402,13 @@ export default function TerminalPage() {
                 </span>
               )}
               {connecting && (
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground dark:text-zinc-400 font-semibold">
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground dark:text-[var(--terminal-muted)] font-semibold">
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
                   Connecting...
                 </span>
               )}
               {!connected && !connecting && targetSerial && (
-                <span className="text-xs text-muted-foreground dark:text-zinc-500 font-mono">
+                <span className="text-xs text-muted-foreground dark:text-[var(--terminal-muted)] font-mono">
                   Target: {targetSerial}
                 </span>
               )}
@@ -421,7 +421,7 @@ export default function TerminalPage() {
                   size="sm"
                   variant="ghost"
                   className={cn(
-                    'h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer',
+                    'h-7 w-7 p-0 rounded-full text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-surface)] transition-colors cursor-pointer',
                     refreshing && 'animate-spin',
                   )}
                   onClick={refreshDevices}
@@ -435,8 +435,8 @@ export default function TerminalPage() {
                   size="sm"
                   variant="ghost"
                   className={cn(
-                    'h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer',
-                    showHistory && 'bg-zinc-200 dark:bg-zinc-800 text-foreground dark:text-foreground',
+                    'h-7 w-7 p-0 rounded-full text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-surface)] transition-colors cursor-pointer',
+                    showHistory && 'bg-accent dark:bg-[var(--terminal-surface)] text-foreground dark:text-foreground',
                   )}
                   onClick={() => setShowHistory(!showHistory)}
                   title="Command history"
@@ -447,7 +447,7 @@ export default function TerminalPage() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-7 w-7 p-0 rounded-full text-zinc-500 dark:text-zinc-400 hover:text-foreground dark:hover:text-foreground hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  className="h-7 w-7 p-0 rounded-full text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-surface)] transition-colors cursor-pointer"
                   onClick={clearOutput}
                   disabled={!session}
                   title="Clear output"
@@ -455,7 +455,7 @@ export default function TerminalPage() {
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
 
-                <div className="h-4 w-px bg-border dark:bg-zinc-800 mx-1" />
+                <div className="h-4 w-px bg-border dark:bg-[var(--terminal-surface)] mx-1" />
 
                 {connected ? (
                   <Button
@@ -494,7 +494,7 @@ export default function TerminalPage() {
 
             {/* Integrated Input Form */}
             <form
-              className="flex items-center gap-2 border-t border-border dark:border-zinc-950 bg-zinc-50 dark:bg-[var(--terminal-bg)]/90 px-4 py-2.5"
+              className="flex items-center gap-2 border-t border-border dark:border-[var(--terminal-border)] bg-muted dark:bg-[var(--terminal-bg)]/90 px-4 py-2.5"
               onSubmit={handleSubmitCommand}
             >
               <span className="font-mono text-xs text-[var(--logcat-info)] font-bold select-none shrink-0 ml-1">
@@ -505,7 +505,7 @@ export default function TerminalPage() {
                 onChange={(event) => setCommand(event.target.value)}
                 onKeyDown={handleInputKeyDown}
                 placeholder={placeholderText(mode, connected)}
-                className="h-8 rounded-full font-mono text-xs border border-border dark:border-zinc-800 bg-white dark:bg-zinc-900/60 focus-visible:ring-1 focus-visible:ring-ring dark:focus-visible:ring-zinc-700 text-zinc-900 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-650 outline-none"
+                className="h-8 rounded-full font-mono text-xs border border-border dark:border-[var(--terminal-border)] bg-background dark:bg-[var(--terminal-surface)] focus-visible:ring-1 focus-visible:ring-ring dark:focus-visible:ring-[var(--terminal-border)] text-foreground dark:text-[var(--terminal-text)] placeholder:text-muted-foreground dark:placeholder:text-[var(--terminal-muted)] outline-none"
                 disabled={!connected || !session}
                 autoComplete="off"
                 autoCapitalize="off"
@@ -524,12 +524,12 @@ export default function TerminalPage() {
 
             {/* Errors / helper footer */}
             {error && (
-              <div className="px-5 py-2 border-t border-border dark:border-zinc-950 bg-[var(--destructive)]/5 dark:bg-[var(--destructive)]/10 text-xs text-[var(--destructive)]">
+              <div className="px-5 py-2 border-t border-border dark:border-[var(--terminal-border)] bg-[var(--destructive)]/5 dark:bg-[var(--destructive)]/10 text-xs text-[var(--destructive)]">
                 {error}
               </div>
             )}
             {!canConnect(mode) && !error && !connected && (
-              <div className="px-5 py-2 border-t border-border dark:border-zinc-950 bg-zinc-50 dark:bg-zinc-950/30 text-xs text-muted-foreground font-medium">
+              <div className="px-5 py-2 border-t border-border dark:border-[var(--terminal-border)] bg-muted dark:bg-[var(--terminal-surface)] text-xs text-muted-foreground font-medium">
                 {mode === 'fastboot-host'
                   ? 'No Fastboot device detected. Connect a device in Fastboot mode first.'
                   : 'No device selected. Select a device first.'}
@@ -550,12 +550,12 @@ export default function TerminalPage() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-              className="absolute inset-y-0 right-0 z-50 w-80 border-l border-border dark:border-zinc-800 bg-white/95 dark:bg-[var(--terminal-bg)]/95 backdrop-blur-md shadow-[var(--shadow-floating)] flex flex-col"
+              className="absolute inset-y-0 right-0 z-50 w-80 border-l border-border dark:border-[var(--terminal-border)] bg-white/95 dark:bg-[var(--terminal-bg)]/95 backdrop-blur-md shadow-[var(--shadow-floating)] flex flex-col"
             >
               <div className="absolute left-0 top-3 -ml-3">
                 <Button
                   size="icon"
-                  className="h-6 w-6 rounded-full p-0 shadow-md border border-border dark:border-zinc-700 bg-white dark:bg-zinc-800 text-muted-foreground dark:text-zinc-400 hover:text-foreground dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer"
+                  className="h-6 w-6 rounded-full p-0 shadow-md border border-border dark:border-[var(--terminal-border)] bg-background dark:bg-[var(--terminal-surface)] text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-muted)] cursor-pointer"
                   onClick={() => setShowHistory(false)}
                 >
                   <X className="h-3.5 w-3.5" />
