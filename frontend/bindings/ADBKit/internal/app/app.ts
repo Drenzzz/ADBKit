@@ -245,6 +245,10 @@ export function ImportAuditLogs(path: string): $CancellablePromise<number> {
     return $Call.ByID(3429852810, path);
 }
 
+export function InspectAPK(filePath: string): $CancellablePromise<packagemgr$0.APKPreview> {
+    return $Call.ByID(2473824945, filePath);
+}
+
 export function InstallPackage(filePath: string): $CancellablePromise<string> {
     return $Call.ByID(3740894366, filePath);
 }
@@ -297,6 +301,10 @@ export function PushMultipleFiles(localPaths: string[] | null, remoteDirectory: 
     return $Call.ByID(1562821958, localPaths, remoteDirectory);
 }
 
+export function PushMultiplePaths(localPaths: string[] | null, remoteDirectory: string): $CancellablePromise<string> {
+    return $Call.ByID(2952406737, localPaths, remoteDirectory);
+}
+
 export function PushScrcpyClipboard(serial: string, text: string): $CancellablePromise<void> {
     return $Call.ByID(992928109, serial, text);
 }
@@ -347,6 +355,10 @@ export function SelectFile(): $CancellablePromise<string> {
 
 export function SelectFlashImageFile(): $CancellablePromise<string> {
     return $Call.ByID(3511365674);
+}
+
+export function SelectMultipleDirectories(): $CancellablePromise<string[] | null> {
+    return $Call.ByID(3923529714);
 }
 
 export function SelectMultipleFiles(): $CancellablePromise<string[] | null> {
@@ -441,6 +453,10 @@ export function StopScrcpyRecording(): $CancellablePromise<string> {
 
 export function StopScrcpySession(sessionID: string): $CancellablePromise<void> {
     return $Call.ByID(2897003951, sessionID);
+}
+
+export function TakeDeviceScreenshot(serial: string, outputPath: string): $CancellablePromise<string> {
+    return $Call.ByID(1770298602, serial, outputPath);
 }
 
 export function TakeScrcpyScreenshot(sessionID: string, outputPath: string): $CancellablePromise<string> {

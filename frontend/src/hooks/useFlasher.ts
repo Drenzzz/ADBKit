@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import * as fastbootSvc from '@/services/fastbootService'
 import * as deviceSvc from '@/services/deviceService'
 import { useFlasherStore } from '@/stores/useFlasherStore'
-import type { FlasherMode } from '@/lib/types'
+import type { FlasherMode, FlasherOperation } from '@/lib/types'
 
 const POLL_INTERVAL = 4000
 
@@ -18,12 +18,16 @@ export function useFlasher() {
   // Prevents polling from changing mode or showing error toasts during active operations
   const operationInProgressRef = useRef(false)
 
+  const isRunning = (operation: FlasherOperation) => store.operations[operation] === 'running'
+  const setStatus = (operation: FlasherOperation, status: 'idle' | 'running') =>
+    store.setOperationStatus(operation, status)
+
   const isAnyOperationRunning =
-    store.runningFlash ||
-    store.runningBatchFlash ||
-    store.runningWipe ||
-    store.runningSideload ||
-    store.runningSlotChange
+    store.operations.flash === 'running' ||
+    store.operations.batchFlash === 'running' ||
+    store.operations.wipe === 'running' ||
+    store.operations.sideload === 'running' ||
+    store.operations.slotChange === 'running'
 
   useEffect(() => {
     operationInProgressRef.current = isAnyOperationRunning
@@ -185,7 +189,7 @@ export function useFlasher() {
       const serial = store.activeFastbootSerial
       if (!serial) return
       if (operationInProgressRef.current) return
-      store.setRunningSlotChange(true)
+      setStatus('slotChange', 'running')
       try {
         await fastbootSvc.setActiveSlot(serial, slot)
         store.setCurrentSlot(slot)
@@ -193,7 +197,7 @@ export function useFlasher() {
       } catch (err) {
         toast.error(getErrorMessage(err))
       } finally {
-        store.setRunningSlotChange(false)
+        setStatus('slotChange', 'idle')
       }
     },
     [store.activeFastbootSerial],
@@ -237,7 +241,7 @@ export function useFlasher() {
       return
     }
 
-    store.setRunningFlash(true)
+    setStatus('flash', 'running')
     store.setError(null)
     try {
       const result = await fastbootSvc.flashPartition(serial, partition, filePath)
@@ -249,7 +253,7 @@ export function useFlasher() {
       store.setError(msg)
       toast.error(msg)
     } finally {
-      store.setRunningFlash(false)
+      setStatus('flash', 'idle')
     }
   }, [store.activeFastbootSerial, store.selectedPartition, store.selectedImagePath])
 
@@ -272,7 +276,7 @@ export function useFlasher() {
       return
     }
 
-    store.setRunningBatchFlash(true)
+    setStatus('batchFlash', 'running')
     store.setError(null)
 
     for (const step of filteredSteps) {
@@ -289,7 +293,7 @@ export function useFlasher() {
       store.setError(msg)
       toast.error(msg)
     } finally {
-      store.setRunningBatchFlash(false)
+      setStatus('batchFlash', 'idle')
     }
   }, [
     store.activeFastbootSerial,
@@ -306,14 +310,14 @@ export function useFlasher() {
       toast.error('No fastboot device connected')
       return
     }
-    store.setRunningWipe(true)
+    setStatus('wipe', 'running')
     try {
       const result = await fastbootSvc.wipeData(serial)
       toast.success(result || 'Device data wiped successfully')
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {
-      store.setRunningWipe(false)
+      setStatus('wipe', 'idle')
     }
   }, [store.activeFastbootSerial])
 
@@ -329,14 +333,14 @@ export function useFlasher() {
       toast.error('Select a ZIP file to sideload')
       return
     }
-    store.setRunningSideload(true)
+    setStatus('sideload', 'running')
     try {
       const result = await fastbootSvc.sideloadPackage(serial, zipPath)
       toast.success(result || 'Sideload completed')
     } catch (err) {
       toast.error(getErrorMessage(err))
     } finally {
-      store.setRunningSideload(false)
+      setStatus('sideload', 'idle')
     }
   }, [store.activeFastbootSerial, store.sideloadFilePath])
 
@@ -351,14 +355,14 @@ export function useFlasher() {
       toast.error('Enter a fastboot command')
       return
     }
-    store.setRunningCommand(true)
+    setStatus('command', 'running')
     try {
       const output = await fastbootSvc.runCustomFastbootCommand(serial, args)
       store.setCustomCommandOutput(output)
     } catch (err) {
       store.setCustomCommandOutput(getErrorMessage(err))
     } finally {
-      store.setRunningCommand(false)
+      setStatus('command', 'idle')
     }
   }, [store.activeFastbootSerial, store.customCommand])
 
@@ -444,6 +448,14 @@ export function useFlasher() {
 
   return {
     ...store,
+    // Derived booleans keep existing components unchanged while the store
+    // tracks full operation status.
+    runningFlash: isRunning('flash'),
+    runningBatchFlash: isRunning('batchFlash'),
+    runningWipe: isRunning('wipe'),
+    runningSideload: isRunning('sideload'),
+    runningSlotChange: isRunning('slotChange'),
+    runningCommand: isRunning('command'),
     syncFastbootDevices: syncDevices,
     chooseImageFile,
     chooseSideloadFile,

@@ -6,11 +6,13 @@ import {
   IconRefresh as RefreshCw,
   IconArrowRight as ArrowRight,
   IconLoader2 as Loader2,
-  IconWifiOff as WifiOff
+  IconWifiOff as WifiOff,
+  IconCamera as Camera,
 } from "@tabler/icons-react"
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { rebootDevice, disconnectWireless } from '@/services/deviceService'
+import { rebootDevice, disconnectWireless, takeDeviceScreenshot } from '@/services/deviceService'
+import { selectSaveFile } from '@/services/fileService'
 import { useDevices } from '@/hooks/useDevices'
 import { toast } from 'sonner'
 import type { DeviceState } from '@/lib/types'
@@ -77,6 +79,7 @@ export function DeviceActions() {
   const { activeSerial, deviceInfo, refreshing, refreshDevices } = useDevices()
   const [rebooting, setRebooting] = useState<string | null>(null)
   const [confirmMode, setConfirmMode] = useState<string | null>(null)
+  const [screenshotting, setScreenshotting] = useState(false)
 
   const state = deviceInfo?.state ?? 'unknown'
   const options = getOptionsForState(state)
@@ -96,6 +99,23 @@ export function DeviceActions() {
     } finally {
       setRebooting(null)
       setConfirmMode(null)
+    }
+  }
+
+    const handleScreenshot = async () => {
+    if (!activeSerial) return
+    const outputPath = await selectSaveFile(`screenshot-${Date.now()}.png`)
+    if (!outputPath.trim()) return
+    setScreenshotting(true)
+    try {
+      const message = await takeDeviceScreenshot(activeSerial, outputPath)
+      toast.success('Screenshot saved', { description: message })
+    } catch (e) {
+      toast.error('Screenshot failed', {
+        description: e instanceof Error ? e.message : String(e),
+      })
+    } finally {
+      setScreenshotting(false)
     }
   }
 
@@ -177,6 +197,23 @@ export function DeviceActions() {
                 )}
               </div>
             ))}
+
+            {state === 'device' && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 text-xs font-medium"
+                onClick={handleScreenshot}
+                disabled={screenshotting || rebooting !== null}
+              >
+                {screenshotting ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Camera className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+                )}
+                Screenshot
+              </Button>
+            )}
 
             {isWirelessDevice && (
               <div>

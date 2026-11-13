@@ -19,10 +19,10 @@ Unicode true
 ####
 ## The following information is taken from the wails_tools.nsh file, but they can be overwritten here.
 ####
-## !define INFO_PROJECTNAME    "ADBKit" # Default "ADBKit"
+## !define INFO_PROJECTNAME    "adbkit" # Default "adbkit"
 ## !define INFO_COMPANYNAME    "Drenzzz" # Default "Drenzzz"
-## !define INFO_PRODUCTNAME    "ADBKit" # Default "ADBKit"
-## !define INFO_PRODUCTVERSION "2.0.0" # Default "2.0.0"
+## !define INFO_PRODUCTNAME    "adbkit" # Default "adbkit"
+## !define INFO_PRODUCTVERSION "2.1.0" # Default "2.1.0"
 ## !define INFO_COPYRIGHT      "(c) 2026, Drenzzz" # Default "(c) 2026, Drenzzz"
 ###
 ## !define PRODUCT_EXECUTABLE  "Application.exe"      # Default "${INFO_PROJECTNAME}.exe"
@@ -38,7 +38,7 @@ Unicode true
 # Windows fixed file versions must be numeric; keep the prerelease label in the
 # string version keys below.
 !ifndef INFO_PRODUCTVERSION_NUMERIC
-!define INFO_PRODUCTVERSION_NUMERIC "2.0.0.0"
+!define INFO_PRODUCTVERSION_NUMERIC "2.1.0.0"
 !endif
 VIProductVersion "${INFO_PRODUCTVERSION_NUMERIC}"
 VIFileVersion    "${INFO_PRODUCTVERSION_NUMERIC}"

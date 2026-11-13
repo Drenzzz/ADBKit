@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { useAuditLogs } from '@/hooks/useAuditLogs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -189,6 +190,19 @@ export function AuditLogsPanel() {
 
   const [showClearDialog, setShowClearDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const virtualizer = useVirtualizer({
+    count: filteredLogs.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 44,
+    overscan: 8,
+  })
+
+  // Expanded rows change height, so the cached measurements must be dropped.
+  useEffect(() => {
+    virtualizer.measure()
+  }, [selectedAuditLogId, virtualizer])
 
   function toggleLevel(level: AuditLogLevel) {
     const current = auditLogFilters.levels
@@ -440,7 +454,7 @@ export function AuditLogsPanel() {
             <div className="col-span-1 text-right">Result</div>
           </div>
 
-          <div className="max-h-[350px] overflow-y-auto divide-y divide-[var(--border)]/40 dark:divide-[var(--border)]/40">
+          <div ref={scrollRef} className="max-h-[350px] overflow-y-auto">
             {loadingAuditLogs ? (
               <div className="flex flex-col gap-2 p-4">
                 <Skeleton className="h-8 w-full rounded-full animate-pulse" />
@@ -465,18 +479,42 @@ export function AuditLogsPanel() {
                 </span>
               </div>
             ) : (
-              filteredLogs.map((entry) => (
-                <AuditRow
-                  key={entry.id}
-                  entry={entry}
-                  isOpen={entry.id === selectedAuditLogId}
-                  onToggle={() =>
-                    setSelectedAuditLogId(
-                      entry.id === selectedAuditLogId ? null : entry.id,
-                    )
-                  }
-                />
-              ))
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  position: 'relative',
+                  width: '100%',
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualRow) => {
+                  const entry = filteredLogs[virtualRow.index]
+                  if (!entry) return null
+                  return (
+                    <div
+                      key={entry.id}
+                      data-index={virtualRow.index}
+                      ref={virtualizer.measureElement}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        transform: `translate3d(0, ${virtualRow.start}px, 0)`,
+                      }}
+                    >
+                      <AuditRow
+                        entry={entry}
+                        isOpen={entry.id === selectedAuditLogId}
+                        onToggle={() =>
+                          setSelectedAuditLogId(
+                            entry.id === selectedAuditLogId ? null : entry.id,
+                          )
+                        }
+                      />
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
         </div>

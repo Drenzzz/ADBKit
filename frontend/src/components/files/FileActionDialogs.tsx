@@ -47,7 +47,7 @@ interface FileActionDialogsProps {
 
   onPullConfirm: (localPath: string) => Promise<void>
   onPushConfirm: (localPath: string) => void
-  onPushFolderConfirm: (localPath: string) => void
+  onPushFolderConfirm: (localPaths: string[]) => void
   onRenameConfirm: (newName: string) => void
   onDeleteConfirm: () => void
   onNewFolderConfirm: (folderName: string) => void
@@ -58,6 +58,7 @@ interface FileActionDialogsProps {
   chooseLocalFile: () => Promise<string>
   chooseLocalSaveFile: (defaultFilename: string) => Promise<string>
   chooseLocalDirectory: () => Promise<string>
+  chooseMultipleLocalDirectories: () => Promise<string[]>
 }
 
 export function FileActionDialogs({
@@ -93,6 +94,7 @@ export function FileActionDialogs({
   chooseLocalFile,
   chooseLocalSaveFile,
   chooseLocalDirectory,
+  chooseMultipleLocalDirectories,
 }: FileActionDialogsProps) {
   const [renameValue, setRenameValue] = useState('')
   const [folderName, setFolderName] = useState('')
@@ -141,15 +143,15 @@ export function FileActionDialogs({
           <DialogHeader>
             <DialogTitle>Import Folder</DialogTitle>
             <DialogDescription>
-              Import a folder from PC to this device directory.
+              Import one or more folders from PC to this device directory.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsPushFolderDialogOpen(false)}>Cancel</Button>
             <Button onClick={async () => {
-              const path = await chooseLocalDirectory()
-              if (path) { onPushFolderConfirm(path); setIsPushFolderDialogOpen(false) }
-            }}>Choose Folder</Button>
+              const paths = await chooseMultipleLocalDirectories()
+              if (paths.length) { onPushFolderConfirm(paths); setIsPushFolderDialogOpen(false) }
+            }}>Choose Folders</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

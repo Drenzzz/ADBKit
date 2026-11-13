@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="ADBKit"
-VERSION="${VERSION:-2.0.0}"
+APP_NAME="adbkit"
+VERSION="${VERSION:-2.1.0}"
 BUILD_DIR="bin"
 APPIMAGE_TOOL="build/tools/appimagetool-x86_64.AppImage"
 APPIMAGE_OUT="build/AppImage-out"
@@ -29,9 +29,9 @@ mkdir -p "$APPDIR/usr/share/applications"
 mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
 
 cp "$BUILD_DIR/$APP_NAME" "$APPDIR/usr/bin/"
-cp "build/linux/$APP_NAME.desktop" "$APPDIR/"
-cp "build/appicon.png" "$APPDIR/$APP_NAME.png"
-cp "build/appicon.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png"
+cp "build/linux/com.drenzzz.adbkit.desktop" "$APPDIR/"
+cp "build/appicon.png" "$APPDIR/com.drenzzz.adbkit.png"
+cp "build/appicon.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/com.drenzzz.adbkit.png"
 
 cat > "$APPDIR/AppRun" << 'APPRUN'
 #!/usr/bin/env bash
@@ -39,7 +39,7 @@ SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
 export PATH="${HERE}/usr/bin:${PATH}"
 export LD_LIBRARY_PATH="${HERE}/usr/lib:${LD_LIBRARY_PATH:-}"
-exec "${HERE}/usr/bin/ADBKit" "$@"
+exec "${HERE}/usr/bin/adbkit" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
 

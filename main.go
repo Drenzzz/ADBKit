@@ -61,6 +61,11 @@ func main() {
 	app := application.New(application.Options{
 		Name:        "ADBKit",
 		Description: "Modern desktop toolkit for ADB, Fastboot, and scrcpy",
+		Linux: application.LinuxOptions{
+			// Must match StartupWMClass in the Linux .desktop file so docks
+			// can match the running window to its icon.
+			ApplicationID: "com.drenzzz.adbkit",
+		},
 		Services: []application.Service{
 			application.NewService(service),
 		},

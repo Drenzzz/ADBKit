@@ -4,7 +4,6 @@ interface UIState {
   theme: 'dark' | 'light'
   commandPaletteOpen: boolean
   startupLoading: boolean
-  toggleTheme: () => void
   setTheme: (theme: 'dark' | 'light') => void
   toggleCommandPalette: () => void
   setCommandPaletteOpen: (open: boolean) => void
@@ -16,26 +15,17 @@ function applyTheme(theme: 'dark' | 'light') {
 }
 
 function getInitialTheme(): 'dark' | 'light' {
-  const saved = localStorage.getItem('adbkit-theme')
-  if (saved === 'light' || saved === 'dark') return saved
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
+// Render-only theme state. The persisted value lives in config.json and is
+// synced in by AppShell/BottomDock once the config query resolves.
 export const useUIStore = create<UIState>((set) => ({
   theme: getInitialTheme(),
   commandPaletteOpen: false,
   startupLoading: true,
 
-  toggleTheme: () =>
-    set((state) => {
-      const next = state.theme === 'dark' ? 'light' : 'dark'
-      localStorage.setItem('adbkit-theme', next)
-      applyTheme(next)
-      return { theme: next }
-    }),
-
   setTheme: (theme) => {
-    localStorage.setItem('adbkit-theme', theme)
     applyTheme(theme)
     set({ theme })
   },

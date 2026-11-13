@@ -151,7 +151,7 @@ export function FileActionBar({
             disabled={refreshing}
           >
             <FolderPlus className="h-3.5 w-3.5 text-primary-foreground" />
-            Push Folder
+            Push Folders
           </Button>
 
           <Button

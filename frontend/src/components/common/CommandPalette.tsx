@@ -17,6 +17,7 @@ import {
 } from "@tabler/icons-react"
 import { useUIStore } from '@/stores/useUIStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
+import { useSettings } from '@/hooks/useSettings'
 import { getDevices } from '@/services/deviceService'
 import { toast } from 'sonner'
 
@@ -32,8 +33,15 @@ const routeCommands = [
 ]
 
 export function CommandPalette() {
-  const { commandPaletteOpen, setCommandPaletteOpen, theme, toggleTheme } = useUIStore()
+  const { commandPaletteOpen, setCommandPaletteOpen, theme, setTheme } = useUIStore()
+  const { setTheme: persistTheme } = useSettings()
   const navigate = useNavigate()
+
+  const handleToggleTheme = useCallback(() => {
+    const next: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    void persistTheme(next)
+  }, [theme, setTheme, persistTheme])
 
   const handleRefreshDevices = useCallback(async () => {
     setCommandPaletteOpen(false)
@@ -143,7 +151,7 @@ export function CommandPalette() {
             <Command.Item
               value="Toggle theme"
               onSelect={() => {
-                toggleTheme()
+                handleToggleTheme()
                 setCommandPaletteOpen(false)
               }}
               className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"

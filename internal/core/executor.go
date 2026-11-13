@@ -163,31 +163,40 @@ func RunCommandStreaming(ctx context.Context, req StreamingExecRequest) (*ExecRe
 	}
 
 	var stdoutBuf bytes.Buffer
+	var stderrBuf bytes.Buffer
 	var bufMu sync.Mutex
 	var wg sync.WaitGroup
+	var scanErr error
 
-	scan := func(r io.Reader, capture bool) {
+	scan := func(r io.Reader, capture *bytes.Buffer) {
 		defer wg.Done()
 		scanner := bufio.NewScanner(r)
 		scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 		scanner.Split(scanProgressLines)
 		for scanner.Scan() {
 			line := scanner.Text()
-			if capture && line != "" {
+			if capture != nil && line != "" {
 				bufMu.Lock()
-				stdoutBuf.WriteString(line)
-				stdoutBuf.WriteByte('\n')
+				capture.WriteString(line)
+				capture.WriteByte('\n')
 				bufMu.Unlock()
 			}
 			if req.OnStderrLine != nil {
 				req.OnStderrLine(line)
 			}
 		}
+		if err := scanner.Err(); err != nil {
+			bufMu.Lock()
+			if scanErr == nil {
+				scanErr = err
+			}
+			bufMu.Unlock()
+		}
 	}
 
 	wg.Add(2)
-	go scan(stdoutPipe, true)
-	go scan(stderrPipe, false)
+	go scan(stdoutPipe, &stdoutBuf)
+	go scan(stderrPipe, &stderrBuf)
 
 	waitErr := cmd.Wait()
 	wg.Wait()
@@ -204,8 +213,13 @@ func RunCommandStreaming(ctx context.Context, req StreamingExecRequest) (*ExecRe
 		}
 	}
 
+	if scanErr != nil && waitErr == nil {
+		return nil, NewOperationError("exec", "failed to read process output", scanErr.Error(), true)
+	}
+
 	result := &ExecResult{
 		Stdout:   stdoutBuf.String(),
+		Stderr:   stderrBuf.String(),
 		ExitCode: exitCode,
 	}
 	return result, waitErr

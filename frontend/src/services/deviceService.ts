@@ -5,6 +5,7 @@ import {
   GetDeviceInfo,
   GetDeviceMode,
   RebootDevice,
+  TakeDeviceScreenshot,
   ConnectWireless,
   EnableWirelessTCPIP,
   DisconnectWireless,
@@ -52,6 +53,13 @@ export async function rebootDevice(
   mode: string = 'system',
 ): Promise<string> {
   return RebootDevice(serial ?? '', mode)
+}
+
+export async function takeDeviceScreenshot(
+  serial: string,
+  outputPath: string,
+): Promise<string> {
+  return TakeDeviceScreenshot(serial, outputPath)
 }
 
 export async function connectWireless(address: string): Promise<string> {

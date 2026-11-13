@@ -15,7 +15,7 @@ type PlatformToolsSelection struct {
 }
 
 type ScrcpyDirectorySelection struct {
-	Directory string `json:"directory"`
+	Directory  string `json:"directory"`
 	ScrcpyPath string `json:"scrcpyPath"`
 }
 
@@ -162,6 +162,24 @@ func (s *Service) SelectDirectory() (string, error) {
 		return "", err
 	}
 	return dir, nil
+}
+
+// SelectMultipleDirectories opens the same directory picker with multi
+// selection enabled, so several folders can be pushed in one batch.
+func (s *Service) SelectMultipleDirectories() ([]string, error) {
+	if s.ctx == nil {
+		return nil, core.NewOperationError("select_multiple_directories", "application context is not initialized", "", true)
+	}
+	dirs, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
+		Title:                   "Select directories",
+		CanChooseDirectories:    true,
+		CanChooseFiles:          false,
+		AllowsMultipleSelection: true,
+	}).PromptForMultipleSelection()
+	if err != nil {
+		return nil, err
+	}
+	return dirs, nil
 }
 
 func (s *Service) SelectMultipleFiles() ([]string, error) {
