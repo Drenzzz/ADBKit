@@ -19,7 +19,7 @@ export function TransferProgressOverlay({
   const label = direction === 'pull' ? 'Exporting' : 'Importing'
 
   return (
-    <div className="fixed bottom-20 left-1/2 z-50 w-[360px] -translate-x-1/2 rounded-lg border border-border/60 bg-background/95 px-4 py-3 shadow-lg backdrop-blur-sm">
+    <div className="fixed bottom-20 left-1/2 z-50 w-[360px] -translate-x-1/2 rounded-lg border border-border/60 bg-background/95 px-4 py-3 shadow-[var(--shadow-floating)] backdrop-blur-sm">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">

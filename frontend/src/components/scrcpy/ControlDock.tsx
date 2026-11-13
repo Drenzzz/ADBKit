@@ -68,7 +68,7 @@ export function ControlDock({
 }: ControlDockProps) {
   return (
     <div
-      className={`flex items-center gap-1.5 rounded-full border border-[var(--border)]/50 dark:border-[var(--border)]/50 bg-card/70 dark:bg-[var(--muted)]/70 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md transition-colors duration-300 ${
+      className={`flex items-center gap-1.5 rounded-full border border-[var(--border)]/50 dark:border-[var(--border)]/50 bg-card/70 dark:bg-[var(--muted)]/70 p-1.5 shadow-[var(--shadow-floating)] backdrop-blur-md transition-colors duration-300 ${
         className ?? ''
       }`}
     >

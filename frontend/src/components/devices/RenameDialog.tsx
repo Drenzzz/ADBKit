@@ -45,7 +45,7 @@ export function RenameDialog({ serial, currentNickname, onClose }: {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       <div className="fixed inset-0 bg-background/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-sm rounded-lg border border-border bg-popover p-5 shadow-lg">
+      <div className="relative z-10 w-full max-w-sm rounded-lg border border-border bg-popover p-5 shadow-[var(--shadow-floating)]">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold">Rename device</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">

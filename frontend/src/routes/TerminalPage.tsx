@@ -555,7 +555,7 @@ export default function TerminalPage() {
               <div className="absolute left-0 top-3 -ml-3">
                 <Button
                   size="icon"
-                  className="h-6 w-6 rounded-full p-0 shadow-md border border-border dark:border-[var(--terminal-border)] bg-background dark:bg-[var(--terminal-surface)] text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-muted)] cursor-pointer"
+                  className="h-6 w-6 rounded-full p-0 shadow-[var(--shadow-card)] border border-border dark:border-[var(--terminal-border)] bg-background dark:bg-[var(--terminal-surface)] text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-muted)] cursor-pointer"
                   onClick={() => setShowHistory(false)}
                 >
                   <X className="h-3.5 w-3.5" />

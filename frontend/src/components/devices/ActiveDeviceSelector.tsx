@@ -45,7 +45,7 @@ export function ActiveDeviceSelector() {
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 z-50 mb-1 w-56 overflow-hidden rounded-md border border-border bg-popover shadow-md">
+        <div className="absolute bottom-full left-0 z-50 mb-1 w-56 overflow-hidden rounded-md border border-border bg-popover shadow-[var(--shadow-floating)]">
           {devices.map((device) => (
             <button
               key={device.serial}
