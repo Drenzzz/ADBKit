@@ -136,7 +136,7 @@ export function BinarySetupStep() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {ready ? (
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+              <CheckCircle2 className="h-4 w-4 text-success" />
             ) : (
               <span className="block h-1.5 w-1.5 rounded-full bg-muted-foreground/40" aria-hidden />
             )}

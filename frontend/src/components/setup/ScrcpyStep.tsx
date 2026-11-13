@@ -26,8 +26,8 @@ type RowState = 'ready' | 'missing' | 'downloading'
 function StatusPill({ state }: { state: RowState }) {
   const map: Record<RowState, { classes: string; dot: string; label: string }> = {
     ready: {
-      classes: 'text-emerald-600 dark:text-emerald-300',
-      dot: 'bg-emerald-500',
+      classes: 'text-success',
+      dot: 'bg-success',
       label: 'Ready',
     },
     missing: {
@@ -275,9 +275,9 @@ export function ScrcpyStep({ embedded = false, autoScan = true }: { embedded?: b
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={reduced ? { duration: 0 } : { duration: 0.2 }}
-                className="flex items-start gap-2 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300"
+                className="flex items-start gap-2 rounded-lg border border-warning/35 bg-warning/10 px-3 py-2 text-sm text-warning"
               >
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-warning" />
                 <span>Scrcpy is required to proceed. Link an existing binary or use automatic download.</span>
               </motion.div>
             )}

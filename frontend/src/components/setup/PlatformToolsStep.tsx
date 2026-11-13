@@ -26,8 +26,8 @@ type RowState = 'ready' | 'missing' | 'downloading'
 function StatusPill({ state }: { state: RowState }) {
   const map: Record<RowState, { classes: string; dot: string; label: string }> = {
     ready: {
-      classes: 'text-emerald-600 dark:text-emerald-300',
-      dot: 'bg-emerald-500',
+      classes: 'text-success',
+      dot: 'bg-success',
       label: 'Ready',
     },
     missing: {
@@ -299,11 +299,11 @@ export function PlatformToolsStep({ embedded = false }: { embedded?: boolean }) 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={reduced ? { duration: 0 } : { duration: 0.2 }}
-            className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-3 py-2"
+            className="flex items-center justify-between gap-3 rounded-lg border border-warning/35 bg-warning/10 px-3 py-2"
           >
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              <p className="text-sm text-amber-700 dark:text-amber-300">{error}</p>
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <p className="text-sm text-warning">{error}</p>
             </div>
             <Button variant="outline" size="sm" onClick={handleScan} className="h-7 shrink-0 text-xs">
               Retry

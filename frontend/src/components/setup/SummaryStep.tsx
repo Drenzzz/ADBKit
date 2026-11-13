@@ -14,7 +14,7 @@ function BinarySummaryRow({ label, info }: { label: string; info?: BinaryInfo })
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium text-foreground">{label}</span>
         <span className="inline-flex items-center gap-1.5 text-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
           {info?.version ?? 'ready'}
         </span>
       </div>
@@ -67,7 +67,7 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
       >
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-emerald-500/35 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-success/35 bg-success/10 text-success">
               <Check className="h-3.5 w-3.5" />
             </div>
             <h2 className="text-2xl font-semibold tracking-tight text-foreground">You are ready.</h2>

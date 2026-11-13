@@ -37,12 +37,12 @@ export function EncoderBadge({ codec }: { codec: ScrcpyCodecSupport }) {
             <span className="font-mono">{codec.codec}</span>
             <span className="text-muted-foreground">({codec.encoderName})</span>
             {codec.hardware && !isAlias && (
-              <span className="rounded bg-emerald-500/20 px-1 text-[10px] text-emerald-400">
+              <span className="rounded bg-success/20 px-1 text-[10px] text-success">
                 HW
               </span>
             )}
             {!codec.hardware && !isAlias && (
-              <span className="rounded bg-zinc-500/20 px-1 text-[10px] text-muted-foreground">
+              <span className="rounded bg-muted px-1 text-[10px] text-muted-foreground">
                 SW
               </span>
             )}
@@ -78,11 +78,11 @@ export function EncoderLegend() {
   return (
     <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
       <span className="flex items-center gap-1">
-        <LegendChip label="HW" className="bg-emerald-500/20 text-emerald-400" />
+        <LegendChip label="HW" className="bg-success/20 text-success" />
         hardware
       </span>
       <span className="flex items-center gap-1">
-        <LegendChip label="SW" className="bg-zinc-500/20 text-muted-foreground" />
+        <LegendChip label="SW" className="bg-muted text-muted-foreground" />
         software
       </span>
       <span className="flex items-center gap-1">
