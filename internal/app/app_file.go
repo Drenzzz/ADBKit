@@ -44,6 +44,12 @@ func (a *App) PushMultipleFiles(localPaths []string, remoteDirectory string) (st
 	})
 }
 
+func (a *App) PushMultiplePaths(localPaths []string, remoteDirectory string) (string, error) {
+	return auditAction(a, "push_multiple_paths", func() (string, error) {
+		return a.fileSvc.PushMultiplePaths(a.ctx, localPaths, remoteDirectory)
+	})
+}
+
 func (a *App) DeleteFile(remotePath string) (string, error) {
 	return auditAction(a, "delete_file", func() (string, error) {
 		return a.fileSvc.DeleteFile(a.ctx, remotePath)
@@ -92,6 +98,10 @@ func (a *App) SelectFile() (string, error) {
 
 func (a *App) SelectDirectory() (string, error) {
 	return a.diaSvc.SelectDirectory()
+}
+
+func (a *App) SelectMultipleDirectories() ([]string, error) {
+	return a.diaSvc.SelectMultipleDirectories()
 }
 
 func (a *App) SelectMultipleFiles() ([]string, error) {

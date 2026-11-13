@@ -6,6 +6,7 @@ import {
   PullMultipleFiles,
   PushFile,
   PushMultipleFiles,
+  PushMultiplePaths,
   DeleteFile,
   DeleteMultipleFiles,
   CreateDirectory,
@@ -13,6 +14,7 @@ import {
   SelectFile,
   SelectSavePath,
   SelectDirectory,
+  SelectMultipleDirectories,
   SelectMultipleFiles,
   CancelFileTransfer,
   ListSdCards,
@@ -66,6 +68,15 @@ export async function selectMultipleFiles(): Promise<string[]> {
 
 export async function selectDirectory(): Promise<string> {
   return SelectDirectory()
+}
+
+export async function selectMultipleDirectories(): Promise<string[]> {
+  const result = await SelectMultipleDirectories()
+  return result ?? []
+}
+
+export async function pushMultiplePaths(localPaths: string[], remoteDirectory: string): Promise<string> {
+  return PushMultiplePaths(localPaths, remoteDirectory)
 }
 
 export async function pullFile(remotePath: string, localPath: string): Promise<string> {
