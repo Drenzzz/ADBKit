@@ -15,10 +15,24 @@ provides:
 contents:
   - src: "./bin/adbkit"
     dst: /usr/bin/adbkit
-  - src: "./build/linux/adbkit.desktop"
-    dst: /usr/share/applications/adbkit.desktop
-  - src: "./build/linux/appicon.png"
-    dst: /usr/share/icons/hicolor/256x256/apps/adbkit.png
+  - src: "./build/linux/com.drenzzz.adbkit.desktop"
+    dst: /usr/share/applications/com.drenzzz.adbkit.desktop
+  - src: "./build/linux/icons/16x16/apps/com.drenzzz.adbkit.png"
+    dst: /usr/share/icons/hicolor/16x16/apps/com.drenzzz.adbkit.png
+  - src: "./build/linux/icons/24x24/apps/com.drenzzz.adbkit.png"
+    dst: /usr/share/icons/hicolor/24x24/apps/com.drenzzz.adbkit.png
+  - src: "./build/linux/icons/32x32/apps/com.drenzzz.adbkit.png"
+    dst: /usr/share/icons/hicolor/32x32/apps/com.drenzzz.adbkit.png
+  - src: "./build/linux/icons/48x48/apps/com.drenzzz.adbkit.png"
+    dst: /usr/share/icons/hicolor/48x48/apps/com.drenzzz.adbkit.png
+  - src: "./build/linux/icons/64x64/apps/com.drenzzz.adbkit.png"
+    dst: /usr/share/icons/hicolor/64x64/apps/com.drenzzz.adbkit.png
+  - src: "./build/linux/icons/128x128/apps/com.drenzzz.adbkit.png"
+    dst: /usr/share/icons/hicolor/128x128/apps/com.drenzzz.adbkit.png
+  - src: "./build/linux/icons/256x256/apps/com.drenzzz.adbkit.png"
+    dst: /usr/share/icons/hicolor/256x256/apps/com.drenzzz.adbkit.png
+  - src: "./build/linux/icons/512x512/apps/com.drenzzz.adbkit.png"
+    dst: /usr/share/icons/hicolor/512x512/apps/com.drenzzz.adbkit.png
 
 depends:
   - libgtk-4-1

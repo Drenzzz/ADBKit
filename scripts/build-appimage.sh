@@ -29,9 +29,9 @@ mkdir -p "$APPDIR/usr/share/applications"
 mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
 
 cp "$BUILD_DIR/$APP_NAME" "$APPDIR/usr/bin/"
-cp "build/linux/$APP_NAME.desktop" "$APPDIR/"
-cp "build/appicon.png" "$APPDIR/$APP_NAME.png"
-cp "build/appicon.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/$APP_NAME.png"
+cp "build/linux/com.drenzzz.adbkit.desktop" "$APPDIR/"
+cp "build/appicon.png" "$APPDIR/com.drenzzz.adbkit.png"
+cp "build/appicon.png" "$APPDIR/usr/share/icons/hicolor/256x256/apps/com.drenzzz.adbkit.png"
 
 cat > "$APPDIR/AppRun" << 'APPRUN'
 #!/usr/bin/env bash

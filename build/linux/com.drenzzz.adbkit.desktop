@@ -2,9 +2,10 @@
 Type=Application
 Name=ADBKit
 Exec=adbkit
-Icon=adbkit
+Icon=com.drenzzz.adbkit
 Categories=Development;
 Terminal=false
 Keywords=wails
 Version=1.0
 StartupNotify=false
+StartupWMClass=com.drenzzz.adbkit

@@ -2,6 +2,9 @@ version: '3'
 
 vars:
   APP_NAME: "adbkit"
+  # Wayland/X11 app id. Must match Linux.ApplicationID in main.go.
+  # Do not name this APP_ID: wails3 injects its own APP_ID (com.wails.app).
+  APP_DESKTOP_ID: "com.drenzzz.adbkit"
   BIN_DIR: "bin"
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "bun"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
