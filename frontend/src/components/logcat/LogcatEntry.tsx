@@ -39,7 +39,7 @@ export const LogcatEntry = memo(function LogcatEntry({ entry }: LogcatEntryProps
       <span className="shrink-0 text-muted-foreground tabular-nums w-16 text-right select-none">
         {entry.pid}/{entry.tid}
       </span>
-      <span className="shrink-0 text-cyan-400/80 truncate max-w-[180px]">
+      <span className="shrink-0 text-info/80 truncate max-w-[180px]">
         {entry.tag}
       </span>
       <span className={cn('flex-1 truncate', levelColor)}>

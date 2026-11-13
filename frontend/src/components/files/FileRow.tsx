@@ -61,7 +61,7 @@ function FileIcon({ name, type }: { name: string; type: FileEntry['type'] }) {
   }
   // Archives
   if (['zip', 'rar', 'tar', 'gz', '7z', 'bz2', 'xz'].includes(ext)) {
-    return <Archive className="h-4 w-4 text-yellow-500 fill-yellow-500/10 shrink-0" />
+    return <Archive className="h-4 w-4 text-warning fill-warning/10 shrink-0" />
   }
   // Code / configs
   if (

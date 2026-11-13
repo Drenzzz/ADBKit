@@ -19,12 +19,12 @@ function DeviceRow({ device, nickname, isActive, onSelect }: {
   onSelect: () => void
 }) {
   const stateColor = device.state === 'device'
-    ? 'text-green-500'
+    ? 'text-success'
     : device.state === 'unauthorized'
-      ? 'text-yellow-500'
+      ? 'text-warning'
       : device.state === 'offline'
         ? 'text-muted-foreground'
-        : 'text-blue-400'
+        : 'text-info'
 
   const displayName = nickname || device.model || device.product || device.serial
 
