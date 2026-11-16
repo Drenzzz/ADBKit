@@ -1,5 +1,12 @@
 # ADBKit Frontend Design System
 
+> **Status: SUPERSEDED — in transition.** The app is migrating from the shadcn
+> token system to the Astryx design system with a custom "Violet Ink" theme.
+> This document describes the legacy system. The new source of truth is being
+> built under `src/themes/violet-ink/` and will replace this document at the
+> end of the migration (STEP-028). Sections marked **[legacy]** no longer
+> describe the code.
+
 Source of truth for the ADBKit desktop UI. Everything here is derived from
 `frontend/src/index.css` and the components in `frontend/src/components/ui/`.
 If code and this document disagree, fix the code or update this document in
@@ -7,7 +14,51 @@ the same commit.
 
 ---
 
-## 1. Identity
+## 0. Token Strategy — Astryx migration (active) 
+
+### Why the app keeps its own utility names
+
+The Astryx Tailwind bridge (`@astryxdesign/core/tailwind-theme.css`) exposes
+Tailwind utilities from Astryx system tokens. Eleven of those utility names
+collide with names this app already uses, with **different meanings**:
+
+| Utility | ADBKit meaning | Astryx meaning |
+|---|---|---|
+| `bg-primary` | accent fill (button) | text-primary color (as a background) |
+| `text-primary-foreground` | text on accent | n/a (text-primary) |
+| `bg-secondary` | muted fill | text-secondary color |
+| `bg-muted` | muted fill | background-muted |
+| `text-muted-foreground` | secondary text | n/a |
+| `bg-accent` | subtle hover fill | text-accent color |
+| `border-border` | hairline | border (same meaning) |
+| `bg-card` | panel surface | background-card (same meaning) |
+| `bg-popover` | overlay surface | background-popover (same meaning) |
+| `bg-secondary-foreground` | text on muted | n/a |
+| `rounded-sm/md/lg/xl` | 0.6×/0.8×/1×/1.4× of 0.75rem | inner/element/container/page |
+
+**Resolution:** the app's `@theme inline` block is declared **after** the
+Astryx imports in `index.css`, so the app's mappings win. App utilities
+(`bg-primary`, `bg-card`, `text-muted-foreground`, …) keep their ADBKit
+meanings but now **resolve to Astryx system tokens**
+(`--color-accent`, `--color-background-card`, `--color-text-secondary`, …).
+Changing the active Astryx theme therefore re-skins the whole app without
+renaming a single utility class.
+
+### Custom components (no Astryx equivalent — stay in-house)
+
+- `Sparkline` — inline trend chart (Live Monitor, PerformancePanel)
+- Virtualized lists — `@tanstack/react-virtual` (package table, file table)
+- `BottomDock` — the app's signature macOS-style dock
+- Icons — Tabler (`@tabler/icons-react`), not the Astryx icon registry
+
+### Domain tokens (terminal, logcat, charts, glow, traffic lights)
+
+These move into the theme as `localTokens` so they follow the active theme.
+Until the theme lands they remain defined in `index.css` `:root`/`.dark`.
+
+---
+
+## 1. Identity **[legacy]**
 
 ADBKit is a dense, dark-first desktop workbench for Android device work
 (adb, fastboot, scrcpy). The visual language is Apple/macOS-like pro tool:
@@ -21,7 +72,7 @@ iOS app.
 - No gradients as decoration, no glow outside state indicators, no emoji in
   the UI.
 
-## 2. Color
+## 2. Color **[legacy]**
 
 All colors are OKLCH in `index.css`, hue 265 (cool graphite). Two themes:
 `:root` (light) and `.dark`. Never hardcode palette hexes or Tailwind
@@ -80,7 +131,7 @@ keep the pattern, do not migrate these to semantic tokens.
 - Glow (`--glow-*`) is a state indicator on running badges, not decoration.
 - Borders are hairlines (`--border` or foreground alpha 6–12%).
 
-## 3. Typography
+## 3. Typography **[legacy]**
 
 - Family: Google Sans Flex Variable (`@fontsource-variable/google-sans-flex`),
   loaded in `index.css`, applied globally via `html { @apply font-sans }`.
@@ -90,23 +141,17 @@ keep the pattern, do not migrate these to semantic tokens.
   Nothing above 600.
 - Tracking: `-0.02em` on large headings only, `-0.01em` on medium headings,
   none below that. No wide tracking on labels, no uppercase transforms.
-- Numbers: `tabular-nums` (`.github-star-count` sets the example) and one
-  format per screen.
-- Sizes come from `clamp()` per context (hero `3rem→4.75rem`, section
-  `1.9→3rem`, sub-headings `1.35→2rem`). Keep the existing clamps.
+- Numbers: `tabular-nums` and one format per screen.
 
-## 4. Spacing and radius
+## 4. Spacing and radius **[legacy]**
 
-- 4px grid everywhere. Section rhythm is uniform: `6rem 0` vertical padding
-  for every page section (`.section`, `.download-section`, `.download-help`,
-  `.final-cta`, `.download-hero`, `.donate-hero`).
-- Panels/cards: `p-4`–`p-6`. Page edges: `site-container`.
+- 4px grid everywhere.
 - Radius is derived from `--radius: 0.75rem`:
   `sm .6× / md .8× / lg 1× / xl 1.4× / 2xl 1.8× / 3xl 2.2× / 4xl 2.6×`.
 - `rounded-full` is reserved for pills: action bars, chips, avatars, badges,
   search inputs, and the dock. Cards and panels use `rounded-xl`/`rounded-2xl`.
 
-## 5. Elevation
+## 5. Elevation **[legacy]**
 
 Three shadow tiers, theme-aware, defined once in `index.css`:
 
@@ -116,60 +161,29 @@ Three shadow tiers, theme-aware, defined once in `index.css`:
 | `--shadow-raised` | raised | info cards, raised panels |
 | `--shadow-floating` | floating | dock, dialogs, command palette, popovers, transfer overlay |
 
-Rules:
-
-- App components must use these tokens (`shadow-[var(--shadow-card)]` etc.).
-  Tailwind `shadow-md/lg/xl` are allowed only inside `components/ui/`
-  primitives where shadcn defaults live.
-- Inset shadows (`inset 0 1px 2px ...`) are control details (inset input
-  wells), not elevation — they are exempt.
-- Blur (`backdrop-blur`) only on Floating tier. Never blur inside
-  virtualized lists.
-- Dark theme depth comes from surface steps and hairlines, not bigger
-  shadows.
-
-## 6. Components
+## 6. Components **[legacy]**
 
 Two layers:
 
 1. **Primitives** — `frontend/src/components/ui/` (27 files). 24 shadcn-style
-   (alert-dialog, badge, button, card, checkbox, dialog, dropdown-menu,
-   input, kbd, label, popover, progress, radio-group, scroll-area, select,
-   separator, skeleton, slider, switch, table, tabs, tooltip, alert, avatar)
-   plus 3 in-house:
-   - `Sparkline` — inline trend, takes `color` (default `currentColor`).
-   - `StatTile` — stat card with `valueTone: default | success | warning |
-     danger | info`.
-   - `toast` — Base UI toast wrapper.
+   plus 3 in-house: `Sparkline`, `StatTile`, `toast`.
 2. **Domain components** — `components/{apps,dashboard,devices,files,
    flasher,layout,logcat,scrcpy,settings,setup,terminal,common}/`. They
    compose primitives and must not re-implement them.
 
-Conventions:
-
-- Variants via `cn()` + `cva`, never string concatenation.
-- Buttons: primary `bg-primary text-primary-foreground`, secondary
-  `border-border bg-transparent`. Hover = surface change, active =
-  `translate-y-px` (already in `button.tsx`).
-- Destructive confirmations go through `alert-dialog`.
-- Every list surface has empty / loading (skeleton) / error states.
-- Route components stay thin; compose domain panels instead of inlining logic.
-
 ## 7. Motion
 
-- One engine: `motion/react`. GSAP/Framer-class libraries are not allowed in
-  the app (the marketing website is separate and may use GSAP).
+- One engine: `motion/react`. GSAP/Framer-class libraries are not allowed.
 - Durations: 150–250ms for feedback and transitions. Easing:
   `[0.16, 1, 0.3, 1]` (or `ease-out` for micro feedback).
-- Animate only `transform` and `opacity`. Never width/height/top/left/
-  box-shadow/backdrop-filter. Hover = surface change or `scale ≤1.02`;
-  press = tiny scale down.
-- At most one entrance animation per screen (`hero-rise` pattern is the
-  reference: 700ms rise+fade, `both` fill).
+- Animate only `transform` and `opacity`.
 - Reduced motion is a contract: every JS animation checks
   `useReducedMotion()`, CSS fallback in `index.css` under
-  `@media (prefers-reduced-motion: reduce)` (zero durations). Content must
-  never get stuck at `opacity: 0` for reduced-motion users.
+  `@media (prefers-reduced-motion: reduce)`. Content must never get stuck at
+  `opacity: 0` for reduced-motion users.
+- During the Astryx migration, prefer Astryx motion tokens
+  (`--duration-*`, `--ease-*`) for new CSS transitions; the theme sets
+  `character: 'expressive'`.
 
 ## 8. Icons
 
@@ -187,41 +201,17 @@ Conventions:
 - Add new domain tokens to `index.css` (both themes) before using them.
 - Keep route components thin; compose panels.
 - Gate every new animation behind reduced-motion.
-- Use `shadow-[var(--shadow-*)]` from the three tiers.
 
 **Don't**
 
 - Hardcode zinc/slate/emerald/amber classes — map to semantic tokens.
 - Introduce a second state library or animation engine.
-- Animate layout properties or animate blur.
-- Put accent color on paragraphs or multiple elements per surface.
-- Blur inside virtualized lists.
 - Store important state in `localStorage` (theme lives in config.json; the
   setup-wizard draft is the only allowed exception).
 - Import generated Wails bindings outside `src/services/`.
 
 ## 10. Migration status
 
-All hardcoded palette references in app components have been migrated to
-semantic tokens (terminal, setup, scrcpy, files, settings, flasher, device
-states, logcat tags). Remaining intentional colors:
-
-- File-type category colors in `FileRow.tsx` (functional coding, §2).
-- `components/ui/` shadcn defaults (`shadow-sm/md/lg` allowed there).
-- Inset control shadows.
-
-If you find a stray zinc/emerald class, map it to the closest token in §2
-and delete it rather than adding it back.
-
-## 11. Theming
-
-- Tokens are CSS custom properties. Light values live in `:root`, dark
-  overrides in `.dark`. Tailwind v4 `@theme inline` maps them to utilities
-  (`bg-card`, `text-muted-foreground`, …).
-- Adding a token: define it in `:root` and `.dark`, add a
-  `--color-<name>: var(--<name>)` mapping in `@theme inline`, then use
-  `bg-<name>` / `text-<name>` utilities.
-- Theme switching: `.dark` class on `document.documentElement`, applied by
-  `useUIStore`. Persisted in `config.json` (not localStorage).
-- After changing tokens, run `bun run build` and visually check light and
-  dark on Dashboard, Files, Terminal, and Settings before committing.
+The shadcn → Astryx migration is in progress (branch `ui/redesign`). See
+§0 for the active token strategy. This section and the legacy sections above
+will be replaced when the migration completes.
