@@ -4,6 +4,7 @@ import { RouteErrorBoundary } from '@/components/common/ErrorBoundary'
 import { AppShell } from '@/components/layout/AppShell'
 
 const DashboardPage = lazy(() => import('@/routes/DashboardPage'))
+const FoundationCheckPage = lazy(() => import('@/routes/FoundationCheckPage'))
 const DevicesPage = lazy(() => import('@/routes/DevicesPage'))
 const AppsPage = lazy(() => import('@/routes/AppsPage'))
 const FilesPage = lazy(() => import('@/routes/FilesPage'))
@@ -37,6 +38,10 @@ export const router = createHashRouter([
     path: '/',
     element: <AppShell />,
     children: [
+      {
+        path: '__foundation',
+        element: routeElement(<FoundationCheckPage />),
+      },
       {
         index: true,
         element: routeElement(<DashboardPage />),
