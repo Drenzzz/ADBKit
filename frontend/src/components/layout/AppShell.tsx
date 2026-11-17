@@ -12,10 +12,6 @@ const CommandPalette = lazy(() =>
   import('@/components/common/CommandPalette').then(({ CommandPalette: Component }) => ({ default: Component })),
 )
 
-function applyThemeClass(theme: 'dark' | 'light') {
-  document.documentElement.classList.toggle('dark', theme === 'dark')
-}
-
 function StartupLoader() {
   return (
     <div className="flex h-screen items-center justify-center bg-background text-foreground">
@@ -50,7 +46,6 @@ export function AppShell() {
         const nextTheme = config.theme === 'light' ? 'light' : 'dark'
         if (nextTheme !== currentTheme) {
           setUiTheme(nextTheme)
-          applyThemeClass(nextTheme)
         }
         setSetupComplete(state.setupCompleted)
         setSetupChecked(true)
