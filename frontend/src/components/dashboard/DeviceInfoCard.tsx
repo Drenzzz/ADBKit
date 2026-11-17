@@ -24,7 +24,7 @@ export function DeviceInfoCard() {
   return (
     <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
       <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4">
-        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+        <CardTitle className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
           <Info className="h-3.5 w-3.5" />
           Device Specifications
         </CardTitle>

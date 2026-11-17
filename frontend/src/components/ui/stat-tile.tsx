@@ -64,7 +64,7 @@ function StatTile({
           data={trend}
           height={trendHeight}
           width={120}
-          color={trendColor ?? 'var(--primary)'}
+          color={trendColor ?? 'var(--color-accent)'}
           className="w-full mt-0.5"
         />
       )}

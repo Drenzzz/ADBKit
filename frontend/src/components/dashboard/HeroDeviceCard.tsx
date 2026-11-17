@@ -126,7 +126,7 @@ export function HeroDeviceCard({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold tracking-tight text-foreground truncate">
+              <h2 className="text-lg font-semibold tracking-tight text-foreground truncate">
                 {displayName}
               </h2>
               <span className="flex h-2 w-2 relative shrink-0">

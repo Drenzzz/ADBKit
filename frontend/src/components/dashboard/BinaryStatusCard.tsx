@@ -56,7 +56,7 @@ export function BinaryStatusCard() {
   return (
     <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
       <CardHeader className="pb-2 pt-4 px-4">
-        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+        <CardTitle className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5" />
           Binary Diagnostics
         </CardTitle>

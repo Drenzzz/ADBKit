@@ -92,7 +92,7 @@ export default function DashboardPage() {
     >
       {/* Header Greeting */}
       <motion.div variants={itemVariants} className="flex flex-col gap-1">
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
           {getTimeGreeting()}
         </h1>
         <p className="text-sm text-muted-foreground font-medium">

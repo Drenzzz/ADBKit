@@ -33,10 +33,6 @@ const navItems = [
 
 const HIDE_DELAY_MS = 300
 
-function applyThemeClass(theme: 'dark' | 'light') {
-  document.documentElement.classList.toggle('dark', theme === 'dark')
-}
-
 export function BottomDock() {
   const reduced = useReducedMotion()
   const navigate = useNavigate()
@@ -54,14 +50,12 @@ export function BottomDock() {
     const next = appConfig.theme === 'light' ? 'light' : 'dark'
     if (next !== theme) {
       setLocalTheme(next)
-      applyThemeClass(next)
     }
   }, [appConfig, theme, setLocalTheme])
 
   function handleToggleTheme() {
     const next: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark'
     setLocalTheme(next)
-    applyThemeClass(next)
     void persistTheme(next)
   }
 
@@ -113,7 +107,7 @@ export function BottomDock() {
             className={cn(
               'fixed bottom-2 left-1/2 z-40 -translate-x-1/2',
               'flex items-center gap-1.5 rounded-full px-3 py-1',
-              'border border-border/50 bg-popover/80 dark:bg-popover/80 shadow-[var(--shadow-floating)] backdrop-blur-sm',
+              'border border-border/50 bg-popover/80 shadow-[var(--shadow-floating)] backdrop-blur-sm',
               'text-muted-foreground hover:text-foreground transition-colors cursor-pointer',
             )}
           >
@@ -135,7 +129,7 @@ export function BottomDock() {
             className={cn(
               'fixed bottom-3 left-1/2 z-50 -translate-x-1/2',
               'flex items-center gap-0.5 px-3 py-1.5',
-              'rounded-2xl border border-border/50 bg-popover/80 dark:bg-popover/80 shadow-[var(--shadow-floating)] backdrop-blur-sm',
+              'rounded-2xl border border-border/50 bg-popover/80 shadow-[var(--shadow-floating)] backdrop-blur-sm',
             )}
             onMouseEnter={handleDockMouseEnter}
             onMouseLeave={handleDockMouseLeave}
@@ -184,7 +178,7 @@ export function BottomDock() {
                     {/* Active route indicator bar */}
                     {isActive && (
                       <motion.div
-                        className="pointer-events-none absolute bottom-0.5 left-1/2 w-2/5 -translate-x-1/2 origin-center h-[2.5px] rounded-full bg-primary shadow-[0_0_8px_var(--primary)]"
+                        className="pointer-events-none absolute bottom-0.5 left-1/2 w-2/5 -translate-x-1/2 origin-center h-[2.5px] rounded-full bg-primary shadow-[0_0_8px_var(--color-accent)]"
                         initial={{ opacity: 0, scaleX: 0 }}
                         animate={{ opacity: 1, scaleX: 1 }}
                         exit={{ opacity: 0, scaleX: 0 }}
