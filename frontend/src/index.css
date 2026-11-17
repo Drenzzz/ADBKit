@@ -29,8 +29,10 @@
   --color-card-foreground: var(--color-text-primary);
   --color-popover: var(--color-background-popover);
   --color-popover-foreground: var(--color-text-primary);
-  --color-primary: var(--color-accent);
+  --color-primary: var(--color-text-accent);
   --color-primary-foreground: var(--color-on-accent);
+  --color-primary-container: var(--color-accent);
+  --color-primary-container-foreground: var(--color-on-accent);
   --color-secondary: var(--color-background-muted);
   --color-secondary-foreground: var(--color-text-secondary);
   --color-muted: var(--color-background-muted);

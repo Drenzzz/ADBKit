@@ -105,7 +105,7 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
             </div>
             <div className="h-2 w-full bg-border/50 rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full bg-primary transition-colors duration-500"
+                className="h-full rounded-full bg-primary-container transition-colors duration-500"
                 style={{ width: `${storagePercent}%` }}
               />
             </div>

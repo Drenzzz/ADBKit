@@ -15,7 +15,7 @@ export default function FoundationCheckPage() {
           </span>
           <button
             type="button"
-            className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground"
+            className="rounded-md bg-primary-container px-3 py-1.5 text-sm text-primary-foreground"
           >
             Tailwind utility on plain button
           </button>

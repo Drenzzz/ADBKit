@@ -172,7 +172,7 @@ export function FlasherHeader() {
             <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => applyActiveSlot(pendingSlot)}
-              className="rounded-full bg-primary hover:bg-primary/95 text-primary-foreground border-0 shadow-sm"
+              className="rounded-full bg-primary-container hover:bg-primary-container/90 text-primary-foreground border-0 shadow-sm"
             >
               Switch to Slot {pendingSlot.toUpperCase()}
             </AlertDialogAction>

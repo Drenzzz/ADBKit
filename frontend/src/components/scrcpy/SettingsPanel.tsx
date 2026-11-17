@@ -62,7 +62,7 @@ export function SettingsPanel({
                 setClipboardDraft('')
               }}
               disabled={!clipboardDraft || !isConnected}
-              className="absolute right-1 top-1 bottom-1 h-7 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-[10px] px-3 border-0 transition-[colors,transform] active:scale-[0.96]"
+              className="absolute right-1 top-1 bottom-1 h-7 rounded-full bg-primary-container hover:bg-primary-container/90 text-primary-foreground font-semibold text-[10px] px-3 border-0 transition-[colors,transform] active:scale-[0.96]"
             >
               Push
             </Button>

@@ -136,7 +136,7 @@ export function FileActionBar({
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary-container text-primary-foreground hover:bg-primary-container/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
             onClick={onPushFiles}
             disabled={refreshing}
           >
@@ -146,7 +146,7 @@ export function FileActionBar({
 
           <Button
             size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary-container text-primary-foreground hover:bg-primary-container/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
             onClick={onPushFolder}
             disabled={refreshing}
           >
@@ -156,7 +156,7 @@ export function FileActionBar({
 
           <Button
             size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary-container text-primary-foreground hover:bg-primary-container/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
             onClick={onNewFolder}
             disabled={refreshing}
           >

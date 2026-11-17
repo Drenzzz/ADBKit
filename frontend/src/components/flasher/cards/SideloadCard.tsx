@@ -87,7 +87,7 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
         </div>
 
         <Button
-          className="w-full rounded-full bg-primary hover:bg-primary/95 text-primary-foreground border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer text-xs font-semibold shadow-sm h-9 mt-4"
+          className="w-full rounded-full bg-primary-container hover:bg-primary-container/90 text-primary-foreground border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer text-xs font-semibold shadow-sm h-9 mt-4"
           onClick={() => setConfirmOpen(true)}
           disabled={disabled || !hasDevice || !hasFile || runningSideload}
         >
@@ -124,7 +124,7 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
             <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => { setConfirmOpen(false); executeSideload() }}
-              className="rounded-full bg-primary hover:bg-primary/95 text-primary-foreground border-0 shadow-sm"
+              className="rounded-full bg-primary-container hover:bg-primary-container/90 text-primary-foreground border-0 shadow-sm"
             >
               Start Sideload
             </AlertDialogAction>

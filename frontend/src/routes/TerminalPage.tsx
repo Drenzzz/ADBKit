@@ -468,7 +468,7 @@ export default function TerminalPage() {
                 ) : (
                   <Button
                     size="sm"
-                    className="h-7 text-xs font-semibold px-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer shadow-sm gap-1.5"
+                    className="h-7 text-xs font-semibold px-4 rounded-full bg-primary-container text-primary-foreground hover:bg-primary-container/90 border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer shadow-sm gap-1.5"
                     onClick={handleConnect}
                     disabled={connecting || !canConnect(mode)}
                   >
@@ -514,7 +514,7 @@ export default function TerminalPage() {
               <Button
                 type="submit"
                 size="sm"
-                className="h-8 gap-1.5 text-xs shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer px-4 shadow-sm font-semibold"
+                className="h-8 gap-1.5 text-xs shrink-0 rounded-full bg-primary-container text-primary-foreground hover:bg-primary-container/90 border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer px-4 shadow-sm font-semibold"
                 disabled={!connected || !session || command.trim() === ''}
               >
                 <CornerDownLeft className="h-3.5 w-3.5" />

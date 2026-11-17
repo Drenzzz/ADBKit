@@ -37,7 +37,7 @@ function StatusPill({ state }: { state: RowState }) {
     },
     downloading: {
       classes: 'text-primary',
-      dot: 'bg-primary',
+      dot: 'bg-primary-container',
       label: 'Downloading',
     },
   }

@@ -18,7 +18,7 @@ export function HeroEmptyState({ refreshing, onRefresh }: HeroEmptyStateProps) {
         <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/40 border border-border/60 text-muted-foreground">
           <Smartphone className="h-8 w-8" />
           <span className="absolute -top-1.5 -right-1.5 flex h-3.5 w-3.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-60" />
             <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-primary/80" />
           </span>
         </div>

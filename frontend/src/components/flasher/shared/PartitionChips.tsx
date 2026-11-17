@@ -57,7 +57,7 @@ export function PartitionChips({ selected, onSelect, disabled }: PartitionChipsP
               className={cn(
                 "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border transition-colors duration-200 cursor-pointer outline-none select-none",
                 isSelected
-                  ? "bg-primary border-primary text-primary-foreground shadow-sm scale-[1.03]"
+                  ? "bg-primary-container border-primary text-primary-foreground shadow-sm scale-[1.03]"
                   : "bg-background dark:bg-card border-border text-muted-foreground hover:text-foreground hover:bg-accent",
                 disabled && "opacity-40 cursor-not-allowed pointer-events-none"
               )}

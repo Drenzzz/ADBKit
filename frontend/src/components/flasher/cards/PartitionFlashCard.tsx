@@ -86,7 +86,7 @@ export function PartitionFlashCard({ disabled }: PartitionFlashCardProps) {
         </div>
 
         <Button
-          className="w-full rounded-full bg-primary hover:bg-primary/95 text-primary-foreground border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer text-xs font-semibold shadow-sm h-9 mt-4"
+          className="w-full rounded-full bg-primary-container hover:bg-primary-container/90 text-primary-foreground border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer text-xs font-semibold shadow-sm h-9 mt-4"
           onClick={executeFlashPartition}
           disabled={!canFlash || runningFlash}
         >

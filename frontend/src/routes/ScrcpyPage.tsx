@@ -240,7 +240,7 @@ export default function ScrcpyPage() {
 
                 <Button
                   size="lg"
-                  className="mt-8 w-56 gap-2 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-xs h-10 shadow-sm cursor-pointer transition-[colors,transform] active:scale-[0.97]"
+                  className="mt-8 w-56 gap-2 rounded-full bg-primary-container hover:bg-primary-container/90 text-primary-foreground font-semibold text-xs h-10 shadow-sm cursor-pointer transition-[colors,transform] active:scale-[0.97]"
                   onClick={() => handleStart(scrcpyOptions)}
                   disabled={isStarting || !activeSerial}
                 >

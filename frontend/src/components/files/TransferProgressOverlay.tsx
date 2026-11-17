@@ -28,7 +28,7 @@ export function TransferProgressOverlay({
           </div>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              className="h-full rounded-full bg-primary-container transition-[width] duration-300"
               style={{ width: `${percent}%` }}
             />
           </div>

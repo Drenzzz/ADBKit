@@ -285,7 +285,7 @@ export function PreferencesPanel({
             size="sm"
             onClick={onSave}
             disabled={!hasChanges || saving}
-            className="rounded-full h-8 text-xs font-semibold cursor-pointer bg-primary hover:bg-primary/95 text-primary-foreground border-0 shadow-sm transition-[colors,transform] active:scale-[0.96]"
+            className="rounded-full h-8 text-xs font-semibold cursor-pointer bg-primary-container hover:bg-primary-container/90 text-primary-foreground border-0 shadow-sm transition-[colors,transform] active:scale-[0.96]"
           >
             {saving ? (
               <>

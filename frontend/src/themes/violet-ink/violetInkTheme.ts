@@ -32,8 +32,17 @@ export const violetInkTheme = defineTheme({
   },
   tokens: {
     // Keep generated roles connected to the accepted palette.
-    '--color-accent': [palette.violet.light[45], palette.violet.dark[60]],
+    // --color-accent is the DEEP fill (buttons, chips): white label on it is
+    // 5.75:1 (AA). --color-text-accent / --color-icon-accent are the BRIGHT
+    // tone for text, icons, and active indicators on dark surfaces (7.07:1
+    // on card). M3 tonal split: fill and text cannot be one color here —
+    // the deep fill alone fails 3:1 against the dark card as text.
+    '--color-accent': [palette.violet.light[45], palette.violet.light[45]],
     '--color-on-accent': ['#FFFFFF', '#FFFFFF'],
+    '--color-text-accent': ['#5B46BA', palette.violet.dark[70]],
+    '--color-icon-accent': ['#5B46BA', palette.violet.dark[70]],
+    // Override the neutral theme's blue accent-muted (leaked #0082fb33).
+    '--color-accent-muted': ['rgba(102,83,202,0.16)', 'rgba(165,157,255,0.20)'],
     // Warm graphite canvases (dark-first app).
     '--color-background-body': ['#F7F4EF', '#12100E'],
     '--color-background-surface': ['#FFFFFF', '#1A1714'],

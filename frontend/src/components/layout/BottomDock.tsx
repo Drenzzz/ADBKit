@@ -178,7 +178,7 @@ export function BottomDock() {
                     {/* Active route indicator bar */}
                     {isActive && (
                       <motion.div
-                        className="pointer-events-none absolute bottom-0.5 left-1/2 w-2/5 -translate-x-1/2 origin-center h-[2.5px] rounded-full bg-primary shadow-[0_0_8px_var(--color-accent)]"
+                        className="pointer-events-none absolute bottom-0.5 left-1/2 w-2/5 -translate-x-1/2 origin-center h-[2.5px] rounded-full bg-primary-container shadow-[0_0_8px_var(--color-accent)]"
                         initial={{ opacity: 0, scaleX: 0 }}
                         animate={{ opacity: 1, scaleX: 1 }}
                         exit={{ opacity: 0, scaleX: 0 }}
