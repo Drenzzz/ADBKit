@@ -88,4 +88,15 @@ export const violetInkTheme = defineTheme({
     '--traffic-light-yellow': '#ffbd2e',
     '--traffic-light-green': '#27c93f',
   },
+  components: {
+    // Collapsed nav rail: 16px glyphs read as specks in a 56px rail.
+    icon: {
+      'size:sm': { width: '20px', height: '20px' },
+    },
+    // The collapsed rail defaults to 48px (--spacing-12) — too tight for a
+    // 20px glyph plus its hit area.
+    'side-nav': {
+      base: { width: '56px' },
+    },
+  },
 })

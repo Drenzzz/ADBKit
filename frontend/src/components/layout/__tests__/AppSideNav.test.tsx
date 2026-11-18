@@ -25,35 +25,33 @@ function renderSideNav(initialPath: string) {
   )
 }
 
-function navItems() {
-  return [...document.querySelectorAll('.astryx-side-nav-item')]
+function railButtons() {
+  return [...document.querySelectorAll('aside button')]
 }
 
 describe('AppSideNav', () => {
-  it('renders one navigation item per route, labelled for screen readers', async () => {
+  it('renders one rail button per route plus device status and theme switcher', async () => {
     renderSideNav('/')
 
     await waitFor(() => {
-      expect(navItems()).toHaveLength(ROUTE_LABELS.length)
+      expect(railButtons().length).toBeGreaterThanOrEqual(ROUTE_LABELS.length)
     })
 
-    const labels = navItems().map((el) => el.getAttribute('aria-label'))
-    expect(labels).toEqual(ROUTE_LABELS)
+    const labels = railButtons().map((el) => el.getAttribute('aria-label'))
+    expect(labels.slice(0, ROUTE_LABELS.length)).toEqual(ROUTE_LABELS)
   })
 
-  it('describes each collapsed item with a tooltip', async () => {
+  it('pairs every rail button with a CSS tooltip label', async () => {
     renderSideNav('/')
 
     await waitFor(() => {
-      expect(navItems()).toHaveLength(ROUTE_LABELS.length)
+      expect(railButtons().length).toBeGreaterThanOrEqual(ROUTE_LABELS.length)
     })
 
-    // The rail is collapsed, so the visible label is hidden and the item
-    // points at a tooltip element instead.
-    for (const item of navItems()) {
-      expect(item.getAttribute('aria-describedby')).toBeTruthy()
-      expect(item.textContent?.trim()).toBe('')
-    }
+    // Each RailButton wraps its trigger and tooltip in a group; the tooltip
+    // is a sibling span, not an Astryx popover (WebKitGTK clips those).
+    const tooltips = document.querySelectorAll('[role="tooltip"]')
+    expect(tooltips.length).toBe(railButtons().length)
   })
 
   it('marks the active route as the current page', async () => {

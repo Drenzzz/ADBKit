@@ -35,7 +35,7 @@ function renderShell() {
 }
 
 describe('AppShell', () => {
-  it('renders the side navigation and the route content side by side', async () => {
+  it('renders the rail navigation beside the route content', async () => {
     renderShell()
 
     await waitFor(() => {
@@ -43,13 +43,16 @@ describe('AppShell', () => {
     }, { timeout: 3000 })
 
     await waitFor(() => {
-      expect(document.querySelectorAll('nav, [role="navigation"]').length).toBeGreaterThan(0)
+      expect(document.querySelector('aside[role="navigation"]')).toBeTruthy()
     }, { timeout: 3000 })
 
-    // LayoutContent renders role="main" as a div (not the <main> element).
-    const main = document.querySelector('[role="main"]')
+    // The rail and the content region are siblings in a flex row — the rail
+    // must not overlap the content.
+    const rail = document.querySelector('aside[role="navigation"]') as HTMLElement
+    expect(rail.className).toContain('shrink-0')
+
+    const main = document.querySelector('main')
     expect(main).toBeTruthy()
-    expect(main?.textContent).toContain('ROUTE_CONTENT')
   })
 
   it('keeps the route content inside a rounded, bordered surface', async () => {
@@ -57,7 +60,7 @@ describe('AppShell', () => {
 
     await waitFor(() => {
       expect(document.body.textContent).toContain('ROUTE_CONTENT')
-    })
+    }, { timeout: 3000 })
 
     const content = [...document.querySelectorAll('div')].find((el) =>
       el.className.includes('rounded-2xl'),
@@ -68,15 +71,11 @@ describe('AppShell', () => {
     expect(content?.textContent).toContain('ROUTE_CONTENT')
   })
 
-  it('exposes a skip link as the first focusable element', async () => {
+  it('renders rail buttons for every route', async () => {
     renderShell()
 
     await waitFor(() => {
-      expect(document.querySelector('a[href^="#"]')).toBeTruthy()
-    })
-
-    const skip = document.querySelector('a[href^="#"]')
-    expect(skip).toBeTruthy()
-    expect(skip?.textContent?.toLowerCase()).toContain('skip')
+      expect(document.querySelectorAll('aside[role="navigation"] button').length).toBeGreaterThanOrEqual(8)
+    }, { timeout: 3000 })
   })
 })

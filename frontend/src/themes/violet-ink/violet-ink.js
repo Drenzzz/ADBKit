@@ -479,6 +479,17 @@ export const violetInkTheme = {
       "base": {
         "padding": "var(--spacing-3)"
       }
+    },
+    "icon": {
+      "size:sm": {
+        "width": "20px",
+        "height": "20px"
+      }
+    },
+    "side-nav": {
+      "base": {
+        "width": "56px"
+      }
     }
   },
   __onDark: {

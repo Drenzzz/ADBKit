@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import { AppShell as AstryxAppShell } from '@astryxdesign/core/AppShell'
 import { AppSideNav } from './AppSideNav'
 import { SetupWizard } from '@/components/setup/SetupWizard'
 import { getSetupState } from '@/services/binaryService'
@@ -79,28 +78,20 @@ export function AppShell() {
   return (
     <>
       <DeviceSync />
-      <div data-file-drop-target="app" className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-        <AstryxAppShell
-          className="min-h-0 flex-1"
-          height="fill"
-          contentPadding={0}
-          variant="section"
-          sideNav={<AppSideNav />}
-          mobileNav={{ breakpoint: 'md' }}
-        >
-          <div className="flex h-full min-h-0 w-full flex-col p-3">
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card">
-              <div
-                className={cn(
-                  'flex min-h-0 flex-1 flex-col',
-                  isNoGlobalScroll ? 'overflow-hidden' : 'overflow-y-auto',
-                )}
-              >
-                <Outlet />
-              </div>
+      <div data-file-drop-target="app" className="flex h-screen overflow-hidden bg-background text-foreground">
+        <AppSideNav />
+        <main className="flex min-w-0 flex-1 flex-col p-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card">
+            <div
+              className={cn(
+                'flex min-h-0 flex-1 flex-col',
+                isNoGlobalScroll ? 'overflow-hidden' : 'overflow-y-auto',
+              )}
+            >
+              <Outlet />
             </div>
           </div>
-        </AstryxAppShell>
+        </main>
         <Suspense fallback={null}>
           <CommandPalette />
         </Suspense>

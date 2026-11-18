@@ -561,6 +561,15 @@
     --astryx-section-padding: var(--spacing-3);
   }
 
+  .astryx-icon[data-size="sm"] {
+    --_icon-width: 20px;
+    --_icon-height: 20px;
+  }
+
+  .astryx-side-nav {
+    width: 56px;
+  }
+
   .astryx-text[data-color="primary"] { color: var(--color-text-primary); }
 
   .astryx-heading[data-color="primary"] { color: var(--color-text-primary); }
