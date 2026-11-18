@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { cn } from '@/lib/utils'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -6,100 +7,71 @@ import { WelcomeStep } from './WelcomeStep'
 import { BinarySetupStep } from './BinarySetupStep'
 import { SummaryStep } from './SummaryStep'
 import type { SetupWizardStep } from '@/lib/types'
-import {
-  IconCircleCheck as CheckCircle2,
-  IconHelp as HelpCircle,
-  IconTerminal as Terminal,
-  type Icon as TablerIcon
-} from "@tabler/icons-react"
 
-const STEPS: { key: SetupWizardStep; label: string; icon: TablerIcon }[] = [
-  { key: 'welcome', label: 'Welcome', icon: HelpCircle },
-  { key: 'setup-binary', label: 'Setup binary', icon: Terminal },
-  { key: 'finish', label: 'Finish', icon: CheckCircle2 },
-]
+const STEP_ORDER: SetupWizardStep[] = ['welcome', 'setup-binary', 'finish']
 
-function SidebarStepper({ current }: { current: SetupWizardStep }) {
-  const currentIdx = STEPS.findIndex((s) => s.key === current)
+const STEP_LABELS: Record<SetupWizardStep, string> = {
+  welcome: 'Welcome',
+  'setup-binary': 'Setup binary',
+  finish: 'Finish',
+}
+
+function ProgressStepper({ current }: { current: SetupWizardStep }) {
+  const currentIdx = STEP_ORDER.indexOf(current)
   const reduced = useReducedMotion()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   return (
-    <div className="flex flex-col gap-6">
-      <div
-        className="flex items-center gap-3 px-1"
-        style={{
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(6px)',
-          transition: reduced
-            ? 'none'
-            : 'opacity 320ms cubic-bezier(0.32, 0.72, 0, 1), transform 320ms cubic-bezier(0.32, 0.72, 0, 1)',
-        }}
-      >
-        <img src="/logo.webp" alt="ADBKit" className="h-8 w-8 object-contain" />
-        <div className="flex flex-col">
-          <span className="select-none text-sm font-semibold tracking-tight text-foreground">
-            ADBKit
-          </span>
-          <span className="select-none text-xs text-muted-foreground">Setup</span>
-        </div>
-      </div>
-
-      <nav className="relative flex gap-2 overflow-x-auto lg:flex-col lg:gap-1">
-        {STEPS.map((step, i) => {
-          const active = i === currentIdx
-          const done = i < currentIdx
-          const Icon = step.icon
-
-          return (
-            <div
-              key={step.key}
-              className={cn(
-                'relative flex min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-2 select-none transition-colors duration-200 lg:flex-none lg:px-1.5',
-                active
-                  ? 'text-foreground'
-                  : done
-                    ? 'text-muted-foreground'
-                    : 'text-muted-foreground/55',
-              )}
-              aria-current={active ? 'step' : undefined}
-              style={{
-                opacity: mounted ? 1 : 0,
-                transform: mounted ? 'translateY(0)' : 'translateY(6px)',
-                transition: reduced
-                  ? 'none'
-                  : `opacity 320ms cubic-bezier(0.32, 0.72, 0, 1) ${80 + i * 60}ms, transform 320ms cubic-bezier(0.32, 0.72, 0, 1) ${80 + i * 60}ms`,
-              }}
-            >
-              <div
-                className={cn(
-                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors duration-200',
-                  active
-                    ? 'border-foreground bg-foreground text-background'
-                    : done
-                      ? 'border-foreground/40 text-foreground/70'
-                      : 'border-border text-muted-foreground/55',
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" />
-              </div>
+    <ol className="flex items-center gap-2" aria-label="Setup progress">
+      {STEP_ORDER.map((step, i) => {
+        const active = i === currentIdx
+        const done = i < currentIdx
+        return (
+          <li key={step} className="flex items-center gap-2">
+            {i > 0 && (
               <span
                 className={cn(
-                  'whitespace-nowrap text-sm transition-colors duration-200 lg:whitespace-normal',
-                  active ? 'font-medium' : 'font-normal',
+                  'h-px w-5 transition-colors duration-300',
+                  done || active ? 'bg-primary/40' : 'bg-border',
+                )}
+                aria-hidden
+              />
+            )}
+            <span
+              className={cn(
+                'relative inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[14px] transition-colors duration-300',
+                active
+                  ? 'font-medium text-foreground'
+                  : done
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground/60',
+              )}
+              aria-current={active ? 'step' : undefined}
+            >
+              {active && !reduced && (
+                <motion.span
+                  layoutId="setup-step-surface"
+                  className="absolute inset-0 -z-10 rounded-full bg-primary/10"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                />
+              )}
+              <span
+                className={cn(
+                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[14px] font-medium',
+                  active
+                    ? 'bg-primary text-primary-foreground'
+                    : done
+                      ? 'bg-primary/20 text-primary'
+                      : 'bg-muted text-muted-foreground',
                 )}
               >
-                {step.label}
+                {done ? '✓' : i + 1}
               </span>
-            </div>
-          )
-        })}
-      </nav>
-    </div>
+              {STEP_LABELS[step]}
+            </span>
+          </li>
+        )
+      })}
+    </ol>
   )
 }
 
@@ -116,19 +88,53 @@ function StepContent({ step, onComplete }: { step: SetupWizardStep; onComplete?:
 
 export function SetupWizard({ onComplete }: { onComplete?: () => void }) {
   const currentStep = useSetupWizardStore((s) => s.currentStep)
+  const reduced = useReducedMotion()
+  const [direction, setDirection] = useState(1)
+  const [prevStepKey, setPrevStepKey] = useState<SetupWizardStep | null>(null)
+
+  useEffect(() => {
+    const idx = STEP_ORDER.indexOf(currentStep)
+    const prevIdx = prevStepKey ? STEP_ORDER.indexOf(prevStepKey) : idx
+    if (idx !== prevIdx) setDirection(idx > prevIdx ? 1 : -1)
+    setPrevStepKey(currentStep)
+  }, [currentStep, prevStepKey])
+
+  const variants = {
+    enter: (dir: number) => (reduced ? { opacity: 0 } : { opacity: 0, x: dir * 32 }),
+    center: { opacity: 1, x: 0 },
+    exit: (dir: number) => (reduced ? { opacity: 0 } : { opacity: 0, x: dir * -32 }),
+  }
 
   return (
-    <div className="flex min-h-[100dvh] w-full items-center justify-center bg-background px-4 py-6 text-foreground sm:px-6 lg:px-10">
-      <div className="grid min-h-[min(640px,calc(100dvh-3rem))] w-full max-w-5xl overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[var(--shadow-floating)] lg:grid-cols-[220px_minmax(0,1fr)]">
-        <aside className="flex flex-col justify-between border-b border-border/50 p-5 lg:border-b-0 lg:border-r">
-          <SidebarStepper current={currentStep} />
-        </aside>
-
-        <main className="min-w-0 overflow-y-auto px-6 py-8 sm:px-10 sm:py-10 lg:px-14 lg:py-12">
-          <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col justify-center">
-            <StepContent step={currentStep} onComplete={onComplete} />
+    <div className="flex min-h-0 w-full flex-1 items-center justify-center bg-background p-4 text-foreground sm:p-6">
+      <div className="flex max-h-full min-h-0 w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-floating)]">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-8 py-5">
+          <div className="flex items-center gap-3">
+            <img src="/logo.webp" alt="" className="h-9 w-9 object-contain" />
+            <div className="flex flex-col">
+              <span className="text-[16px] font-semibold leading-tight text-foreground">ADBKit</span>
+              <span className="text-[14px] leading-tight text-muted-foreground">Setup</span>
+            </div>
           </div>
-        </main>
+          <ProgressStepper current={currentStep} />
+        </header>
+
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-8 py-8 sm:px-12">
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div
+              key={currentStep}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={reduced ? { duration: 0 } : { duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col justify-center"
+            >
+              <StepContent step={currentStep} onComplete={onComplete} />
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   )

@@ -68,7 +68,7 @@ export function AppShell() {
   if (!setupComplete) {
     return (
       <div data-file-drop-target="app" className="flex min-h-[100dvh] flex-col overflow-hidden bg-background text-foreground">
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <SetupWizard onComplete={() => setSetupComplete(true)} />
         </main>
       </div>

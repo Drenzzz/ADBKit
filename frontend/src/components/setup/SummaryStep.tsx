@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { motion } from 'motion/react'
 import {
   IconCheck as Check
 } from "@tabler/icons-react"
@@ -8,19 +9,27 @@ import { completeSetup } from '@/services/binaryService'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { BinaryInfo } from '@/lib/types'
 
+function versionOf(raw?: string): string | null {
+  if (!raw) return null
+  const withoutUrl = raw.replace(/<[^>]*>/g, '').trim()
+  const match = withoutUrl.match(/\d+(?:\.\d+)*[^\s]*/)
+  return match ? match[0] : withoutUrl
+}
+
 function BinarySummaryRow({ label, info }: { label: string; info?: BinaryInfo }) {
+  const version = versionOf(info?.version)
   return (
-    <div className="flex flex-col gap-1 py-2">
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-medium text-foreground">{label}</span>
-        <span className="inline-flex items-center gap-1.5 text-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
-          {info?.version ?? 'ready'}
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3.5">
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-[16px] font-medium text-foreground">{label}</span>
+        <span className="truncate font-mono text-[13px] text-muted-foreground">
+          {info?.path ?? 'not configured'}
         </span>
       </div>
-      <div className="truncate text-xs text-muted-foreground">
-        {info?.path ?? 'not configured'}
-      </div>
+      <span className="inline-flex items-center gap-2 font-mono text-[13px] text-foreground">
+        <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden />
+        {version ?? 'ready'}
+      </span>
     </div>
   )
 }
@@ -30,11 +39,6 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
   const [submitting, setSubmitting] = useState(false)
   const [done, setDone] = useState(false)
   const reduced = useReducedMotion()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const handleFinish = async () => {
     setSubmitting(true)
@@ -51,79 +55,81 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
   }
 
   const transition = reduced
-    ? 'none'
-    : 'opacity 320ms cubic-bezier(0.32, 0.72, 0, 1), transform 320ms cubic-bezier(0.32, 0.72, 0, 1)'
+    ? { duration: 0 }
+    : { duration: 0.32, ease: [0.16, 1, 0.3, 1] as const }
 
   if (done) {
     return (
       <div
-        className="flex w-full flex-col gap-5 text-left"
+        className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 text-center"
         aria-live="polite"
-        style={{
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(8px)',
-          transition,
-        }}
       >
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-success/35 bg-success/10 text-success">
-              <Check className="h-3.5 w-3.5" />
-            </div>
-            <h2 className="text-2xl font-semibold tracking-tight text-foreground">You are ready.</h2>
+        <motion.div
+          className="flex flex-col items-center gap-4"
+          initial={reduced ? false : { opacity: 0, scale: 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 26 }}
+        >
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-success/35 bg-success/10 text-success">
+            <Check className="h-8 w-8" />
           </div>
-          <p className="max-w-lg text-sm leading-6 text-muted-foreground">
-            The local toolchain is configured. Launch ADBKit to start managing connected devices.
-          </p>
-        </div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground">You are ready</h1>
+            <p className="max-w-md text-[16px] leading-7 text-muted-foreground">
+              The local toolchain is configured. Launch ADBKit to start managing connected devices.
+            </p>
+          </div>
+        </motion.div>
 
-        <div className="flex justify-end border-t border-border/30 pt-5">
-          <Button onClick={onComplete} size="sm" className="h-8 px-5">
+        <motion.div
+          initial={reduced ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={reduced ? { duration: 0 } : { delay: 0.18, duration: 0.3 }}
+        >
+          <Button onClick={onComplete} size="lg" className="h-11 px-7 text-[16px]">
             Launch ADBKit
           </Button>
-        </div>
+        </motion.div>
       </div>
     )
   }
 
   return (
-    <div
-      className="flex w-full flex-col gap-6 text-left"
-      style={{
-        opacity: mounted ? 1 : 0,
-        transform: mounted ? 'translateY(0)' : 'translateY(8px)',
-        transition,
-      }}
-    >
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.6rem]">Finish setup.</h1>
-        <p className="max-w-lg text-sm leading-6 text-muted-foreground">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <motion.header
+        className="flex flex-col gap-1.5"
+        initial={reduced ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={transition}
+      >
+        <h1 className="text-4xl font-semibold tracking-tight text-foreground">Finish setup</h1>
+        <p className="max-w-xl text-[16px] leading-7 text-muted-foreground">
           Review the resolved paths, then write the configuration locally.
         </p>
-      </header>
+      </motion.header>
 
-      <div className="flex flex-col gap-3 rounded-xl border border-border/50 bg-background p-5">
-        <div className="border-b border-border/30 pb-2 text-xs text-muted-foreground">
-          Local Environment
-        </div>
-        <div className="flex flex-col divide-y divide-border/30">
-          <BinarySummaryRow label="ADB" info={setupState?.status?.adb} />
-          <BinarySummaryRow label="Fastboot" info={setupState?.status?.fastboot} />
-          <BinarySummaryRow label="Scrcpy" info={setupState?.status?.scrcpy} />
-        </div>
-      </div>
+      <motion.div
+        className="mt-8 flex flex-col rounded-xl border border-border bg-background px-5 py-2"
+        initial={reduced ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={reduced ? { duration: 0 } : { duration: 0.32, delay: 0.06, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <BinarySummaryRow label="ADB" info={setupState?.status?.adb} />
+        <BinarySummaryRow label="Fastboot" info={setupState?.status?.fastboot} />
+        <BinarySummaryRow label="Scrcpy" info={setupState?.status?.scrcpy} />
+      </motion.div>
 
-      <footer className="flex items-center justify-between border-t border-border/30 pt-5">
-        <Button variant="ghost" size="sm" onClick={prevStep} disabled={submitting} className="h-8">
+      <footer className="mt-auto flex items-center justify-between gap-3 pt-6">
+        <Button variant="ghost" size="lg" onClick={prevStep} disabled={submitting} className="h-11">
           Back
         </Button>
         <Button
           onClick={handleFinish}
           disabled={submitting || !setupState?.canFinish}
-          size="sm"
-          className="h-8 px-5"
+          size="lg"
+          className="h-11 px-7 text-[16px]"
         >
-          {submitting ? 'Writing config...' : 'Finish Setup'}
+          {submitting ? 'Writing config…' : 'Finish setup'}
         </Button>
       </footer>
     </div>
