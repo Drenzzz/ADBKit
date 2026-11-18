@@ -88,13 +88,17 @@ export function AppShell() {
           sideNav={<AppSideNav />}
           mobileNav={{ breakpoint: 'md' }}
         >
-          <div
-            className={cn(
-              'flex h-full min-h-0 w-full flex-col p-6',
-              isNoGlobalScroll ? 'overflow-hidden' : 'overflow-y-auto',
-            )}
-          >
-            <Outlet />
+          <div className="flex h-full min-h-0 w-full flex-col p-3">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card">
+              <div
+                className={cn(
+                  'flex min-h-0 flex-1 flex-col',
+                  isNoGlobalScroll ? 'overflow-hidden' : 'overflow-y-auto',
+                )}
+              >
+                <Outlet />
+              </div>
+            </div>
           </div>
         </AstryxAppShell>
         <Suspense fallback={null}>
