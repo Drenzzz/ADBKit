@@ -81,6 +81,7 @@ export function AppShell() {
       <DeviceSync />
       <div data-file-drop-target="app" className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
         <AstryxAppShell
+          className="min-h-0 flex-1"
           height="fill"
           contentPadding={0}
           variant="section"
@@ -89,7 +90,7 @@ export function AppShell() {
         >
           <div
             className={cn(
-              'flex h-full min-h-0 w-full flex-col',
+              'flex h-full min-h-0 w-full flex-col p-6',
               isNoGlobalScroll ? 'overflow-hidden' : 'overflow-y-auto',
             )}
           >

@@ -9,7 +9,9 @@ import {
   IconCast as MonitorPlay,
   IconSettings as Settings,
 } from '@tabler/icons-react'
-import { SideNav, SideNavItem, SideNavSection } from '@astryxdesign/core/SideNav'
+import { SideNav, SideNavHeading, SideNavItem, SideNavSection } from '@astryxdesign/core/SideNav'
+import { NavIcon } from '@astryxdesign/core/NavIcon'
+import { Icon } from '@astryxdesign/core/Icon'
 import { AppSideNavFooter } from './AppSideNavFooter'
 
 const NAV_ITEMS = [
@@ -28,7 +30,15 @@ export function AppSideNav() {
   const location = useLocation()
 
   return (
-    <SideNav collapsible={{ defaultIsCollapsed: true, hasButton: false }}>
+    <SideNav
+      collapsible={{ defaultIsCollapsed: true, hasButton: false }}
+      header={
+        <SideNavHeading
+          heading="ADBKit"
+          icon={<NavIcon icon={<Icon icon={Smartphone} size="sm" />} />}
+        />
+      }
+    >
       <SideNavSection title="Workspace" isHeaderHidden>
         {NAV_ITEMS.map((item) => {
           const isSelected =
