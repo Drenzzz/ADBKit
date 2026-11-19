@@ -1,3 +1,6 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Violet Ink (by request) · nav: icon rail kept · signature: live telemetry chart and tonal meters kept · states: connected, offline, loading, empty
+ * Hallmark · pre-emit critique: P8 H2 E4 S7 R3 V5 · weakest: V2, filled with a tonal ladder, three real meters and larger type
+ * axes: warm graphite/violet accent · contrast: pass · v2.0.0 */
 @layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 
 @import "tailwindcss/theme.css" layer(theme);
@@ -76,6 +79,35 @@
   --secondary: var(--color-background-muted);
   --primary: var(--color-text-accent);
   --destructive: var(--color-error);
+
+  /* Hallmark floor 48: toast and glass literals lifted into role tokens. */
+  --toast-glass-bg: rgba(255, 255, 255, 0.7);
+  --toast-glass-bg-dark: rgba(28, 28, 30, 0.75);
+  --toast-font-family: 'Google Sans Flex Variable', system-ui, sans-serif;
+  --toast-surface: rgba(255, 255, 255, 0.9);
+  --toast-surface-dark: rgba(30, 30, 32, 0.9);
+  --toast-stroke: rgba(0, 0, 0, 0.08);
+  --toast-stroke-dark: rgba(255, 255, 255, 0.08);
+  --toast-success-stroke: rgba(34, 197, 94, 0.25);
+  --toast-success-surface: rgba(240, 253, 244, 0.9);
+  --toast-success-surface-dark: rgba(20, 35, 25, 0.9);
+  --toast-success-ink: #15803d;
+  --toast-success-ink-dark: #4ade80;
+  --toast-error-stroke: rgba(239, 68, 68, 0.25);
+  --toast-error-surface: rgba(254, 242, 242, 0.9);
+  --toast-error-surface-dark: rgba(40, 20, 20, 0.9);
+  --toast-error-ink: #b91c1c;
+  --toast-error-ink-dark: #f87171;
+  --toast-warning-stroke: rgba(245, 158, 11, 0.25);
+  --toast-warning-surface: rgba(255, 251, 235, 0.9);
+  --toast-warning-surface-dark: rgba(40, 30, 15, 0.9);
+  --toast-warning-ink: #b45309;
+  --toast-warning-ink-dark: #fbbf24;
+  --toast-info-stroke: rgba(59, 130, 246, 0.25);
+  --toast-info-surface: rgba(239, 246, 255, 0.9);
+  --toast-info-surface-dark: rgba(20, 25, 40, 0.9);
+  --toast-info-ink: #1d4ed8;
+  --toast-info-ink-dark: #60a5fa;
   --success: var(--color-success);
   --warning: var(--color-warning);
 }
@@ -99,6 +131,16 @@
 
   html {
     @apply font-sans;
+    overflow-x: clip;
+  }
+
+  body {
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-muted);
+    color: var(--color-text-primary);
   }
 
   /* Custom scrollbar matching macOS style */
@@ -133,13 +175,187 @@
   }
 }
 
+/* Dashboard type scale: bump the base so every Astryx text inside the page
+   reads one step larger. Scoped to the dashboard wrapper class. */
+.dashboard-scale {
+  font-size: 1.125rem;
+}
+.dashboard-scale .astryx-text {
+  font-size: inherit;
+}
+.dashboard-scale .astryx-button {
+  font-size: 1rem;
+}
+
+.dashboard-header .astryx-badge {
+  padding: 8px 16px;
+}
+.dashboard-header .astryx-badge > span {
+  font-size: 1rem;
+}
+
+.m3-surface {
+  background-color: var(--color-surface-container);
+  border-radius: 16px;
+}
+
+.m3-inset {
+  background-color: var(--color-surface-inset);
+  border-radius: 12px;
+}
+
+/* Reboot modes slide out to the right of the trigger, in and out. */
+.reboot-flyout {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 12px);
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+  opacity: 1;
+  transform: translate(0, -50%) scale(1);
+  transform-origin: right center;
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.js .reboot-flyout {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(12px, -50%) scale(0.94);
+}
+
+.js .reboot-flyout[data-open='true'] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(0, -50%) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reboot-flyout { transition: none; }
+}
+
+/* Thick fluid meter: a wave layer rides inside the fill. */
+.m3-meter {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: var(--color-surface-inset);
+}
+
+.m3-meter-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.m3-meter-fill::after {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -10px;
+  bottom: -30%;
+  width: 24px;
+  border-radius: 50%;
+  background: inherit;
+  animation: meter-meniscus 2.4s ease-in-out infinite alternate;
+}
+
+.m3-meter-bubbles {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(3px 3px at 18% 78%, color-mix(in srgb, var(--color-text-primary) 30%, transparent), transparent 100%),
+    radial-gradient(2px 2px at 42% 60%, color-mix(in srgb, var(--color-text-primary) 25%, transparent), transparent 100%),
+    radial-gradient(3px 3px at 68% 85%, color-mix(in srgb, var(--color-text-primary) 28%, transparent), transparent 100%);
+  background-size: 100% 100%;
+  animation: meter-bubbles 3.2s linear infinite;
+}
+
+@keyframes meter-meniscus {
+  from { transform: translateX(-3px) scaleY(0.94); }
+  to { transform: translateX(3px) scaleY(1.06); }
+}
+
+@keyframes meter-bubbles {
+  from { background-position: 0 0, 0 0, 0 0; }
+  to { background-position: 0 -80px, 0 -120px, 0 -96px; }
+}
+
+.m3-meter-wave {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background:
+    radial-gradient(12px 6px at 25% 50%, transparent 48%, color-mix(in srgb, var(--color-text-primary) 35%, transparent) 50%, transparent 52%),
+    radial-gradient(16px 8px at 65% 50%, transparent 48%, color-mix(in srgb, var(--color-text-primary) 25%, transparent) 50%, transparent 52%);
+  background-size: 48px 100%;
+  animation: meter-wave 2.2s linear infinite;
+}
+
+@keyframes meter-wave {
+  from { background-position-x: 0; }
+  to { background-position-x: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m3-meter-wave,
+  .m3-meter-fill::after,
+  .m3-meter-bubbles {
+    animation: none;
+  }
+}
+
+/* Long spec values scroll sideways on their own, then settle briefly. */
+.spec-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.spec-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: spec-scroll 9s linear infinite;
+}
+
+.spec-marquee-track > span {
+  padding-right: 2rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+@keyframes spec-scroll {
+  0%, 12% { transform: translateX(0); }
+  88%, 100% { transform: translateX(-50%); }
+}
+
+.spec-marquee:hover .spec-marquee-track,
+.spec-marquee:focus-within .spec-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spec-marquee-track {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: none;
+  }
+  .spec-marquee-track > span + span { display: none; }
+}
+
 .glass-panel {
   position: relative !important;
-  background-color: rgba(255, 255, 255, 0.7) !important;
+  background-color: var(--toast-glass-bg) !important;
 }
 
 [data-theme='dark'] .glass-panel {
-  background-color: rgba(28, 28, 30, 0.75) !important;
+  background-color: var(--toast-glass-bg-dark) !important;
 }
 
 .glass-panel::before {
@@ -170,7 +386,7 @@
 /* Custom Sonner Toast Styles to match design system */
 [data-sonner-toast] {
   border-radius: 1rem !important; /* rounded-2xl */
-  font-family: 'Google Sans Flex Variable', system-ui, sans-serif !important;
+  font-family: var(--toast-font-family) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: var(--shadow-floating) !important;
@@ -180,15 +396,15 @@
 
 /* Light mode defaults */
 [data-sonner-toast] {
-  background-color: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: var(--toast-surface) !important;
+  border-color: var(--toast-stroke) !important;
   color: var(--foreground) !important;
 }
 
 /* Dark mode defaults */
 [data-theme='dark'] [data-sonner-toast] {
-  background-color: rgba(30, 30, 32, 0.9) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  background-color: var(--toast-surface-dark) !important;
+  border-color: var(--toast-stroke-dark) !important;
   color: var(--foreground) !important;
 }
 
@@ -205,66 +421,66 @@
 
 /* Success Toast styling */
 [data-sonner-toast][data-type="success"] {
-  border-color: rgba(34, 197, 94, 0.25) !important;
-  background-color: rgba(240, 253, 244, 0.9) !important;
+  border-color: var(--toast-success-stroke) !important;
+  background-color: var(--toast-success-surface) !important;
 }
 [data-theme='dark'] [data-sonner-toast][data-type="success"] {
-  border-color: rgba(34, 197, 94, 0.25) !important;
-  background-color: rgba(20, 35, 25, 0.9) !important;
+  border-color: var(--toast-success-stroke) !important;
+  background-color: var(--toast-success-surface-dark) !important;
 }
 [data-sonner-toast][data-type="success"] [data-title] {
-  color: #15803d !important;
+  color: var(--toast-success-ink) !important;
 }
 [data-theme='dark'] [data-sonner-toast][data-type="success"] [data-title] {
-  color: #4ade80 !important;
+  color: var(--toast-success-ink-dark) !important;
 }
 
 /* Error Toast styling */
 [data-sonner-toast][data-type="error"] {
-  border-color: rgba(239, 68, 68, 0.25) !important;
-  background-color: rgba(254, 242, 242, 0.9) !important;
+  border-color: var(--toast-error-stroke) !important;
+  background-color: var(--toast-error-surface) !important;
 }
 [data-theme='dark'] [data-sonner-toast][data-type="error"] {
-  border-color: rgba(239, 68, 68, 0.25) !important;
-  background-color: rgba(40, 20, 20, 0.9) !important;
+  border-color: var(--toast-error-stroke) !important;
+  background-color: var(--toast-error-surface-dark) !important;
 }
 [data-sonner-toast][data-type="error"] [data-title] {
-  color: #b91c1c !important;
+  color: var(--toast-error-ink) !important;
 }
 [data-theme='dark'] [data-sonner-toast][data-type="error"] [data-title] {
-  color: #f87171 !important;
+  color: var(--toast-error-ink-dark) !important;
 }
 
 /* Warning Toast styling */
 [data-sonner-toast][data-type="warning"] {
-  border-color: rgba(245, 158, 11, 0.25) !important;
-  background-color: rgba(255, 251, 235, 0.9) !important;
+  border-color: var(--toast-warning-stroke) !important;
+  background-color: var(--toast-warning-surface) !important;
 }
 [data-theme='dark'] [data-sonner-toast][data-type="warning"] {
-  border-color: rgba(245, 158, 11, 0.25) !important;
-  background-color: rgba(40, 30, 15, 0.9) !important;
+  border-color: var(--toast-warning-stroke) !important;
+  background-color: var(--toast-warning-surface-dark) !important;
 }
 [data-sonner-toast][data-type="warning"] [data-title] {
-  color: #b45309 !important;
+  color: var(--toast-warning-ink) !important;
 }
 [data-theme='dark'] [data-sonner-toast][data-type="warning"] [data-title] {
-  color: #fbbf24 !important;
+  color: var(--toast-warning-ink-dark) !important;
 }
 
 /* Info Toast styling */
 [data-sonner-toast][data-type="info"] {
-  border-color: rgba(59, 130, 246, 0.25) !important;
-  background-color: rgba(239, 246, 255, 0.9) !important;
+  border-color: var(--toast-info-stroke) !important;
+  background-color: var(--toast-info-surface) !important;
 }
 [data-theme='dark'] [data-sonner-toast][data-type="info"] {
-  border-color: rgba(59, 130, 246, 0.25) !important;
-  background-color: rgba(20, 25, 40, 0.9) !important;
+  border-color: var(--toast-info-stroke) !important;
+  background-color: var(--toast-info-surface-dark) !important;
 }
 [data-sonner-toast][data-type="info"] [data-title] {
-  color: #1d4ed8 !important;
+  color: var(--toast-info-ink) !important;
 }
 [data-theme='dark'] [data-sonner-toast][data-type="info"] [data-title] {
-  color: #60a5fa !important;
+  color: var(--toast-info-ink-dark) !important;
 }
 
 /* Close button style adjustment */

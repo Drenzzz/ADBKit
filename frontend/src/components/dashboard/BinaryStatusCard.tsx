@@ -17,10 +17,10 @@ function BinaryRow({ label, icon, info }: { label: string; icon: React.ReactNode
     <div className="flex items-center justify-between py-2.5">
       <div className="flex items-center gap-2.5">
         <div className="text-muted-foreground">{icon}</div>
-        <span className="text-xs font-semibold text-foreground">{label}</span>
+        <span className="text-[14px] font-semibold text-foreground">{label}</span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-[11px] font-mono text-muted-foreground max-w-[150px] truncate">
+        <span className="text-[13px] font-mono text-muted-foreground max-w-[150px] truncate">
           {ready ? info.version ?? 'Ready' : info.status}
         </span>
         {ready ? (
@@ -56,7 +56,7 @@ export function BinaryStatusCard() {
   return (
     <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
       <CardHeader className="pb-2 pt-4 px-4">
-        <CardTitle className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+        <CardTitle className="flex items-center gap-2 text-[14px] font-semibold text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5" />
           Binary Diagnostics
         </CardTitle>
@@ -69,7 +69,7 @@ export function BinaryStatusCard() {
             <Skeleton className="h-5 w-full" />
           </div>
         ) : !status ? (
-          <p className="text-xs text-muted-foreground py-2 text-center">Failed to load diagnostics.</p>
+          <p className="text-[14px] text-muted-foreground py-2 text-center">Failed to load diagnostics.</p>
         ) : (
           <div className="divide-y divide-border/40">
             <BinaryRow label="ADB Tool" icon={<Terminal className="h-3.5 w-3.5" />} info={status.adb} />

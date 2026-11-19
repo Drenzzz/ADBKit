@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { WirelessConnectCard } from '../WirelessConnectCard'
+import { ConnectionPanel } from '../ConnectionPanel'
 
 const mocks = vi.hoisted(() => ({
   connectWireless: vi.fn().mockResolvedValue('connected'),
@@ -12,7 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/services/deviceService', () => mocks)
 
-describe('WirelessConnectCard', () => {
+describe('ConnectionPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.getWirelessHistory.mockResolvedValue([])
@@ -23,7 +23,7 @@ describe('WirelessConnectCard', () => {
     mocks.getWirelessHistory.mockResolvedValueOnce([
       { address: '192.168.1.5:5555', name: 'Pixel' },
     ])
-    render(<WirelessConnectCard />)
+    render(<ConnectionPanel />)
 
     const history = await screen.findByRole('combobox', { name: 'Saved wireless devices' })
     fireEvent.change(history, { target: { value: '192.168.1.5:5555' } })
@@ -34,7 +34,7 @@ describe('WirelessConnectCard', () => {
   })
 
   it('saves a named device after a successful connection', async () => {
-    render(<WirelessConnectCard />)
+    render(<ConnectionPanel />)
     fireEvent.change(screen.getByPlaceholderText('Device IP (e.g. 192.168.1.5)'), {
       target: { value: '192.168.1.5' },
     })

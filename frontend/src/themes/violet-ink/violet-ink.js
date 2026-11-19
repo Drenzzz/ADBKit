@@ -116,9 +116,9 @@ export const violetInkTheme = {
     "--color-syntax-removed-marker": "var(--color-syntax-punctuation)",
     "--color-background-surface": "light-dark(#FFFFFF, #1A1714)",
     "--color-background-body": "light-dark(#F7F4EF, #12100E)",
-    "--color-background-card": "light-dark(#FFFFFF, #211D19)",
+    "--color-background-card": "light-dark(#FFFFFF, #262119)",
     "--color-background-popover": "light-dark(#FFFFFF, #262119)",
-    "--color-background-muted": "light-dark(#EDE9E1, #2A2620)",
+    "--color-background-muted": "light-dark(#EDE9E1, #2E2922)",
     "--color-accent": "light-dark(#6653ca, #6653ca)",
     "--color-accent-muted": "light-dark(rgba(102,83,202,0.16), rgba(165,157,255,0.20))",
     "--color-neutral": "light-dark(#1D1A231A, #E4E1EE33)",
@@ -202,10 +202,10 @@ export const violetInkTheme = {
     "--color-icon-gray": "light-dark(#474747, #9e9e9e)",
     "--color-text-gray": "light-dark(#1b1b1b, #d4d4d4)",
     "--radius-none": "0px",
-    "--radius-inner": "15px",
-    "--radius-element": "30px",
-    "--radius-container": "45px",
-    "--radius-page": "105px",
+    "--radius-inner": "5px",
+    "--radius-element": "10px",
+    "--radius-container": "15px",
+    "--radius-page": "35px",
     "--radius-full": "9999px",
     "--shadow-low": "0 2px 4px light-dark(oklch(0 0 0 / 5%), oklch(0 0 0 / 25%)), 0 4px 8px light-dark(oklch(0 0 0 / 10%), oklch(0 0 0 / 40%)), inset 0 0 0 1px light-dark(transparent, oklch(1 0 0 / 8%))",
     "--shadow-med": "0 2px 4px light-dark(oklch(0 0 0 / 5%), oklch(0 0 0 / 35%)), 0 4px 12px light-dark(oklch(0 0 0 / 10%), oklch(0 0 0 / 50%)), inset 0 0 0 1px light-dark(transparent, oklch(1 0 0 / 12%))",
@@ -217,12 +217,14 @@ export const violetInkTheme = {
     "--shadow-inset-error": "inset 0px 0px 0px 2px #de47454D",
     "--color-background-inverted": "light-dark(#1D1A23, #FDFBFF)",
     "--color-track": "light-dark(#AEA8BA, #484554)",
-    "--radius-chat": "105px",
+    "--radius-chat": "35px",
     "--ease-entrance": "cubic-bezier(0.3, 1.2, 0.5, 1)",
     "--ease-move": "cubic-bezier(0.3, 1.2, 0.5, 1)"
   },
   localTokens: {
     "--astryx-theme-neutral-color-status-fill-accent": "light-dark(#0074e2, #6d9cfe)",
+    "--color-surface-container": "light-dark(#F2EEE7, #302A23)",
+    "--color-surface-inset": "light-dark(#E7E2D9, #1E1A16)",
     "--terminal-bg": "light-dark(#EDEBE6, #0B0A0D)",
     "--terminal-surface": "light-dark(#E3E1DB, #08070A)",
     "--terminal-text": "light-dark(#3A3833, #DEDBD4)",
@@ -247,6 +249,8 @@ export const violetInkTheme = {
   },
   __localTokenOwners: {
     "--astryx-theme-neutral-color-status-fill-accent": "neutral",
+    "--color-surface-container": "violet-ink",
+    "--color-surface-inset": "violet-ink",
     "--terminal-bg": "violet-ink",
     "--terminal-surface": "violet-ink",
     "--terminal-text": "violet-ink",
@@ -564,7 +568,7 @@ export const violetInkTheme = {
       "contrast": "standard"
     },
     "radius": {
-      "base": 12,
+      "base": 4,
       "multiplier": 1.25
     },
     "motion": {

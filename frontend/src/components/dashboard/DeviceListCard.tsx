@@ -36,17 +36,17 @@ function DeviceRow({ device, nickname, isActive, onSelect }: {
     >
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{displayName}</span>
-          {isActive && <Badge variant="default" className="text-[10px]">active</Badge>}
+          <span className="text-[14px] font-medium">{displayName}</span>
+          {isActive && <Badge variant="default" className="text-[14px]">active</Badge>}
         </div>
         {displayName !== device.serial && (
-          <span className="text-xs text-muted-foreground font-mono">{device.serial}</span>
+          <span className="text-[13px] text-muted-foreground font-mono">{device.serial}</span>
         )}
         {device.mode === 'fastboot' && (
-          <span className="text-xs text-muted-foreground">fastboot</span>
+          <span className="text-[14px] text-muted-foreground">fastboot</span>
         )}
       </div>
-      <span className={`text-xs font-medium ${stateColor}`}>
+      <span className={`text-[14px] font-medium ${stateColor}`}>
         {device.state}
       </span>
     </button>
@@ -68,7 +68,7 @@ export function DeviceListCard() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+        <CardTitle className="flex items-center gap-2 text-[14px] font-semibold">
           <Smartphone className="h-4 w-4" />
           Connected Devices
         </CardTitle>
@@ -80,7 +80,7 @@ export function DeviceListCard() {
         {loading && devices.length === 0 ? (
           <LoadingSkeleton />
         ) : devices.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-[14px] text-muted-foreground">
             No device detected. Ensure USB Debugging is enabled.
           </p>
         ) : (

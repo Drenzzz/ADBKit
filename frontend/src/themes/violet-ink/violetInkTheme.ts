@@ -19,7 +19,9 @@ export const violetInkTheme = defineTheme({
     neutralStyle: 'warm',
     contrast: 'standard',
   },
-  radius: { base: 12, multiplier: 1.25 },
+  // base is the SMALLEST radius (inner). container = base*3*multiplier:
+  // 4*3*1.25 = 15px card radius. base 12 made containers 45px.
+  radius: { base: 4, multiplier: 1.25 },
   motion: { character: 'expressive', tempo: 1.1 },
   typography: {
     body: {
@@ -46,9 +48,9 @@ export const violetInkTheme = defineTheme({
     // Warm graphite canvases (dark-first app).
     '--color-background-body': ['#F7F4EF', '#12100E'],
     '--color-background-surface': ['#FFFFFF', '#1A1714'],
-    '--color-background-card': ['#FFFFFF', '#211D19'],
+    '--color-background-card': ['#FFFFFF', '#262119'],
     '--color-background-popover': ['#FFFFFF', '#262119'],
-    '--color-background-muted': ['#EDE9E1', '#2A2620'],
+    '--color-background-muted': ['#EDE9E1', '#2E2922'],
     '--color-text-primary': ['#1C1B19', '#F2EEE8'],
     '--color-text-secondary': ['#6E675E', '#A9A19A'],
     '--color-border': ['rgba(0,0,0,0.10)', 'rgba(255,255,255,0.10)'],
@@ -60,6 +62,9 @@ export const violetInkTheme = defineTheme({
     '--color-info': ['#0E7490', '#22B8D4'],
   },
   localTokens: {
+    // M3 tonal ladder: section cards sit above the frame; insets sit below it.
+    '--color-surface-container': ['#F2EEE7', '#302A23'],
+    '--color-surface-inset': ['#E7E2D9', '#1E1A16'],
     // Terminal — a distinct island surface, darker than the app in dark mode,
     // lighter in light mode.
     '--terminal-bg': ['#EDEBE6', '#0B0A0D'],
