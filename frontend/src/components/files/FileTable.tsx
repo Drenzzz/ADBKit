@@ -1,14 +1,20 @@
 import { useRef } from 'react'
+import { motion } from 'motion/react'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { cn } from '@/lib/utils'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FileRow } from './FileRow'
 import { EmptyFolderState, NoSearchResultsState } from './EmptyStates'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { FileEntry, FileSortField, FileSortDirection } from '@/lib/types'
 import {
-  IconArrowUp as ArrowUp,
-  IconArrowDown as ArrowDown
+  IconArrowUp,
+  IconArrowDown,
 } from "@tabler/icons-react"
+
+const GRID = 'grid grid-cols-[44px_minmax(0,1fr)_110px_120px_150px_48px]'
+const ROW_HEIGHT = 64
 
 interface SortHeaderProps {
   label: string
@@ -26,20 +32,21 @@ function SortHeader({
   onSort,
 }: SortHeaderProps) {
   const isActive = field === currentField
+  const Icon = direction === 'asc' ? IconArrowUp : IconArrowDown
   return (
-    <span
-      className="inline-flex items-center gap-1 cursor-pointer select-none text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+    <button
+      type="button"
       onClick={() => onSort(field)}
-      role="button"
+      className={cn(
+        'inline-flex items-center gap-1 select-none rounded-md px-1 py-0.5 text-[14px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]',
+        isActive
+          ? 'text-[var(--color-text-primary)]'
+          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
+      )}
     >
       {label}
-      {isActive &&
-        (direction === 'asc' ? (
-          <ArrowUp className="h-3 w-3 text-primary" />
-        ) : (
-          <ArrowDown className="h-3 w-3 text-primary" />
-        ))}
-    </span>
+      {isActive && <Icon size={14} stroke={1.75} className="text-[var(--color-accent)]" />}
+    </button>
   )
 }
 
@@ -85,12 +92,13 @@ export function FileTable({
   onGetSize,
 }: FileTableProps) {
   const parentRef = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
 
   const rowVirtualizer = useVirtualizer({
     count: files.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 40,
-    overscan: 10,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 8,
   })
 
   const allPaths = files.map((f) => f.path)
@@ -100,8 +108,8 @@ export function FileTable({
   if (loading) {
     return (
       <div className="space-y-2 p-4">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <Skeleton key={i} className="h-9 w-full" />
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Skeleton key={i} className="h-14 w-full rounded-xl" />
         ))}
       </div>
     )
@@ -114,15 +122,23 @@ export function FileTable({
       <EmptyFolderState />
     )
   }
-
   return (
-    <div className="flex-1 min-h-0 flex flex-col relative">
-      {/* Table Header */}
-      <div className="grid grid-cols-[40px_1fr_96px_128px_144px_40px] items-center border-b border-border bg-muted/20 sticky top-0 z-10 h-10 select-none shrink-0">
-        <div className="px-3">
+    <motion.div
+      className="relative flex min-h-0 flex-1 flex-col"
+      initial={reduced ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {/* Header */}
+      <div
+        className={`${GRID} sticky top-0 z-10 h-11 shrink-0 select-none items-center border-b border-border/40 bg-[var(--color-background-muted)]/60 backdrop-blur-sm`}
+      >
+        <div className="flex justify-center">
           <Checkbox
             checked={allSelected}
             onCheckedChange={() => onSelectAll(allPaths)}
+            className="h-[18px] w-[18px]"
+            aria-label="Select all files"
           />
         </div>
         <div className="px-3">
@@ -143,12 +159,12 @@ export function FileTable({
             onSort={onSort}
           />
         </div>
-        <div className="px-3 hidden md:block">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Permissions
+        <div className="hidden px-3 md:block">
+          <span className="text-[14px] font-semibold text-[var(--color-text-secondary)]">
+            Perm
           </span>
         </div>
-        <div className="px-3 hidden lg:block">
+        <div className="hidden px-3 lg:block">
           <SortHeader
             label="Modified"
             field="date"
@@ -160,8 +176,8 @@ export function FileTable({
         <div className="px-2" />
       </div>
 
-      {/* Table Body */}
-      <div ref={parentRef} className="flex-1 overflow-auto perf-scroll">
+      {/* Body (virtualized) */}
+      <div ref={parentRef} className="perf-scroll min-h-0 flex-1 overflow-auto">
         <div
           style={{
             height: `${rowVirtualizer.getTotalSize()}px`,
@@ -204,6 +220,6 @@ export function FileTable({
           })}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

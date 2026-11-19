@@ -20,17 +20,21 @@ export function StorageBar({ info }: StorageBarProps) {
   if (!info) return null
 
   return (
-    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+    <div className="flex min-w-[220px] flex-col gap-1.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-[14px] font-semibold tabular text-[var(--color-text-primary)]">
+          {formatBytes(info.usedBytes)}<span className="text-[var(--color-text-secondary)]"> / {formatBytes(info.totalBytes)}</span>
+        </span>
+        <span className="text-[14px] font-semibold tabular text-[var(--color-text-secondary)]">
+          {info.usedPct}%
+        </span>
+      </div>
+      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-background-muted)]">
         <div
-          className="h-full rounded-full bg-primary-container transition-colors duration-300"
+          className="h-full rounded-full bg-[var(--color-accent)] transition-transform duration-500 ease-out motion-reduce:transition-none motion-reduce:duration-0"
           style={{ width: `${Math.min(info.usedPct, 100)}%` }}
         />
       </div>
-      <span className="shrink-0 tabular-nums">
-        {formatBytes(info.usedBytes)} / {formatBytes(info.totalBytes)}
-        <span className="ml-1 text-muted-foreground/70">({info.usedPct}%)</span>
-      </span>
     </div>
   )
 }

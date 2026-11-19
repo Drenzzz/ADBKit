@@ -35,13 +35,13 @@ export function UnblockPathDialog({
             {isVolumeMissing ? 'Storage Not Available' : 'Path Not Accessible'}
           </DialogTitle>
           <DialogDescription className="space-y-2">
-            <p className="font-mono text-xs bg-muted px-2 py-1.5 rounded border">
+            <p className="font-mono text-[13px] bg-muted px-2 py-1.5 rounded border">
               {result.path}
             </p>
             {result.reason && (
-              <p className="text-sm text-foreground">{result.reason}</p>
+              <p className="text-[14px] text-foreground">{result.reason}</p>
             )}
-            <p className="text-sm">
+            <p className="text-[14px]">
               {isVolumeMissing
                 ? 'The removable storage is currently disconnected. Reconnect it and try again.'
                 : 'This path is protected by Android and cannot be accessed through File Explorer.'}

@@ -518,7 +518,9 @@ export function useFileExplorer() {
     store.setIsDeleteDialogOpen(true)
   }
   function openNewFolderDialog() { store.setIsNewFolderDialogOpen(true) }
-  function openPushFolderDialog() { store.setIsPushFolderDialogOpen(true) }
+  // Folder import skips the confirmation dialog and opens the native picker
+  // directly, matching the import-files flow.
+  function openPushFolderDialog() { void pushFoldersToCurrentDirectory() }
 
   // Multi-folder push: open the native picker in multi-directory mode and push
   // everything in one batch. Cancelled pickers resolve empty and do nothing.
@@ -554,10 +556,6 @@ export function useFileExplorer() {
     if (!store.dialogTargetFile) return
     const success = await pushSingleFile(localPath, store.dialogTargetFile.path)
     if (success) store.setIsPushDialogOpen(false)
-  }
-  async function handlePushFolderConfirm(localPaths: string[]) {
-    const success = await pushMultipleFoldersToCurrentDir(localPaths)
-    if (success) store.setIsPushFolderDialogOpen(false)
   }
   async function handlePushFilesToCurrentDirectory() {
     const paths = await chooseMultipleLocalFiles()
@@ -646,7 +644,6 @@ export function useFileExplorer() {
 
     isPullDialogOpen: store.isPullDialogOpen,
     isPushDialogOpen: store.isPushDialogOpen,
-    isPushFolderDialogOpen: store.isPushFolderDialogOpen,
     isRenameDialogOpen: store.isRenameDialogOpen,
     isDeleteDialogOpen: store.isDeleteDialogOpen,
     isNewFolderDialogOpen: store.isNewFolderDialogOpen,
@@ -657,7 +654,6 @@ export function useFileExplorer() {
 
     setIsPullDialogOpen: store.setIsPullDialogOpen,
     setIsPushDialogOpen: store.setIsPushDialogOpen,
-    setIsPushFolderDialogOpen: store.setIsPushFolderDialogOpen,
     setIsRenameDialogOpen: store.setIsRenameDialogOpen,
     setIsDeleteDialogOpen: store.setIsDeleteDialogOpen,
     setIsNewFolderDialogOpen: store.setIsNewFolderDialogOpen,
@@ -677,7 +673,6 @@ export function useFileExplorer() {
     getSizeForFile,
     handlePullConfirm,
     handlePushConfirm,
-    handlePushFolderConfirm,
     handlePushFilesToCurrentDirectory,
     chooseMultipleLocalDirectories,
     pushFoldersToCurrentDirectory,

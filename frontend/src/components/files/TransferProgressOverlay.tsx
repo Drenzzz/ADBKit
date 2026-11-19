@@ -23,16 +23,16 @@ export function TransferProgressOverlay({
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground">{label}</span>
-            <span className="truncate text-xs font-medium">{fileName}</span>
+            <span className="text-[14px] font-medium text-muted-foreground">{label}</span>
+            <span className="truncate text-[14px] font-medium">{fileName}</span>
           </div>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-primary-container transition-[width] duration-300"
+              className="h-full rounded-full bg-primary-container transition-transform duration-300"
               style={{ width: `${percent}%` }}
             />
           </div>
-          <div className="mt-1 text-[10px] text-muted-foreground/60">{percent}%</div>
+          <div className="mt-1 text-[14px] text-muted-foreground/60">{percent}%</div>
         </div>
         <Button
           variant="ghost"

@@ -27,7 +27,6 @@ interface FileActionDialogsProps {
 
   isPullDialogOpen: boolean
   isPushDialogOpen: boolean
-  isPushFolderDialogOpen: boolean
   isRenameDialogOpen: boolean
   isDeleteDialogOpen: boolean
   isNewFolderDialogOpen: boolean
@@ -37,7 +36,6 @@ interface FileActionDialogsProps {
 
   setIsPullDialogOpen: (open: boolean) => void
   setIsPushDialogOpen: (open: boolean) => void
-  setIsPushFolderDialogOpen: (open: boolean) => void
   setIsRenameDialogOpen: (open: boolean) => void
   setIsDeleteDialogOpen: (open: boolean) => void
   setIsNewFolderDialogOpen: (open: boolean) => void
@@ -47,7 +45,6 @@ interface FileActionDialogsProps {
 
   onPullConfirm: (localPath: string) => Promise<void>
   onPushConfirm: (localPath: string) => void
-  onPushFolderConfirm: (localPaths: string[]) => void
   onRenameConfirm: (newName: string) => void
   onDeleteConfirm: () => void
   onNewFolderConfirm: (folderName: string) => void
@@ -58,7 +55,6 @@ interface FileActionDialogsProps {
   chooseLocalFile: () => Promise<string>
   chooseLocalSaveFile: (defaultFilename: string) => Promise<string>
   chooseLocalDirectory: () => Promise<string>
-  chooseMultipleLocalDirectories: () => Promise<string[]>
 }
 
 export function FileActionDialogs({
@@ -66,7 +62,6 @@ export function FileActionDialogs({
   selectedCount,
   isPullDialogOpen,
   isPushDialogOpen,
-  isPushFolderDialogOpen,
   isRenameDialogOpen,
   isDeleteDialogOpen,
   isNewFolderDialogOpen,
@@ -75,7 +70,6 @@ export function FileActionDialogs({
   isBatchDeleteDialogOpen,
   setIsPullDialogOpen,
   setIsPushDialogOpen,
-  setIsPushFolderDialogOpen,
   setIsRenameDialogOpen,
   setIsDeleteDialogOpen,
   setIsNewFolderDialogOpen,
@@ -84,7 +78,6 @@ export function FileActionDialogs({
   setIsBatchDeleteDialogOpen,
   onPullConfirm,
   onPushConfirm,
-  onPushFolderConfirm,
   onRenameConfirm,
   onDeleteConfirm,
   onNewFolderConfirm,
@@ -94,7 +87,6 @@ export function FileActionDialogs({
   chooseLocalFile,
   chooseLocalSaveFile,
   chooseLocalDirectory,
-  chooseMultipleLocalDirectories,
 }: FileActionDialogsProps) {
   const [renameValue, setRenameValue] = useState('')
   const [folderName, setFolderName] = useState('')
@@ -125,7 +117,7 @@ export function FileActionDialogs({
           <DialogHeader>
             <DialogTitle>Import File</DialogTitle>
             <DialogDescription>
-              Import a file to <span className="font-mono text-sm">{dialogTargetFile?.path}</span>
+              Import a file to <span className="font-mono text-[13px]">{dialogTargetFile?.path}</span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -134,24 +126,6 @@ export function FileActionDialogs({
               const path = await chooseLocalFile()
               if (path) { onPushConfirm(path); setIsPushDialogOpen(false) }
             }}>Choose File</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isPushFolderDialogOpen} onOpenChange={setIsPushFolderDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import Folder</DialogTitle>
-            <DialogDescription>
-              Import one or more folders from PC to this device directory.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPushFolderDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
-              const paths = await chooseMultipleLocalDirectories()
-              if (paths.length) { onPushFolderConfirm(paths); setIsPushFolderDialogOpen(false) }
-            }}>Choose Folders</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -194,7 +168,7 @@ export function FileActionDialogs({
           <DialogHeader>
             <DialogTitle>Move</DialogTitle>
             <DialogDescription>
-              Move <span className="font-mono text-sm">{dialogTargetFile?.name}</span> to a destination directory on the device.
+              Move <span className="font-mono text-[13px]">{dialogTargetFile?.name}</span> to a destination directory on the device.
             </DialogDescription>
           </DialogHeader>
           <Input
@@ -221,7 +195,7 @@ export function FileActionDialogs({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete File</AlertDialogTitle>
             <AlertDialogDescription>
-              Delete <span className="font-mono text-sm">{dialogTargetFile?.name}</span>? This cannot be undone.
+              Delete <span className="font-mono text-[13px]">{dialogTargetFile?.name}</span>? This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

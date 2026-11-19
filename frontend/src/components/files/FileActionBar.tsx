@@ -1,23 +1,13 @@
 import {
-  IconSearch as Search,
-  IconArrowsSort as ArrowUpDown,
-  IconCopy as Files,
-  IconFolderPlus as FolderPlus,
-  IconList as LayoutList,
-  IconFolder as Folder,
-  IconFile as File
+  IconSearch,
+  IconCopy,
+  IconFolderPlus,
+  IconEye,
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Selector } from '@astryxdesign/core/Selector'
+import { Button } from '@astryxdesign/core/Button'
 import type { FileSortField, FileSortDirection } from '@/lib/types'
-import { cn } from '@/lib/utils'
 import { SdCardPicker } from './SdCardPicker'
 
 interface FileActionBarProps {
@@ -36,7 +26,6 @@ interface FileActionBarProps {
   onPushFolder: () => void
   onSdCardSelect: (mountPoint: string) => void
 
-  // Stats props for alignment
   totalItems: number
   folderCount: number
   fileCount: number
@@ -48,6 +37,11 @@ const SORT_OPTIONS: { value: FileSortField; label: string }[] = [
   { value: 'size', label: 'Size' },
   { value: 'date', label: 'Date' },
 ]
+
+const DIRECTION_LABEL: Record<FileSortDirection, string> = {
+  asc: 'Ascending',
+  desc: 'Descending',
+}
 
 export function FileActionBar({
   searchTerm,
@@ -68,130 +62,91 @@ export function FileActionBar({
   fileCount,
   lastUpdatedAt,
 }: FileActionBarProps) {
-  const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sortField)?.label ?? 'Sort'
-
   return (
-    <div className="flex flex-col gap-3">
-      {/* Row 1: Search & Controls */}
+    <div className="m3-surface flex flex-col gap-3 rounded-3xl px-4 py-3">
+      {/* Row 1: search + sort + direction + hidden toggle + SD */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search files..."
+        <div className="relative min-w-[240px] flex-1">
+          <IconSearch
+            size={18}
+            stroke={1.75}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
+          />
+          <input
+            type="search"
+            placeholder="Search files…"
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-8 pl-9 pr-4 text-xs rounded-full border-border/40 bg-muted/50 transition-colors hover:border-border/80 focus:border-primary focus:bg-background"
+            aria-label="Search files"
+            className="h-11 w-full rounded-full bg-[color-mix(in_srgb,var(--color-background-muted)_88%,black)] pl-10 pr-4 text-[15px] text-[var(--color-text-primary)] outline-none transition-colors placeholder:text-[var(--color-text-secondary)] focus-visible:bg-[color-mix(in_srgb,var(--color-background-muted)_70%,black)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
           />
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border/50 bg-muted/50 px-3.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-[colors,transform] cursor-pointer shadow-sm active:scale-[0.97]"
-          >
-            <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
-            {currentSortLabel}
-            {sortDirection === 'desc' ? ' ↓' : ' ↑'}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="border-border/60 rounded-xl">
-            {SORT_OPTIONS.map((opt) => (
-              <DropdownMenuItem
-                key={opt.value}
-                onClick={() => {
-                  if (sortField === opt.value) {
-                    onSetSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-                  } else {
-                    onSetSortField(opt.value)
-                    onSetSortDirection('asc')
-                  }
-                }}
-                className={cn(
-                  'rounded-lg text-xs',
-                  sortField === opt.value && 'font-medium text-primary',
-                )}
-              >
-                {opt.label}
-                {sortField === opt.value && (
-                  <span className="ml-auto text-[10px] text-muted-foreground">
-                    {sortDirection === 'asc' ? '↑' : '↓'}
-                  </span>
-                )}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Selector
+          label="Sort by"
+          isLabelHidden
+          value={sortField}
+          onChange={(v) => onSetSortField(v as FileSortField)}
+          options={SORT_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+        />
+        <Selector
+          label="Direction"
+          isLabelHidden
+          value={sortDirection}
+          onChange={(v) => onSetSortDirection(v as FileSortDirection)}
+          options={(Object.keys(DIRECTION_LABEL) as FileSortDirection[]).map((d) => ({
+            value: d,
+            label: DIRECTION_LABEL[d],
+          }))}
+        />
 
-        <div className="flex items-center gap-2 h-8 px-2.5 rounded-full border border-border/40 bg-muted/50 select-none shadow-sm">
-          <Switch
-            checked={showHidden}
-            onCheckedChange={onToggleHidden}
-            className="scale-75"
-          />
-          <span className="text-[11px] font-semibold text-muted-foreground">Show hidden files</span>
-        </div>
+        <label className="flex h-11 cursor-pointer select-none items-center gap-2.5 rounded-full bg-[var(--color-background-muted)] px-4">
+          <Switch checked={showHidden} onCheckedChange={onToggleHidden} />
+          <span className="flex items-center gap-1.5 text-[14px] font-semibold text-[var(--color-text-secondary)]">
+            <IconEye size={16} stroke={1.75} />
+            Hidden
+          </span>
+        </label>
+
+        <SdCardPicker onSelect={onSdCardSelect} disabled={refreshing} />
       </div>
 
-      {/* Row 2: Action Buttons (Left) & Stats Capsule (Right) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-1 w-full">
-        {/* Left: Labeled Push/Create Quick Actions */}
-        <div className="flex items-center gap-2">
+      {/* Row 2: push actions + stats */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary-container text-primary-foreground hover:bg-primary-container/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            label="Import Files"
+            icon={<IconCopy size={18} stroke={1.75} />}
+            variant="secondary"
+            isDisabled={refreshing}
             onClick={onPushFiles}
-            disabled={refreshing}
-          >
-            <Files className="h-3.5 w-3.5 text-primary-foreground" />
-            Push Files
-          </Button>
-
+          />
           <Button
-            size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary-container text-primary-foreground hover:bg-primary-container/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            label="Import Folders"
+            icon={<IconFolderPlus size={18} stroke={1.75} />}
+            variant="secondary"
+            isDisabled={refreshing}
             onClick={onPushFolder}
-            disabled={refreshing}
-          >
-            <FolderPlus className="h-3.5 w-3.5 text-primary-foreground" />
-            Push Folders
-          </Button>
-
+          />
           <Button
-            size="sm"
-            className="h-7 text-xs font-semibold gap-1.5 rounded-full bg-primary-container text-primary-foreground hover:bg-primary-container/90 transition-[colors,transform] active:scale-[0.97] shadow-sm border-0 cursor-pointer px-4"
+            label="New Folder"
+            icon={<IconFolderPlus size={18} stroke={1.75} />}
+            variant="secondary"
+            isDisabled={refreshing}
             onClick={onNewFolder}
-            disabled={refreshing}
-          >
-            <FolderPlus className="h-3.5 w-3.5 text-primary-foreground" />
-            New Folder
-          </Button>
-
-          <SdCardPicker onSelect={onSdCardSelect} disabled={refreshing} />
+          />
         </div>
 
-        {/* Right: Apple-like Stats Capsule */}
-        <div className="flex items-center gap-3 px-3.5 py-1 rounded-full border border-border/40 bg-muted/50 text-[11px] text-muted-foreground select-none h-8 shadow-sm">
-          <div className="flex items-center gap-1">
-            <LayoutList className="h-3 w-3 text-muted-foreground/60" />
-            <span className="font-semibold text-foreground">{totalItems}</span>
-            <span>items</span>
-          </div>
-          <span className="text-border/60">·</span>
-          <div className="flex items-center gap-1">
-            <Folder className="h-3 w-3 text-amber-500 fill-amber-500/10" />
-            <span className="font-semibold text-foreground">{folderCount}</span>
-            <span>folders</span>
-          </div>
-          <span className="text-border/60">·</span>
-          <div className="flex items-center gap-1">
-            <File className="h-3 w-3 text-muted-foreground/60" />
-            <span className="font-semibold text-foreground">{fileCount}</span>
-            <span>files</span>
-          </div>
+        <div className="flex items-center gap-3 px-1 text-[14px] text-[var(--color-text-secondary)]">
+          <span><b className="font-semibold tabular text-[var(--color-text-primary)]">{totalItems}</b> items</span>
+          <span className="mx-1 h-4 w-px bg-border/40" aria-hidden="true" />
+          <span><b className="font-semibold tabular text-[var(--color-text-primary)]">{folderCount}</b> folders</span>
+          <span className="mx-1 h-4 w-px bg-border/40" aria-hidden="true" />
+          <span><b className="font-semibold tabular text-[var(--color-text-primary)]">{fileCount}</b> files</span>
           {lastUpdatedAt && (
             <>
-              <span className="text-border/60">·</span>
-              <span className="font-medium">
-                Updated {new Date(lastUpdatedAt).toLocaleTimeString()}
-              </span>
+              <span className="mx-1 h-4 w-px bg-border/40" aria-hidden="true" />
+              <span className="tabular">Updated {new Date(lastUpdatedAt).toLocaleTimeString()}</span>
             </>
           )}
         </div>
