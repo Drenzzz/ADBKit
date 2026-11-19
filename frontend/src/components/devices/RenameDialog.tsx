@@ -47,7 +47,7 @@ export function RenameDialog({ serial, currentNickname, onClose }: {
       <div className="fixed inset-0 bg-background/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-sm rounded-lg border border-border bg-popover p-5 shadow-[var(--shadow-floating)]">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Rename device</h3>
+          <h3 className="text-[14px] font-semibold">Rename device</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
@@ -55,12 +55,12 @@ export function RenameDialog({ serial, currentNickname, onClose }: {
 
         <div className="flex flex-col gap-3">
           <div className="rounded-md bg-muted/50 px-3 py-2">
-            <p className="text-xs text-muted-foreground">Serial</p>
-            <p className="font-mono text-sm">{serial}</p>
+            <p className="text-[14px] text-muted-foreground">Serial</p>
+            <p className="font-mono text-[13px]">{serial}</p>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="nickname" className="text-xs font-medium text-muted-foreground">Nickname</label>
+            <label htmlFor="nickname" className="text-[14px] font-medium text-muted-foreground">Nickname</label>
             <Input
               id="nickname"
               value={draft}

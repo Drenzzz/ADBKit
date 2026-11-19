@@ -94,6 +94,19 @@ func (s *Service) getRAMTotal(ctx context.Context, serial string) (string, error
 	return parseRAMTotal(result.Stdout), nil
 }
 
+func (s *Service) getSwapTotal(ctx context.Context, serial string) (string, error) {
+	paths := s.getBinPath()
+	result, err := core.RunCommand(ctx, core.ExecRequest{
+		Command: paths.Adb,
+		Args:    []string{"-s", serial, "shell", "cat", "/proc/meminfo"},
+		Timeout: 5e9,
+	})
+	if err != nil {
+		return "", err
+	}
+	return parseSwapTotal(result.Stdout), nil
+}
+
 func parseADBDevices(output string) []Summary {
 	lines := strings.Split(output, "\n")
 	devices := make([]Summary, 0)
@@ -265,6 +278,28 @@ func parseRAMTotal(output string) string {
 		}
 		memTotalGB := memTotalKB / 1024 / 1024
 		return fmt.Sprintf("%.2f GB", memTotalGB)
+	}
+	return ""
+}
+
+func parseSwapTotal(output string) string {
+	for _, rawLine := range strings.Split(output, "\n") {
+		line := strings.TrimSpace(rawLine)
+		if !strings.HasPrefix(line, "SwapTotal:") {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			return ""
+		}
+		swapTotalKB, err := strconv.ParseFloat(fields[1], 64)
+		if err != nil {
+			return ""
+		}
+		if swapTotalKB <= 0 {
+			return "None"
+		}
+		return fmt.Sprintf("%.2f GB", swapTotalKB/1024/1024)
 	}
 	return ""
 }

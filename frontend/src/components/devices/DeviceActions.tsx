@@ -135,34 +135,34 @@ export function DeviceActions() {
   return (
     <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
       <CardHeader className="pb-2 pt-4 px-4 flex flex-row items-center justify-between">
-        <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-          Device Actions
+        <CardTitle className="text-[14px] font-semibold text-muted-foreground/80">
+          Device actions
         </CardTitle>
         {activeSerial && (
-          <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
+          <span className="rounded-full bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 text-[14px] font-semibold">
             {stateLabel}
           </span>
         )}
       </CardHeader>
       <CardContent className="px-4 pb-4">
         {!activeSerial ? (
-          <p className="text-xs text-muted-foreground">Select a device from the sidebar to execute actions.</p>
+          <p className="text-[14px] text-muted-foreground">Select a device from the sidebar to execute actions.</p>
         ) : state === 'offline' || state === 'unauthorized' ? (
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-[14px] text-muted-foreground leading-relaxed">
               {state === 'unauthorized'
                 ? 'Device is unauthorized. Please verify the USB debugging prompt on your phone screen.'
                 : 'Device is offline. Check the hardware connection or USB cable.'}
             </p>
             <div className="flex gap-2 mt-1">
-              <Button size="sm" variant="outline" className="h-8 text-xs font-medium" onClick={refreshDevices} disabled={refreshing}>
+              <Button size="sm" variant="outline" className="h-8 text-[14px] font-medium" onClick={refreshDevices} disabled={refreshing}>
                 <RefreshCw className={`mr-1.5 h-3 w-3 ${refreshing ? 'animate-spin' : ''}`} />
                 Retry Connection
               </Button>
             </div>
           </div>
         ) : options.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No operations available for the current device state.</p>
+          <p className="text-[14px] text-muted-foreground">No operations available for the current device state.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {options.map(({ mode, label, icon: Icon, variant }) => (
@@ -172,14 +172,14 @@ export function DeviceActions() {
                     <Button
                       size="sm"
                       variant="destructive"
-                      className="h-8 text-xs font-medium"
+                      className="h-8 text-[14px] font-medium"
                       onClick={() => handleReboot(mode)}
                       disabled={rebooting !== null}
                     >
                       {rebooting === mode ? <Loader2 className="mr-1.5 h-3 w-3 animate-spin" /> : null}
                       Confirm {label}
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-8 text-xs font-medium" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
+                    <Button size="sm" variant="ghost" className="h-8 text-[14px] font-medium" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
                       Cancel
                     </Button>
                   </div>
@@ -187,7 +187,7 @@ export function DeviceActions() {
                   <Button
                     size="sm"
                     variant={variant}
-                    className="h-8 text-xs font-medium"
+                    className="h-8 text-[14px] font-medium"
                     onClick={() => setConfirmMode(mode)}
                     disabled={rebooting !== null}
                   >
@@ -202,7 +202,7 @@ export function DeviceActions() {
               <Button
                 size="sm"
                 variant="outline"
-                className="h-8 text-xs font-medium"
+                className="h-8 text-[14px] font-medium"
                 onClick={handleScreenshot}
                 disabled={screenshotting || rebooting !== null}
               >
@@ -222,13 +222,13 @@ export function DeviceActions() {
                     <Button
                       size="sm"
                       variant="destructive"
-                      className="h-8 text-xs font-medium"
+                      className="h-8 text-[14px] font-medium"
                       onClick={handleForget}
                       disabled={rebooting !== null}
                     >
                       Confirm Disconnect
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-8 text-xs font-medium" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
+                    <Button size="sm" variant="ghost" className="h-8 text-[14px] font-medium" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
                       Cancel
                     </Button>
                   </div>
@@ -236,7 +236,7 @@ export function DeviceActions() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 text-xs font-medium"
+                    className="h-8 text-[14px] font-medium"
                     onClick={() => setConfirmMode('forget')}
                     disabled={rebooting !== null}
                   >

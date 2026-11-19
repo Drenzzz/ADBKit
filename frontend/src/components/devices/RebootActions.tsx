@@ -41,11 +41,11 @@ export function RebootActions() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold">Reboot Actions</CardTitle>
+        <CardTitle className="text-[14px] font-semibold">Reboot Actions</CardTitle>
       </CardHeader>
       <CardContent>
         {!activeSerial ? (
-          <p className="text-sm text-muted-foreground">Select a device first.</p>
+          <p className="text-[14px] text-muted-foreground">Select a device first.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {REBOOT_MODES.map(({ mode, label, icon: Icon, variant }) => (

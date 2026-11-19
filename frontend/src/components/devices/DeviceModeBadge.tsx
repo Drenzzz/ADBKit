@@ -19,7 +19,7 @@ export function DeviceModeBadge() {
   const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className="gap-1 text-[10px]">
+    <Badge variant={config.variant} className="gap-1 text-[14px]">
       <Icon className="h-3 w-3" />
       {config.label}
     </Badge>

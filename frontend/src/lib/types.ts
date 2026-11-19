@@ -109,6 +109,7 @@ export interface DeviceInfo {
   batteryLevel?: string
   storageInfo?: string
   ramTotal?: string
+  swapTotal?: string
 }
 
 export interface PerformanceSnapshot {

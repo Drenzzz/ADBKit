@@ -52,4 +52,5 @@ type Info struct {
 	BatteryLevel    string `json:"batteryLevel,omitempty"`
 	StorageInfo     string `json:"storageInfo,omitempty"`
 	RAMTotal        string `json:"ramTotal,omitempty"`
+	SwapTotal       string `json:"swapTotal,omitempty"`
 }

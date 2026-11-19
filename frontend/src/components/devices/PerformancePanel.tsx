@@ -50,20 +50,20 @@ export function PerformancePanel({ snapshot, error }: PerformancePanelProps) {
   return (
     <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
       <CardHeader className="pb-3 pt-5 px-5 flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+        <CardTitle className="flex items-center gap-2 text-[14px] font-semibold text-muted-foreground/80">
           <Activity className="h-3.5 w-3.5" />
-          Performance Telemetry
+          Performance telemetry
         </CardTitle>
       </CardHeader>
       <CardContent className="px-5 pb-5">
         {error ? (
           <div className="flex items-center justify-center py-6">
-            <p className="text-xs text-destructive text-center">{error}</p>
+            <p className="text-[14px] text-destructive text-center">{error}</p>
           </div>
         ) : !snapshot ? (
           <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <p className="text-xs">Connecting diagnostics stream...</p>
+            <p className="text-[14px]">Connecting diagnostics stream...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

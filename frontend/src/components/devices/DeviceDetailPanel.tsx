@@ -86,9 +86,9 @@ export function DeviceDetailPanel() {
   return (
     <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)] w-full">
       <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4">
-        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+        <CardTitle className="flex items-center gap-2 text-[14px] font-semibold text-muted-foreground/80">
           <Info className="h-3.5 w-3.5" />
-          Device Specifications
+          Device specifications
         </CardTitle>
         {activeSerial && (
           <Button
@@ -104,7 +104,7 @@ export function DeviceDetailPanel() {
       </CardHeader>
       <CardContent className="px-4 pb-4">
         {!deviceInfo ? (
-          <p className="text-xs text-muted-foreground py-4 text-center">No active device details.</p>
+          <p className="text-[14px] text-muted-foreground py-4 text-center">No active device details.</p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
             {cells.map((cell) => {
@@ -124,7 +124,7 @@ export function DeviceDetailPanel() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between">
-                      <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/60">
+                      <p className="text-[14px] text-muted-foreground/80">
                         {cell.label}
                       </p>
                       <span className="flex h-3 w-3 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
@@ -135,7 +135,7 @@ export function DeviceDetailPanel() {
                         )}
                       </span>
                     </div>
-                    <p className={cn('mt-0.5 truncate text-xs font-semibold text-foreground', cell.mono && 'font-mono text-[10px]')}>
+                    <p className={cn('mt-0.5 truncate text-[14px] font-semibold text-foreground', cell.mono && 'font-mono text-[13px]')}>
                       {cell.value}
                     </p>
                   </div>
