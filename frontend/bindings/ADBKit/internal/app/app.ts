@@ -152,6 +152,18 @@ export function GetAppConfig(): $CancellablePromise<core$0.AppConfigSnapshot> {
     return $Call.ByID(3154339166);
 }
 
+export function GetAppIcon(packageName: string): $CancellablePromise<packagemgr$0.AppIcon> {
+    return $Call.ByID(1045570161, packageName);
+}
+
+export function GetAppIcons(packageNames: string[] | null): $CancellablePromise<{ [_ in string]?: packagemgr$0.AppIcon } | null> {
+    return $Call.ByID(491489574, packageNames);
+}
+
+export function GetAppLabels(packageNames: string[] | null): $CancellablePromise<{ [_ in string]?: string } | null> {
+    return $Call.ByID(278214151, packageNames);
+}
+
 export function GetAuditLogs(limit: number): $CancellablePromise<audit$0.Entry[] | null> {
     return $Call.ByID(229985055, limit);
 }

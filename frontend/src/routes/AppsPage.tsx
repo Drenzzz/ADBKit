@@ -1,22 +1,18 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { motion } from 'motion/react'
-import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useEffect, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import {
-  IconRefresh as RefreshCw,
-  IconBox as Package,
-  IconUpload as Upload,
-  IconLoader2 as Loader2,
-  IconArrowsSort as ArrowUpDown
-} from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+  IconLoader2,
+  IconRefresh,
+  IconUpload,
+  IconSearch,
+} from '@tabler/icons-react'
+import { Button } from '@astryxdesign/core/Button'
+import { Heading } from '@astryxdesign/core/Heading'
+import { Text } from '@astryxdesign/core/Text'
+import { HStack } from '@astryxdesign/core/HStack'
+import { Selector } from '@astryxdesign/core/Selector'
 import { useDevices } from '@/hooks/useDevices'
+import { DeviceManagerSheet } from '@/components/devices/DeviceManagerSheet'
 import { useAppManager } from '@/hooks/useAppManager'
 import { onFileDrop } from '@/services/fileDropService'
 import { selectApkFile } from '@/services/packageService'
@@ -30,7 +26,6 @@ import {
   NoPackagesState,
   NoSearchResultsState,
 } from '@/components/apps/EmptyStates'
-import { cn } from '@/lib/utils'
 import type {
   PackageFilter,
   PackageSortOrder,
@@ -50,76 +45,19 @@ const STATUS_TABS: { value: PackageStatusFilter; label: string }[] = [
 ]
 
 const SORT_OPTIONS: { value: PackageSortOrder; label: string }[] = [
-  { value: 'az', label: 'A → Z' },
-  { value: 'za', label: 'Z → A' },
+  { value: 'az', label: 'A to Z' },
+  { value: 'za', label: 'Z to A' },
   { value: 'size-desc', label: 'Largest first' },
   { value: 'size-asc', label: 'Smallest first' },
 ]
 
-interface SegmentedTabsProps<T extends string> {
-  tabs: { value: T; label: string }[]
-  value: T
-  onChange: (value: T) => void
-}
-
-function SegmentedTabs<T extends string>({
-  tabs,
-  value,
-  onChange,
-}: SegmentedTabsProps<T>) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const [indicator, setIndicator] = useState({ left: 0, width: 0 })
-
-  useLayoutEffect(() => {
-    const activeIdx = tabs.findIndex((t) => t.value === value)
-    const activeEl = itemRefs.current[activeIdx]
-    const containerEl = containerRef.current
-    if (!activeEl || !containerEl) return
-    const ar = activeEl.getBoundingClientRect()
-    const cr = containerEl.getBoundingClientRect()
-    setIndicator({ left: ar.left - cr.left, width: ar.width })
-  }, [value, tabs])
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative inline-flex items-center gap-0.5 rounded-full border border-border/50 bg-muted/20 p-0.5"
-    >
-      <div
-        className="absolute top-0.5 bottom-0.5 rounded-full bg-background shadow-sm transition-colors duration-200 ease-out"
-        style={{ left: indicator.left, width: indicator.width }}
-      />
-      {tabs.map((tab, idx) => (
-        <Button
-          key={tab.value}
-          ref={(el) => {
-            itemRefs.current[idx] = el as HTMLButtonElement
-          }}
-          variant="ghost"
-          size="sm"
-          onClick={() => onChange(tab.value)}
-          className={cn(
-            'relative z-10 rounded-full px-3 py-1 h-auto text-xs font-medium transition-colors duration-150 hover:bg-transparent',
-            value === tab.value
-              ? 'text-primary font-bold'
-              : 'text-muted-foreground hover:text-foreground',
-          )}
-        >
-          {tab.label}
-        </Button>
-      ))}
-    </div>
-  )
-}
-
 export default function AppsPage() {
   const reduced = useReducedMotion()
-  const { activeSerial } = useDevices()
   const appManager = useAppManager()
 
   const [installDialogOpen, setInstallDialogOpen] = useState(false)
   const [installApkPath, setInstallApkPath] = useState<string | undefined>()
+  const [managerOpen, setManagerOpen] = useState(false)
   const [detailPackage, setDetailPackage] = useState<string | null>(null)
   const [confirmAction, setConfirmAction] = useState<{
     title: string
@@ -138,16 +76,16 @@ export default function AppsPage() {
     })
   }, [])
 
+  const { activeSerial, refreshing, refreshDevices } = useDevices()
+
   if (!activeSerial) {
     return (
-      <div className="flex flex-col gap-6">
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">Apps</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Manage installed applications and system packages
-          </p>
+      <div className="dashboard-scale flex h-full min-h-0 flex-col gap-4 p-5">
+        <Heading level={1} type="display-1" weight="semibold">Apps</Heading>
+        <div className="min-h-0 flex-1">
+          <NoDeviceState onRefresh={refreshDevices} refreshing={refreshing} />
         </div>
-        <NoDeviceState />
+        <DeviceManagerSheet open={managerOpen} onClose={() => setManagerOpen(false)} />
       </div>
     )
   }
@@ -155,257 +93,166 @@ export default function AppsPage() {
   const totalPackages = appManager.allPackages.length
   const enabledPackages = appManager.allPackages.filter((p) => p.isEnabled).length
   const disabledPackages = appManager.allPackages.filter((p) => !p.isEnabled).length
-
   const isEmpty = !appManager.loading && appManager.packages.length === 0
   const hasSearch = appManager.searchTerm.trim().length > 0
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: reduced
-        ? { duration: 0, staggerChildren: 0 }
-        : { staggerChildren: 0.05 },
-    },
-  }
+  const confirm = (
+    title: string,
+    description: string,
+    confirmLabel: string,
+    variant: 'default' | 'destructive',
+    onConfirm: () => void,
+  ) => setConfirmAction({ title, description, confirmLabel, variant, onConfirm })
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: reduced
-        ? { duration: 0 }
-        : { type: 'spring' as const, stiffness: 300, damping: 24 },
+  const tableHandlers = {
+    selectedPackages: appManager.selectedPackages,
+    busyPackageName: appManager.busyPackageName,
+    loading: appManager.loading,
+    detailsCache: appManager.detailsCache,
+    onToggleSelect: appManager.togglePackageSelection,
+    onToggleAll: appManager.toggleVisibleSelection,
+    onDetails: (name: string) => setDetailPackage(name),
+    onLaunch: appManager.launch,
+    onForceStop: (name: string) =>
+      confirm('Force stop app', `Force stop ${name}? All active processes will be terminated.`, 'Force stop', 'default', () => {
+        appManager.forceStop(name)
+        setConfirmAction(null)
+      }),
+    onToggleEnabled: (name: string) => {
+      const pkg = appManager.allPackages.find((p) => p.packageName === name)
+      if (pkg?.isEnabled) appManager.disableSingle(name)
+      else appManager.enableSingle(name)
     },
+    onClearData: (name: string) =>
+      confirm('Clear app data', `Clear all data and cache for ${name}? This cannot be undone.`, 'Clear data', 'destructive', () => {
+        appManager.clearData(name)
+        setConfirmAction(null)
+      }),
+    onPullApk: appManager.pullApk,
+    onUninstall: (name: string) =>
+      confirm('Uninstall app', `Uninstall ${name} and all its settings? This cannot be undone.`, 'Uninstall', 'destructive', () => {
+        appManager.uninstallSingle(name)
+        setConfirmAction(null)
+      }),
+    loadDetails: appManager.loadDetails,
   }
 
   return (
     <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="flex-1 min-h-0 flex flex-col gap-4 font-sans"
+      className="dashboard-scale js flex h-full min-h-0 flex-col gap-4 p-5"
+      initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reduced ? 0.18 : 0.45, ease: [0.16, 1, 0.3, 1] }}
     >
-      {/* Header Panel */}
-      <motion.header
-        variants={itemVariants}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading text-2xl font-bold tracking-tight">
-            Apps
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Manage installed applications and system packages
-          </p>
+      <div className="m3-surface flex flex-wrap items-center justify-between gap-3 p-5">
+        <div className="min-w-0">
+          <Heading level={1} type="display-1" weight="semibold" maxLines={1}>Apps</Heading>
+          <Text type="body" color="secondary">
+            {totalPackages > 0
+              ? `${totalPackages} packages · ${enabledPackages} on · ${disabledPackages} off`
+              : 'Manage installed applications and system packages'}
+          </Text>
         </div>
-
-        <div className="flex items-center gap-2">
-          {totalPackages > 0 && (
-            <div className="hidden sm:flex items-center gap-2 text-[11px] text-muted-foreground mr-2">
-              <span className="tabular font-medium">{totalPackages}</span>
-              <span>packages</span>
-              <span className="text-border">·</span>
-              <span className="tabular font-medium text-success">
-                {enabledPackages}
-              </span>
-              <span>on</span>
-              <span className="text-border">·</span>
-              <span className="tabular font-medium text-warning">
-                {disabledPackages}
-              </span>
-              <span>off</span>
-            </div>
-          )}
-
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5"
-              onClick={() => setInstallDialogOpen(true)}
-              disabled={appManager.installing}
-            >
-              {appManager.installing ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Upload className="h-3.5 w-3.5" />
-              )}
-              {appManager.installing ? 'Installing…' : 'Install APK'}
-            </Button>
-          </motion.div>
-
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              variant="ghost"
-              className="h-8 w-8 p-0"
-              onClick={() => appManager.fetchPackages(true)}
-              disabled={appManager.refreshing || appManager.installing}
-            >
-              <RefreshCw
-                className={cn('h-3.5 w-3.5', appManager.refreshing && 'animate-spin')}
-              />
-            </Button>
-          </motion.div>
-        </div>
-      </motion.header>
+        <motion.div
+          initial={reduced ? false : { opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        >
+        <HStack gap={2}>
+          <Button
+            label={appManager.installing ? 'Installing…' : 'Install APK'}
+            icon={appManager.installing
+              ? <IconLoader2 size={18} className="animate-spin motion-reduce:animate-none" />
+              : <IconUpload size={18} stroke={1.75} />}
+            variant="secondary"
+            isDisabled={appManager.installing}
+            onClick={() => setInstallDialogOpen(true)}
+          />
+          <Button
+            label="Refresh"
+            icon={<IconRefresh size={18} stroke={1.75} />}
+            variant="ghost"
+            isIconOnly
+            tooltip="Refresh packages"
+            isLoading={appManager.refreshing}
+            isDisabled={appManager.refreshing || appManager.installing}
+            onClick={() => appManager.fetchPackages(true)}
+          />
+        </HStack>
+        </motion.div>
+      </div>
 
       {appManager.error && (
-        <motion.div
-          variants={itemVariants}
-          className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"
-        >
+        <div className="m3-surface px-4 py-3 text-[14px] text-[var(--color-error)]">
           {appManager.error}
-        </motion.div>
+        </div>
       )}
 
-      {/* Control Panel */}
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-wrap items-center gap-2"
-      >
-        <div className="relative flex-1 min-w-[180px] max-w-xs">
-          <Package className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
+      <div className="m3-surface flex flex-wrap items-center gap-2 rounded-3xl px-4 py-2.5">
+        <div className="relative min-w-[280px] flex-1">
+          <IconSearch
+            size={18}
+            stroke={1.75}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
+          />
+          <input
+            type="search"
             placeholder="Search packages…"
             value={appManager.searchTerm}
             onChange={(e) => appManager.setSearchTerm(e.target.value)}
-            className="h-8 pl-8 text-xs transition-colors hover:border-border/80 focus:border-primary"
+            aria-label="Search packages"
+            className="h-11 w-full rounded-full bg-[color-mix(in_srgb,var(--color-background-muted)_88%,black)] pl-10 pr-4 text-[15px] text-[var(--color-text-primary)] outline-none transition-colors placeholder:text-[var(--color-text-secondary)] focus-visible:bg-[color-mix(in_srgb,var(--color-background-muted)_70%,black)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
           />
         </div>
 
-        <SegmentedTabs
-          tabs={SOURCE_TABS}
+        <Selector
+          label="Source"
+          isLabelHidden
           value={appManager.filter}
-          onChange={appManager.setFilter}
+          onChange={(v) => appManager.setFilter(v as PackageFilter)}
+          options={SOURCE_TABS.map((t) => ({ value: t.value, label: t.label }))}
         />
-        <SegmentedTabs
-          tabs={STATUS_TABS}
+        <Selector
+          label="Status"
+          isLabelHidden
           value={appManager.statusFilter}
-          onChange={appManager.setStatusFilter}
+          onChange={(v) => appManager.setStatusFilter(v as PackageStatusFilter)}
+          options={STATUS_TABS.map((t) => ({ value: t.value, label: t.label }))}
         />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border/50 bg-background px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors cursor-pointer"
-          >
-            <ArrowUpDown className="h-3 w-3 text-muted-foreground" />
-            {SORT_OPTIONS.find((o) => o.value === appManager.sortOrder)?.label ?? 'Sort'}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="border-border/60">
-            {SORT_OPTIONS.map((opt) => (
-              <DropdownMenuItem
-                key={opt.value}
-                onClick={() => appManager.setSortOrder(opt.value)}
-                className={cn(
-                  appManager.sortOrder === opt.value && 'font-medium text-primary',
-                )}
-              >
-                {opt.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </motion.div>
+        <Selector
+          label="Sort order"
+          isLabelHidden
+          value={appManager.sortOrder}
+          onChange={(v) => appManager.setSortOrder(v as PackageSortOrder)}
+          options={SORT_OPTIONS.map((t) => ({ value: t.value, label: t.label }))}
+        />
+      </div>
 
-      {/* Virtualized List Card */}
-      <motion.div variants={itemVariants} className="flex-1 min-h-0 flex flex-col">
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         {isEmpty ? (
-          hasSearch ? (
-            <NoSearchResultsState term={appManager.searchTerm} />
-          ) : (
-            <NoPackagesState filter={appManager.filter} />
-          )
+          hasSearch ? <NoSearchResultsState term={appManager.searchTerm} /> : <NoPackagesState filter={appManager.filter} />
         ) : (
-          <PackageTable
-            packages={appManager.packages}
-            selectedPackages={appManager.selectedPackages}
-            busyPackageName={appManager.busyPackageName}
-            loading={appManager.loading}
-            detailsCache={appManager.detailsCache}
-            onToggleSelect={appManager.togglePackageSelection}
-            onToggleAll={appManager.toggleVisibleSelection}
-            onDetails={(name) => setDetailPackage(name)}
-            onLaunch={appManager.launch}
-            onForceStop={(name) =>
-              setConfirmAction({
-                title: 'Force Stop App',
-                description: `Are you sure you want to force stop ${name}? This will terminate all active processes for this package immediately.`,
-                variant: 'default',
-                confirmLabel: 'Force Stop',
-                onConfirm: () => {
-                  appManager.forceStop(name)
-                  setConfirmAction(null)
-                },
-              })
-            }
-            onToggleEnabled={(name) => {
-              const pkg = appManager.allPackages.find((p) => p.packageName === name)
-              if (pkg?.isEnabled) {
-                appManager.disableSingle(name)
-              } else {
-                appManager.enableSingle(name)
-              }
-            }}
-            onClearData={(name) =>
-              setConfirmAction({
-                title: 'Clear Application Data',
-                description: `Are you sure you want to clear all data and cache for ${name}? This action is destructive and cannot be undone.`,
-                variant: 'destructive',
-                confirmLabel: 'Clear Data',
-                onConfirm: () => {
-                  appManager.clearData(name)
-                  setConfirmAction(null)
-                },
-              })
-            }
-            onPullApk={appManager.pullApk}
-            onUninstall={(name) =>
-              setConfirmAction({
-                title: 'Uninstall Application',
-                description: `Are you sure you want to uninstall ${name}? This will permanently remove the application and its associated settings.`,
-                variant: 'destructive',
-                confirmLabel: 'Uninstall',
-                onConfirm: () => {
-                  appManager.uninstallSingle(name)
-                  setConfirmAction(null)
-                },
-              })
-            }
-            loadDetails={appManager.loadDetails}
-          />
+          <PackageTable packages={appManager.packages} {...tableHandlers} />
         )}
-      </motion.div>
+      </div>
 
       <BatchBar
         count={appManager.selectedPackages.length}
         busyAction={appManager.busyBatchAction}
         onUninstall={() =>
-          setConfirmAction({
-            title: 'Uninstall Selected Packages',
-            description: `Are you sure you want to permanently uninstall the ${appManager.selectedPackages.length} selected package(s)? This action cannot be undone.`,
-            variant: 'destructive',
-            confirmLabel: 'Uninstall All',
-            onConfirm: () => {
-              appManager.uninstallBatch()
-              setConfirmAction(null)
-            },
+          confirm('Uninstall selected', `Permanently uninstall ${appManager.selectedPackages.length} selected package(s)?`, 'Uninstall all', 'destructive', () => {
+            appManager.uninstallBatch()
+            setConfirmAction(null)
           })
         }
         onEnable={appManager.enableBatch}
         onDisable={appManager.disableBatch}
         onForceStop={appManager.forceStopBatch}
         onClearData={() =>
-          setConfirmAction({
-            title: 'Clear Data for Selected Apps',
-            description: `Are you sure you want to clear cache and data for the ${appManager.selectedPackages.length} selected package(s)?`,
-            variant: 'destructive',
-            confirmLabel: 'Clear All',
-            onConfirm: () => {
-              appManager.clearDataBatch()
-              setConfirmAction(null)
-            },
+          confirm('Clear data for selected apps', `Clear cache and data for ${appManager.selectedPackages.length} selected package(s)?`, 'Clear all', 'destructive', () => {
+            appManager.clearDataBatch()
+            setConfirmAction(null)
           })
         }
         onExportApk={appManager.exportApkBatch}
@@ -423,26 +270,20 @@ export default function AppsPage() {
           if (success) setInstallDialogOpen(false)
           return success
         }}
-        onSelectFile={async () => {
-          return selectApkFile()
-        }}
+        onSelectFile={async () => selectApkFile()}
         initialFilePath={installApkPath}
       />
 
       <PackageDetailSheet
         open={detailPackage !== null}
-        onOpenChange={(open) => {
-          if (!open) setDetailPackage(null)
-        }}
+        onOpenChange={(open) => { if (!open) setDetailPackage(null) }}
         packageName={detailPackage ?? ''}
         onFetchDetails={appManager.getDetails}
       />
 
       <ConfirmDialog
         open={confirmAction !== null}
-        onOpenChange={(open) => {
-          if (!open) setConfirmAction(null)
-        }}
+        onOpenChange={(open) => { if (!open) setConfirmAction(null) }}
         title={confirmAction?.title ?? ''}
         description={confirmAction?.description ?? ''}
         variant={confirmAction?.variant}

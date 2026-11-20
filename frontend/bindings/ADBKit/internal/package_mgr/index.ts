@@ -3,6 +3,7 @@
 
 export type {
     APKPreview,
+    AppIcon,
     Details,
     Info
 } from "./models.js";

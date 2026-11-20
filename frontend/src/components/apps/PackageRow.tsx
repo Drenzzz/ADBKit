@@ -1,143 +1,83 @@
 import { useEffect } from 'react'
+import { motion } from 'motion/react'
 import { cn } from '@/lib/utils'
-import { Checkbox } from '@/components/ui/checkbox'
-import { PackageActions } from './PackageActions'
-import type { PackageInfo, PackageDetails } from '@/lib/types'
-
-interface PackageRowProps {
-  pkg: PackageInfo
-  details: PackageDetails | undefined
-  isSelected: boolean
-  isBusy: boolean
-  onToggleSelect: (name: string) => void
-  onDetails: (name: string) => void
-  onLaunch: (name: string) => void
-  onForceStop: (name: string) => void
-  onToggleEnabled: (name: string) => void
-  onClearData: (name: string) => void
-  onPullApk: (name: string) => void
-  onUninstall: (name: string) => void
-  loadDetails: (name: string) => void
-}
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 function formatSize(bytes?: number): string {
-  if (bytes === undefined || bytes < 0) return '—'
+  if (bytes === undefined || bytes < 0) return ''
   if (bytes === 0) return '0 B'
   const kb = 1024
-  const mb = kb * 1024
-  const gb = mb * 1024
-  if (bytes >= gb) return `${(bytes / gb).toFixed(1)} GB`
-  if (bytes >= mb) return `${(bytes / mb).toFixed(1)} MB`
+  if (bytes >= kb * kb * kb) return `${(bytes / (kb * kb * kb)).toFixed(1)} GB`
+  if (bytes >= kb * kb) return `${(bytes / (kb * kb)).toFixed(1)} MB`
   return `${(bytes / kb).toFixed(0)} KB`
+}
+
+interface PackageRowProps {
+  pkg: {
+    packageName: string
+    isEnabled: boolean
+    isSystemApp?: boolean
+  }
+  details?: { totalSizeBytes?: number; versionName?: string }
+  loadDetails: (name: string) => void
+  onToggleSelect: (name: string) => void
 }
 
 export function PackageRow({
   pkg,
   details,
-  isSelected,
-  isBusy,
-  onToggleSelect,
-  onDetails,
-  onLaunch,
-  onForceStop,
-  onToggleEnabled,
-  onClearData,
-  onPullApk,
-  onUninstall,
   loadDetails,
+  onToggleSelect,
 }: PackageRowProps) {
-  const isDisabled = !pkg.isEnabled
+  const reduced = useReducedMotion()
+  const versionLabel = details?.versionName
 
   useEffect(() => {
     loadDetails(pkg.packageName)
   }, [pkg.packageName, loadDetails])
 
-  const sizeLabel = details ? formatSize(details.totalSizeBytes) : '—'
-  const versionLabel = details?.versionName ?? ''
-
   return (
     <div
-      className={cn(
-        'flex items-center gap-3 px-4 py-2 border-b border-border/30 transition-colors duration-150',
-        'hover:bg-muted/50 cursor-pointer h-12',
-        isSelected && 'bg-primary/[0.04] border-l-2 border-l-primary',
-        isDisabled && 'opacity-50 grayscale'
-      )}
+      className="flex h-full min-w-0 flex-1 cursor-pointer items-center gap-4 pl-6"
       onClick={() => onToggleSelect(pkg.packageName)}
     >
-      <Checkbox
-        checked={isSelected}
-        onCheckedChange={() => onToggleSelect(pkg.packageName)}
-        className="h-4 w-4 shrink-0"
-        aria-label={`Select ${pkg.packageName}`}
-        onClick={(e) => e.stopPropagation()}
-      />
-
-      {/* Status Column */}
-      <div className="flex items-center w-24 shrink-0">
-        <div
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleEnabled(pkg.packageName)
-          }}
-          className={cn(
-            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[10px] font-semibold tracking-wider transition-[colors,transform] duration-150 cursor-pointer select-none active:scale-95',
-            pkg.isEnabled
-              ? 'bg-success/15 text-success border-success/30 hover:bg-success/20'
-              : 'bg-destructive/10 text-destructive border-destructive/25 hover:bg-destructive/15'
-          )}
-          title="Click to toggle status"
-        >
-          <span
-            className={cn(
-              'h-1.5 w-1.5 rounded-full shrink-0',
-              pkg.isEnabled ? 'bg-success animate-pulse' : 'bg-destructive'
-            )}
-          />
-          {pkg.isEnabled ? 'Enabled' : 'Disabled'}
-        </div>
-      </div>
-
-      {/* Package Column */}
-      <div className="flex-1 min-w-0">
-        <span className="text-xs font-mono truncate block text-foreground">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[17px] font-semibold leading-tight tracking-tight text-[var(--color-text-primary)]">
           {pkg.packageName}
-        </span>
-        {versionLabel && (
-          <span className="text-[10px] text-muted-foreground/60 tabular block mt-0.5">
-            v{versionLabel}
+        </p>
+        <div className="mt-1 flex items-center gap-2 text-[14px]">
+          <span className="tabular text-[var(--color-text-secondary)]">
+            {versionLabel ?? '…'}
           </span>
-        )}
-      </div>
-
-      {/* Size Column */}
-      <div className="w-24 shrink-0 text-right font-mono">
-        <span className="text-[11px] text-muted-foreground tabular">{sizeLabel}</span>
-      </div>
-
-      {/* Actions Column */}
-      <div className="flex items-center gap-1.5 w-20 shrink-0 justify-end">
-        {pkg.isSystemApp && (
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground/60 border border-border/50 rounded px-1.5 py-0.5 font-semibold">
-            sys
-          </span>
-        )}
-
-        <div onClick={(e) => e.stopPropagation()}>
-          <PackageActions
-            packageName={pkg.packageName}
-            isEnabled={pkg.isEnabled}
-            isBusy={isBusy}
-            onDetails={onDetails}
-            onLaunch={onLaunch}
-            onForceStop={onForceStop}
-            onToggleEnabled={onToggleEnabled}
-            onClearData={onClearData}
-            onPullApk={onPullApk}
-            onUninstall={onUninstall}
-          />
+          <motion.span
+            initial={reduced ? false : { scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 25 }}
+            className={cn(
+              'inline-flex items-center rounded-full px-2.5 py-0.5 text-[14px] font-semibold',
+              pkg.isEnabled
+                ? 'bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] text-[var(--color-success)]'
+                : 'bg-[color-mix(in_srgb,var(--color-warning)_15%,transparent)] text-[var(--color-warning)]',
+            )}
+          >
+            {pkg.isEnabled ? 'Enabled' : 'Disabled'}
+          </motion.span>
+          {pkg.isSystemApp && (
+            <span className="rounded-full bg-[var(--color-background-muted)] px-2.5 py-0.5 text-[14px] font-medium text-[var(--color-text-secondary)]">
+              System
+            </span>
+          )}
         </div>
       </div>
+
+      <span
+        className={cn(
+          'shrink-0 pr-1 text-[14px] tabular transition-colors duration-200',
+          details ? 'text-[var(--color-text-primary)]' : 'text-transparent',
+        )}
+      >
+        {details ? formatSize(details.totalSizeBytes) : '0 MB'}
+      </span>
     </div>
   )
 }

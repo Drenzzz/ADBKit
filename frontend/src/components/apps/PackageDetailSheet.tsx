@@ -5,8 +5,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { PackageDetails } from '@/lib/types'
 
@@ -25,6 +23,17 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
 }
 
+function StatRow({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-3.5">
+      <span className="text-[15px] text-[var(--color-text-secondary)]">{label}</span>
+      <span className="text-[18px] font-semibold tracking-tight tabular text-[var(--color-text-primary)]">
+        {value}
+      </span>
+    </div>
+  )
+}
+
 export function PackageDetailSheet({
   open,
   onOpenChange,
@@ -39,7 +48,6 @@ export function PackageDetailSheet({
       setDetails(null)
       return
     }
-
     let cancelled = false
     setLoading(true)
     onFetchDetails(packageName).then((result) => {
@@ -48,7 +56,6 @@ export function PackageDetailSheet({
         setLoading(false)
       }
     })
-
     return () => {
       cancelled = true
     }
@@ -56,49 +63,39 @@ export function PackageDetailSheet({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="break-all text-base">{packageName}</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[440px] gap-0 rounded-2xl border border-border/50 bg-card/60 p-0 backdrop-blur-2xl supports-backdrop-filter:bg-card/70">
+        <div className="dashboard-scale">
+          <DialogHeader className="border-b border-border/40 px-7 py-6">
+            <DialogTitle className="break-all text-[24px] font-bold leading-tight tracking-tight text-[var(--color-text-primary)]">
+              {packageName}
+            </DialogTitle>
+          </DialogHeader>
 
-        {loading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-5 w-3/4" />
-            <Skeleton className="h-5 w-1/2" />
-            <Skeleton className="h-5 w-2/3" />
-          </div>
-        ) : details ? (
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Version</span>
-              <span className="font-medium">
-                {details.versionName || 'N/A'}
+          <div className="px-7 py-3">
+            {loading ? (
+              <div className="space-y-5 py-4">
+                <Skeleton className="h-5 w-2/3" />
+                <Skeleton className="h-5 w-1/2" />
+                <Skeleton className="h-5 w-3/5" />
+                <Skeleton className="h-5 w-1/2" />
+              </div>
+            ) : details ? (
+              <div className="divide-y divide-border/40">
+                <StatRow label="Version" value={details.versionName || 'N/A'} />
                 {details.versionCode && (
-                  <Badge variant="outline" className="ml-2 text-[10px]">
-                    {details.versionCode}
-                  </Badge>
+                  <StatRow label="Version code" value={details.versionCode} />
                 )}
-              </span>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">APK Size</span>
-              <span className="font-medium">{formatBytes(details.apkSizeBytes)}</span>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Data Size</span>
-              <span className="font-medium">{formatBytes(details.dataSizeBytes)}</span>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Total Size</span>
-              <span className="font-medium">{formatBytes(details.totalSizeBytes)}</span>
-            </div>
+                <StatRow label="APK size" value={formatBytes(details.apkSizeBytes)} />
+                <StatRow label="Data size" value={formatBytes(details.dataSizeBytes)} />
+                <StatRow label="Total size" value={formatBytes(details.totalSizeBytes)} />
+              </div>
+            ) : (
+              <p className="py-4 text-[15px] text-[var(--color-text-secondary)]">
+                Failed to load package details.
+              </p>
+            )}
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">Failed to load package details.</p>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   )

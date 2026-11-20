@@ -55,7 +55,7 @@ describe('BatchBar', () => {
 
   it('calls onClear when X button is clicked', () => {
     render(<BatchBar {...defaultProps} />)
-    fireEvent.click(screen.getByRole('button', { name: '' }).closest('button')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Clear selection' }))
     expect(defaultProps.onClear).toHaveBeenCalledTimes(1)
   })
 })
