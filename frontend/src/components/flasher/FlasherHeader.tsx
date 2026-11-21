@@ -1,18 +1,8 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import {
-  IconRefresh as RefreshCw
+  IconRefresh,
 } from "@tabler/icons-react"
+import { ConfirmOverlay } from '@/components/flasher/cards/RomFlashCard'
 import { useFlasher } from '@/hooks/useFlasher'
 import { cn } from '@/lib/utils'
 
@@ -22,6 +12,12 @@ function timeAgo(timestamp: number | null): string {
   if (seconds < 5) return 'just now'
   if (seconds < 60) return `${seconds}s ago`
   return `${Math.floor(seconds / 60)}m ago`
+}
+
+const MODE_STYLES: Record<string, { dot: string; text: string }> = {
+  fastbootd: { dot: 'bg-[var(--color-success)]', text: 'text-[var(--color-success)]' },
+  fastboot: { dot: 'bg-[var(--color-accent)]', text: 'text-[var(--color-accent)]' },
+  sideload: { dot: 'bg-[var(--color-warning)]', text: 'text-[var(--color-warning)]' },
 }
 
 export function FlasherHeader() {
@@ -42,143 +38,80 @@ export function FlasherHeader() {
 
   const hasDevice = fastbootDevices.length > 0 || deviceMode === 'sideload'
   const hasSlot = (deviceMode === 'fastboot' || deviceMode === 'fastbootd') && (currentSlot === 'a' || currentSlot === 'b')
-  const isSideload = deviceMode === 'sideload'
+  const modeStyle = MODE_STYLES[deviceMode ?? ''] ?? { dot: 'bg-[var(--color-text-secondary)]', text: 'text-[var(--color-text-secondary)]' }
 
   function handleSlotSwitch(slot: string) {
     setPendingSlot(slot)
     setSlotDialogOpen(true)
   }
 
-  // Get status color and label for the unified status pane
-  const getStatusConfig = () => {
-    if (deviceMode === 'fastbootd') {
-      return {
-        label: 'Fastbootd',
-        dotClass: 'bg-[var(--success)] shadow-[var(--glow-success)]',
-        bgClass: 'bg-[var(--success)]/10 dark:bg-[var(--success)]/20 border-[var(--success)]/30 dark:border-[var(--success)]/20 text-[var(--success)]',
-      }
-    }
-    if (deviceMode === 'fastboot') {
-      return {
-        label: 'Fastboot',
-        dotClass: 'bg-[var(--primary)] shadow-[var(--glow-info)]',
-        bgClass: 'bg-[var(--primary)]/10 dark:bg-[var(--primary)]/20 border-[var(--primary)]/30 dark:border-[var(--primary)]/20 text-[var(--primary)]',
-      }
-    }
-    if (deviceMode === 'sideload') {
-      return {
-        label: 'Sideload',
-        dotClass: 'bg-[var(--warning)] shadow-[var(--glow-warning)]',
-        bgClass: 'bg-[var(--warning)]/10 dark:bg-[var(--warning)]/20 border-[var(--warning)]/30 dark:border-[var(--warning)]/20 text-[var(--warning)]',
-      }
-    }
-    return {
-      label: 'Disconnected',
-      dotClass: 'bg-muted-foreground dark:bg-muted-foreground',
-      bgClass: 'bg-[var(--muted)]/30 dark:bg-[var(--muted)]/30 border-[var(--border)] dark:border-[var(--border)] text-muted-foreground dark:text-muted-foreground',
-    }
-  }
-
-  const status = getStatusConfig()
-
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="space-y-0.5">
-        <h2 className="text-xl font-bold tracking-tight text-foreground">ROM Flasher</h2>
-        <p className="text-xs text-muted-foreground">
-          {isSideload
-            ? 'Device is in sideload mode. Sideload a ZIP package to install.'
-            : 'Flash partitions, ROM folders, A/B slot management, and wipe operations.'}
-        </p>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Unified Device Status Pane */}
-        <div className={cn(
-          "flex items-center gap-2.5 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm transition-colors duration-300",
-          status.bgClass
-        )}>
-          <span className={cn("h-2 w-2 rounded-full animate-pulse", status.dotClass)} />
-          <div className="flex items-center gap-1.5 font-mono">
-            {hasDevice && activeFastbootSerial && (
-              <span className="opacity-90 max-w-[80px] truncate" title={activeFastbootSerial}>
-                {activeFastbootSerial}
-              </span>
-            )}
-            {hasDevice && <span className="opacity-40">|</span>}
-            <span>{status.label}</span>
-          </div>
-        </div>
-
-        {/* macOS-style Slot Switcher */}
-        {hasSlot && (
-          <div className="flex items-center gap-0.5 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)] dark:bg-[var(--muted)] p-0.5 shadow-sm">
-            <button
-              onClick={() => currentSlot === 'b' && handleSlotSwitch('a')}
-              disabled={runningSlotChange}
-              className={cn(
-                "rounded-full px-3 py-1 text-[11px] font-semibold transition-colors duration-200 cursor-pointer",
-                currentSlot === 'a'
-                  ? "bg-card dark:bg-card text-foreground dark:text-foreground shadow-sm"
-                  : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground"
-              )}
-            >
-              Slot A
-            </button>
-            <button
-              onClick={() => currentSlot === 'a' && handleSlotSwitch('b')}
-              disabled={runningSlotChange}
-              className={cn(
-                "rounded-full px-3 py-1 text-[11px] font-semibold transition-colors duration-200 cursor-pointer",
-                currentSlot === 'b'
-                  ? "bg-card dark:bg-card text-foreground dark:text-foreground shadow-sm"
-                  : "text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-foreground"
-              )}
-            >
-              Slot B
-            </button>
-          </div>
-        )}
-
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full text-muted-foreground dark:text-muted-foreground hover:bg-[var(--muted)] dark:hover:bg-[var(--muted)]"
-            onClick={() => syncFastbootDevices(true)}
-            disabled={refreshingDevices}
-          >
-            <RefreshCw className={cn("h-3.5 w-3.5", refreshingDevices && "animate-spin")} />
-          </Button>
-
-          {lastUpdatedAt && (
-            <span className="text-[10px] text-muted-foreground font-medium ml-1">
-              Refreshed {timeAgo(lastUpdatedAt)}
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="flex items-center gap-2.5">
+            <span className={cn('h-2.5 w-2.5 shrink-0 rounded-full', modeStyle.dot, hasDevice && 'animate-pulse motion-reduce:animate-none')} />
+            <span className="truncate text-[18px] font-bold text-[var(--color-text-primary)]">
+              {hasDevice && activeFastbootSerial ? activeFastbootSerial : 'No device'}
             </span>
+          </p>
+          <p className={cn('mt-0.5 pl-5 text-[15px] font-bold', modeStyle.text)}>
+            {hasDevice ? deviceMode || 'connected' : 'disconnected'}
+          </p>
+          {lastUpdatedAt && (
+            <p className="pl-5 text-[14px] text-[var(--color-text-secondary)]">
+              Refreshed {timeAgo(lastUpdatedAt)}
+            </p>
           )}
         </div>
+        <button
+          type="button"
+          aria-label="Refresh fastboot devices"
+          onClick={() => syncFastbootDevices(true)}
+          disabled={refreshingDevices}
+          className="flex size-11 shrink-0 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-card)]/60 hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+        >
+          <IconRefresh
+            size={18}
+            stroke={1.75}
+            className={refreshingDevices ? 'animate-spin motion-reduce:animate-none' : undefined}
+          />
+        </button>
       </div>
 
-      <AlertDialog open={slotDialogOpen} onOpenChange={setSlotDialogOpen}>
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Switch Active Slot</AlertDialogTitle>
-            <AlertDialogDescription>
-              Switch from slot {currentSlot.toUpperCase()} to slot {pendingSlot.toUpperCase()}?
-              The device will boot from slot {pendingSlot.toUpperCase()} on next restart.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={() => applyActiveSlot(pendingSlot)}
-              className="rounded-full bg-primary-container hover:bg-primary-container/90 text-primary-foreground border-0 shadow-sm"
+      {hasSlot && (
+        <div className="flex items-center gap-0.5 rounded-full bg-[var(--color-surface-inset)] p-1">
+          {(['a', 'b'] as const).map((slot) => (
+            <button
+              key={slot}
+              type="button"
+              onClick={() => currentSlot !== slot && handleSlotSwitch(slot)}
+              disabled={runningSlotChange}
+              className={cn(
+                'flex-1 rounded-full px-4 py-2 text-[15px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-60',
+                currentSlot === slot
+                  ? 'bg-[var(--color-background-card)] text-[var(--color-text-primary)]'
+                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
+              )}
             >
-              Switch to Slot {pendingSlot.toUpperCase()}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              Slot {slot.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {slotDialogOpen && (
+        <ConfirmOverlay
+          title="Switch Active Slot"
+          body={`Switch from slot ${currentSlot.toUpperCase()} to slot ${pendingSlot.toUpperCase()}? The device will boot from slot ${pendingSlot.toUpperCase()} on next restart.`}
+          confirmLabel={`Switch to Slot ${pendingSlot.toUpperCase()}`}
+          onConfirm={() => {
+            applyActiveSlot(pendingSlot)
+            setSlotDialogOpen(false)
+          }}
+          onCancel={() => setSlotDialogOpen(false)}
+        />
+      )}
     </div>
   )
 }

@@ -1,16 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { useFlasher } from '@/hooks/useFlasher'
+import { Switch } from '@/components/ui/switch'
 import {
-  IconPower as Power,
-  IconCircleFilled as PlayCircle,
-  IconCpu as Cpu,
-  IconLockOpen as Unlock,
-  IconBatteryCharging as BatteryCharging,
-  IconInfoCircle as Info
+  IconInfoCircle,
+  IconLockOpen,
+  IconBatteryCharging,
+  IconPlayerPlay,
 } from "@tabler/icons-react"
 
 interface WakeOnFastbootCardProps {
@@ -18,13 +13,9 @@ interface WakeOnFastbootCardProps {
 }
 
 /**
- * WOF (Wake on Fastboot) card.
- *
- * Software replacements for a broken physical power button:
- *  - Stay Awake While Charging: never sleep on USB, so a screen-off device
- *    stays reachable (best daily workaround for a dead power button).
- *  - Wake + Unlock: KEYCODE_WAKEUP + keyguard dismiss (one-tap turn-on).
- *  - Continue Boot: `fastboot continue` — exits fastboot without a Start press.
+ * WOF (Wake on Fastboot): software replacements for a broken physical power
+ * button. Stay Awake keeps a screen-off device reachable on USB; Wake +
+ * Unlock turns the screen on; Continue Boot exits fastboot without Start.
  */
 export function WakeOnFastbootCard({ disabled }: WakeOnFastbootCardProps) {
   const {
@@ -43,8 +34,6 @@ export function WakeOnFastbootCard({ disabled }: WakeOnFastbootCardProps) {
   const isFastboot = deviceMode === 'fastboot' || deviceMode === 'fastbootd'
   const isAdb = hasDevice && !isFastboot
 
-  // Sync the toggle with the device's current setting when an ADB device
-  // becomes active. Stay-awake is an Android setting, unavailable in fastboot.
   useEffect(() => {
     if (!isAdb) return
     let cancelled = false
@@ -58,43 +47,37 @@ export function WakeOnFastbootCard({ disabled }: WakeOnFastbootCardProps) {
 
   const handleToggle = async (next: boolean) => {
     setToggling(true)
-    setStayAwakeState(next) // optimistic
+    setStayAwakeState(next)
     try {
       await setStayAwake(next)
     } catch {
-      setStayAwakeState(!next) // revert on failure
+      setStayAwakeState(!next)
     } finally {
       setToggling(false)
     }
   }
 
   return (
-    <Card className="relative overflow-hidden border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-surface)] rounded-2xl shadow-[var(--shadow-card)] h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Power className="h-4 w-4 text-[var(--primary)]" />
-          Wake on Fastboot (WOF)
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-4 flex-1 flex flex-col justify-between">
-        <p className="text-xs text-muted-foreground dark:text-muted-foreground leading-relaxed font-medium">
-          Power-button replacement. Keep the screen on while charging, wake it on
-          demand, or boot out of fastboot — all from software.
+    <div className="flex h-full min-h-0 flex-col">
+      <header className="mb-6">
+        <h3 className="text-[32px] font-semibold tracking-tight text-[var(--color-text-primary)]">Power & Wake</h3>
+        <p className="mt-1 text-[16px] text-[var(--color-text-secondary)]">
+          Power-button replacements, all from software
         </p>
+      </header>
 
-        {/* Stay awake while charging: the core daily workaround */}
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/40 dark:bg-[var(--muted)]/20 px-3 py-2.5">
-          <div className="flex items-start gap-2">
-            <BatteryCharging className="h-4 w-4 mt-0.5 text-[var(--primary)] shrink-0" />
-            <div className="space-y-0.5">
-              <Label
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+        <div className="flex items-center justify-between gap-4 rounded-2xl bg-[var(--color-surface-inset)] px-5 py-5">
+          <div className="flex items-start gap-3.5">
+            <IconBatteryCharging size={20} stroke={1.75} className="mt-0.5 shrink-0 text-[var(--color-accent)]" />
+            <div>
+              <label
                 htmlFor="wof-stay-awake"
-                className="text-xs font-semibold cursor-pointer"
+                className="cursor-pointer text-[16px] font-semibold text-[var(--color-text-primary)]"
               >
                 Stay awake while charging
-              </Label>
-              <p className="text-[11px] text-muted-foreground leading-tight">
+              </label>
+              <p className="mt-0.5 text-[15px] text-[var(--color-text-secondary)]">
                 Screen never sleeps on any charger. Requires ADB mode.
               </p>
             </div>
@@ -107,47 +90,46 @@ export function WakeOnFastbootCard({ disabled }: WakeOnFastbootCardProps) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Button
-            className="w-full rounded-full text-xs font-semibold h-9 transition-[colors,transform] active:scale-[0.97] cursor-pointer"
-            onClick={wakeAndUnlock}
-            disabled={!isAdb}
-          >
-            <Unlock className="mr-1.5 h-3.5 w-3.5" />
-            Wake + Unlock (turn on)
-          </Button>
+        <button
+          type="button"
+          onClick={wakeAndUnlock}
+          disabled={!isAdb}
+          className="flex w-full items-center gap-4 rounded-2xl bg-[var(--color-surface-inset)] px-5 py-5 text-left transition-colors hover:bg-[var(--color-background-card)]/60 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+        >
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--color-background-card)] text-[var(--color-accent)]">
+            <IconLockOpen size={20} stroke={1.75} />
+          </span>
+          <span className="min-w-0">
+            <span className="block whitespace-nowrap text-[16px] font-semibold text-[var(--color-text-primary)]">Wake + Open</span>
+            <span className="block text-[15px] text-[var(--color-text-secondary)]">Turn the screen on and dismiss the keyguard. Requires ADB mode.</span>
+          </span>
+        </button>
 
-          <Button
-            variant="outline"
-            className="w-full rounded-full text-xs font-semibold h-9 transition-[colors,transform] active:scale-[0.97] cursor-pointer"
-            onClick={continueBoot}
-            disabled={!hasDevice || !isFastboot}
-          >
-            <PlayCircle className="mr-1.5 h-3.5 w-3.5" />
-            Continue Boot (exit fastboot)
-          </Button>
-        </div>
+        <button
+          type="button"
+          onClick={continueBoot}
+          disabled={!hasDevice || !isFastboot}
+          className="flex w-full items-center gap-4 rounded-2xl bg-[var(--color-surface-inset)] px-5 py-5 text-left transition-colors hover:bg-[var(--color-background-card)]/60 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+        >
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--color-background-card)] text-[var(--color-accent)]">
+            <IconPlayerPlay size={20} stroke={1.75} />
+          </span>
+          <span className="min-w-0">
+            <span className="block whitespace-nowrap text-[16px] font-semibold text-[var(--color-text-primary)]">Continue Boot</span>
+            <span className="block text-[15px] text-[var(--color-text-secondary)]">Exit fastboot and boot the system without pressing Start.</span>
+          </span>
+        </button>
 
-        {/* Dead-battery + dead-button rescue path */}
-        <div className="flex items-start gap-2 rounded-xl border border-[var(--border)] dark:border-[var(--border)] bg-[var(--muted)]/30 dark:bg-[var(--muted)]/15 px-3 py-2.5">
-          <Info className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
-          <p className="text-[11px] text-muted-foreground leading-tight">
-            <span className="font-semibold text-foreground/80">Phone fully off?</span>{' '}
-            No software can boot a powered-off device. Try your model's bootloader
-            combo (often Vol Down while plugging USB) to reach fastboot, then hit
-            Continue Boot. Keep &ldquo;Stay awake&rdquo; on to avoid this.
+        <div className="flex items-start gap-3 rounded-2xl bg-[var(--color-surface-inset)] px-5 py-4">
+          <IconInfoCircle size={20} stroke={1.75} className="mt-0.5 shrink-0 text-[var(--color-text-secondary)]" />
+          <p className="text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
+            <span className="font-semibold text-[var(--color-text-primary)]">Phone fully off?</span>{' '}
+            No software can boot a powered-off device. Try your model's bootloader combo
+            (often Vol Down while plugging USB) to reach fastboot, then hit Continue Boot.
+            Keep "Stay awake" on to avoid this.
           </p>
         </div>
-      </CardContent>
-
-      {disabled && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/80 dark:bg-[var(--terminal-surface)]/85 backdrop-blur-[3px] select-none transition-colors duration-300">
-          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
-            <Cpu className="h-3.5 w-3.5 text-muted-foreground dark:text-muted-foreground" />
-            Device Required
-          </div>
-        </div>
-      )}
-    </Card>
+      </div>
+    </div>
   )
 }
