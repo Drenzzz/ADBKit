@@ -4,15 +4,13 @@ import {
   IconTrash as Trash2,
   IconX as X,
   IconSend as Send,
-  IconHistory as History
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useTerminalStore } from '@/stores/useTerminalStore'
 import type { TerminalHistoryEntry } from '@/lib/types'
 
 interface CommandHistoryProps {
   onReExecute: (command: string) => void
+  onClose: () => void
 }
 
 interface HistoryGroup {
@@ -44,7 +42,7 @@ function groupBySession(entries: TerminalHistoryEntry[]): HistoryGroup[] {
   return groups
 }
 
-export function CommandHistory({ onReExecute }: CommandHistoryProps) {
+export function CommandHistory({ onReExecute, onClose }: CommandHistoryProps) {
   const { history, removeHistoryEntry, clearHistory } = useTerminalStore()
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -89,62 +87,64 @@ export function CommandHistory({ onReExecute }: CommandHistoryProps) {
   }
 
   return (
-    <div className="flex h-full flex-col bg-[var(--terminal-bg)]/95 backdrop-blur-md text-[var(--terminal-text)]">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-[var(--terminal-border)]/80 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <History className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs font-bold tracking-wide uppercase text-[var(--terminal-text)]">History</span>
-        </div>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex items-center justify-between gap-2 border-b border-border/40 px-4 py-3">
+        <p className="text-[16px] font-semibold text-[var(--color-text-primary)]">Command history</p>
         <div className="flex items-center gap-1">
           {history.length > 0 && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0 rounded-full hover:bg-[var(--terminal-surface)] text-muted-foreground hover:text-[var(--terminal-text)]"
+            <button
+              type="button"
+              aria-label="Clear all history"
               onClick={clearHistory}
-              title="Clear all history"
+              className="flex size-9 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-card)]/60 hover:text-[var(--color-error)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
             >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+              <Trash2 size={17} stroke={1.75} />
+            </button>
           )}
+          <button
+            type="button"
+            aria-label="Close history"
+            onClick={onClose}
+            className="flex size-9 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-card)]/60 hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+          >
+            <X size={17} stroke={1.75} />
+          </button>
         </div>
       </div>
 
-      {/* Filter Input */}
-      <div className="border-b border-[var(--terminal-border)]/80 px-4 py-2 bg-muted/20">
-        <Input
+      <div className="border-b border-border/40 px-4 py-3">
+        <input
           type="text"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Filter history..."
-          className="h-8 w-full rounded-full border-[var(--terminal-border)] bg-[var(--terminal-surface)]/60 px-3.5 text-xs text-[var(--terminal-text)] placeholder:text-muted-foreground focus:bg-[var(--terminal-surface)] focus:border-[var(--terminal-border)] outline-none"
+          placeholder="Filter history"
+          aria-label="Filter history"
+          className="h-11 w-full rounded-full bg-[var(--color-surface-inset)] px-4 text-[15px] text-[var(--color-text-primary)] outline-none transition-colors placeholder:text-[var(--color-text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
         />
       </div>
 
-      {/* History List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {groups.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <Clock className="h-7 w-7 text-muted-foreground mb-2" />
-            <p className="text-xs text-muted-foreground font-medium">
+          <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-[var(--color-surface-inset)] text-[var(--color-text-secondary)]">
+              <Clock size={22} stroke={1.75} />
+            </div>
+            <p className="text-[15px] font-semibold text-[var(--color-text-primary)]">
               {searchTerm ? 'No matching commands' : 'No command history yet'}
             </p>
-            <p className="mt-1 text-[10px] text-muted-foreground leading-normal max-w-[180px]">
-              Use Arrow Up/Down in terminal to cycle through commands
+            <p className="max-w-[220px] text-[14px] leading-relaxed text-[var(--color-text-secondary)]">
+              Use Arrow Up/Down in the terminal to cycle through commands
             </p>
           </div>
         ) : (
           <div className="py-1">
             {groups.map((group, groupIndex) => (
               <div key={`${group.key}-${groupIndex}`} className="mb-2">
-                {/* Session Header */}
-                <div className="sticky top-0 z-10 flex items-center gap-1.5 bg-[var(--terminal-surface)]/90 px-4 py-1 border-b border-[var(--terminal-border)] backdrop-blur-sm">
-                  <span className="text-[10px] font-mono font-medium text-muted-foreground truncate max-w-[130px]">
+                <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border/40 bg-[var(--color-surface-container)]/95 px-4 py-2 backdrop-blur-sm">
+                  <span className="max-w-[150px] truncate font-mono text-[13px] font-medium text-[var(--color-text-secondary)]">
                     {group.serial}
                   </span>
-                  <span className="text-[10px] text-[var(--terminal-muted)]">·</span>
-                  <span className="text-[10px] font-semibold text-muted-foreground">
+                  <span className="text-[14px] font-semibold text-[var(--color-text-secondary)]">
                     {formatMode(group.mode)}
                   </span>
                 </div>
@@ -152,34 +152,32 @@ export function CommandHistory({ onReExecute }: CommandHistoryProps) {
                 {group.entries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="group flex items-center justify-between gap-3 px-4 py-2 hover:bg-[var(--terminal-surface)]/30 transition-colors"
+                    className="group flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[var(--color-background-card)]/60"
                   >
-                    <code className="truncate text-xs font-mono text-[var(--terminal-text)] min-w-0 select-all">
+                    <code className="min-w-0 select-all truncate font-mono text-[15px] text-[var(--color-text-primary)]">
                       {entry.command}
                     </code>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] text-muted-foreground font-mono group-hover:hidden">
+                    <div className="flex shrink-0 items-center gap-1">
+                      <span className="font-mono text-[13px] text-[var(--color-text-secondary)] group-hover:hidden">
                         {formatTimestamp(entry.timestamp)}
                       </span>
-                      <div className="hidden group-hover:flex items-center gap-0.5">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-5 w-5 p-0 rounded-full text-muted-foreground hover:text-[var(--terminal-text)] hover:bg-[var(--terminal-surface)]"
+                      <div className="hidden items-center gap-0.5 group-hover:flex">
+                        <button
+                          type="button"
+                          aria-label="Load command"
                           onClick={() => onReExecute(entry.command)}
-                          title="Load command"
+                          className="flex size-8 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--color-surface-inset)] hover:text-[var(--color-text-primary)] active:scale-[0.95] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] motion-reduce:transition-none motion-reduce:active:scale-100"
                         >
-                          <Send className="h-2.5 w-2.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-5 w-5 p-0 rounded-full text-muted-foreground hover:text-[var(--destructive)] hover:bg-[var(--terminal-surface)]"
+                          <Send size={15} stroke={1.75} />
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Remove entry"
                           onClick={() => removeHistoryEntry(entry.id)}
-                          title="Remove entry"
+                          className="flex size-8 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--color-surface-inset)] hover:text-[var(--color-error)] active:scale-[0.95] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] motion-reduce:transition-none motion-reduce:active:scale-100"
                         >
-                          <X className="h-2.5 w-2.5" />
-                        </Button>
+                          <X size={15} stroke={1.75} />
+                        </button>
                       </div>
                     </div>
                   </div>

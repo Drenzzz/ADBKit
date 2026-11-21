@@ -33,7 +33,7 @@ function EmptyIcon({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function NoDeviceState({ onRefresh, refreshing }: { onRefresh?: () => void; refreshing?: boolean }) {
+export function NoDeviceState({ onRefresh, refreshing, description }: { onRefresh?: () => void; refreshing?: boolean; description?: string }) {
   return (
     <EmptyShell>
       <EmptyIcon>
@@ -41,7 +41,7 @@ export function NoDeviceState({ onRefresh, refreshing }: { onRefresh?: () => voi
       </EmptyIcon>
       <VStack gap={1}>
         <Heading level={2} weight="semibold">No device connected</Heading>
-        <Text type="body" color="secondary">Connect an Android device to manage packages</Text>
+        <Text type="body" color="secondary">{description ?? 'Connect an Android device to manage packages'}</Text>
       </VStack>
       {onRefresh && (
         <Button
@@ -50,6 +50,7 @@ export function NoDeviceState({ onRefresh, refreshing }: { onRefresh?: () => voi
           variant="primary"
           isDisabled={refreshing}
           onClick={onRefresh}
+          className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         />
       )}
     </EmptyShell>
