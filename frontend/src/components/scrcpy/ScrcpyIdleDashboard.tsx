@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { QualityControls } from '@/components/scrcpy/QualityControls'
 import { AudioControls } from '@/components/scrcpy/AudioControls'
 import { DeviceOptionsControls } from '@/components/scrcpy/DeviceOptionsControls'
-import { EncoderBadge, EncoderLegend } from '@/components/scrcpy/EncoderBadge'
+import { EncoderRow, EncoderLegend } from '@/components/scrcpy/EncoderBadge'
 
 interface ScrcpyIdleDashboardProps {
   options: ScrcpyOptions
@@ -179,7 +179,7 @@ export function ScrcpyIdleDashboard({
                 {encoderSupport && (
                   <div className="space-y-3">
                     <div>
-                      <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                      <Label className="text-sm text-muted-foreground">
                         Video
                       </Label>
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -189,7 +189,7 @@ export function ScrcpyIdleDashboard({
                           </span>
                         ) : (
                           encoderSupport.videoCodecs.map((codec) => (
-                            <EncoderBadge
+                            <EncoderRow
                               key={`v-idle-${codec.codec}-${codec.encoderName}`}
                               codec={codec}
                             />
@@ -198,7 +198,7 @@ export function ScrcpyIdleDashboard({
                       </div>
                     </div>
                     <div>
-                      <Label className="text-xs uppercase tracking-wide text-muted-foreground">
+                      <Label className="text-sm text-muted-foreground">
                         Audio
                       </Label>
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -208,7 +208,7 @@ export function ScrcpyIdleDashboard({
                           </span>
                         ) : (
                           encoderSupport.audioCodecs.map((codec) => (
-                            <EncoderBadge
+                            <EncoderRow
                               key={`a-idle-${codec.codec}-${codec.encoderName}`}
                               codec={codec}
                             />

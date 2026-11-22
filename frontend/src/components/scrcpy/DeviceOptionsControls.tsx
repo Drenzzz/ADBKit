@@ -1,8 +1,6 @@
 import type { ScrcpyOptions } from '@/lib/types'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
 
 interface DeviceOptionsControlsProps {
   options: ScrcpyOptions
@@ -19,124 +17,126 @@ interface ToggleRowProps {
 
 function ToggleRow({ id, label, description, checked, onChange }: ToggleRowProps) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2 border-b border-border/60 last:border-0">
+    <div className="flex items-center justify-between gap-4 py-3">
       <div className="space-y-0.5">
-        <Label htmlFor={id} className="text-xs font-bold text-foreground">
+        <Label htmlFor={id} className="text-[15px] font-semibold text-[var(--color-text-primary)]">
           {label}
         </Label>
-        <p className="text-[10px] text-muted-foreground leading-relaxed">{description}</p>
+        <p className="text-[14px] text-[var(--color-text-secondary)] leading-relaxed">{description}</p>
       </div>
       <Switch id={id} checked={checked} onCheckedChange={onChange} />
     </div>
   )
 }
 
+const inputClass =
+  'h-11 w-full rounded-full bg-[var(--color-background-card)] px-4 text-[15px] text-[var(--color-text-primary)] outline-none transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]'
+const labelClass = 'text-[15px] font-semibold text-[var(--color-text-primary)]'
+
 export function DeviceOptionsControls({
   options,
   onOptionChange,
 }: DeviceOptionsControlsProps) {
   return (
-    <div className="space-y-2">
-      <div className="space-y-0.5 max-h-[220px] overflow-y-auto pr-1">
+    <div className="space-y-5">
+      <div className="divide-y divide-border/40">
         <ToggleRow
           id="show-touches"
           label="Show touches"
-          description="Visualize physical touches on the device."
+          description="Visualize physical touches on the device"
           checked={options.show_touches}
           onChange={(v) => onOptionChange('show_touches', v)}
         />
         <ToggleRow
           id="no-control"
           label="Read-only"
-          description="Disable input control from mirror window."
+          description="Disable input control from mirror window"
           checked={options.no_control}
           onChange={(v) => onOptionChange('no_control', v)}
         />
         <ToggleRow
           id="stay-awake"
           label="Stay awake"
-          description="Keep the device awake while connected."
+          description="Keep the device awake while connected"
           checked={options.stay_awake}
           onChange={(v) => onOptionChange('stay_awake', v)}
         />
         <ToggleRow
           id="turn-screen-off"
           label="Turn screen off"
-          description="Turn off device screen while mirroring."
+          description="Turn off device screen while mirroring"
           checked={options.turn_screen_off}
           onChange={(v) => onOptionChange('turn_screen_off', v)}
         />
         <ToggleRow
           id="power-off-on-close"
           label="Power off on close"
-          description="Power off device when mirror window closes."
+          description="Power off device when mirror window closes"
           checked={options.power_off_on_close}
           onChange={(v) => onOptionChange('power_off_on_close', v)}
         />
         <ToggleRow
           id="fullscreen"
           label="Fullscreen"
-          description="Open mirror window in fullscreen."
+          description="Open mirror window in fullscreen"
           checked={options.fullscreen}
           onChange={(v) => onOptionChange('fullscreen', v)}
         />
         <ToggleRow
           id="always-on-top"
           label="Always on top"
-          description="Keep mirror window above other windows."
+          description="Keep mirror window above other windows"
           checked={options.always_on_top}
           onChange={(v) => onOptionChange('always_on_top', v)}
         />
         <ToggleRow
           id="disable-screensaver"
           label="Disable screensaver"
-          description="Prevent host screensaver during mirroring."
+          description="Prevent host screensaver during mirroring"
           checked={options.disable_screensaver}
           onChange={(v) => onOptionChange('disable_screensaver', v)}
         />
       </div>
 
-      <Separator className="bg-muted my-2" />
-
-      <div className="grid grid-cols-2 gap-3 pt-1">
-        <div className="space-y-1.5">
-          <Label htmlFor="display-id" className="text-[11px] font-bold text-foreground">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <Label htmlFor="display-id" className={labelClass}>
             Display ID
           </Label>
-          <Input
+          <input
             id="display-id"
             type="number"
             min={0}
             value={options.display_id}
             onChange={(e) => onOptionChange('display_id', Number(e.target.value) || 0)}
-            className="h-8.5 rounded-full border border-border bg-background dark:bg-card/60 focus-visible:ring-1 focus-visible:ring-ring text-xs pl-3.5"
+            className={inputClass}
           />
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="rotation" className="text-[11px] font-bold text-foreground">
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <Label htmlFor="rotation" className={labelClass}>
             Rotation
           </Label>
-          <Input
+          <input
             id="rotation"
             type="number"
             min={0}
             max={3}
             value={options.rotation}
             onChange={(e) => onOptionChange('rotation', Number(e.target.value) || 0)}
-            className="h-8.5 rounded-full border border-border bg-background dark:bg-card/60 focus-visible:ring-1 focus-visible:ring-ring text-xs pl-3.5"
+            className={inputClass}
           />
         </div>
-        <div className="col-span-2 space-y-1.5">
-          <Label htmlFor="time-limit" className="text-[11px] font-bold text-foreground">
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <Label htmlFor="time-limit" className={labelClass}>
             Time limit (seconds, 0 = none)
           </Label>
-          <Input
+          <input
             id="time-limit"
             type="number"
             min={0}
             value={options.time_limit}
             onChange={(e) => onOptionChange('time_limit', Number(e.target.value) || 0)}
-            className="h-8.5 rounded-full border border-border bg-background dark:bg-card/60 focus-visible:ring-1 focus-visible:ring-ring text-xs pl-3.5"
+            className={inputClass}
           />
         </div>
       </div>

@@ -205,6 +205,57 @@
   border-radius: 12px;
 }
 
+/* Native range: UA track follows the app theme, not the OS preference. */
+[data-theme='dark'] input[type='range'] { color-scheme: dark; }
+[data-theme='light'] input[type='range'] { color-scheme: light; }
+
+/* Tonal range: accent fill, neutral remainder, themed thumb.
+   UA track ignores color-scheme once accent-color is set, so draw it ourselves. */
+input[type='range'].range-tonal {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    var(--color-accent) var(--range-fill, 0%),
+    var(--color-border-emphasized) var(--range-fill, 0%)
+  );
+  cursor: pointer;
+}
+input[type='range'].range-tonal::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  border: 3px solid var(--color-surface-inset);
+  transition: transform 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+input[type='range'].range-tonal:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+input[type='range'].range-tonal:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  input[type='range'].range-tonal::-webkit-slider-thumb { transition: none; }
+}
+
+/* Truncated labels walk on hover to reveal the full text. */
+.marquee-hover:hover {
+  text-overflow: clip;
+  animation: marquee-x var(--marquee-dur, 2s) linear infinite alternate;
+}
+@keyframes marquee-x {
+  to { transform: translateX(calc(-1 * var(--marquee-shift, 0px))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-hover:hover { animation: none; }
+}
+
 /* Reboot modes slide out to the right of the trigger, in and out. */
 .reboot-flyout {
   position: absolute;

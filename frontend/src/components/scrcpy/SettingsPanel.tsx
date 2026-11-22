@@ -4,161 +4,145 @@ import {
   IconRefresh as RefreshCw
 } from "@tabler/icons-react"
 import type { ScrcpyEncoderSupport } from '@/lib/types'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { EncoderBadge, EncoderLegend } from '@/components/scrcpy/EncoderBadge'
+import { EncoderRow, EncoderLegend } from '@/components/scrcpy/EncoderBadge'
 
-interface SettingsPanelProps {
-  encoderSupport: ScrcpyEncoderSupport | null
-  isFetchingEncoder: boolean
-  onRefreshEncoder: () => void
+interface ClipboardPanelProps {
   onPushClipboard: (text: string) => void
   onPullClipboard: () => void
   isConnected: boolean
 }
 
-export function SettingsPanel({
+export function ClipboardPanel({ onPushClipboard, onPullClipboard, isConnected }: ClipboardPanelProps) {
+  const [clipboardDraft, setClipboardDraft] = useState('')
+
+  function push() {
+    if (!clipboardDraft) return
+    onPushClipboard(clipboardDraft)
+    setClipboardDraft('')
+  }
+
+  return (
+    <section className="m3-surface flex flex-col gap-4 rounded-3xl p-5">
+      <div>
+        <h3 className="text-[16px] font-semibold text-[var(--color-text-primary)]">Clipboard sync</h3>
+        <p className="mt-0.5 text-[14px] text-[var(--color-text-secondary)]">
+          Two-way clipboard between host and device
+        </p>
+      </div>
+
+      <div className="relative flex items-center">
+        <input
+          id="clipboard-draft"
+          value={clipboardDraft}
+          onChange={(e) => setClipboardDraft(e.target.value)}
+          placeholder="Text to send to device"
+          aria-label="Text to send to device"
+          disabled={!isConnected}
+          className="h-12 w-full rounded-full bg-[var(--color-surface-inset)] pl-5 pr-24 text-[15px] text-[var(--color-text-primary)] outline-none transition-colors placeholder:text-[var(--color-text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && clipboardDraft && isConnected) push()
+          }}
+        />
+        <button
+          type="button"
+          onClick={push}
+          disabled={!clipboardDraft || !isConnected}
+          className="absolute right-1.5 top-1.5 bottom-1.5 rounded-full bg-[var(--color-accent)] px-5 text-[14px] font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+        >
+          Push
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={onPullClipboard}
+        disabled={!isConnected}
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-border/50 text-[15px] font-semibold text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-background-card)]/60 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+      >
+        <ClipboardCopy size={18} stroke={1.75} className="text-[var(--color-text-secondary)]" />
+        Pull device clipboard
+      </button>
+    </section>
+  )
+}
+
+interface EncodersPanelProps {
+  encoderSupport: ScrcpyEncoderSupport | null
+  isFetchingEncoder: boolean
+  onRefreshEncoder: () => void
+  isConnected: boolean
+}
+
+export function EncodersPanel({
   encoderSupport,
   isFetchingEncoder,
   onRefreshEncoder,
-  onPushClipboard,
-  onPullClipboard,
   isConnected,
-}: SettingsPanelProps) {
-  const [clipboardDraft, setClipboardDraft] = useState('')
-
+}: EncodersPanelProps) {
   return (
-    <div className="space-y-4">
-      {/* Clipboard Card */}
-      <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 rounded-2xl shadow-[var(--shadow-card)] p-4">
-        <h3 className="mb-0.5 text-xs font-bold text-foreground">Clipboard Sync</h3>
-        <p className="mb-3.5 text-[10px] text-muted-foreground leading-relaxed">
-          Two-way clipboard synchronization between host and device.
+    <section className="m3-surface flex flex-col gap-4 rounded-3xl p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-[16px] font-semibold text-[var(--color-text-primary)]">Available encoders</h3>
+          <p className="mt-0.5 text-[14px] text-[var(--color-text-secondary)]">Reported for the active device</p>
+        </div>
+        <button
+          type="button"
+          aria-label="Refresh encoders"
+          onClick={onRefreshEncoder}
+          disabled={isFetchingEncoder || !isConnected}
+          className="flex size-10 shrink-0 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-card)]/60 hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+        >
+          <RefreshCw size={18} stroke={1.75} className={isFetchingEncoder ? 'animate-spin motion-reduce:animate-none' : undefined} />
+        </button>
+      </div>
+
+      {isFetchingEncoder && !encoderSupport && (
+        <div className="space-y-2 py-1">
+          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-10 w-2/3 rounded-xl" />
+        </div>
+      )}
+
+      {!isFetchingEncoder && !encoderSupport && (
+        <p className="rounded-2xl border-2 border-dashed border-border/40 px-4 py-6 text-center text-[14px] text-[var(--color-text-secondary)]">
+          {isConnected ? 'No encoder report yet' : 'Connect a device to list its encoders'}
         </p>
+      )}
 
-        <div className="space-y-3">
-          <div className="relative flex items-center">
-            <Input
-              id="clipboard-draft"
-              value={clipboardDraft}
-              onChange={(e) => setClipboardDraft(e.target.value)}
-              placeholder="Type text to send to device..."
-              className="h-9 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/60 focus-visible:ring-1 focus-visible:ring-muted-foreground dark:focus-visible:ring-muted-foreground text-xs pl-3.5 pr-20"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && clipboardDraft && isConnected) {
-                  onPushClipboard(clipboardDraft)
-                  setClipboardDraft('')
-                }
-              }}
-            />
-            <Button
-              type="button"
-              onClick={() => {
-                if (!clipboardDraft) return
-                onPushClipboard(clipboardDraft)
-                setClipboardDraft('')
-              }}
-              disabled={!clipboardDraft || !isConnected}
-              className="absolute right-1 top-1 bottom-1 h-7 rounded-full bg-primary-container hover:bg-primary-container/90 text-primary-foreground font-semibold text-[10px] px-3 border-0 transition-[colors,transform] active:scale-[0.96]"
-            >
-              Push
-            </Button>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onPullClipboard}
-            disabled={!isConnected}
-            className="w-full rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card hover:bg-[var(--muted)]/50 dark:bg-[var(--muted)] dark:hover:bg-[var(--muted)]/80 text-xs font-semibold h-9 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-          >
-            <ClipboardCopy className="h-3.5 w-3.5 text-muted-foreground" />
-            Pull Device Clipboard
-          </Button>
-        </div>
-      </Card>
-
-      {/* Encoders Card */}
-      <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 rounded-2xl shadow-[var(--shadow-card)] p-4">
-        <div className="mb-3.5 flex items-center justify-between">
+      {encoderSupport && (
+        <div className="flex flex-col gap-4">
           <div>
-            <h3 className="text-xs font-bold text-foreground">Available Encoders</h3>
-            <p className="text-[10px] text-muted-foreground">
-              Reported for active device.
-            </p>
+            <p className="mb-1.5 text-[14px] font-semibold text-[var(--color-text-secondary)]">Video encoders</p>
+            <div className="flex flex-col gap-0.5">
+              {encoderSupport.videoCodecs.length === 0 ? (
+                <span className="px-3 py-2 text-[14px] text-[var(--color-text-secondary)]">No video encoders reported</span>
+              ) : (
+                encoderSupport.videoCodecs.map((codec) => (
+                  <EncoderRow key={`v-${codec.codec}-${codec.encoderName}`} codec={codec} />
+                ))
+              )}
+            </div>
           </div>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={onRefreshEncoder}
-            disabled={isFetchingEncoder || !isConnected}
-            className="h-8 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)] text-xs font-semibold px-3 cursor-pointer flex items-center"
-          >
-            <RefreshCw
-              className={`h-3 w-3 mr-1.5 text-muted-foreground ${isFetchingEncoder ? 'animate-spin' : ''}`}
-            />
-            Refresh
-          </Button>
+
+          <div>
+            <p className="mb-1.5 text-[14px] font-semibold text-[var(--color-text-secondary)]">Audio encoders</p>
+            <div className="flex flex-col gap-0.5">
+              {encoderSupport.audioCodecs.length === 0 ? (
+                <span className="px-3 py-2 text-[14px] text-[var(--color-text-secondary)]">No audio encoders reported</span>
+              ) : (
+                encoderSupport.audioCodecs.map((codec) => (
+                  <EncoderRow key={`a-${codec.codec}-${codec.encoderName}`} codec={codec} />
+                ))
+              )}
+            </div>
+          </div>
+
+          <EncoderLegend />
         </div>
-
-        {isFetchingEncoder && !encoderSupport && (
-          <div className="space-y-2 py-1">
-            <Skeleton className="h-3.5 w-32 rounded-full" />
-            <Skeleton className="h-3.5 w-48 rounded-full" />
-            <Skeleton className="h-3.5 w-24 rounded-full" />
-          </div>
-        )}
-
-        {encoderSupport && (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Video
-              </Label>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {encoderSupport.videoCodecs.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">
-                    No video encoders reported
-                  </span>
-                ) : (
-                  encoderSupport.videoCodecs.map((codec) => (
-                    <EncoderBadge
-                      key={`v-${codec.codec}-${codec.encoderName}`}
-                      codec={codec}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Audio
-              </Label>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {encoderSupport.audioCodecs.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">
-                    No audio encoders reported
-                  </span>
-                ) : (
-                  encoderSupport.audioCodecs.map((codec) => (
-                    <EncoderBadge
-                      key={`a-${codec.codec}-${codec.encoderName}`}
-                      codec={codec}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-
-            <EncoderLegend />
-          </div>
-        )}
-      </Card>
-    </div>
+      )}
+    </section>
   )
 }
