@@ -1,35 +1,22 @@
 import { motion } from 'motion/react'
+import { Heading } from '@astryxdesign/core/Heading'
 import { useSettings } from '@/hooks/useSettings'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BinaryManager } from './BinaryManager'
 import { PreferencesPanel } from './PreferencesPanel'
 import { AuditLogsPanel } from './AuditLogsPanel'
-import { DiagnosticsPanel } from './DiagnosticsPanel'
+
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
 export function SettingsShell() {
   const reduced = useReducedMotion()
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: reduced
-        ? { duration: 0, staggerChildren: 0 }
-        : { staggerChildren: 0.05 },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: reduced
-        ? { duration: 0 }
-        : { type: 'spring' as const, stiffness: 260, damping: 22 },
-    },
-  }
+  const enter = (delay: number) => ({
+    initial: reduced ? { opacity: 0 } : { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: reduced ? 0.12 : 0.35, delay: reduced ? 0 : delay, ease: EASE },
+  })
 
   const {
     appConfig,
@@ -48,63 +35,44 @@ export function SettingsShell() {
 
   if (loadingConfig && !appConfig) {
     return (
-      <div className="flex h-full flex-col gap-4 p-1">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-12 w-full animate-pulse" />
-        <Skeleton className="h-32 w-full animate-pulse" />
+      <div className="dashboard-scale flex h-full flex-col gap-4 p-5">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-64 w-full rounded-3xl" />
+        <Skeleton className="h-40 w-full rounded-3xl" />
       </div>
     )
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto pr-1"
-    >
-      {/* Header */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-0.5 shrink-0">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Settings</h1>
-        <p className="text-xs text-muted-foreground font-medium">
-          Manage system binaries, visual preferences, runtime diagnostics, and system operation logs.
-        </p>
+    <div className="dashboard-scale relative flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-5">
+      <motion.header {...enter(0)}>
+        <Heading level={1} type="display-1" weight="semibold" maxLines={1}>
+          Settings
+        </Heading>
+      </motion.header>
+
+      <motion.div {...enter(0.05)}>
+        <PreferencesPanel
+          preferencesDraft={preferencesDraft}
+          saving={savingPreferences}
+          hasChanges={hasPreferenceChanges}
+          errorMessage={error}
+          onDraftChange={setPreferencesDraft}
+          onSave={() => void savePreferences()}
+          onReset={resetPreferencesDraft}
+          windowState={windowState}
+          savingWindowState={savingWindowState}
+          onWindowStateChange={(state) => void setPreferredWindowState(state)}
+        />
       </motion.div>
 
-      {/* Bento Grid Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 pb-6 min-h-0">
-        
-        {/* Box 1: Binaries (Takes 2/3 width) */}
-        <motion.div variants={itemVariants} className="lg:col-span-2 flex flex-col min-w-0">
-          <BinaryManager />
-        </motion.div>
+      <motion.div {...enter(0.1)}>
+        <BinaryManager />
+      </motion.div>
 
-        {/* Box 2: Preferences (Takes 1/3 width) */}
-        <motion.div variants={itemVariants} className="lg:col-span-1 flex flex-col min-w-0">
-          <PreferencesPanel
-            preferencesDraft={preferencesDraft}
-            saving={savingPreferences}
-            hasChanges={hasPreferenceChanges}
-            errorMessage={error}
-            onDraftChange={setPreferencesDraft}
-            onSave={() => void savePreferences()}
-            onReset={resetPreferencesDraft}
-            windowState={windowState}
-            savingWindowState={savingWindowState}
-            onWindowStateChange={(state) => void setPreferredWindowState(state)}
-          />
-        </motion.div>
-
-        {/* Box 3: Audit Logs (Full Width) */}
-        <motion.div variants={itemVariants} className="lg:col-span-3 flex flex-col min-w-0">
-          <AuditLogsPanel />
-        </motion.div>
-
-        {/* Box 4: Diagnostics (Full Width at the very bottom) */}
-        <motion.div variants={itemVariants} className="lg:col-span-3 flex flex-col min-w-0">
-          <DiagnosticsPanel />
-        </motion.div>
-      </div>
-    </motion.div>
+      <motion.div {...enter(0.2)}>
+        <AuditLogsPanel />
+      </motion.div>
+    </div>
   )
 }

@@ -9,7 +9,7 @@ import {
 } from '@/services/binaryService'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SettingsSection } from './SettingsSection'
 import {
   IconBinary as Binary
 } from "@tabler/icons-react"
@@ -87,40 +87,31 @@ export function BinaryManager() {
   }
 
   return (
-    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)] h-full flex flex-col justify-between">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Binary className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
-          Binaries
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-4 flex-grow p-0">
-        {loading && !status ? (
-          <div className="space-y-2 p-4">
-            <Skeleton className="h-10 w-full rounded-xl" />
-            <Skeleton className="h-10 w-full rounded-xl" />
-            <Skeleton className="h-10 w-full rounded-xl" />
-          </div>
-        ) : (
-          <div className="divide-y divide-[var(--border)]/40 dark:divide-[var(--border)]/40">
-            {BINARY_NAMES.map(({ key, displayName }, index) => (
-              <BinaryModuleCard
-                key={key}
-                displayName={displayName}
-                status={status?.[key] as BinaryInfo | undefined}
-                loading={loading}
-                isLast={index === BINARY_NAMES.length - 1}
-                onDetect={reload}
-                onBrowseFile={() => void handleBrowseFile(key)}
-                onBrowseFolder={key === 'adb' || key === 'fastboot' ? () => void handleBrowseFolder() : undefined}
-                onClear={() => void handleClear(key)}
-                onSavePath={(path) => handleSavePath(key, path)}
-              />
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <SettingsSection icon={<Binary size={20} stroke={1.75} />} title="Binaries">
+      {loading && !status ? (
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-12 w-full rounded-xl" />
+          <Skeleton className="h-12 w-full rounded-xl" />
+          <Skeleton className="h-12 w-full rounded-xl" />
+        </div>
+      ) : (
+        <div className="divide-y divide-border/40">
+          {BINARY_NAMES.map(({ key, displayName }, index) => (
+            <BinaryModuleCard
+              key={key}
+              displayName={displayName}
+              status={status?.[key] as BinaryInfo | undefined}
+              loading={loading}
+              isLast={index === BINARY_NAMES.length - 1}
+              onDetect={reload}
+              onBrowseFile={() => void handleBrowseFile(key)}
+              onBrowseFolder={key === 'adb' || key === 'fastboot' ? () => void handleBrowseFolder() : undefined}
+              onClear={() => void handleClear(key)}
+              onSavePath={(path) => handleSavePath(key, path)}
+            />
+          ))}
+        </div>
+      )}
+    </SettingsSection>
   )
 }
