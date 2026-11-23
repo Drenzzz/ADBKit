@@ -14,7 +14,7 @@
     <img src="https://img.shields.io/github/issues/Drenzzz/ADBKit?style=flat&amp;logo=github&amp;label=Issues" alt="Open GitHub issues">
   </a>
   <a href="https://github.com/Drenzzz/ADBKit/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Drenzzz/ADBKit?style=flat&amp;label=License" alt="MIT license">
+    <img src="https://img.shields.io/github/license/Drenzzz/ADBKit?style=flat&amp;label=License" alt="GPL-3.0 license">
   </a>
   <a href="https://github.com/Drenzzz/ADBKit/releases">
     <img src="https://img.shields.io/github/v/tag/Drenzzz/ADBKit?style=flat&amp;label=Latest%20tag" alt="Latest Git tag">
@@ -290,4 +290,4 @@ Report security vulnerabilities privately using the process in
 
 ## License
 
-ADBKit is available under the [MIT License](LICENSE).
+ADBKit is available under the GNU General Public License v3.0 (GPL-3.0-only). See [LICENSE](LICENSE).

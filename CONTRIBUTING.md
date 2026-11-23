@@ -122,4 +122,5 @@ prefixes such as `feat:`, `fix:`, `docs:`, and `chore:`.
 
 ## License
 
-Contributions should be compatible with the project's [MIT License](LICENSE).
+Contributions should be compatible with the project's [GPL-3.0-only License](LICENSE).
+By opening a pull request you agree to license your contribution under GPL-3.0-only.
