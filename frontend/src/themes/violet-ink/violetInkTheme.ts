@@ -103,5 +103,20 @@ export const violetInkTheme = defineTheme({
     'side-nav': {
       base: { width: '56px' },
     },
+    // Astryx defaults to inverse surfaces (white card in dark, saturated red
+    // error); tone them to the app's quiet tonal ladder instead.
+    toast: {
+      base: {
+        backgroundColor: 'var(--color-background-card)',
+        color: 'var(--color-text-primary)',
+        border: '1px solid var(--color-border-emphasized)',
+        boxShadow: 'var(--shadow-floating)',
+      },
+      'type:error': {
+        backgroundColor: 'color-mix(in srgb, var(--color-error) 12%, var(--color-background-card))',
+        border: '1px solid color-mix(in srgb, var(--color-error) 35%, transparent)',
+        color: 'var(--color-text-primary)',
+      },
+    },
   },
 })
