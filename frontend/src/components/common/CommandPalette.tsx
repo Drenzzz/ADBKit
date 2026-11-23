@@ -19,7 +19,7 @@ import { useUIStore } from '@/stores/useUIStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useSettings } from '@/hooks/useSettings'
 import { getDevices } from '@/services/deviceService'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 const routeCommands = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },

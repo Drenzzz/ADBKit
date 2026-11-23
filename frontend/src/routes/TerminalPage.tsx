@@ -9,7 +9,7 @@ import {
   IconArticle as ScrollText,
   IconRotate as RotateCw
 } from "@tabler/icons-react"
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Button } from '@astryxdesign/core/Button'
 import { SegmentedControl } from '@astryxdesign/core/SegmentedControl'

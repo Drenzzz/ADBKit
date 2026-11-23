@@ -13,7 +13,7 @@ import { SettingsSection } from './SettingsSection'
 import {
   IconBinary as Binary
 } from "@tabler/icons-react"
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import type { BinaryInfo } from '@/lib/types'
 
 const BINARY_NAMES: { key: 'adb' | 'fastboot' | 'scrcpy'; displayName: string }[] = [

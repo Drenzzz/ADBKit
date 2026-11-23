@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { rebootDevice, disconnectWireless, takeDeviceScreenshot } from '@/services/deviceService'
 import { selectSaveFile } from '@/services/fileService'
 import { useDevices } from '@/hooks/useDevices'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import type { DeviceState } from '@/lib/types'
 
 interface RebootOption {

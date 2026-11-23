@@ -11,7 +11,7 @@ import { HStack } from '@astryxdesign/core/HStack'
 import { VStack } from '@astryxdesign/core/VStack'
 import { useDevices } from '@/hooks/useDevices'
 import { connectWireless } from '@/services/deviceService'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import type { DeviceSummary } from '@/lib/types'
 

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { rebootDevice } from '@/services/deviceService'
 import { useDeviceStore } from '@/stores/useDeviceStore'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 const REBOOT_MODES = [
   { mode: 'system', label: 'Reboot', icon: RotateCw, variant: 'default' as const },

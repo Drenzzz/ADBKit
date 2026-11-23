@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import type { ScrcpyOptions, ScrcpySessionEvent } from '@/lib/types'
 import { useScrcpyStore } from '@/stores/scrcpyStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'

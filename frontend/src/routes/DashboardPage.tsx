@@ -11,7 +11,7 @@ import { NoDeviceState } from '@/components/apps/EmptyStates'
 import { LiveTelemetry } from '@/components/dashboard/LiveTelemetry'
 import { ConnectionPanel } from '@/components/dashboard/ConnectionPanel'
 import { DeviceSpecs } from '@/components/dashboard/DeviceSpecs'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 export default function DashboardPage() {
   const {

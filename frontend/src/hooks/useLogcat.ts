@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import type { LogcatEntry } from '@/lib/types'
 import { useLogcatStore } from '@/stores/useLogcatStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'

@@ -30,7 +30,7 @@ import { useDevices } from '@/hooks/useDevices'
 import { useMetricsHistoryStore } from '@/stores/metricsHistoryStore'
 import { rebootDevice, takeDeviceScreenshot } from '@/services/deviceService'
 import { selectSaveFile } from '@/services/fileService'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import type { DeviceInfo, PerformanceSnapshot } from '@/lib/types'
 

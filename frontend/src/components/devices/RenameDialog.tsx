@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { setDeviceNickname, clearDeviceNickname } from '@/services/deviceService'
 import { useDevices } from '@/hooks/useDevices'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 export function RenameDialog({ serial, currentNickname, onClose }: {
   serial: string

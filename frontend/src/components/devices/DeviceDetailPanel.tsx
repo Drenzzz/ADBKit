@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import {
   IconDeviceMobile as Smartphone,
   IconStack2 as Layers,

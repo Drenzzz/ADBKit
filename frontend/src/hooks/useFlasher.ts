@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import * as fastbootSvc from '@/services/fastbootService'
 import * as deviceSvc from '@/services/deviceService'
 import { useFlasherStore } from '@/stores/useFlasherStore'

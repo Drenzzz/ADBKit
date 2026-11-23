@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
 import type { AuditLogEntry, AuditLogLevel } from '@/lib/types'
 import { AUDIT_LOG_LIMIT_OPTIONS } from '@/services/settingsService'
 import { selectSaveFile, selectFile } from '@/services/binaryService'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { SettingsSection } from './SettingsSection'
 import {
   IconAlertTriangle as AlertTriangle,

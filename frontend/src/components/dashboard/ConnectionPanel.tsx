@@ -15,7 +15,7 @@ import {
 } from '@/services/deviceService'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import type { WirelessHistoryEntry } from '@/lib/types'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 export function ConnectionPanel() {
   const { devices } = useDeviceStore()
