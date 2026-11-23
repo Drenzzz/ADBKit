@@ -92,3 +92,15 @@ animation behind reduced-motion.
 theme); import generated Wails bindings outside `src/services/`; store
 state outside zustand; animate width/height/top/left; use uppercase
 tracked labels or sub-14px text.
+
+## Residual audit notes (2026-11)
+
+- Backdrop blur persists only on transient overlays 7 files
+  (PackageDetailSheet, InstallApkDialog, CommandPalette, RenameDialog,
+  RomFlashCard, CommandHistory, FilesPage); no persistent page blur.
+- FileRow keeps per-extension icon colors (amber folders, indigo video,
+  violet audio, fuchsia images, cyan code, yellow archives, success APKs)
+  as an intentional exception per token strategy.
+- Theme overrides that must survive regeneration: toast tonal surfaces
+  (`components.toast`), side-nav width (`components['side-nav']`), icon
+  size (`components.icon`).
