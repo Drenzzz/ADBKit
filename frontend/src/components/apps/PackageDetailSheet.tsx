@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { Skeleton } from '@astryxdesign/core/Skeleton'
 import type { PackageDetails } from '@/lib/types'
 
@@ -62,41 +57,49 @@ export function PackageDetailSheet({
   }, [open, packageName])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[440px] gap-0 rounded-2xl border border-border/50 bg-card/60 p-0 backdrop-blur-2xl supports-backdrop-filter:bg-card/70">
-        <div className="dashboard-scale">
-          <DialogHeader className="border-b border-border/40 px-7 py-6">
-            <DialogTitle className="break-all text-[24px] font-bold leading-tight tracking-tight text-[var(--color-text-primary)]">
+    <Dialog
+      isOpen={open}
+      onOpenChange={onOpenChange}
+      width={440}
+      padding={0}
+      className="overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-2xl supports-backdrop-filter:bg-card/70"
+    >
+      <div className="dashboard-scale">
+        <DialogHeader
+          className="border-b border-border/40 px-7 py-6"
+          onOpenChange={onOpenChange}
+          title={
+            <span className="break-all text-[24px] font-bold leading-tight tracking-tight text-[var(--color-text-primary)]">
               {packageName}
-            </DialogTitle>
-          </DialogHeader>
+            </span>
+          }
+        />
 
-          <div className="px-7 py-3">
-            {loading ? (
-              <div className="space-y-5 py-4">
-                <Skeleton height={20} width="66.666667%" radius={2} />
-                <Skeleton height={20} width="50%" radius={2} />
-                <Skeleton height={20} width="60%" radius={2} />
-                <Skeleton height={20} width="50%" radius={2} />
-              </div>
-            ) : details ? (
-              <div className="divide-y divide-border/40">
-                <StatRow label="Version" value={details.versionName || 'N/A'} />
-                {details.versionCode && (
-                  <StatRow label="Version code" value={details.versionCode} />
-                )}
-                <StatRow label="APK size" value={formatBytes(details.apkSizeBytes)} />
-                <StatRow label="Data size" value={formatBytes(details.dataSizeBytes)} />
-                <StatRow label="Total size" value={formatBytes(details.totalSizeBytes)} />
-              </div>
-            ) : (
-              <p className="py-4 text-[15px] text-[var(--color-text-secondary)]">
-                Failed to load package details.
-              </p>
-            )}
-          </div>
+        <div className="px-7 py-3">
+          {loading ? (
+            <div className="space-y-5 py-4">
+              <Skeleton height={20} width="66.666667%" radius={2} />
+              <Skeleton height={20} width="50%" radius={2} />
+              <Skeleton height={20} width="60%" radius={2} />
+              <Skeleton height={20} width="50%" radius={2} />
+            </div>
+          ) : details ? (
+            <div className="divide-y divide-border/40">
+              <StatRow label="Version" value={details.versionName || 'N/A'} />
+              {details.versionCode && (
+                <StatRow label="Version code" value={details.versionCode} />
+              )}
+              <StatRow label="APK size" value={formatBytes(details.apkSizeBytes)} />
+              <StatRow label="Data size" value={formatBytes(details.dataSizeBytes)} />
+              <StatRow label="Total size" value={formatBytes(details.totalSizeBytes)} />
+            </div>
+          ) : (
+            <p className="py-4 text-[15px] text-[var(--color-text-secondary)]">
+              Failed to load package details.
+            </p>
+          )}
         </div>
-      </DialogContent>
+      </div>
     </Dialog>
   )
 }

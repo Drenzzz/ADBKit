@@ -9,13 +9,7 @@ import {
   IconAlertTriangle as AlertTriangle,
 } from "@tabler/icons-react"
 import { motion } from 'motion/react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
+import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { Button } from '@astryxdesign/core/Button'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -135,239 +129,246 @@ export function InstallApkDialog({
 
   return (
     <Dialog
-      open={open}
+      isOpen={open}
       onOpenChange={(v) => {
         if (!isInstalling) onOpenChange(v)
       }}
+      width={560}
+      padding={0}
+      className="overflow-hidden rounded-3xl border border-border/50 bg-card/60 backdrop-blur-2xl supports-backdrop-filter:bg-card/70"
     >
-      <DialogContent className="sm:max-w-[560px] gap-0 rounded-3xl border border-border/50 bg-card/60 p-0 backdrop-blur-2xl supports-backdrop-filter:bg-card/70">
-        <div className="dashboard-scale">
-          <DialogHeader className="flex-row items-start justify-between space-y-0 border-b border-border/40 px-8 pb-5 pt-7">
-            <div className="space-y-1.5">
-              <DialogTitle className="text-[22px] font-bold leading-tight tracking-tight text-[var(--color-text-primary)]">
-                {isDone
-                  ? status === 'success' ? 'Installed' : 'Install failed'
-                  : 'Install APK'}
-              </DialogTitle>
-              <DialogDescription className="text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
-                {isDone
-                  ? status === 'success'
-                    ? 'Installation completed successfully.'
-                    : 'An error occurred during installation.'
-                  : 'Select or drop an APK file to install on your connected device.'}
-              </DialogDescription>
-            </div>
-          </DialogHeader>
+      <div className="dashboard-scale">
+        <DialogHeader
+          className="flex-row items-start justify-between space-y-0 border-b border-border/40 px-8 pb-5 pt-7"
+          onOpenChange={(v) => {
+            if (!isInstalling) onOpenChange(v)
+          }}
+          title={
+            <span className="text-[22px] font-bold leading-tight tracking-tight text-[var(--color-text-primary)]">
+              {isDone
+                ? status === 'success' ? 'Installed' : 'Install failed'
+                : 'Install APK'}
+            </span>
+          }
+          subtitle={
+            <span className="text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
+              {isDone
+                ? status === 'success'
+                  ? 'Installation completed successfully.'
+                  : 'An error occurred during installation.'
+                : 'Select or drop an APK file to install on your connected device.'}
+            </span>
+          }
+        />
 
-          <div className="flex flex-col gap-5 px-8 py-6 w-full min-w-0">
-            {/* Dropzone */}
-            <div
-              onDragOver={(e) => {
-                e.preventDefault()
-                if (status === 'idle') setIsDragOver(true)
+        <div className="flex flex-col gap-5 px-8 py-6 w-full min-w-0">
+          {/* Dropzone */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault()
+              if (status === 'idle') setIsDragOver(true)
+            }}
+            onDragLeave={() => setIsDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setIsDragOver(false)
+              if (status !== 'idle') return
+              const file = e.dataTransfer?.files?.[0]
+              if (file && file.name.toLowerCase().endsWith('.apk')) {
+                const f = file as File & { path?: string }
+                if (f.path) setFilePath(f.path)
+              }
+            }}
+            className="relative w-full min-w-0"
+          >
+            <motion.div
+              animate={{ scale: isDragOver ? 1.01 : 1 }}
+              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 25 }}
+              onClick={() => {
+                if (!filePath && status === 'idle') handleBrowse()
               }}
-              onDragLeave={() => setIsDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                setIsDragOver(false)
-                if (status !== 'idle') return
-                const file = e.dataTransfer?.files?.[0]
-                if (file && file.name.toLowerCase().endsWith('.apk')) {
-                  const f = file as File & { path?: string }
-                  if (f.path) setFilePath(f.path)
-                }
-              }}
-              className="relative w-full min-w-0"
+              className={cn(
+                'flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-8 py-12 text-center transition-colors w-full min-w-0',
+                isDragOver
+                  ? 'border-[var(--color-accent)] bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]'
+                  : 'border-border/50 bg-[var(--color-background-muted)]',
+                filePath && 'hidden',
+              )}
             >
               <motion.div
-                animate={{ scale: isDragOver ? 1.01 : 1 }}
-                transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 25 }}
-                onClick={() => {
-                  if (!filePath && status === 'idle') handleBrowse()
-                }}
+                animate={{ y: isDragOver && !reduced ? [0, 6, 0] : 0 }}
+                transition={
+                  isDragOver && !reduced
+                    ? { repeat: Infinity, duration: 1.2, ease: 'easeInOut' }
+                    : undefined
+                }
                 className={cn(
-                  'flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-8 py-12 text-center transition-colors w-full min-w-0',
+                  'flex h-16 w-16 items-center justify-center rounded-2xl transition-colors',
                   isDragOver
-                    ? 'border-[var(--color-accent)] bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]'
-                    : 'border-border/50 bg-[var(--color-background-muted)]',
-                  filePath && 'hidden',
+                    ? 'bg-[var(--color-accent)] text-white'
+                    : 'bg-[var(--color-background-card)] text-[var(--color-text-secondary)]',
                 )}
               >
-                <motion.div
-                  animate={{ y: isDragOver && !reduced ? [0, 6, 0] : 0 }}
-                  transition={
-                    isDragOver && !reduced
-                      ? { repeat: Infinity, duration: 1.2, ease: 'easeInOut' }
-                      : undefined
-                  }
-                  className={cn(
-                    'flex h-16 w-16 items-center justify-center rounded-2xl transition-colors',
-                    isDragOver
-                      ? 'bg-[var(--color-accent)] text-white'
-                      : 'bg-[var(--color-background-card)] text-[var(--color-text-secondary)]',
-                  )}
-                >
-                  <Upload className="h-7 w-7" stroke={1.75} />
-                </motion.div>
-                <div>
-                  <p className="text-[17px] font-bold tracking-tight text-[var(--color-text-primary)]">
-                    Drag & drop APK here
-                  </p>
-                  <p className="mt-1 text-[15px] text-[var(--color-text-secondary)]">
-                    or click to browse files
-                  </p>
-                </div>
+                <Upload className="h-7 w-7" stroke={1.75} />
               </motion.div>
-            </div>
-
-            {/* File selected card */}
-            {filePath && (
-              <motion.div
-                initial={reduced ? false : { opacity: 0, y: 10, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 28 }}
-                className="flex items-start gap-4 rounded-2xl border border-border/40 bg-[var(--color-background-muted)] p-5 w-full min-w-0"
-              >
-                <div
-                  className={cn(
-                    'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl',
-                    status === 'success'
-                      ? 'bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] text-[var(--color-success)]'
-                      : status === 'error'
-                        ? 'bg-[color-mix(in_srgb,var(--color-error)_15%,transparent)] text-[var(--color-error)]'
-                        : 'bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)]',
-                  )}
-                >
-                  {status === 'success' ? (
-                    <CheckCircle2 className="h-6 w-6" stroke={1.75} />
-                  ) : status === 'error' ? (
-                    <XCircle className="h-6 w-6" stroke={1.75} />
-                  ) : (
-                    <FileCode className="h-6 w-6" stroke={1.75} />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1 overflow-hidden">
-                  <p className="truncate text-[17px] font-bold tracking-tight text-[var(--color-text-primary)]">
-                    {previewStatus === 'ready' && preview?.appLabel ? preview.appLabel : fileName}
-                  </p>
-                  {previewStatus === 'ready' && preview?.packageName && (
-                    <p className="mt-0.5 truncate text-[13px] font-mono text-[var(--color-text-secondary)]">
-                      {preview.packageName}
-                    </p>
-                  )}
-                  <p className="mt-1 truncate text-[14px] text-[var(--color-text-secondary)] opacity-70">
-                    {filePath}
-                  </p>
-                </div>
-                {status === 'idle' && (
-                  <Button
-                    variant="ghost"
-                    isIconOnly
-                    size="sm"
-                    onClick={handleReset}
-                    label="Remove file"
-                    className="shrink-0 size-9 rounded-full text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                    icon={<X className="h-4 w-4" />}
-                  />
-                )}
-              </motion.div>
-            )}
-
-            {/* APK metadata preview */}
-            {filePath && status === 'idle' && (
-              <div className="w-full min-w-0">
-                {previewStatus === 'loading' && (
-                  <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--color-background-muted)] px-5 py-4 text-[15px] font-medium text-[var(--color-text-secondary)]">
-                    <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none text-[var(--color-accent)]" />
-                    Reading APK metadata…
-                  </div>
-                )}
-                {previewStatus === 'ready' && preview && (
-                  <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border/30">
-                    {[
-                      { label: 'Version', value: preview.versionName ? `${preview.versionName}${preview.versionCode ? ` (${preview.versionCode})` : ''}` : 'N/A' },
-                      { label: 'APK size', value: formatAPKSize(preview.sizeBytes) },
-                      { label: 'Min Android', value: formatSdkLevel(preview.minSdk) },
-                      { label: 'Target SDK', value: preview.targetSdk > 0 ? `API ${preview.targetSdk}` : 'N/A' },
-                    ].map((m) => (
-                      <div key={m.label} className="bg-[var(--color-background-card)] px-5 py-4">
-                        <p className="text-[14px] font-semibold text-[var(--color-text-secondary)] opacity-80">
-                          {m.label}
-                        </p>
-                        <p className="mt-1 truncate text-[17px] font-bold tracking-tight text-[var(--color-text-primary)]">
-                          {m.value}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {previewStatus === 'error' && (
-                  <div className="flex items-start gap-2.5 rounded-2xl bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] px-5 py-4 text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
-                    <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
-                    Could not read APK metadata. You can still try installing this file.
-                  </div>
-                )}
+              <div>
+                <p className="text-[17px] font-bold tracking-tight text-[var(--color-text-primary)]">
+                  Drag & drop APK here
+                </p>
+                <p className="mt-1 text-[15px] text-[var(--color-text-secondary)]">
+                  or click to browse files
+                </p>
               </div>
-            )}
-
-            {isInstalling && (
-              <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--color-background-muted)] px-5 py-4 text-[15px] font-medium text-[var(--color-text-secondary)]">
-                <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none text-[var(--color-accent)]" />
-                Installing package on device…
-              </div>
-            )}
-
-            {status === 'error' && errorMsg && (
-              <p className="rounded-2xl bg-[color-mix(in_srgb,var(--color-error)_10%,transparent)] px-5 py-4 text-[15px] leading-relaxed text-[var(--color-error)]">
-                {errorMsg}
-              </p>
-            )}
+            </motion.div>
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-3 border-t border-border/40 bg-[var(--color-background-muted)]/50 px-8 py-5">
-            {isDone ? (
-              <Button
-                className="h-12 rounded-full px-7 text-[15px] font-bold"
-                variant={status === 'error' ? 'secondary' : 'primary'}
-                onClick={() => {
-                  if (status === 'success') onOpenChange(false)
-                  else handleReset()
-                }}
-                label={status === 'success' ? 'Done' : 'Try again'}
-              />
-            ) : (
-              <>
-                <Button
-                  variant="secondary"
-                  className="h-12 rounded-full px-7 text-[15px] font-bold"
-                  onClick={() => onOpenChange(false)}
-                  isDisabled={isInstalling}
-                  label="Cancel"
-                />
-                {!filePath ? (
-                  <Button
-                    variant="primary"
-                    className="h-12 rounded-full px-7 text-[15px] font-bold"
-                    onClick={handleBrowse}
-                    label="Browse File"
-                  />
+          {/* File selected card */}
+          {filePath && (
+            <motion.div
+              initial={reduced ? false : { opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 28 }}
+              className="flex items-start gap-4 rounded-2xl border border-border/40 bg-[var(--color-background-muted)] p-5 w-full min-w-0"
+            >
+              <div
+                className={cn(
+                  'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl',
+                  status === 'success'
+                    ? 'bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] text-[var(--color-success)]'
+                    : status === 'error'
+                      ? 'bg-[color-mix(in_srgb,var(--color-error)_15%,transparent)] text-[var(--color-error)]'
+                      : 'bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] text-[var(--color-accent)]',
+                )}
+              >
+                {status === 'success' ? (
+                  <CheckCircle2 className="h-6 w-6" stroke={1.75} />
+                ) : status === 'error' ? (
+                  <XCircle className="h-6 w-6" stroke={1.75} />
                 ) : (
-                  <Button
-                    variant="primary"
-                    className="h-12 gap-2 rounded-full bg-[var(--color-accent)] px-7 text-[15px] font-bold text-white hover:opacity-90 active:scale-[0.98]"
-                    onClick={handleInstall}
-                    isDisabled={isInstalling}
-                    isLoading={isInstalling}
-                    label={isInstalling ? 'Installing…' : 'Install Now'}
-                  />
+                  <FileCode className="h-6 w-6" stroke={1.75} />
                 )}
-              </>
-            )}
-          </div>
+              </div>
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <p className="truncate text-[17px] font-bold tracking-tight text-[var(--color-text-primary)]">
+                  {previewStatus === 'ready' && preview?.appLabel ? preview.appLabel : fileName}
+                </p>
+                {previewStatus === 'ready' && preview?.packageName && (
+                  <p className="mt-0.5 truncate text-[13px] font-mono text-[var(--color-text-secondary)]">
+                    {preview.packageName}
+                  </p>
+                )}
+                <p className="mt-1 truncate text-[14px] text-[var(--color-text-secondary)] opacity-70">
+                  {filePath}
+                </p>
+              </div>
+              {status === 'idle' && (
+                <Button
+                  variant="ghost"
+                  isIconOnly
+                  size="sm"
+                  onClick={handleReset}
+                  label="Remove file"
+                  className="shrink-0 size-9 rounded-full text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                  icon={<X className="h-4 w-4" />}
+                />
+              )}
+            </motion.div>
+          )}
+
+          {/* APK metadata preview */}
+          {filePath && status === 'idle' && (
+            <div className="w-full min-w-0">
+              {previewStatus === 'loading' && (
+                <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--color-background-muted)] px-5 py-4 text-[15px] font-medium text-[var(--color-text-secondary)]">
+                  <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none text-[var(--color-accent)]" />
+                  Reading APK metadata…
+                </div>
+              )}
+              {previewStatus === 'ready' && preview && (
+                <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border/30">
+                  {[
+                    { label: 'Version', value: preview.versionName ? `${preview.versionName}${preview.versionCode ? ` (${preview.versionCode})` : ''}` : 'N/A' },
+                    { label: 'APK size', value: formatAPKSize(preview.sizeBytes) },
+                    { label: 'Min Android', value: formatSdkLevel(preview.minSdk) },
+                    { label: 'Target SDK', value: preview.targetSdk > 0 ? `API ${preview.targetSdk}` : 'N/A' },
+                  ].map((m) => (
+                    <div key={m.label} className="bg-[var(--color-background-card)] px-5 py-4">
+                      <p className="text-[14px] font-semibold text-[var(--color-text-secondary)] opacity-80">
+                        {m.label}
+                      </p>
+                      <p className="mt-1 truncate text-[17px] font-bold tracking-tight text-[var(--color-text-primary)]">
+                        {m.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {previewStatus === 'error' && (
+                <div className="flex items-start gap-2.5 rounded-2xl bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] px-5 py-4 text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
+                  <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+                  Could not read APK metadata. You can still try installing this file.
+                </div>
+              )}
+            </div>
+          )}
+
+          {isInstalling && (
+            <div className="flex items-center gap-2.5 rounded-2xl bg-[var(--color-background-muted)] px-5 py-4 text-[15px] font-medium text-[var(--color-text-secondary)]">
+              <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none text-[var(--color-accent)]" />
+              Installing package on device…
+            </div>
+          )}
+
+          {status === 'error' && errorMsg && (
+            <p className="rounded-2xl bg-[color-mix(in_srgb,var(--color-error)_10%,transparent)] px-5 py-4 text-[15px] leading-relaxed text-[var(--color-error)]">
+              {errorMsg}
+            </p>
+          )}
         </div>
-      </DialogContent>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 border-t border-border/40 bg-[var(--color-background-muted)]/50 px-8 py-5">
+          {isDone ? (
+            <Button
+              className="h-12 rounded-full px-7 text-[15px] font-bold"
+              variant={status === 'error' ? 'secondary' : 'primary'}
+              onClick={() => {
+                if (status === 'success') onOpenChange(false)
+                else handleReset()
+              }}
+              label={status === 'success' ? 'Done' : 'Try again'}
+            />
+          ) : (
+            <>
+              <Button
+                variant="secondary"
+                className="h-12 rounded-full px-7 text-[15px] font-bold"
+                onClick={() => onOpenChange(false)}
+                isDisabled={isInstalling}
+                label="Cancel"
+              />
+              {!filePath ? (
+                <Button
+                  variant="primary"
+                  className="h-12 rounded-full px-7 text-[15px] font-bold"
+                  onClick={handleBrowse}
+                  label="Browse File"
+                />
+              ) : (
+                <Button
+                  variant="primary"
+                  className="h-12 gap-2 rounded-full bg-[var(--color-accent)] px-7 text-[15px] font-bold text-white hover:opacity-90 active:scale-[0.98]"
+                  onClick={handleInstall}
+                  isDisabled={isInstalling}
+                  isLoading={isInstalling}
+                  label={isInstalling ? 'Installing…' : 'Install Now'}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </Dialog>
   )
 }

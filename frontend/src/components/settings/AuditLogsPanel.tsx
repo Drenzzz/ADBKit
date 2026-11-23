@@ -4,16 +4,7 @@ import { SegmentedControl, SegmentedControlItem } from '@astryxdesign/core/Segme
 import { Selector } from '@astryxdesign/core/Selector'
 import { useAuditLogs } from '@/hooks/useAuditLogs'
 import { Skeleton } from '@astryxdesign/core/Skeleton'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { AlertDialog } from '@astryxdesign/core/AlertDialog'
 import { cn } from '@/lib/utils'
 import type { AuditLogEntry, AuditLogLevel } from '@/lib/types'
 import { AUDIT_LOG_LIMIT_OPTIONS } from '@/services/settingsService'
@@ -433,48 +424,27 @@ export function AuditLogsPanel() {
         <span>Backend buffer keeps 1000 entries. Export to back up history</span>
       </div>
 
-      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-[18px] font-semibold">Clear all audit logs?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[14px] leading-relaxed">
-              This will remove all audit log entries from local storage (
-              {auditLogs.length} total). This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-11 rounded-full px-5 text-[15px] font-semibold">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleClear}
-              className="h-11 rounded-full border-0 bg-[var(--color-error)] px-5 text-[15px] font-bold text-white hover:opacity-90"
-            >
-              Clear logs
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AlertDialog
+        isOpen={showClearDialog}
+        onOpenChange={setShowClearDialog}
+        title="Clear all audit logs?"
+        description={`This will remove all audit log entries from local storage (${auditLogs.length} total). This action cannot be undone.`}
+        actionLabel="Clear logs"
+        onAction={handleClear}
+        cancelLabel="Cancel"
+        actionVariant="destructive"
+      />
 
-      <AlertDialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-[18px] font-semibold">Import audit logs?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[14px] leading-relaxed">
-              This will replace the current audit log with the contents of
-              the selected JSON file. The backend keeps at most 1000
-              entries, anything beyond that will be dropped.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="h-11 rounded-full px-5 text-[15px] font-semibold">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => void handleImport()}
-              className="h-11 rounded-full border-0 bg-[var(--color-accent)] px-5 text-[15px] font-bold text-white hover:opacity-90"
-            >
-              Select file and import
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AlertDialog
+        isOpen={showImportDialog}
+        onOpenChange={setShowImportDialog}
+        title="Import audit logs?"
+        description="This will replace the current audit log with the contents of the selected JSON file. The backend keeps at most 1000 entries, anything beyond that will be dropped."
+        actionLabel="Select file and import"
+        onAction={() => void handleImport()}
+        cancelLabel="Cancel"
+        actionVariant="primary"
+      />
     </SettingsSection>
   )
 }

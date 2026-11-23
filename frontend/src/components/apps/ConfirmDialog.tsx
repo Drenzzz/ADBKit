@@ -3,13 +3,7 @@ import {
   IconAlertTriangle,
   IconTrash,
 } from '@tabler/icons-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog'
+import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { Button } from '@astryxdesign/core/Button'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
@@ -37,65 +31,67 @@ export function ConfirmDialog({
   const Icon = destructive ? IconTrash : IconAlertTriangle
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="dashboard-scale max-w-lg gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card/60 p-0 backdrop-blur-2xl supports-backdrop-filter:bg-card/70"
-        showCloseButton={false}
+    <Dialog
+      isOpen={open}
+      onOpenChange={onOpenChange}
+      width={512}
+      padding={0}
+      className="dashboard-scale overflow-hidden rounded-2xl"
+    >
+      <motion.div
+        initial={reduced ? false : { opacity: 0, scale: 0.96, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 26 }}
       >
-        <motion.div
-          initial={reduced ? false : { opacity: 0, scale: 0.96, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 26 }}
+        <div
+          className={
+            destructive
+              ? 'flex items-start gap-4 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-7 pb-6 pt-7'
+              : 'flex items-start gap-4 px-7 pb-6 pt-7'
+          }
         >
           <div
             className={
               destructive
-                ? 'flex items-start gap-4 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-7 pb-6 pt-7'
-                : 'flex items-start gap-4 px-7 pb-6 pt-7'
+                ? 'mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-error)_16%,transparent)] text-[var(--color-error)]'
+                : 'mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--color-background-muted)] text-[var(--color-text-secondary)]'
             }
           >
-            <div
-              className={
-                destructive
-                  ? 'mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-error)_16%,transparent)] text-[var(--color-error)]'
-                  : 'mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--color-background-muted)] text-[var(--color-text-secondary)]'
-              }
-            >
-              <Icon size={24} stroke={1.75} />
-            </div>
-            <DialogHeader className="space-y-1.5 text-left">
-              <DialogTitle className="text-[20px] font-bold leading-snug tracking-tight text-[var(--color-text-primary)]">
+            <Icon size={24} stroke={1.75} />
+          </div>
+          <DialogHeader
+            className="space-y-1.5 text-left"
+            title={
+              <span className="text-[20px] font-bold leading-snug tracking-tight text-[var(--color-text-primary)]">
                 {title}
-              </DialogTitle>
-              <DialogDescription className="text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
+              </span>
+            }
+            subtitle={
+              <span className="text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
                 {description}
-              </DialogDescription>
-            </DialogHeader>
-          </div>
+              </span>
+            }
+          />
+        </div>
 
-          <div className="flex justify-end gap-2 border-t border-border/40 bg-[var(--color-background-muted)]/50 px-7 py-4">
-            <Button
-              variant="ghost"
-              className="h-11 rounded-xl px-5 text-[14px] font-semibold"
-              onClick={() => onOpenChange(false)}
-              label="Cancel"
-            />
-            <Button
-              variant="primary"
-              className={
-                destructive
-                  ? 'h-11 rounded-xl bg-[var(--color-error)] px-5 text-[14px] font-semibold text-white hover:bg-[color-mix(in_srgb,var(--color-error)_88%,black)] focus-visible:outline-2 focus-visible:outline-[var(--color-error)]'
-                  : 'h-11 rounded-xl px-5 text-[14px] font-semibold'
-              }
-              onClick={() => {
-                onConfirm()
-                onOpenChange(false)
-              }}
-              label={confirmLabel}
-            />
-          </div>
-        </motion.div>
-      </DialogContent>
+        <div className="flex justify-end gap-2 border-t border-border/40 bg-[var(--color-background-muted)]/50 px-7 py-4">
+          <Button
+            variant="ghost"
+            className="h-11 rounded-xl px-5 text-[14px] font-semibold"
+            onClick={() => onOpenChange(false)}
+            label="Cancel"
+          />
+          <Button
+            variant={destructive ? 'destructive' : 'primary'}
+            className="h-11 rounded-xl px-5 text-[14px] font-semibold"
+            onClick={() => {
+              onConfirm()
+              onOpenChange(false)
+            }}
+            label={confirmLabel}
+          />
+        </div>
+      </motion.div>
     </Dialog>
   )
 }

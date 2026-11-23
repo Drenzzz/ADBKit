@@ -12,12 +12,9 @@ import {
 } from '@tabler/icons-react'
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { cn } from '@/lib/utils'
+  DropdownMenuDivider,
+} from '@astryxdesign/core/DropdownMenu'
 
 interface PackageActionsProps {
   packageName: string
@@ -32,8 +29,8 @@ interface PackageActionsProps {
   onUninstall: (name: string) => void
 }
 
-const ITEM = 'gap-3.5 px-4 py-2.5 text-[15px] font-medium transition-[background-color,padding] duration-150 ease-out data-highlighted:pl-5'
-const ICON = 'size-[18px] stroke-[1.75] transition-transform duration-150 group-hover:scale-110'
+const ITEM = 'px-4 py-2.5 text-[15px] font-medium'
+const ICON = 'size-[18px] stroke-[1.75]'
 
 export function PackageActions({
   packageName,
@@ -55,18 +52,24 @@ export function PackageActions({
   }
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger
-        className="flex size-10 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-muted)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
-        disabled={isBusy}
-        aria-label={`Actions for ${packageName}`}
-      >
-        <IconDotsVertical size={20} stroke={1.75} />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-64 rounded-2xl border-border/50 bg-card/95 p-1.5 backdrop-blur-2xl"
-      >
+    <DropdownMenu
+      isMenuOpen={open}
+      onOpenChange={setOpen}
+      placement="below"
+      alignment="end"
+      menuWidth={256}
+      renderTrigger={(props) => (
+        <button
+          {...props}
+          type="button"
+          disabled={isBusy}
+          aria-label={`Actions for ${packageName}`}
+          className="flex size-10 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-muted)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+        >
+          <IconDotsVertical size={20} stroke={1.75} />
+        </button>
+      )}
+      header={
         <div className="border-b border-border/40 px-4 pb-2.5 pt-2">
           <p className="truncate text-[14px] font-bold tracking-tight text-[var(--color-text-primary)]">
             {packageName}
@@ -75,37 +78,43 @@ export function PackageActions({
             {isEnabled ? 'Enabled' : 'Disabled'} app
           </p>
         </div>
-        <DropdownMenuItem className={ITEM} onClick={run(onDetails)}>
-          <IconInfoCircle className={ICON} /> Details
-        </DropdownMenuItem>
-        <DropdownMenuItem className={ITEM} onClick={run(onLaunch)}>
-          <IconPlayerPlay className={ICON} /> Launch
-        </DropdownMenuItem>
-        <DropdownMenuItem className={ITEM} onClick={run(onForceStop)}>
-          <IconSquare className={ICON} /> Force stop
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="my-1.5" />
-        <DropdownMenuItem className={ITEM} onClick={run(onToggleEnabled)}>
-          {isEnabled
-            ? <><IconEyeOff className={ICON} /> Disable</>
-            : <><IconEye className={ICON} /> Enable</>}
-        </DropdownMenuItem>
-        <DropdownMenuItem className={ITEM} onClick={run(onClearData)}>
-          <IconEraser className={ICON} /> Clear data
-          <span className="ml-auto text-[14px] text-[var(--color-text-secondary)]">data & cache</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className={ITEM} onClick={run(onPullApk)}>
-          <IconDownload className={ICON} /> Export APK
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="my-1.5" />
-        <DropdownMenuItem
-          className={cn(ITEM, 'text-[var(--color-error)] focus:text-[var(--color-error)]')}
-          onClick={run(onUninstall)}
-        >
-          <IconTrash className={ICON} /> Uninstall
-          <span className="ml-auto text-[14px] opacity-70">removes app</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+      }
+    >
+      <DropdownMenuItem className={ITEM} icon={<IconInfoCircle className={ICON} />} label="Details" onClick={run(onDetails)} />
+      <DropdownMenuItem className={ITEM} icon={<IconPlayerPlay className={ICON} />} label="Launch" onClick={run(onLaunch)} />
+      <DropdownMenuItem className={ITEM} icon={<IconSquare className={ICON} />} label="Force stop" onClick={run(onForceStop)} />
+      <DropdownMenuDivider className="my-1.5" />
+      <DropdownMenuItem
+        className={ITEM}
+        icon={isEnabled ? <IconEyeOff className={ICON} /> : <IconEye className={ICON} />}
+        label={isEnabled ? 'Disable' : 'Enable'}
+        onClick={run(onToggleEnabled)}
+      />
+      <DropdownMenuItem
+        className={ITEM}
+        icon={<IconEraser className={ICON} />}
+        label={
+          <span className="flex w-full items-center gap-2">
+            Clear data
+            <span className="ml-auto text-[14px] text-[var(--color-text-secondary)]">data & cache</span>
+          </span>
+        }
+        onClick={run(onClearData)}
+      />
+      <DropdownMenuItem className={ITEM} icon={<IconDownload className={ICON} />} label="Export APK" onClick={run(onPullApk)} />
+      <DropdownMenuDivider className="my-1.5" />
+      <DropdownMenuItem
+        className={ITEM}
+        variant="destructive"
+        icon={<IconTrash className={ICON} />}
+        label={
+          <span className="flex w-full items-center gap-2">
+            Uninstall
+            <span className="ml-auto text-[14px] opacity-70">removes app</span>
+          </span>
+        }
+        onClick={run(onUninstall)}
+      />
     </DropdownMenu>
   )
 }
