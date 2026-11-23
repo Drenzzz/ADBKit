@@ -1,4 +1,4 @@
-/* Hallmark · shape: app screen · genre: modern-minimal · theme: Violet Ink (by request) · nav: icon rail kept · signature: live telemetry chart and tonal meters kept · states: connected, offline, loading, empty
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Violet Ink (Astryx defineTheme, by request) · nav: labeled 96px icon rail · signature: live telemetry chart and tonal meters · states: connected, offline, loading, empty, toast
  * Hallmark · pre-emit critique: P8 H2 E4 S7 R3 V5 · weakest: V2, filled with a tonal ladder, three real meters and larger type
  * axes: warm graphite/violet accent · contrast: pass · v2.0.0 */
 @layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
