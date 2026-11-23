@@ -3,7 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { Theme } from '@astryxdesign/core/theme'
 import { LayerProvider } from '@astryxdesign/core/Layer'
 import { themes, defaultThemeSlug } from '@/astryx-themes'
-import { ToastBridge, toast } from '@/lib/toast'
+import { ToastBridge } from '@/components/common/ToastBridge'
+import { toast } from '@/lib/toast'
 
 function setup() {
   return render(

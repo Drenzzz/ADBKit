@@ -1,19 +1,13 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { RouterProvider } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ToastBridge } from '@/lib/toast'
 // index.css must load BEFORE astryx-themes so the @layer order statement
 // (reset, theme, base, astryx-base...) registers before violet-ink.css
 // declares its own layer order; otherwise Tailwind's base layer beats
 // astryx-base and every Astryx control loses its chrome.
 import './index.css'
-import { Theme } from '@astryxdesign/core/theme'
-import { LayerProvider } from '@astryxdesign/core/Layer'
 import { AppErrorBoundary } from '@/components/common/ErrorBoundary'
-import { router } from './App'
-import { useUIStore } from '@/stores/useUIStore'
-import { themes, defaultThemeSlug } from './astryx-themes'
+import { ThemedApp } from '@/components/common/ThemedApp'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,18 +18,6 @@ const queryClient = new QueryClient({
     },
   },
 })
-
-function ThemedApp() {
-  const theme = useUIStore((s) => s.theme)
-  return (
-    <Theme theme={themes[defaultThemeSlug]} mode={theme}>
-      <LayerProvider>
-        <ToastBridge />
-        <RouterProvider router={router} />
-      </LayerProvider>
-    </Theme>
-  )
-}
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
