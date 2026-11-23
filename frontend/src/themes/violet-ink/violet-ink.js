@@ -94,7 +94,7 @@ export const violetInkTheme = {
     "--_astryx-motion-tempo": "1.1",
     "--font-family-body": "\"Google Sans Flex Variable\", system-ui, sans-serif",
     "--font-family-heading": "\"Google Sans Flex Variable\", system-ui, sans-serif",
-    "--font-family-code": "\"ui-monospace, SFMono-Regular, Menlo, Consolas, monospace\"",
+    "--font-family-code": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     "--color-syntax-keyword": "light-dark(#6b187c, #efa8ff)",
     "--color-syntax-string": "light-dark(#0b5615, #a4d6a3)",
     "--color-syntax-comment": "light-dark(#525252, #b9b9b9)",
@@ -569,7 +569,8 @@ export const violetInkTheme = {
         }
       },
       "code": {
-        "family": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        "family": "ui-monospace",
+        "fallbacks": "SFMono-Regular, Menlo, Consolas, monospace"
       }
     },
     "color": {

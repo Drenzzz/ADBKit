@@ -29,7 +29,8 @@ export const violetInkTheme = defineTheme({
       fallbacks: 'system-ui, sans-serif',
     },
     code: {
-      family: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+      family: 'ui-monospace',
+      fallbacks: 'SFMono-Regular, Menlo, Consolas, monospace',
     },
   },
   tokens: {
