@@ -5,8 +5,7 @@ import {
   IconFileDownload as FileDown,
   IconBraces as FileJson
 } from "@tabler/icons-react"
-import { Switch } from '@/components/ui/switch'
-import { Kbd } from '@/components/ui/kbd'
+import { Switch } from '@astryxdesign/core/Switch'
 import { useLogcatStore } from '@/stores/useLogcatStore'
 import { useLogcat } from '@/hooks/useLogcat'
 import { LogcatView } from '@/components/logcat/LogcatView'
@@ -141,7 +140,7 @@ export function LogcatWorkspace() {
           >
             <FileDown size={18} stroke={1.75} className="shrink-0 text-[var(--color-text-secondary)]" />
             <span className="flex-1 text-left">Export as TXT</span>
-            <Kbd>{modKey}+E</Kbd>
+            <span className="pointer-events-none inline-flex h-5 select-none items-center justify-center rounded-md border border-border/50 bg-[var(--color-surface-inset)] px-1.5 font-mono text-[13px] text-[var(--color-text-secondary)]">{modKey}+E</span>
           </button>
           <button
             type="button"
@@ -151,7 +150,7 @@ export function LogcatWorkspace() {
           >
             <FileJson size={18} stroke={1.75} className="shrink-0 text-[var(--color-text-secondary)]" />
             <span className="flex-1 text-left">Export as JSON</span>
-            <Kbd>{modKey}+Shift+E</Kbd>
+            <span className="pointer-events-none inline-flex h-5 select-none items-center justify-center rounded-md border border-border/50 bg-[var(--color-surface-inset)] px-1.5 font-mono text-[13px] text-[var(--color-text-secondary)]">{modKey}+Shift+E</span>
           </button>
         </div>
 
@@ -194,13 +193,14 @@ export function LogcatWorkspace() {
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          <label htmlFor="logcat-autoscroll" className="cursor-pointer text-[15px] font-medium text-[var(--color-text-primary)]">
+          <p className="cursor-pointer text-[15px] font-medium text-[var(--color-text-primary)]">
             Auto-scroll
-          </label>
+          </p>
           <Switch
-            id="logcat-autoscroll"
-            checked={autoScroll}
-            onCheckedChange={setAutoScroll}
+            label="Auto-scroll"
+            isLabelHidden
+            value={autoScroll}
+            onChange={setAutoScroll}
           />
         </div>
       </aside>

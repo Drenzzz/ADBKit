@@ -7,9 +7,9 @@ import {
   IconAlertTriangle as AlertTriangle,
   IconTerminal as Terminal
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@astryxdesign/core/Button'
+import { ProgressBar } from '@astryxdesign/core/ProgressBar'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { useBinaryDownload } from '@/hooks/useBinaryDownload'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -143,11 +143,11 @@ function BinaryRow({
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
         >
-          <Progress value={50} className="h-1 rounded-full" />
+          <ProgressBar label={`Downloading ${label}`} isLabelHidden value={50} max={100} variant="accent" />
         </motion.div>
       )}
       {reduced && state === 'downloading' && (
-        <Progress value={50} className="h-1 rounded-full" />
+        <ProgressBar label={`Downloading ${label}`} isLabelHidden value={50} max={100} variant="accent" />
       )}
 
       <AnimatePresence initial={false}>
@@ -187,8 +187,8 @@ function BinaryRow({
 function LoadingSkeleton() {
   return (
     <div className="flex flex-col gap-3">
-      <Skeleton className="h-24 w-full rounded-xl" />
-      <Skeleton className="h-24 w-full rounded-xl" />
+      <Skeleton height={96} width="100%" radius={4} />
+      <Skeleton height={96} width="100%" radius={4} />
     </div>
   )
 }
@@ -305,9 +305,7 @@ export function PlatformToolsStep({ embedded = false }: { embedded?: boolean }) 
               <AlertTriangle className="h-5 w-5 text-warning" />
               <p className="text-[14px] text-warning">{error}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleScan} className="h-9 shrink-0 text-[14px]">
-              Retry
-            </Button>
+            <Button variant="secondary" size="sm" onClick={handleScan} className="h-9 shrink-0 text-[14px]" label="Retry" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -324,14 +322,22 @@ export function PlatformToolsStep({ embedded = false }: { embedded?: boolean }) 
             onPickCandidate={(path) => void handlePickCandidate('adb', path)}
             actions={
               <div className="flex flex-wrap items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleDownloadPlatformTools} className="h-9 text-[14px]">
-                  <Download className="h-4 w-4 mr-1.5" />
-                  Download
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => void handleSelectFile('adb')} className="h-9 text-[14px] text-muted-foreground hover:text-foreground">
-                  <FileSearch className="h-4 w-4 mr-1.5" />
-                  Link local file
-                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleDownloadPlatformTools}
+                  className="h-9 text-[14px]"
+                  icon={<Download className="h-4 w-4" />}
+                  label="Download"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void handleSelectFile('adb')}
+                  className="h-9 text-[14px] text-muted-foreground hover:text-foreground"
+                  icon={<FileSearch className="h-4 w-4" />}
+                  label="Link local file"
+                />
               </div>
             }
           />
@@ -346,14 +352,22 @@ export function PlatformToolsStep({ embedded = false }: { embedded?: boolean }) 
               onPickCandidate={(path) => void handlePickCandidate('fastboot', path)}
               actions={
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={handleDownloadPlatformTools} className="h-9 text-[14px]">
-                    <Download className="h-4 w-4 mr-1.5" />
-                    Download
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => void handleSelectFile('fastboot')} className="h-9 text-[14px] text-muted-foreground hover:text-foreground">
-                    <FileSearch className="h-4 w-4 mr-1.5" />
-                    Link local file
-                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleDownloadPlatformTools}
+                    className="h-9 text-[14px]"
+                    icon={<Download className="h-4 w-4" />}
+                    label="Download"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => void handleSelectFile('fastboot')}
+                    className="h-9 text-[14px] text-muted-foreground hover:text-foreground"
+                    icon={<FileSearch className="h-4 w-4" />}
+                    label="Link local file"
+                  />
                 </div>
               }
             />

@@ -1,6 +1,6 @@
 import type { ScrcpyOptions } from '@/lib/types'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
+import { Switch } from '@astryxdesign/core/Switch'
+import { FieldLabel } from '@astryxdesign/core/Field'
 
 interface DeviceOptionsControlsProps {
   options: ScrcpyOptions
@@ -8,23 +8,22 @@ interface DeviceOptionsControlsProps {
 }
 
 interface ToggleRowProps {
-  id: string
   label: string
   description: string
   checked: boolean
   onChange: (checked: boolean) => void
 }
 
-function ToggleRow({ id, label, description, checked, onChange }: ToggleRowProps) {
+function ToggleRow({ label, description, checked, onChange }: ToggleRowProps) {
   return (
     <div className="flex items-center justify-between gap-4 py-3">
       <div className="space-y-0.5">
-        <Label htmlFor={id} className="text-[15px] font-semibold text-[var(--color-text-primary)]">
+        <p className="text-[15px] font-semibold text-[var(--color-text-primary)]">
           {label}
-        </Label>
+        </p>
         <p className="text-[14px] text-[var(--color-text-secondary)] leading-relaxed">{description}</p>
       </div>
-      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+      <Switch label={label} isLabelHidden value={checked} onChange={onChange} />
     </div>
   )
 }
@@ -41,56 +40,48 @@ export function DeviceOptionsControls({
     <div className="space-y-5">
       <div className="divide-y divide-border/40">
         <ToggleRow
-          id="show-touches"
           label="Show touches"
           description="Visualize physical touches on the device"
           checked={options.show_touches}
           onChange={(v) => onOptionChange('show_touches', v)}
         />
         <ToggleRow
-          id="no-control"
           label="Read-only"
           description="Disable input control from mirror window"
           checked={options.no_control}
           onChange={(v) => onOptionChange('no_control', v)}
         />
         <ToggleRow
-          id="stay-awake"
           label="Stay awake"
           description="Keep the device awake while connected"
           checked={options.stay_awake}
           onChange={(v) => onOptionChange('stay_awake', v)}
         />
         <ToggleRow
-          id="turn-screen-off"
           label="Turn screen off"
           description="Turn off device screen while mirroring"
           checked={options.turn_screen_off}
           onChange={(v) => onOptionChange('turn_screen_off', v)}
         />
         <ToggleRow
-          id="power-off-on-close"
           label="Power off on close"
           description="Power off device when mirror window closes"
           checked={options.power_off_on_close}
           onChange={(v) => onOptionChange('power_off_on_close', v)}
         />
         <ToggleRow
-          id="fullscreen"
           label="Fullscreen"
           description="Open mirror window in fullscreen"
           checked={options.fullscreen}
           onChange={(v) => onOptionChange('fullscreen', v)}
         />
         <ToggleRow
-          id="always-on-top"
           label="Always on top"
           description="Keep mirror window above other windows"
           checked={options.always_on_top}
           onChange={(v) => onOptionChange('always_on_top', v)}
         />
         <ToggleRow
-          id="disable-screensaver"
           label="Disable screensaver"
           description="Prevent host screensaver during mirroring"
           checked={options.disable_screensaver}
@@ -100,9 +91,7 @@ export function DeviceOptionsControls({
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
         <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
-          <Label htmlFor="display-id" className={labelClass}>
-            Display ID
-          </Label>
+          <FieldLabel label="Display ID" inputID="display-id" className={labelClass} />
           <input
             id="display-id"
             type="number"
@@ -113,9 +102,7 @@ export function DeviceOptionsControls({
           />
         </div>
         <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
-          <Label htmlFor="rotation" className={labelClass}>
-            Rotation
-          </Label>
+          <FieldLabel label="Rotation" inputID="rotation" className={labelClass} />
           <input
             id="rotation"
             type="number"
@@ -127,9 +114,7 @@ export function DeviceOptionsControls({
           />
         </div>
         <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
-          <Label htmlFor="time-limit" className={labelClass}>
-            Time limit (seconds, 0 = none)
-          </Label>
+          <FieldLabel label="Time limit (seconds, 0 = none)" inputID="time-limit" className={labelClass} />
           <input
             id="time-limit"
             type="number"

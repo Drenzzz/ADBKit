@@ -2,7 +2,7 @@ import { motion } from 'motion/react'
 import { Heading } from '@astryxdesign/core/Heading'
 import { useSettings } from '@/hooks/useSettings'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { BinaryManager } from './BinaryManager'
 import { PreferencesPanel } from './PreferencesPanel'
 import { AuditLogsPanel } from './AuditLogsPanel'
@@ -36,9 +36,9 @@ export function SettingsShell() {
   if (loadingConfig && !appConfig) {
     return (
       <div className="dashboard-scale flex h-full flex-col gap-4 p-5">
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-64 w-full rounded-3xl" />
-        <Skeleton className="h-40 w-full rounded-3xl" />
+        <Skeleton height={40} width={192} radius={2} />
+        <Skeleton height={256} width="100%" radius={4} />
+        <Skeleton height={160} width="100%" radius={4} />
       </div>
     )
   }

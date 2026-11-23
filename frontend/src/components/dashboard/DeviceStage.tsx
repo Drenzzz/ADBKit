@@ -15,8 +15,6 @@ import { Text } from '@astryxdesign/core/Text'
 import { HStack } from '@astryxdesign/core/HStack'
 import { VStack } from '@astryxdesign/core/VStack'
 import { useDeviceStore } from '@/stores/useDeviceStore'
-import { cn } from '@/lib/utils'
-import { buttonVariants } from '@/components/ui/button'
 import type { DeviceInfo } from '@/lib/types'
 
 interface DeviceStageProps {
@@ -243,18 +241,15 @@ export function DeviceStage({
         <div className="flex justify-end">
           {isOnline && (
             <div className="relative">
-              <button
-                type="button"
+              <Button
+                label="Reboot device"
+                icon={<IconPower size={22} stroke={1.5} />}
+                variant="secondary"
+                size="md"
                 aria-expanded={rebootOpen}
                 onClick={() => setRebootOpen((open) => !open)}
-                className={cn(
-                  buttonVariants({ variant: 'secondary', size: 'lg' }),
-                  'gap-3 bg-[var(--color-accent)] px-6 text-[18px] text-[var(--color-on-accent)] hover:bg-[var(--color-accent)] aria-expanded:bg-[var(--color-accent)] aria-expanded:text-[var(--color-on-accent)]',
-                )}
-              >
-                <IconPower size={22} stroke={1.5} />
-                Reboot device
-              </button>
+                className="gap-3 bg-[var(--color-accent)] px-6 text-[18px] text-[var(--color-on-accent)] hover:bg-[var(--color-accent)] aria-expanded:bg-[var(--color-accent)] aria-expanded:text-[var(--color-on-accent)]"
+              />
               <div
                 className="reboot-flyout"
                 data-open={rebootOpen}

@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { inspectAPK } from '@/services/packageService'
@@ -263,13 +263,13 @@ export function InstallApkDialog({
                 {status === 'idle' && (
                   <Button
                     variant="ghost"
-                    size="icon"
+                    isIconOnly
+                    size="sm"
                     onClick={handleReset}
-                    aria-label="Remove file"
+                    label="Remove file"
                     className="shrink-0 size-9 rounded-full text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                    icon={<X className="h-4 w-4" />}
+                  />
                 )}
               </motion.div>
             )}
@@ -330,46 +330,38 @@ export function InstallApkDialog({
             {isDone ? (
               <Button
                 className="h-12 rounded-full px-7 text-[15px] font-bold"
-                variant={status === 'error' ? 'outline' : 'default'}
+                variant={status === 'error' ? 'secondary' : 'primary'}
                 onClick={() => {
                   if (status === 'success') onOpenChange(false)
                   else handleReset()
                 }}
-              >
-                {status === 'success' ? 'Done' : 'Try again'}
-              </Button>
+                label={status === 'success' ? 'Done' : 'Try again'}
+              />
             ) : (
               <>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   className="h-12 rounded-full px-7 text-[15px] font-bold"
                   onClick={() => onOpenChange(false)}
-                  disabled={isInstalling}
-                >
-                  Cancel
-                </Button>
+                  isDisabled={isInstalling}
+                  label="Cancel"
+                />
                 {!filePath ? (
                   <Button
+                    variant="primary"
                     className="h-12 rounded-full px-7 text-[15px] font-bold"
                     onClick={handleBrowse}
-                  >
-                    Browse File
-                  </Button>
+                    label="Browse File"
+                  />
                 ) : (
                   <Button
+                    variant="primary"
                     className="h-12 gap-2 rounded-full bg-[var(--color-accent)] px-7 text-[15px] font-bold text-white hover:opacity-90 active:scale-[0.98]"
                     onClick={handleInstall}
-                    disabled={isInstalling}
-                  >
-                    {isInstalling ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
-                        Installing…
-                      </>
-                    ) : (
-                      'Install Now'
-                    )}
-                  </Button>
+                    isDisabled={isInstalling}
+                    isLoading={isInstalling}
+                    label={isInstalling ? 'Installing…' : 'Install Now'}
+                  />
                 )}
               </>
             )}

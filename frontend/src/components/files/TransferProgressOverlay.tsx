@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import {
   IconX as X
 } from "@tabler/icons-react"
@@ -36,13 +36,14 @@ export function TransferProgressOverlay({
         </div>
         <Button
           variant="ghost"
-          size="icon"
+          isIconOnly
+          size="sm"
           className="h-7 w-7 shrink-0"
           onClick={onCancel}
-          title="Cancel transfer"
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
+          tooltip="Cancel transfer"
+          label="Cancel transfer"
+          icon={<X className="h-3.5 w-3.5" />}
+        />
       </div>
     </div>
   )

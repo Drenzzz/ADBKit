@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Progress } from '@/components/ui/progress'
+import { ProgressBar } from '@astryxdesign/core/ProgressBar'
 import { FilePicker } from '@/components/flasher/shared/FilePicker'
 import { Step } from '@/components/flasher/shared/Step'
 import { ConfirmOverlay } from './RomFlashCard'
@@ -61,7 +61,7 @@ export function SideloadCard({ disabled }: SideloadCardProps) {
               <IconLoader2 size={18} stroke={1.75} className="animate-spin motion-reduce:animate-none text-[var(--color-accent)]" />
               Sideloading in progress…
             </span>
-            <Progress value={null} className="h-2 animate-pulse motion-reduce:animate-none" />
+            <ProgressBar label="Sideload progress" isLabelHidden isIndeterminate variant="accent" />
           </div>
         )}
       </div>

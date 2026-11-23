@@ -4,7 +4,6 @@ import {
   IconCpu as Cpu,
   IconDeviceUsb as HardDrive
 } from "@tabler/icons-react"
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { PerformanceSnapshot } from '@/lib/types'
 
@@ -40,14 +39,12 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
   return (
     <div className="flex flex-col gap-5">
       {/* Battery Card */}
-      <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
-        <CardHeader className="pb-3 pt-5 px-5">
-          <CardTitle className="flex items-center gap-2 text-[14px] font-semibold text-muted-foreground/80">
-            <Battery className="h-3.5 w-3.5" />
-            Power & thermals
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5 flex flex-col gap-4">
+      <section className="m3-surface rounded-3xl p-5 border border-border/60 bg-card shadow-[var(--shadow-card)]">
+        <h3 className="mb-4 flex items-center gap-2.5 text-[18px] font-semibold text-[var(--color-text-primary)]">
+          <span className="text-[var(--color-text-secondary)]"><Battery className="h-3.5 w-3.5" /></span>
+          Power & thermals
+        </h3>
+        <div className="flex flex-col gap-4">
           {/* Battery level bar */}
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between text-[14px] font-medium">
@@ -83,18 +80,16 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
             <span className="text-muted-foreground font-medium">Power Delivery</span>
             <span className="text-foreground font-medium">USB Connection</span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* Storage Card */}
-      <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
-        <CardHeader className="pb-3 pt-5 px-5">
-          <CardTitle className="flex items-center gap-2 text-[14px] font-semibold text-muted-foreground/80">
-            <Database className="h-3.5 w-3.5" />
-            Storage status
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5 flex flex-col gap-4">
+      <section className="m3-surface rounded-3xl p-5 border border-border/60 bg-card shadow-[var(--shadow-card)]">
+        <h3 className="mb-4 flex items-center gap-2.5 text-[18px] font-semibold text-[var(--color-text-primary)]">
+          <span className="text-[var(--color-text-secondary)]"><Database className="h-3.5 w-3.5" /></span>
+          Storage status
+        </h3>
+        <div className="flex flex-col gap-4">
           {/* Storage progress bar */}
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between text-[14px] font-medium">
@@ -129,8 +124,8 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
               {(100 - storagePercent).toFixed(1)}% free
             </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

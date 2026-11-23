@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import type { PackageDetails } from '@/lib/types'
 
 interface PackageDetailSheetProps {
@@ -74,10 +74,10 @@ export function PackageDetailSheet({
           <div className="px-7 py-3">
             {loading ? (
               <div className="space-y-5 py-4">
-                <Skeleton className="h-5 w-2/3" />
-                <Skeleton className="h-5 w-1/2" />
-                <Skeleton className="h-5 w-3/5" />
-                <Skeleton className="h-5 w-1/2" />
+                <Skeleton height={20} width="66.666667%" radius={2} />
+                <Skeleton height={20} width="50%" radius={2} />
+                <Skeleton height={20} width="60%" radius={2} />
+                <Skeleton height={20} width="50%" radius={2} />
               </div>
             ) : details ? (
               <div className="divide-y divide-border/40">

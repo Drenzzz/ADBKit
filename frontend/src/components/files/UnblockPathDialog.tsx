@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import { IconSettings } from '@tabler/icons-react'
 import type { UnblockResult } from '@/lib/types'
 
@@ -50,16 +50,13 @@ export function UnblockPathDialog({
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
+            label="Cancel"
+          />
           {isVolumeMissing && (
-            <Button size="sm" onClick={onRetry}>
-              Retry
-            </Button>
+            <Button variant="primary" size="sm" onClick={onRetry} label="Retry" />
           )}
           {!isVolumeMissing && (
             <Button
@@ -68,10 +65,9 @@ export function UnblockPathDialog({
               onClick={() => {
                 onOpenChange(false)
               }}
-            >
-              <IconSettings className="h-3.5 w-3.5 mr-1.5" />
-              Open Device Settings
-            </Button>
+              icon={<IconSettings className="h-3.5 w-3.5" />}
+              label="Open Device Settings"
+            />
           )}
         </DialogFooter>
       </DialogContent>

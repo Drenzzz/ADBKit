@@ -2,10 +2,9 @@ import { useState } from 'react'
 import {
   IconPencil as Pencil,
   IconX as X,
-  IconLoader2 as Loader2
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@astryxdesign/core/Button'
+import { TextInput } from '@astryxdesign/core/TextInput'
 import { setDeviceNickname, clearDeviceNickname } from '@/services/deviceService'
 import { useDevices } from '@/hooks/useDevices'
 import { toast } from '@/lib/toast'
@@ -61,25 +60,30 @@ export function RenameDialog({ serial, currentNickname, onClose }: {
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="nickname" className="text-[14px] font-medium text-muted-foreground">Nickname</label>
-            <Input
+            <TextInput
               id="nickname"
+              label="Nickname"
+              isLabelHidden
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={(value) => setDraft(value)}
               placeholder="e.g. Daily Driver"
-              autoFocus
+              hasAutoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
           </div>
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Pencil className="mr-1.5 h-3.5 w-3.5" />}
-            Save
-          </Button>
+          <Button variant="ghost" size="sm" onClick={onClose} isDisabled={saving} label="Cancel" />
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleSave}
+            isDisabled={saving}
+            isLoading={saving}
+            icon={<Pencil className="h-3.5 w-3.5" />}
+            label="Save"
+          />
         </div>
       </div>
     </div>

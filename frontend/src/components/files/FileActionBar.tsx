@@ -2,9 +2,8 @@ import {
   IconSearch,
   IconCopy,
   IconFolderPlus,
-  IconEye,
 } from "@tabler/icons-react"
-import { Switch } from '@/components/ui/switch'
+import { Switch } from '@astryxdesign/core/Switch'
 import { Selector } from '@astryxdesign/core/Selector'
 import { Button } from '@astryxdesign/core/Button'
 import type { FileSortField, FileSortDirection } from '@/lib/types'
@@ -100,13 +99,14 @@ export function FileActionBar({
           }))}
         />
 
-        <label className="flex h-11 cursor-pointer select-none items-center gap-2.5 rounded-full bg-[var(--color-background-muted)] px-4">
-          <Switch checked={showHidden} onCheckedChange={onToggleHidden} />
-          <span className="flex items-center gap-1.5 text-[14px] font-semibold text-[var(--color-text-secondary)]">
-            <IconEye size={16} stroke={1.75} />
-            Hidden
-          </span>
-        </label>
+        <div className="flex h-11 items-center rounded-full bg-[var(--color-background-muted)] px-4">
+          <Switch
+            label="Hidden"
+            labelPosition="start"
+            value={showHidden}
+            onChange={onToggleHidden}
+          />
+        </div>
 
         <SdCardPicker onSelect={onSdCardSelect} disabled={refreshing} />
       </div>

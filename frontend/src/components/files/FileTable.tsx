@@ -2,8 +2,8 @@ import { useRef } from 'react'
 import { motion } from 'motion/react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { cn } from '@/lib/utils'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CheckboxInput } from '@astryxdesign/core/CheckboxInput'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { FileRow } from './FileRow'
 import { EmptyFolderState, NoSearchResultsState } from './EmptyStates'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -109,7 +109,7 @@ export function FileTable({
     return (
       <div className="space-y-2 p-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-14 w-full rounded-xl" />
+          <Skeleton key={i} height={56} width="100%" radius={4} />
         ))}
       </div>
     )
@@ -134,11 +134,12 @@ export function FileTable({
         className={`${GRID} sticky top-0 z-10 h-11 shrink-0 select-none items-center border-b border-border/40 bg-[var(--color-background-muted)]/60 backdrop-blur-sm`}
       >
         <div className="flex justify-center">
-          <Checkbox
-            checked={allSelected}
-            onCheckedChange={() => onSelectAll(allPaths)}
-            className="h-[18px] w-[18px]"
-            aria-label="Select all files"
+          <CheckboxInput
+            value={allSelected}
+            onChange={() => onSelectAll(allPaths)}
+            size="sm"
+            label="Select all files"
+            isLabelHidden
           />
         </div>
         <div className="px-3">

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { cn } from '@/lib/utils'
 import { BinarySourceBadge } from './BinarySourceBadge'
 import {
@@ -62,10 +62,10 @@ export function BinaryModuleCard({
     return (
       <div className={cn('flex items-center justify-between py-4', !isLast && 'border-b border-border/40')}>
         <div className="flex items-center gap-3">
-          <Skeleton className="h-2.5 w-2.5 rounded-full" />
-          <Skeleton className="h-4 w-24" />
+          <Skeleton height={10} width={10} radius="rounded" />
+          <Skeleton height={16} width={96} radius={2} />
         </div>
-        <Skeleton className="h-4 w-16" />
+        <Skeleton height={16} width={64} radius={2} />
       </div>
     )
   }

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { motion } from 'motion/react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { getSetupState } from '@/services/binaryService'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -99,9 +99,7 @@ export function WelcomeStep() {
         <span className="text-[14px] text-muted-foreground">
           Host detected: <span className="font-medium text-foreground">{osName}</span>
         </span>
-        <Button onClick={nextStep} size="lg" className="h-11 px-7 text-[16px]">
-          Continue
-        </Button>
+        <Button variant="primary" onClick={nextStep} size="md" className="h-11 px-7 text-[16px]" label="Continue" />
       </motion.footer>
     </div>
   )

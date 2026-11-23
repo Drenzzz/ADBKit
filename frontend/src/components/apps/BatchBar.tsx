@@ -8,7 +8,7 @@ import {
   IconEraser,
   IconX,
 } from '@tabler/icons-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { PackageBatchAction } from '@/lib/types'
@@ -75,15 +75,14 @@ export function BatchBar({
               {ACTIONS.map(({ busyKey, icon: Icon, label, run }) => (
                 <Button
                   key={busyKey}
-                  size="lg"
+                  size="md"
                   variant="ghost"
-                  disabled={busy}
+                  isDisabled={busy}
                   onClick={handlers[run]}
                   className="h-11 gap-2 rounded-full px-4 text-[18px] font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                >
-                  <Icon size={18} stroke={1.75} />
-                  {label}
-                </Button>
+                  icon={<Icon size={18} stroke={1.75} />}
+                  label={label}
+                />
               ))}
             </div>
 
@@ -91,13 +90,13 @@ export function BatchBar({
 
             <Button
               size="sm"
-              disabled={busy}
+              variant="primary"
+              isDisabled={busy}
               onClick={onUninstall}
               className="h-10 gap-2 rounded-full bg-[var(--color-error)] px-6 text-[14px] font-bold text-white hover:bg-[color-mix(in_srgb,var(--color-error)_90%,black)] active:scale-95"
-            >
-              <IconTrash size={18} stroke={1.75} />
-              Uninstall
-            </Button>
+              icon={<IconTrash size={18} stroke={1.75} />}
+              label="Uninstall"
+            />
 
             <button
               type="button"

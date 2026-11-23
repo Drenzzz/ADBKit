@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { SegmentedControl, SegmentedControlItem } from '@astryxdesign/core/SegmentedControl'
 import { Selector } from '@astryxdesign/core/Selector'
-import { Switch } from '@/components/ui/switch'
+import { Switch } from '@astryxdesign/core/Switch'
 import {
   IconSun as Sun,
   IconMoon as Moon,
@@ -130,8 +130,10 @@ export function PreferencesPanel({
 
         <PrefRow label="Auto-refresh devices" description="Automatically sync connected devices">
           <Switch
-            checked={preferencesDraft.auto_refresh_devices ?? true}
-            onCheckedChange={(v) => onDraftChange({ auto_refresh_devices: v })}
+            label="Auto-refresh devices"
+            isLabelHidden
+            value={preferencesDraft.auto_refresh_devices ?? true}
+            onChange={(v) => onDraftChange({ auto_refresh_devices: v })}
           />
         </PrefRow>
 
@@ -157,8 +159,10 @@ export function PreferencesPanel({
 
         <PrefRow label="Audit logs" description="Record operation history for debugging">
           <Switch
-            checked={preferencesDraft.audit_enabled ?? false}
-            onCheckedChange={(v) => onDraftChange({ audit_enabled: v })}
+            label="Audit logs"
+            isLabelHidden
+            value={preferencesDraft.audit_enabled ?? false}
+            onChange={(v) => onDraftChange({ audit_enabled: v })}
           />
         </PrefRow>
       </div>

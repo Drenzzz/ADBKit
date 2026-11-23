@@ -8,7 +8,7 @@ import {
   setCustomBinary,
 } from '@/services/binaryService'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { SettingsSection } from './SettingsSection'
 import {
   IconBinary as Binary
@@ -90,9 +90,9 @@ export function BinaryManager() {
     <SettingsSection icon={<Binary size={20} stroke={1.75} />} title="Binaries">
       {loading && !status ? (
         <div className="flex flex-col gap-2">
-          <Skeleton className="h-12 w-full rounded-xl" />
-          <Skeleton className="h-12 w-full rounded-xl" />
-          <Skeleton className="h-12 w-full rounded-xl" />
+          <Skeleton height={48} width="100%" radius={4} />
+          <Skeleton height={48} width="100%" radius={4} />
+          <Skeleton height={48} width="100%" radius={4} />
         </div>
       ) : (
         <div className="divide-y divide-border/40">

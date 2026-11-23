@@ -9,7 +9,7 @@ import {
   IconLink,
   IconFile,
 } from "@tabler/icons-react"
-import { Checkbox } from '@/components/ui/checkbox'
+import { CheckboxInput } from '@astryxdesign/core/CheckboxInput'
 import { FileActions } from './FileActions'
 import type { FileEntry } from '@/lib/types'
 
@@ -102,12 +102,13 @@ export function FileRow({
       }}
     >
       <div className="flex justify-center" onClick={(e) => e.stopPropagation()}>
-        <Checkbox
-          checked={isSelected}
-          onCheckedChange={() => onSelect(file.path)}
-          disabled={isBusy}
-          className="h-[18px] w-[18px]"
-          aria-label={`Select ${file.name}`}
+        <CheckboxInput
+          value={isSelected}
+          onChange={() => onSelect(file.path)}
+          isDisabled={isBusy}
+          size="sm"
+          label={`Select ${file.name}`}
+          isLabelHidden
         />
       </div>
 

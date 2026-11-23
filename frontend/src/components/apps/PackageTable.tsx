@@ -2,8 +2,8 @@ import { useMemo, useRef } from 'react'
 import { motion } from 'motion/react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { cn } from '@/lib/utils'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CheckboxInput } from '@astryxdesign/core/CheckboxInput'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { PackageRow } from './PackageRow'
 import { PackageActions } from './PackageActions'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -71,7 +71,9 @@ export function PackageTable({
       <div className="m3-surface min-h-0 flex-1 overflow-hidden">
         <div className="space-y-0 p-3">
           {Array.from({ length: 9 }).map((_, index) => (
-            <Skeleton key={index} className="mb-2 h-[60px] w-full rounded-xl" />
+            <div key={index} className="mb-2">
+              <Skeleton height={60} width="100%" radius={4} />
+            </div>
           ))}
         </div>
       </div>
@@ -87,11 +89,12 @@ export function PackageTable({
     >
       {/* Header: select-all + count */}
       <div className="flex shrink-0 items-center gap-3 border-b border-border/40 px-6 py-3">
-        <Checkbox
-          checked={isAllSelected}
-          onCheckedChange={() => onToggleAll(allNames)}
-          className="h-[18px] w-[18px]"
-          aria-label="Select all visible packages"
+        <CheckboxInput
+          value={isAllSelected}
+          onChange={() => onToggleAll(allNames)}
+          size="sm"
+          label="Select all visible packages"
+          isLabelHidden
         />
         <span className="text-[14px] font-semibold tracking-normal text-[var(--color-text-secondary)]">
           {isSomeSelected ? `${selectedCount} of ${allNames.length} selected` : 'Package'}

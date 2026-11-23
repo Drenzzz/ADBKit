@@ -1,7 +1,6 @@
 import type { ScrcpyOptions } from '@/lib/types'
 import { Selector } from '@astryxdesign/core/Selector'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
+import { Switch } from '@astryxdesign/core/Switch'
 import { IconVolume, IconGauge } from "@tabler/icons-react"
 
 interface AudioControlsProps {
@@ -23,17 +22,18 @@ export function AudioControls({ options, onOptionChange }: AudioControlsProps) {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-4 rounded-xl bg-[var(--color-surface-inset)] px-4 py-3.5">
         <div className="space-y-0.5">
-          <Label htmlFor="no-audio" className="text-[15px] font-semibold text-[var(--color-text-primary)]">
+          <p className="text-[15px] font-semibold text-[var(--color-text-primary)]">
             Disable audio
-          </Label>
+          </p>
           <p className="text-[14px] text-[var(--color-text-secondary)] leading-relaxed">
             Mute audio capture during mirroring
           </p>
         </div>
         <Switch
-          id="no-audio"
-          checked={options.no_audio}
-          onCheckedChange={(checked) => onOptionChange('no_audio', checked)}
+          label="Disable audio"
+          isLabelHidden
+          value={options.no_audio}
+          onChange={(checked) => onOptionChange('no_audio', checked)}
         />
       </div>
 

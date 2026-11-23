@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Progress } from '@/components/ui/progress'
+import { ProgressBar } from '@astryxdesign/core/ProgressBar'
 import { FilePicker } from '@/components/flasher/shared/FilePicker'
 import { RomPartitionList } from '@/components/flasher/shared/RomPartitionList'
 import { Step } from '@/components/flasher/shared/Step'
@@ -100,7 +100,7 @@ export function RomFlashCard({ disabled }: RomFlashCardProps) {
               <span className="text-[var(--color-text-secondary)]">Flashing progress</span>
               <span className="tabular-nums text-[var(--color-text-primary)]">{completedCount}/{flashPlanSteps.length}</span>
             </div>
-            <Progress value={progress} className="h-2 rounded-full" />
+            <ProgressBar label="Flashing progress" isLabelHidden value={progress} max={100} variant="accent" />
           </div>
         )}
         <div className="flex items-center justify-between gap-4">

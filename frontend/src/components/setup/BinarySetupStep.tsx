@@ -5,7 +5,7 @@ import {
   IconCircleCheck as CheckCircle2,
   IconSearch as Search
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { getSetupState } from '@/services/binaryService'
 import { PlatformToolsStep } from './PlatformToolsStep'
@@ -46,14 +46,13 @@ export function BinarySetupStep() {
           </p>
         </div>
         <Button
-          variant="outline"
+          variant="secondary"
           onClick={handleScan}
-          disabled={busy}
+          isDisabled={busy}
           className="h-9 shrink-0 gap-2 px-3 text-[14px]"
-        >
-          <Search className="h-4 w-4" />
-          {busy ? 'Scanning' : 'Rescan'}
-        </Button>
+          icon={<Search className="h-4 w-4" />}
+          label={busy ? 'Scanning' : 'Rescan'}
+        />
       </header>
 
       <div className="mt-7 flex flex-col gap-6">
@@ -76,19 +75,24 @@ export function BinarySetupStep() {
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          <Button variant="ghost" size="lg" onClick={prevStep} disabled={busy} className="h-11 gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
           <Button
+            variant="ghost"
+            size="md"
+            onClick={prevStep}
+            isDisabled={busy}
+            className="h-11 gap-2"
+            icon={<ArrowLeft className="h-4 w-4" />}
+            label="Back"
+          />
+          <Button
+            variant="primary"
             onClick={nextStep}
-            disabled={!ready || busy}
-            size="lg"
+            isDisabled={!ready || busy}
+            size="md"
             className="h-11 gap-2 px-7 text-[16px]"
-          >
-            Continue
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+            label="Continue"
+            endContent={<ArrowRight className="h-4 w-4" />}
+          />
         </div>
       </footer>
     </div>

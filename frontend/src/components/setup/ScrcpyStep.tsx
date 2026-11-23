@@ -7,9 +7,9 @@ import {
   IconAlertTriangle as AlertTriangle,
   IconDeviceDesktop as Monitor
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@astryxdesign/core/Button'
+import { ProgressBar } from '@astryxdesign/core/ProgressBar'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { useBinaryDownload } from '@/hooks/useBinaryDownload'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -95,7 +95,7 @@ function ScrcpyCandidatePicker({
 }
 
 function LoadingSkeleton() {
-  return <Skeleton className="h-28 w-full rounded-xl" />
+  return <Skeleton height={112} width="100%" radius={4} />
 }
 
 export function ScrcpyStep({ embedded = false, autoScan = true }: { embedded?: boolean; autoScan?: boolean }) {
@@ -215,7 +215,7 @@ export function ScrcpyStep({ embedded = false, autoScan = true }: { embedded?: b
                 exit={{ opacity: 0 }}
                 transition={reduced ? { duration: 0 } : { duration: 0.2 }}
               >
-                <Progress value={50} className="h-1 rounded-full" />
+                <ProgressBar label="Downloading Scrcpy" isLabelHidden value={50} max={100} variant="accent" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -247,14 +247,22 @@ export function ScrcpyStep({ embedded = false, autoScan = true }: { embedded?: b
                 transition={reduced ? { duration: 0 } : { duration: 0.2 }}
                 className="flex flex-wrap items-center gap-2"
               >
-                <Button variant="outline" size="sm" onClick={handleDownloadScrcpy} className="h-9 text-[14px]">
-                  <Download className="h-4 w-4 mr-1.5" />
-                  Download Scrcpy
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleSelectFile} className="h-9 text-[14px] text-muted-foreground hover:text-foreground">
-                  <FileSearch className="h-4 w-4 mr-1.5" />
-                  Link local file
-                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleDownloadScrcpy}
+                  className="h-9 text-[14px]"
+                  icon={<Download className="h-4 w-4" />}
+                  label="Download Scrcpy"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSelectFile}
+                  className="h-9 text-[14px] text-muted-foreground hover:text-foreground"
+                  icon={<FileSearch className="h-4 w-4" />}
+                  label="Link local file"
+                />
               </motion.div>
             )}
           </AnimatePresence>

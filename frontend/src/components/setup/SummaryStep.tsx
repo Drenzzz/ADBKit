@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import {
   IconCheck as Check
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { completeSetup } from '@/services/binaryService'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -86,9 +86,7 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
           animate={{ opacity: 1 }}
           transition={reduced ? { duration: 0 } : { delay: 0.18, duration: 0.3 }}
         >
-          <Button onClick={onComplete} size="lg" className="h-11 px-7 text-[16px]">
-            Launch ADBKit
-          </Button>
+          <Button variant="primary" onClick={onComplete} size="md" className="h-11 px-7 text-[16px]" label="Launch ADBKit" />
         </motion.div>
       </div>
     )
@@ -120,17 +118,15 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
       </motion.div>
 
       <footer className="mt-auto flex items-center justify-between gap-3 pt-6">
-        <Button variant="ghost" size="lg" onClick={prevStep} disabled={submitting} className="h-11">
-          Back
-        </Button>
+        <Button variant="ghost" size="md" onClick={prevStep} isDisabled={submitting} className="h-11" label="Back" />
         <Button
+          variant="primary"
           onClick={handleFinish}
-          disabled={submitting || !setupState?.canFinish}
-          size="lg"
+          isDisabled={submitting || !setupState?.canFinish}
+          size="md"
           className="h-11 px-7 text-[16px]"
-        >
-          {submitting ? 'Writing config…' : 'Finish setup'}
-        </Button>
+          label={submitting ? 'Writing config…' : 'Finish setup'}
+        />
       </footer>
     </div>
   )

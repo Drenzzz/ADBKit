@@ -1,5 +1,5 @@
-import { Checkbox } from '@/components/ui/checkbox'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { CheckboxInput } from '@astryxdesign/core/CheckboxInput'
+import { ScrollableArea } from '@astryxdesign/core/ScrollableArea'
 import { cn } from '@/lib/utils'
 import {
   IconCircleCheck as CheckCircle2,
@@ -67,37 +67,41 @@ export function RomPartitionList({
         </button>
       </div>
 
-      <ScrollArea className="min-h-0 flex-1 rounded-2xl border border-border/40 bg-[var(--color-surface-inset)] px-2 py-1">
-        <div className="space-y-1 py-1">
-          {steps.map((step) => {
-            const isSelected = selectedPartitions.includes(step.partition)
-            return (
-              <div
-                key={step.partition}
-                className={cn(
-                  'flex items-center gap-3.5 rounded-xl px-3 py-3 transition-colors hover:bg-[var(--color-background-card)]/60',
-                  disabled && 'pointer-events-none opacity-50',
-                  !isSelected && 'opacity-60'
-                )}
-              >
-                <Checkbox
-                  checked={isSelected}
-                  onCheckedChange={() => onToggle(step.partition)}
-                  disabled={disabled}
-                  className="size-5 rounded-md"
-                />
-                <StatusIndicator status={step.status} />
-                <span className="flex-1 text-[16px] font-semibold text-[var(--color-text-primary)]">
-                  {step.partition}
-                </span>
-                <span className="max-w-[180px] truncate font-mono text-[13px] text-[var(--color-text-secondary)]">
-                  {step.imageFile.split('/').pop()}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      </ScrollArea>
+      <div className="min-h-0 flex-1 rounded-2xl border border-border/40 bg-[var(--color-surface-inset)] px-2 py-1">
+        <ScrollableArea label="ROM partitions" height="100%">
+          <div className="space-y-1 py-1">
+            {steps.map((step) => {
+              const isSelected = selectedPartitions.includes(step.partition)
+              return (
+                <div
+                  key={step.partition}
+                  className={cn(
+                    'flex items-center gap-3.5 rounded-xl px-3 py-3 transition-colors hover:bg-[var(--color-background-card)]/60',
+                    disabled && 'pointer-events-none opacity-50',
+                    !isSelected && 'opacity-60'
+                  )}
+                >
+                  <CheckboxInput
+                    value={isSelected}
+                    onChange={() => onToggle(step.partition)}
+                    isDisabled={disabled}
+                    size="sm"
+                    label={step.partition}
+                    isLabelHidden
+                  />
+                  <StatusIndicator status={step.status} />
+                  <span className="flex-1 text-[16px] font-semibold text-[var(--color-text-primary)]">
+                    {step.partition}
+                  </span>
+                  <span className="max-w-[180px] truncate font-mono text-[13px] text-[var(--color-text-secondary)]">
+                    {step.imageFile.split('/').pop()}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </ScrollableArea>
+      </div>
 
       {steps.length === 0 && (
         <p className="py-6 text-center text-[14px] font-medium text-[var(--color-text-secondary)]">

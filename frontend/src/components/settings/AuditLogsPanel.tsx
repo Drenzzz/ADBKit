@@ -3,7 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { SegmentedControl, SegmentedControlItem } from '@astryxdesign/core/SegmentedControl'
 import { Selector } from '@astryxdesign/core/Selector'
 import { useAuditLogs } from '@/hooks/useAuditLogs'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -364,10 +364,10 @@ export function AuditLogsPanel() {
         >
           {loadingAuditLogs ? (
             <div className="flex flex-col gap-2 p-4">
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
+              <Skeleton height={40} width="100%" radius={4} />
+              <Skeleton height={40} width="100%" radius={4} />
+              <Skeleton height={40} width="100%" radius={4} />
+              <Skeleton height={40} width="100%" radius={4} />
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-6 py-16 text-center">

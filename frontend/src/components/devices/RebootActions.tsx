@@ -3,16 +3,14 @@ import {
   IconRotate as RotateCw,
   IconShield as Shield,
   IconPower as Power,
-  IconLoader2 as Loader2
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@astryxdesign/core/Button'
 import { rebootDevice } from '@/services/deviceService'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { toast } from '@/lib/toast'
 
 const REBOOT_MODES = [
-  { mode: 'system', label: 'Reboot', icon: RotateCw, variant: 'default' as const },
+  { mode: 'system', label: 'Reboot', icon: RotateCw, variant: 'primary' as const },
   { mode: 'bootloader', label: 'Bootloader', icon: Shield, variant: 'secondary' as const },
   { mode: 'recovery', label: 'Recovery', icon: Power, variant: 'secondary' as const },
 ]
@@ -39,48 +37,42 @@ export function RebootActions() {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-[14px] font-semibold">Reboot Actions</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {!activeSerial ? (
-          <p className="text-[14px] text-muted-foreground">Select a device first.</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {REBOOT_MODES.map(({ mode, label, icon: Icon, variant }) => (
-              <div key={mode}>
-                {confirmMode === mode ? (
-                  <div className="flex items-center gap-1.5">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleReboot(mode)}
-                      disabled={rebooting !== null}
-                    >
-                      {rebooting === mode ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
-                      Confirm {label}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setConfirmMode(null)} disabled={rebooting !== null}>
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
+    <section className="m3-surface rounded-3xl p-5">
+      <h3 className="mb-4 flex items-center gap-2.5 text-[18px] font-semibold text-[var(--color-text-primary)]">
+        Reboot Actions
+      </h3>
+      {!activeSerial ? (
+        <p className="text-[14px] text-muted-foreground">Select a device first.</p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {REBOOT_MODES.map(({ mode, label, icon: Icon, variant }) => (
+            <div key={mode}>
+              {confirmMode === mode ? (
+                <div className="flex items-center gap-1.5">
                   <Button
                     size="sm"
-                    variant={variant}
-                    onClick={() => setConfirmMode(mode)}
-                    disabled={rebooting !== null}
-                  >
-                    <Icon className="mr-1.5 h-3.5 w-3.5" />
-                    {label}
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                    variant="destructive"
+                    onClick={() => handleReboot(mode)}
+                    isDisabled={rebooting !== null}
+                    isLoading={rebooting === mode}
+                    label={`Confirm ${label}`}
+                  />
+                  <Button size="sm" variant="ghost" onClick={() => setConfirmMode(null)} isDisabled={rebooting !== null} label="Cancel" />
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  variant={variant}
+                  onClick={() => setConfirmMode(mode)}
+                  isDisabled={rebooting !== null}
+                  icon={<Icon className="h-3.5 w-3.5" />}
+                  label={label}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }

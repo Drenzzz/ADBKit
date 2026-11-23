@@ -4,7 +4,6 @@ import {
   IconTrash as Trash2
 } from "@tabler/icons-react"
 import type { ScrcpyOptions, ScrcpyPreset } from '@/lib/types'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { MarqueeText } from './MarqueeText'
 
 interface PresetsManagerProps {
@@ -73,7 +72,7 @@ export function PresetsManager({
             No presets yet. Save your current options to create one
           </p>
         ) : (
-          <ScrollArea className="max-h-72 pr-2">
+          <div className="max-h-72 overflow-y-auto pr-2">
             <ul className="space-y-2">
               {presets.map((preset) => (
                 <li
@@ -108,7 +107,7 @@ export function PresetsManager({
                 </li>
               ))}
             </ul>
-          </ScrollArea>
+          </div>
         )}
       </div>
 

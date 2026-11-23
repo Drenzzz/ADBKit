@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useFlasher } from '@/hooks/useFlasher'
-import { Switch } from '@/components/ui/switch'
+import { Switch } from '@astryxdesign/core/Switch'
 import {
   IconInfoCircle,
   IconLockOpen,
@@ -71,22 +71,20 @@ export function WakeOnFastbootCard({ disabled }: WakeOnFastbootCardProps) {
           <div className="flex items-start gap-3.5">
             <IconBatteryCharging size={20} stroke={1.75} className="mt-0.5 shrink-0 text-[var(--color-accent)]" />
             <div>
-              <label
-                htmlFor="wof-stay-awake"
-                className="cursor-pointer text-[16px] font-semibold text-[var(--color-text-primary)]"
-              >
+              <p className="cursor-pointer text-[16px] font-semibold text-[var(--color-text-primary)]">
                 Stay awake while charging
-              </label>
+              </p>
               <p className="mt-0.5 text-[15px] text-[var(--color-text-secondary)]">
                 Screen never sleeps on any charger. Requires ADB mode.
               </p>
             </div>
           </div>
           <Switch
-            id="wof-stay-awake"
-            checked={stayAwake}
-            onCheckedChange={handleToggle}
-            disabled={!isAdb || toggling}
+            label="Stay awake while charging"
+            isLabelHidden
+            value={stayAwake}
+            onChange={handleToggle}
+            isDisabled={!isAdb || toggling}
           />
         </div>
 

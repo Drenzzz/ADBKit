@@ -4,7 +4,7 @@ import {
   IconRefresh as RefreshCw
 } from "@tabler/icons-react"
 import type { ScrcpyEncoderSupport } from '@/lib/types'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { EncoderRow, EncoderLegend } from '@/components/scrcpy/EncoderBadge'
 
 interface ClipboardPanelProps {
@@ -100,9 +100,9 @@ export function EncodersPanel({
 
       {isFetchingEncoder && !encoderSupport && (
         <div className="space-y-2 py-1">
-          <Skeleton className="h-10 w-full rounded-xl" />
-          <Skeleton className="h-10 w-full rounded-xl" />
-          <Skeleton className="h-10 w-2/3 rounded-xl" />
+          <Skeleton height={40} width="100%" radius={4} />
+          <Skeleton height={40} width="100%" radius={4} />
+          <Skeleton height={40} width="66.666667%" radius={4} />
         </div>
       )}
 

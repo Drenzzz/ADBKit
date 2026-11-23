@@ -17,8 +17,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@astryxdesign/core/Button'
+import { TextInput } from '@astryxdesign/core/TextInput'
 import type { FileEntry } from '@/lib/types'
 
 interface FileActionDialogsProps {
@@ -103,11 +103,11 @@ export function FileActionDialogs({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPullDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
+            <Button variant="secondary" onClick={() => setIsPullDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={async () => {
               const path = await chooseLocalSaveFile(dialogTargetFile?.name ?? 'exported-file')
               if (path) await onPullConfirm(path)
-            }}>Choose Location</Button>
+            }} label="Choose Location" />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -121,11 +121,11 @@ export function FileActionDialogs({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPushDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
+            <Button variant="secondary" onClick={() => setIsPushDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={async () => {
               const path = await chooseLocalFile()
               if (path) { onPushConfirm(path); setIsPushDialogOpen(false) }
-            }}>Choose File</Button>
+            }} label="Choose File" />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -139,20 +139,22 @@ export function FileActionDialogs({
             <DialogTitle>Rename</DialogTitle>
             <DialogDescription>Rename {dialogTargetFile?.name}</DialogDescription>
           </DialogHeader>
-          <Input
+          <TextInput
+            label="New name"
+            isLabelHidden
             value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
+            onChange={(value) => setRenameValue(value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && renameValue.trim()) {
                 onRenameConfirm(renameValue)
                 setIsRenameDialogOpen(false)
               }
             }}
-            autoFocus
+            hasAutoFocus
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => { onRenameConfirm(renameValue); setIsRenameDialogOpen(false) }} disabled={!renameValue.trim()}>Rename</Button>
+            <Button variant="secondary" onClick={() => setIsRenameDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={() => { onRenameConfirm(renameValue); setIsRenameDialogOpen(false) }} isDisabled={!renameValue.trim()} label="Rename" />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -171,9 +173,11 @@ export function FileActionDialogs({
               Move <span className="font-mono text-[13px]">{dialogTargetFile?.name}</span> to a destination directory on the device.
             </DialogDescription>
           </DialogHeader>
-          <Input
+          <TextInput
+            label="Destination directory"
+            isLabelHidden
             value={moveValue}
-            onChange={(e) => setMoveValue(e.target.value)}
+            onChange={(value) => setMoveValue(value)}
             placeholder="/sdcard/destination"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && moveValue.trim()) {
@@ -181,11 +185,11 @@ export function FileActionDialogs({
                 setIsMoveDialogOpen(false)
               }
             }}
-            autoFocus
+            hasAutoFocus
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsMoveDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => { onMoveConfirm(moveValue); setIsMoveDialogOpen(false) }} disabled={!moveValue.trim()}>Move</Button>
+            <Button variant="secondary" onClick={() => setIsMoveDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={() => { onMoveConfirm(moveValue); setIsMoveDialogOpen(false) }} isDisabled={!moveValue.trim()} label="Move" />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -219,9 +223,11 @@ export function FileActionDialogs({
             <DialogTitle>New Folder</DialogTitle>
             <DialogDescription>Create a new folder in the current directory.</DialogDescription>
           </DialogHeader>
-          <Input
+          <TextInput
+            label="Folder name"
+            isLabelHidden
             value={folderName}
-            onChange={(e) => setFolderName(e.target.value)}
+            onChange={(value) => setFolderName(value)}
             placeholder="Folder name"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && folderName.trim()) {
@@ -229,11 +235,11 @@ export function FileActionDialogs({
                 setIsNewFolderDialogOpen(false)
               }
             }}
-            autoFocus
+            hasAutoFocus
           />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewFolderDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => { onNewFolderConfirm(folderName); setIsNewFolderDialogOpen(false) }} disabled={!folderName.trim()}>Create</Button>
+            <Button variant="secondary" onClick={() => setIsNewFolderDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={() => { onNewFolderConfirm(folderName); setIsNewFolderDialogOpen(false) }} isDisabled={!folderName.trim()} label="Create" />
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -245,11 +251,11 @@ export function FileActionDialogs({
             <DialogDescription>Choose a directory on your computer to save the selected files.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsBatchPullDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
+            <Button variant="secondary" onClick={() => setIsBatchPullDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={async () => {
               const dir = await chooseLocalDirectory()
               if (dir) { onBatchPullConfirm(dir); setIsBatchPullDialogOpen(false) }
-            }}>Choose Directory</Button>
+            }} label="Choose Directory" />
           </DialogFooter>
         </DialogContent>
       </Dialog>

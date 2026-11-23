@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface ConfirmDialogProps {
@@ -78,10 +78,10 @@ export function ConfirmDialog({
               variant="ghost"
               className="h-11 rounded-xl px-5 text-[14px] font-semibold"
               onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
+              label="Cancel"
+            />
             <Button
+              variant="primary"
               className={
                 destructive
                   ? 'h-11 rounded-xl bg-[var(--color-error)] px-5 text-[14px] font-semibold text-white hover:bg-[color-mix(in_srgb,var(--color-error)_88%,black)] focus-visible:outline-2 focus-visible:outline-[var(--color-error)]'
@@ -91,9 +91,8 @@ export function ConfirmDialog({
                 onConfirm()
                 onOpenChange(false)
               }}
-            >
-              {confirmLabel}
-            </Button>
+              label={confirmLabel}
+            />
           </div>
         </motion.div>
       </DialogContent>
