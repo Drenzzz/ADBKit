@@ -68,7 +68,7 @@ export function SummaryStep({ onComplete }: { onComplete?: () => void }) {
           className="flex flex-col items-center gap-4"
           initial={reduced ? false : { opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 280, damping: 26 }}
+          transition={reduced ? { duration: 0 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
         >
           <div className="flex h-16 w-16 items-center justify-center rounded-full border border-success/35 bg-success/10 text-success">
             <Check className="h-8 w-8" />

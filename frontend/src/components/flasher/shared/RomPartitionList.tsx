@@ -30,7 +30,7 @@ function StatusIndicator({ status }: { status: FlashPlanStepStatus['status'] }) 
   if (status === 'pending') {
     return (
       <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-accent)_20%,transparent)] shrink-0">
-        <span className="h-2 w-2 rounded-full bg-[var(--color-accent)] animate-pulse motion-reduce:animate-none" />
+        <span className="h-2 w-2 rounded-full bg-[var(--color-accent)]" />
       </span>
     )
   }

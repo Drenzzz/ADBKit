@@ -158,7 +158,7 @@ export function ConfirmOverlay({ title, body, confirmLabel, onConfirm, onCancel,
         aria-label={title}
         initial={reduced ? false : { opacity: 0, scale: 0.96, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={reduced ? { duration: 0.12 } : { type: 'spring', stiffness: 380, damping: 26 }}
+        transition={reduced ? { duration: 0.12 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-lg rounded-3xl border border-border/50 bg-card/95 p-8 backdrop-blur-2xl"
       >

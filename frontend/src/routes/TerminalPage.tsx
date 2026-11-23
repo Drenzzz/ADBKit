@@ -319,7 +319,7 @@ export default function TerminalPage() {
               className={cn(
                 'h-2.5 w-2.5 shrink-0 rounded-full',
                 stateOk
-                  ? 'bg-[var(--color-success)] animate-pulse motion-reduce:animate-none'
+                  ? 'bg-[var(--color-success)] '
                   : 'bg-[var(--color-text-secondary)]/40',
               )}
             />
@@ -451,8 +451,8 @@ export default function TerminalPage() {
               initial={reduced ? { opacity: 0 } : { x: '100%' }}
               animate={reduced ? { opacity: 1 } : { x: 0 }}
               exit={reduced ? { opacity: 0 } : { x: '100%' }}
-              transition={reduced ? { duration: 0.12 } : { type: 'spring', damping: 28, stiffness: 300 }}
-              className="absolute inset-y-0 right-0 z-40 flex w-[360px] flex-col overflow-hidden rounded-r-3xl border-l border-border/40 bg-[var(--color-surface-container)]/95 backdrop-blur-2xl"
+              transition={reduced ? { duration: 0.12 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+              className="absolute inset-y-0 right-0 z-40 flex w-[360px] flex-col overflow-hidden rounded-r-3xl border-l border-border/40 bg-[var(--color-surface-container)]"
             >
               <CommandHistory
                 onReExecute={handleReExecuteCommand}

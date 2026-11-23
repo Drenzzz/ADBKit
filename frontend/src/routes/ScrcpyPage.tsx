@@ -190,9 +190,9 @@ export default function ScrcpyPage() {
             className={cn(
               'h-2.5 w-2.5 shrink-0 rounded-full',
               stateOk
-                ? 'bg-[var(--color-success)] animate-pulse motion-reduce:animate-none'
+                ? 'bg-[var(--color-success)] '
                 : stateBusy
-                  ? 'bg-[var(--color-warning)] animate-pulse motion-reduce:animate-none'
+                  ? 'bg-[var(--color-warning)] '
                   : 'bg-[var(--color-text-secondary)]/40',
             )}
           />

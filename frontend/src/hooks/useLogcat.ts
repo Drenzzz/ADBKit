@@ -8,6 +8,7 @@ import {
   stopLogcat,
   saveLogcatToFile,
   onLogcatLine,
+  onLogcatLines,
   onLogcatStatus,
 } from '@/services/logcatService'
 
@@ -16,6 +17,7 @@ export function useLogcat() {
   const isStreaming = useLogcatStore((state) => state.isStreaming)
   const clearLogs = useLogcatStore((state) => state.clearLogs)
   const applyLineEvent = useLogcatStore((state) => state.applyLineEvent)
+  const appendLogs = useLogcatStore((state) => state.appendLogs)
   const applyStatusEvent = useLogcatStore((state) => state.applyStatusEvent)
   const reset = useLogcatStore((state) => state.reset)
 
@@ -113,6 +115,9 @@ export function useLogcat() {
     const unsubscribeLine = onLogcatLine((entry: LogcatEntry) => {
       applyLineEvent(entry)
     })
+    const unsubscribeBatch = onLogcatLines((entries: LogcatEntry[]) => {
+      appendLogs(entries)
+    })
 
     const unsubscribeStatus = onLogcatStatus((event) => {
       applyStatusEvent(event)
@@ -120,9 +125,10 @@ export function useLogcat() {
 
     return () => {
       unsubscribeLine()
+      unsubscribeBatch()
       unsubscribeStatus()
     }
-  }, [applyLineEvent, applyStatusEvent])
+  }, [appendLogs, applyLineEvent, applyStatusEvent])
 
   useEffect(() => {
     return () => {

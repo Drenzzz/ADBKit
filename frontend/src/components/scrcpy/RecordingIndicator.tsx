@@ -49,7 +49,7 @@ export function RecordingIndicator({
     <span
       className={`flex items-center gap-2 rounded-full bg-[color-mix(in_srgb,var(--color-error)_12%,transparent)] px-3.5 py-1.5 text-[14px] font-semibold text-[var(--color-error)] ${className ?? ''}`}
     >
-      <Circle className="h-2.5 w-2.5 fill-current animate-pulse motion-reduce:animate-none" />
+      <Circle className="h-2.5 w-2.5 fill-current" />
       REC {display}
     </span>
   )

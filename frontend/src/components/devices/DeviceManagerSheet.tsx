@@ -124,8 +124,8 @@ export function DeviceManagerSheet({ open, onClose }: { open: boolean; onClose: 
             <div className="flex-1 overflow-y-auto">
               {loading && devices.length === 0 ? (
                 <VStack gap={2} className="p-1">
-                  <div className="m3-inset h-14 animate-pulse motion-reduce:animate-none" />
-                  <div className="m3-inset h-14 animate-pulse motion-reduce:animate-none" />
+                  <div className="m3-inset h-14" />
+                  <div className="m3-inset h-14" />
                 </VStack>
               ) : devices.length === 0 ? (
                 <VStack gap={1} className="items-center px-2 py-10 text-center">

@@ -86,7 +86,7 @@ export function FlasherBento() {
                 {isActive && (
                   <motion.span
                     layoutId="flasher-task-active"
-                    transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 32 }}
+                    transition={reduced ? { duration: 0 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
                     className="absolute inset-0 rounded-2xl bg-[var(--color-background-card)]"
                   />
                 )}
@@ -117,7 +117,7 @@ export function FlasherBento() {
             {hasDevice && task === 'wipe' && (
               <motion.span
                 layoutId="flasher-task-active"
-                transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 32 }}
+                transition={reduced ? { duration: 0 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
                 className="absolute inset-0 rounded-2xl bg-[color-mix(in_srgb,var(--color-error)_12%,transparent)]"
               />
             )}

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -19,7 +20,16 @@ import (
 
 const (
 	EventLine   = "logcat_line"
+	EventLines  = "logcat_lines"
 	EventStatus = "logcat_status"
+)
+
+// IPC batching: one Wails event per logcat line costs a JSON marshal +
+// bridge hop each; floods (hundreds of lines per second) thrash the main
+// thread on the JS side. Aggregate into bounded chunks instead.
+const (
+	logcatBatchMaxLines = 256
+	logcatBatchInterval = 80 * time.Millisecond
 )
 
 var logcatPattern = regexp.MustCompile(`^(\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d{3})\s+(\d+)\s+(\d+)\s+([VDIWEF])\s+(.+?):\s?(.*)$`)
@@ -50,6 +60,10 @@ type logcatStream struct {
 	stderr   io.ReadCloser
 	once     sync.Once
 	stopping atomic.Bool
+
+	batchMu    sync.Mutex
+	batch      []LogcatEntry
+	batchTimer *time.Timer
 }
 
 type LogcatService struct {
@@ -162,6 +176,42 @@ func (s *LogcatService) Shutdown() {
 	}
 }
 
+func (s *LogcatService) queueLogEntry(stream *logcatStream, entry LogcatEntry) {
+	stream.batchMu.Lock()
+	defer stream.batchMu.Unlock()
+	stream.batch = append(stream.batch, entry)
+	if len(stream.batch) >= logcatBatchMaxLines {
+		s.flushLogcatBatchLocked(stream)
+		return
+	}
+	if stream.batchTimer == nil {
+		stream.batchTimer = time.AfterFunc(logcatBatchInterval, func() {
+			stream.batchMu.Lock()
+			defer stream.batchMu.Unlock()
+			s.flushLogcatBatchLocked(stream)
+		})
+	}
+}
+
+func (s *LogcatService) flushLogcatBatchLocked(stream *logcatStream) {
+	if stream.batchTimer != nil {
+		stream.batchTimer.Stop()
+		stream.batchTimer = nil
+	}
+	if len(stream.batch) == 0 {
+		return
+	}
+	entries := stream.batch
+	stream.batch = nil
+	application.Get().Event.Emit(EventLines, entries)
+}
+
+func (s *LogcatService) flushLogcatBatch(stream *logcatStream) {
+	stream.batchMu.Lock()
+	defer stream.batchMu.Unlock()
+	s.flushLogcatBatchLocked(stream)
+}
+
 func (s *LogcatService) readLogcatOutput(stream *logcatStream, pipe io.ReadCloser, isError bool) {
 	defer pipe.Close()
 
@@ -177,7 +227,7 @@ func (s *LogcatService) readLogcatOutput(stream *logcatStream, pipe io.ReadClose
 		if isError && entry.Tag == "" {
 			entry.Level = "W"
 		}
-		application.Get().Event.Emit(EventLine, entry)
+		s.queueLogEntry(stream, entry)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -221,6 +271,14 @@ func (s *LogcatService) closeStream(stream *logcatStream, status string) {
 		s.mu.Lock()
 		delete(s.streams, stream.serial)
 		s.mu.Unlock()
+
+		stream.batchMu.Lock()
+		if stream.batchTimer != nil {
+			stream.batchTimer.Stop()
+			stream.batchTimer = nil
+		}
+		stream.batch = nil
+		stream.batchMu.Unlock()
 
 		if stream.stdout != nil {
 			_ = stream.stdout.Close()

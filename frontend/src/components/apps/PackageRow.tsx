@@ -52,7 +52,7 @@ export function PackageRow({
           <motion.span
             initial={reduced ? false : { scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 25 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
             className={cn(
               'inline-flex items-center rounded-full px-2.5 py-0.5 text-[14px] font-semibold',
               pkg.isEnabled

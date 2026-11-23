@@ -51,7 +51,7 @@ function ProgressStepper({ current }: { current: SetupWizardStep }) {
                 <motion.span
                   layoutId="setup-step-surface"
                   className="absolute inset-0 -z-10 rounded-full bg-primary/10"
-                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
                 />
               )}
               <span

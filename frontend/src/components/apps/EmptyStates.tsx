@@ -17,7 +17,7 @@ function EmptyShell({ children }: { children: React.ReactNode }) {
     <motion.div
       initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={reduced ? { duration: 0.15 } : { type: 'spring', stiffness: 300, damping: 28 }}
+      transition={reduced ? { duration: 0.15 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
       className="m3-surface flex h-full flex-col items-center justify-center gap-5 p-8 text-center"
     >
       {children}

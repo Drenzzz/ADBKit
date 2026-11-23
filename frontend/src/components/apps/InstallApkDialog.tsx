@@ -184,7 +184,7 @@ export function InstallApkDialog({
           >
             <motion.div
               animate={{ scale: isDragOver ? 1.01 : 1 }}
-              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 25 }}
+              transition={reduced ? { duration: 0 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
               onClick={() => {
                 if (!filePath && status === 'idle') handleBrowse()
               }}
@@ -228,7 +228,7 @@ export function InstallApkDialog({
             <motion.div
               initial={reduced ? false : { opacity: 0, y: 10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={reduced ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 28 }}
+              transition={reduced ? { duration: 0 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
               className="flex items-start gap-4 rounded-2xl border border-border/40 bg-[var(--color-background-muted)] p-5 w-full min-w-0"
             >
               <div

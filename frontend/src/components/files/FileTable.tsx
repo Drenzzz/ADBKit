@@ -131,7 +131,7 @@ export function FileTable({
     >
       {/* Header */}
       <div
-        className={`${GRID} sticky top-0 z-10 h-11 shrink-0 select-none items-center border-b border-border/40 bg-[var(--color-background-muted)]/60 backdrop-blur-sm`}
+        className={`${GRID} sticky top-0 z-10 h-11 shrink-0 select-none items-center border-b border-border/40 bg-[var(--color-surface-inset)]`}
       >
         <div className="flex justify-center">
           <CheckboxInput

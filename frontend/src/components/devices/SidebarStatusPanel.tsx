@@ -19,7 +19,7 @@ function formatBytes(bytes?: number): string {
 
 function getTempColorClass(temp?: number): string {
   if (!temp) return 'text-muted-foreground'
-  if (temp > 42) return 'text-destructive font-semibold animate-pulse'
+  if (temp > 42) return 'text-destructive font-semibold'
   if (temp > 37) return 'text-warning font-semibold'
   return 'text-success font-medium'
 }

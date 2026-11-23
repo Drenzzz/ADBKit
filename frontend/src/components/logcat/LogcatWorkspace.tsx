@@ -49,7 +49,7 @@ export function LogcatWorkspace() {
               className={cn(
                 'h-2.5 w-2.5 shrink-0 rounded-full',
                 isStreaming
-                  ? 'bg-[var(--color-success)] animate-pulse motion-reduce:animate-none'
+                  ? 'bg-[var(--color-success)]'
                   : 'bg-[var(--color-text-secondary)]/40',
               )}
             />

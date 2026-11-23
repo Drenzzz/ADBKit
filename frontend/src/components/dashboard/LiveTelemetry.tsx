@@ -97,7 +97,7 @@ function CpuChart({ values }: { values: number[] }) {
       <div
         // Live dot pulse: the only looping animation on the page.
         aria-hidden="true"
-        className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[var(--chart-primary)] animate-pulse motion-reduce:animate-none"
+        className="absolute right-3 top-3 h-2 w-2 rounded-full bg-[var(--chart-primary)]"
       />
     </div>
   )

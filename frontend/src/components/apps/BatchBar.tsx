@@ -61,10 +61,10 @@ export function BatchBar({
           initial={reduced ? { opacity: 0 } : { opacity: 0, y: 56 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduced ? { opacity: 0 } : { opacity: 0, y: 56 }}
-          transition={reduced ? { duration: 0.12 } : { type: 'spring', stiffness: 420, damping: 32 }}
+          transition={reduced ? { duration: 0.12 } : { duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
           className="pointer-events-none fixed inset-x-0 bottom-10 z-40 flex justify-center px-6"
         >
-          <div className="pointer-events-auto flex items-center gap-3 rounded-3xl border border-border/40 bg-card/85 py-3 pl-7 pr-3 backdrop-blur-2xl">
+          <div className="pointer-events-auto flex items-center gap-3 rounded-3xl border border-border/40 bg-card py-3 pl-7 pr-3">
             <span className="shrink-0 text-m font-bold tracking-tight text-[var(--color-text-primary)]">
               {count} selected
             </span>

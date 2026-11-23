@@ -3,6 +3,7 @@ import { StartLogcat, StopLogcat, SaveLogcatToFile } from '../../bindings/ADBKit
 import { Events } from '@wailsio/runtime'
 
 export const LOGCAT_LINE_EVENT = 'logcat_line'
+export const LOGCAT_LINES_EVENT = 'logcat_lines'
 export const LOGCAT_STATUS_EVENT = 'logcat_status'
 
 export async function startLogcat(
@@ -28,6 +29,14 @@ export function onLogcatLine(
   callback: (entry: LogcatEntry) => void,
 ): () => void {
   return Events.On(LOGCAT_LINE_EVENT, (event) => {
+    callback(event.data)
+  })
+}
+
+export function onLogcatLines(
+  callback: (entries: LogcatEntry[]) => void,
+): () => void {
+  return Events.On(LOGCAT_LINES_EVENT, (event) => {
     callback(event.data)
   })
 }
