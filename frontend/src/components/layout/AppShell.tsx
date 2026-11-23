@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { Window } from '@wailsio/runtime'
 import { AppSideNav } from './AppSideNav'
 import { SetupWizard } from '@/components/setup/SetupWizard'
 import { getSetupState } from '@/services/binaryService'
@@ -29,8 +30,31 @@ function DeviceSync() {
   return null
 }
 
+const ROUTE_TITLES: Record<string, string> = {
+  '/': 'Dashboard',
+  '/devices': 'Devices',
+  '/apps': 'Apps',
+  '/files': 'Files',
+  '/flasher': 'Flasher',
+  '/terminal': 'Terminal',
+  '/scrcpy': 'Scrcpy',
+  '/settings': 'Settings',
+}
+
+// Mirror the OS window title onto the current menu position, e.g.
+// "Devices". document.title alone does not reach the native window in
+// WebKitGTK, so drive Window.SetTitle directly.
+function useRouteTitle(pathname: string) {
+  useEffect(() => {
+    const title = ROUTE_TITLES[pathname] ?? 'Dashboard'
+    document.title = title
+    Window.SetTitle(title)
+  }, [pathname])
+}
+
 export function AppShell() {
   const location = useLocation()
+  useRouteTitle(location.pathname)
   const isNoGlobalScroll = ['/apps', '/files', '/devices', '/terminal', '/scrcpy', '/settings'].includes(location.pathname)
 
   const [setupChecked, setSetupChecked] = useState(false)
