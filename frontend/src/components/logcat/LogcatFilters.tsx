@@ -1,7 +1,6 @@
+import { useMemo } from 'react'
 import type { LogcatLevel } from '@/lib/types'
 import { useLogcatStore } from '@/stores/useLogcatStore'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 const LEVELS: { value: LogcatLevel; label: string }[] = [
@@ -13,27 +12,25 @@ const LEVELS: { value: LogcatLevel; label: string }[] = [
   { value: 'F', label: 'Fatal' },
 ]
 
-const LEVEL_BADGE_COLORS: Record<LogcatLevel, string> = {
-  V: 'border-muted-foreground/30 text-muted-foreground hover:bg-muted-foreground/10',
-  D: 'border-[var(--logcat-debug)]/30 text-[var(--logcat-debug)] hover:bg-[var(--logcat-debug)]/10',
-  I: 'border-[var(--logcat-info)]/30 text-[var(--logcat-info)] hover:bg-[var(--logcat-info)]/10',
-  W: 'border-[var(--logcat-warn)]/30 text-[var(--logcat-warn)] hover:bg-[var(--logcat-warn)]/10',
-  E: 'border-[var(--logcat-error)]/30 text-[var(--logcat-error)] hover:bg-[var(--logcat-error)]/10',
-  F: 'border-[var(--logcat-fatal)]/40 text-[var(--logcat-fatal)] font-bold hover:bg-[var(--logcat-fatal)]/20',
-}
-
-const LEVEL_ACTIVE_BG: Record<LogcatLevel, string> = {
-  V: 'bg-muted-foreground/20',
-  D: 'bg-[var(--logcat-debug)]/20',
-  I: 'bg-[var(--logcat-info)]/20',
-  W: 'bg-[var(--logcat-warn)]/20',
-  E: 'bg-[var(--logcat-error)]/20',
-  F: 'bg-[var(--logcat-error)]/30',
+const LEVEL_GLYPH: Record<LogcatLevel, string> = {
+  V: 'bg-[var(--color-text-secondary)]/10 text-[var(--color-text-secondary)]',
+  D: 'bg-[var(--logcat-debug)]/10 text-[var(--logcat-debug)]',
+  I: 'bg-[var(--logcat-info)]/10 text-[var(--logcat-info)]',
+  W: 'bg-[var(--logcat-warn)]/10 text-[var(--logcat-warn)]',
+  E: 'bg-[var(--logcat-error)]/10 text-[var(--logcat-error)]',
+  F: 'bg-[var(--logcat-error)]/20 text-[var(--logcat-fatal)]',
 }
 
 export function LogcatFilters() {
   const filter = useLogcatStore((state) => state.filter)
   const setFilter = useLogcatStore((state) => state.setFilter)
+  const logs = useLogcatStore((state) => state.logs)
+
+  const counts = useMemo(() => {
+    const next: Record<string, number> = { V: 0, D: 0, I: 0, W: 0, E: 0, F: 0 }
+    for (const entry of logs) next[entry.level] = (next[entry.level] ?? 0) + 1
+    return next
+  }, [logs])
 
   function toggleLevel(level: LogcatLevel) {
     const next = filter.levels.includes(level)
@@ -46,44 +43,55 @@ export function LogcatFilters() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b border-border/40 bg-muted/20">
-      <div className="flex items-center gap-1.5">
-        {LEVELS.map(({ value, label }) => {
-          const isActive = filter.levels.includes(value)
-
-          return (
-            <Badge
-              key={value}
-              variant="outline"
-              className={cn(
-                'cursor-pointer text-[10px] h-5 px-1.5 gap-0.5 transition-colors',
-                LEVEL_BADGE_COLORS[value],
-                isActive && LEVEL_ACTIVE_BG[value],
-              )}
-              onClick={() => toggleLevel(value)}
-              title={`${label} (${value})`}
-            >
-              {value}
-            </Badge>
-          )
-        })}
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-[14px] font-semibold text-[var(--color-text-secondary)]">Levels</p>
+        <div className="flex flex-col gap-1">
+          {LEVELS.map(({ value, label }) => {
+            const isActive = filter.levels.includes(value)
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => toggleLevel(value)}
+                aria-pressed={isActive}
+                className={cn(
+                  'flex h-11 items-center gap-3 rounded-xl px-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]',
+                  isActive
+                    ? 'bg-[var(--color-background-card)]'
+                    : 'opacity-50 hover:bg-[var(--color-background-card)]/60 hover:opacity-80',
+                )}
+              >
+                <span className={cn('grid size-6 shrink-0 place-items-center rounded-md text-[14px] font-bold', LEVEL_GLYPH[value])}>
+                  {value}
+                </span>
+                <span className="flex-1 text-[15px] font-medium text-[var(--color-text-primary)]">{label}</span>
+                <span className="text-[14px] text-[var(--color-text-secondary)] tabular-nums">
+                  {counts[value].toLocaleString()}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      <div className="h-4 w-px bg-border/40" />
-
-      <Input
-        value={filter.tag}
-        onChange={(e) => setFilter({ tag: e.target.value })}
-        placeholder="Filter by tag..."
-        className="h-6 w-36 text-xs rounded-lg"
-      />
-
-      <Input
-        value={filter.text}
-        onChange={(e) => setFilter({ text: e.target.value })}
-        placeholder="Search messages..."
-        className="h-6 w-48 text-xs rounded-lg"
-      />
+      <div className="flex flex-col gap-2">
+        <p className="text-[14px] font-semibold text-[var(--color-text-secondary)]">Filter</p>
+        <input
+          value={filter.tag}
+          onChange={(e) => setFilter({ tag: e.target.value })}
+          placeholder="Tag"
+          aria-label="Filter by tag"
+          className="h-11 w-full rounded-full bg-[var(--color-background-card)] px-4 text-[15px] text-[var(--color-text-primary)] outline-none transition-colors placeholder:text-[var(--color-text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+        />
+        <input
+          value={filter.text}
+          onChange={(e) => setFilter({ text: e.target.value })}
+          placeholder="Search messages"
+          aria-label="Search messages"
+          className="h-11 w-full rounded-full bg-[var(--color-background-card)] px-4 text-[15px] text-[var(--color-text-primary)] outline-none transition-colors placeholder:text-[var(--color-text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+        />
+      </div>
     </div>
   )
 }

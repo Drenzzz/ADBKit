@@ -4,26 +4,34 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
   IconRefresh as RefreshCw,
   IconPlayerPlay as Play,
-  IconDeviceMobile as Smartphone,
+  IconPlayerStop as Stop,
+  IconCamera as Camera,
+  IconCircle as Circle,
+  IconSquare as Square,
   IconAlertTriangle as AlertTriangle,
   IconLoader2 as Loader2
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Heading } from '@astryxdesign/core/Heading'
 import { useScrcpy } from '@/hooks/useScrcpy'
+import { useDevices } from '@/hooks/useDevices'
+import { NoDeviceState } from '@/components/apps/EmptyStates'
 import { useScrcpyStore } from '@/stores/scrcpyStore'
 import { getScrcpyEncoderSupport } from '@/services/scrcpyService'
-import { VideoContainer } from '@/components/scrcpy/VideoContainer'
-import { ControlDock } from '@/components/scrcpy/ControlDock'
 import { RecordingIndicator } from '@/components/scrcpy/RecordingIndicator'
 import { ScreenshotFlash } from '@/components/scrcpy/ScreenshotFlash'
 import { PresetsManager } from '@/components/scrcpy/PresetsManager'
-import { SettingsPanel } from '@/components/scrcpy/SettingsPanel'
 import { QualityControls } from '@/components/scrcpy/QualityControls'
 import { AudioControls } from '@/components/scrcpy/AudioControls'
 import { DeviceOptionsControls } from '@/components/scrcpy/DeviceOptionsControls'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ClipboardPanel, EncodersPanel } from '@/components/scrcpy/SettingsPanel'
+import { cn } from '@/lib/utils'
+import {
+  IconVideo,
+  IconVolume,
+  IconDeviceMobile,
+  IconBookmark,
+} from "@tabler/icons-react"
+import type { ReactNode } from 'react'
 
 function formatElapsed(startedAt: number): string {
   const total = Math.max(0, Math.floor((Date.now() - startedAt) / 1000))
@@ -38,26 +46,30 @@ function formatElapsed(startedAt: number): string {
   return `${mm}:${ss}`
 }
 
-const containerVariants = (reduced: boolean) => ({
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: reduced
-      ? { duration: 0, staggerChildren: 0 }
-      : { staggerChildren: 0.05 },
-  },
-})
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
-const itemVariants = (reduced: boolean) => ({
-  hidden: { opacity: 0, y: 10 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: reduced
-      ? { duration: 0 }
-      : { type: 'spring' as const, stiffness: 300, damping: 24 },
-  },
-})
+function Stat({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="min-w-0">
+      <p className={cn('text-[24px] font-semibold tabular-nums text-[var(--color-text-primary)]', mono && 'font-mono')}>
+        {value}
+      </p>
+      <p className="text-[14px] text-[var(--color-text-secondary)]">{label}</p>
+    </div>
+  )
+}
+
+function Section({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
+  return (
+    <section className="m3-surface rounded-3xl p-5">
+      <h3 className="mb-4 flex items-center gap-2.5 text-[18px] font-semibold text-[var(--color-text-primary)]">
+        <span className="text-[var(--color-text-secondary)]">{icon}</span>
+        {title}
+      </h3>
+      {children}
+    </section>
+  )
+}
 
 export default function ScrcpyPage() {
   const reduced = useReducedMotion()
@@ -68,7 +80,6 @@ export default function ScrcpyPage() {
     isStopping,
     isRecording,
     error,
-    options,
     presets,
     activeSerial,
     isConnected,
@@ -84,6 +95,8 @@ export default function ScrcpyPage() {
     resetScrcpy,
   } = useScrcpy()
 
+  const { refreshing, refreshDevices } = useDevices()
+
   const scrcpyOptions = useScrcpyStore((state) => state.options)
   const setEncoderSupport = useScrcpyStore((state) => state.setEncoderSupport)
   const recordingStartedAt = useScrcpyStore(
@@ -93,10 +106,9 @@ export default function ScrcpyPage() {
     (state) => state.isFetchingEncoder,
   )
 
-  const sessionStatus = session?.status ?? null
-  const [configTab, setConfigTab] = useState('quality')
   const [screenshotFlash, setScreenshotFlash] = useState(false)
   const [recordingDuration, setRecordingDuration] = useState('00:00')
+  const [sessionElapsed, setSessionElapsed] = useState('00:00')
 
   useEffect(() => {
     if (!isRecording || !recordingStartedAt) {
@@ -108,6 +120,18 @@ export default function ScrcpyPage() {
     const id = window.setInterval(tick, 1000)
     return () => window.clearInterval(id)
   }, [isRecording, recordingStartedAt])
+
+  useEffect(() => {
+    if (!isConnected || !session?.startedAt) {
+      setSessionElapsed('00:00')
+      return
+    }
+    const startedAt = session.startedAt
+    const tick = () => setSessionElapsed(formatElapsed(startedAt))
+    tick()
+    const id = window.setInterval(tick, 1000)
+    return () => window.clearInterval(id)
+  }, [isConnected, session?.startedAt])
 
   const handleRefreshEncoder = async () => {
     if (!activeSerial) return
@@ -126,227 +150,224 @@ export default function ScrcpyPage() {
     await handleScreenshot()
   }
 
+  const stateLabel = isStopping
+    ? 'stopping'
+    : isStarting
+      ? 'starting'
+      : isConnected
+        ? 'running'
+        : 'idle'
+  const stateOk = isConnected
+  const stateBusy = isStarting || isStopping
+
+  const enter = (delay: number) => ({
+    initial: reduced ? { opacity: 0 } : { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: reduced ? 0.12 : 0.35, delay: reduced ? 0 : delay, ease: EASE },
+  })
+
+  if (!activeSerial) {
+    return (
+      <div className="dashboard-scale flex h-full min-h-0 flex-col gap-4 p-5">
+        <Heading level={1} type="display-1" weight="semibold" maxLines={1}>Scrcpy</Heading>
+        <div className="min-h-0 flex-1">
+          <NoDeviceState
+            onRefresh={refreshDevices}
+            refreshing={refreshing}
+            description="Connect an Android device to start a mirror session"
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <motion.div
-      variants={containerVariants(reduced)}
-      initial="hidden"
-      animate="show"
-      className="flex h-full min-h-0 flex-col gap-4 overflow-hidden"
-    >
-      {/* Header */}
-      <motion.div
-        variants={itemVariants(reduced)}
-        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div className="flex flex-col gap-0.5">
-          <h1 className="font-heading text-xl font-bold tracking-tight text-foreground">
-            Scrcpy Hub
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            Mirror, record, capture, and sync clipboard with your Android device.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8 text-muted-foreground dark:text-muted-foreground hover:bg-[var(--muted)] dark:hover:bg-[var(--muted)] rounded-full"
-            onClick={resetScrcpy}
+    <div className="dashboard-scale relative flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-5">
+      <motion.header {...enter(0)} className="flex flex-wrap items-center justify-between gap-3">
+        <Heading level={1} type="display-1" weight="semibold" maxLines={1}>Scrcpy</Heading>
+        <div className="flex items-center gap-3">
+          <span
+            className={cn(
+              'h-2.5 w-2.5 shrink-0 rounded-full',
+              stateOk
+                ? 'bg-[var(--color-success)] '
+                : stateBusy
+                  ? 'bg-[var(--color-warning)] '
+                  : 'bg-[var(--color-text-secondary)]/40',
+            )}
+          />
+          <span className="text-[15px] font-semibold text-[var(--color-text-primary)]">
+            {activeSerial || 'No device'}
+          </span>
+          <span className="text-[14px] font-semibold text-[var(--color-text-secondary)]">{stateLabel}</span>
+          <button
+            type="button"
             aria-label="Reset scrcpy state"
+            onClick={resetScrcpy}
+            className="flex size-11 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-card)]/60 hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
-          </Button>
+            <RefreshCw size={18} stroke={1.75} />
+          </button>
         </div>
-      </motion.div>
+      </motion.header>
 
-      {/* Main Grid: Split Layout */}
-      <motion.div
-        variants={itemVariants(reduced)}
-        className="relative flex-1 overflow-hidden rounded-2xl border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/20 flex flex-col lg:flex-row shadow-[var(--shadow-card)]"
+      <motion.section
+        {...enter(0.05)}
+        className="m3-surface flex flex-wrap items-center gap-x-6 gap-y-4 rounded-3xl px-5 py-4"
       >
-        {/* Left Column: Device Screen / Mirror Box */}
-        <div className="relative flex-grow flex flex-col items-center justify-center p-6 border-b lg:border-b-0 lg:border-r border-[var(--border)] dark:border-[var(--border)] min-h-[300px]">
-          <motion.div
-            key={isStopping ? 'stopping' : isConnected ? 'connected' : 'idle'}
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="w-full h-full flex flex-col items-center justify-center"
-          >
-            {isStopping ? (
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground dark:text-muted-foreground" />
-                <p className="text-xs font-semibold text-muted-foreground dark:text-muted-foreground">
-                  Stopping session...
-                </p>
-              </div>
-            ) : isConnected ? (
-              <div className="relative w-full h-full flex flex-col items-center justify-center">
-                <VideoContainer
-                  sessionStatus={sessionStatus ?? 'running'}
-                  error={error}
-                  isStarting={false}
-                  options={options}
-                />
-                <RecordingIndicator
-                  className="absolute right-4 top-4 z-10"
-                  isRecording={isRecording}
-                  startedAt={recordingStartedAt}
-                  duration={recordingDuration}
-                />
-                <ControlDock
-                  className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2"
-                  isConnected={isConnected}
-                  isRecording={isRecording}
-                  onScreenshot={handleScreenshotWithFlash}
-                  onToggleRecord={handleToggleRecord}
-                  onStopSession={handleStop}
-                />
-                <ScreenshotFlash visible={screenshotFlash} />
-              </div>
-            ) : (
-              /* Idle Screen Phone Mockup */
-              <div className="flex max-w-md flex-col items-center text-center z-10">
-                <div
-                  className={`mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-[var(--border)] dark:border-[var(--border)] shadow-[var(--shadow-card)] transition-colors duration-300 ${
-                    isStarting
-                      ? 'bg-primary/10 text-primary animate-pulse'
-                      : 'bg-[var(--muted)] dark:bg-[var(--muted)]/30 text-muted-foreground'
-                  }`}
-                >
-                  {isStarting ? (
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
-                  ) : (
-                    <Smartphone className="h-9 w-9 text-muted-foreground dark:text-muted-foreground" />
-                  )}
-                </div>
-
-                <h2 className="text-lg font-bold tracking-tight text-foreground dark:text-foreground">
-                  {isStarting ? 'Connecting...' : 'Ready to mirror'}
-                </h2>
-
-                <p className="mt-1.5 text-xs text-muted-foreground dark:text-muted-foreground font-medium">
-                  {activeSerial
-                    ? `Device: ${activeSerial}`
-                    : 'No active device selected'}
-                </p>
-
-                {error && (
-                  <div className="mt-4 flex w-full items-start gap-2 rounded-xl border border-[var(--destructive)]/20 bg-[var(--destructive)]/10 dark:bg-[var(--destructive)]/20 px-3 py-2 text-left text-[11px] text-[var(--destructive)] dark:text-[var(--destructive)]">
-                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <Button
-                  size="lg"
-                  className="mt-8 w-56 gap-2 rounded-full bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-xs h-10 shadow-sm cursor-pointer transition-[colors,transform] active:scale-[0.97]"
-                  onClick={() => handleStart(scrcpyOptions)}
-                  disabled={isStarting || !activeSerial}
-                >
-                  {isStarting ? (
-                    <>
-                      <Loader2 className="h-4.5 w-4.5 animate-spin" />
-                      Starting...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="h-4 w-4 fill-current" />
-                      Start session
-                    </>
-                  )}
-                </Button>
-
-                {!activeSerial && !isStarting && (
-                  <p className="mt-3 text-[10px] text-[var(--destructive)] font-semibold animate-pulse">
-                    Select a device first
-                  </p>
-                )}
-              </div>
-            )}
-          </motion.div>
+        <div className="flex items-center gap-3">
+          {isConnected ? (
+            <button
+              type="button"
+              onClick={handleStop}
+              disabled={isStopping}
+              className="flex h-[52px] items-center gap-2 rounded-full bg-[var(--color-error)] px-7 text-[16px] font-bold text-white transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-error)] disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100"
+            >
+              {isStopping ? (
+                <Loader2 size={18} stroke={1.75} className="animate-spin motion-reduce:animate-none" />
+              ) : (
+                <Stop size={18} stroke={1.75} />
+              )}
+              {isStopping ? 'Stopping…' : 'Stop session'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleStart(scrcpyOptions)}
+              disabled={isStarting || !activeSerial}
+              className="flex h-[52px] items-center gap-2 rounded-full bg-[var(--color-accent)] px-7 text-[16px] font-bold text-white transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40 motion-reduce:transition-none motion-reduce:active:scale-100"
+            >
+              {isStarting ? (
+                <Loader2 size={18} stroke={1.75} className="animate-spin motion-reduce:animate-none" />
+              ) : (
+                <Play size={18} stroke={1.75} />
+              )}
+              {isStarting ? 'Starting…' : 'Start session'}
+            </button>
+          )}
+          <RecordingIndicator
+            isRecording={isRecording}
+            startedAt={recordingStartedAt}
+            duration={recordingDuration}
+          />
         </div>
 
-        {/* Right Column: Configuration & Utilities */}
-        <div className="w-full lg:w-[400px] flex flex-col bg-[var(--muted)]/50 dark:bg-[var(--terminal-bg)]/20 overflow-y-auto min-w-0">
-          <motion.div
-            key={isStopping ? 'stopping' : isConnected ? 'connected' : 'idle'}
-            initial={{ opacity: 0, x: 15 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="flex-grow flex flex-col min-h-0"
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-8 gap-y-3 max-lg:basis-full">
+          <Stat label="Codec" value={scrcpyOptions.video_codec || 'h264'} mono />
+          <Stat
+            label="Max resolution"
+            value={scrcpyOptions.max_size === 0 ? 'Unlimited' : `${scrcpyOptions.max_size}px`}
+          />
+          <Stat
+            label="Bitrate"
+            value={
+              scrcpyOptions.bit_rate === 0
+                ? 'Default'
+                : `${(scrcpyOptions.bit_rate / 1_000_000).toFixed(1)} Mbps`
+            }
+          />
+          <Stat
+            label="Max FPS"
+            value={scrcpyOptions.max_fps === 0 ? 'Unlimited' : String(scrcpyOptions.max_fps)}
+          />
+          {isConnected && session && <Stat label="Running" value={sessionElapsed} mono />}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleScreenshotWithFlash}
+            disabled={!isConnected}
+            className="flex h-11 items-center gap-2 rounded-full border border-border/50 px-5 text-[15px] font-semibold text-[var(--color-text-primary)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--color-background-card)]/60 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40 motion-reduce:transition-none motion-reduce:active:scale-100"
           >
-            {isStopping ? (
-              <div className="p-6 space-y-4 flex-1 flex flex-col justify-center">
-                <Skeleton className="h-20 w-full rounded-2xl" />
-                <Skeleton className="h-40 w-full rounded-2xl" />
-              </div>
-            ) : isConnected ? (
-              /* Live Utilities Panel */
-              <div className="p-5">
-                <SettingsPanel
-                  encoderSupport={encoderSupport}
-                  isFetchingEncoder={isFetchingEncoder}
-                  onRefreshEncoder={handleRefreshEncoder}
-                  onPushClipboard={handlePushClipboard}
-                  onPullClipboard={handlePullClipboard}
-                  isConnected={isConnected}
-                />
-              </div>
-            ) : (
-              /* Disconnected Configuration Panel */
-              <div className="p-5 flex-grow flex flex-col">
-                <h3 className="text-sm font-bold text-foreground mb-4 tracking-tight">Configuration</h3>
-                <Tabs value={configTab} onValueChange={setConfigTab} className="w-full flex-1 flex flex-col">
-                  <TabsList className="mb-4 grid w-full grid-cols-4 bg-[var(--muted)] dark:bg-[var(--muted)]/60 p-0.5 rounded-full">
-                    <TabsTrigger value="quality" className="rounded-full text-[11px] font-semibold">Quality</TabsTrigger>
-                    <TabsTrigger value="audio" className="rounded-full text-[11px] font-semibold">Audio</TabsTrigger>
-                    <TabsTrigger value="device" className="rounded-full text-[11px] font-semibold">Device</TabsTrigger>
-                    <TabsTrigger value="presets" className="rounded-full text-[11px] font-semibold">Presets</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="quality" className="mt-0 outline-none flex-grow">
-                    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
-                      <QualityControls
-                        options={scrcpyOptions}
-                        onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
-                      />
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="audio" className="mt-0 outline-none flex-grow">
-                    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
-                      <AudioControls
-                        options={scrcpyOptions}
-                        onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
-                      />
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="device" className="mt-0 outline-none flex-grow">
-                    <Card className="border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/40 p-4 rounded-2xl shadow-[var(--shadow-card)]">
-                      <DeviceOptionsControls
-                        options={scrcpyOptions}
-                        onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
-                      />
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="presets" className="mt-0 outline-none flex-grow">
-                    <PresetsManager
-                      currentOptions={scrcpyOptions}
-                      presets={presets}
-                      onApplyPreset={updateOptions}
-                      onSavePreset={handleSavePreset}
-                      onDeletePreset={handleDeletePreset}
-                    />
-                  </TabsContent>
-                </Tabs>
-              </div>
+            <Camera size={18} stroke={1.75} className="text-[var(--color-text-secondary)]" />
+            Screenshot
+          </button>
+          <button
+            type="button"
+            onClick={handleToggleRecord}
+            disabled={!isConnected}
+            className={cn(
+              'flex h-11 items-center gap-2 rounded-full px-5 text-[15px] font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40 motion-reduce:transition-none motion-reduce:active:scale-100',
+              isRecording
+                ? 'bg-[color-mix(in_srgb,var(--color-error)_12%,transparent)] text-[var(--color-error)] focus-visible:outline-[var(--color-error)]'
+                : 'border border-border/50 text-[var(--color-text-primary)] hover:bg-[var(--color-background-card)]/60 focus-visible:outline-[var(--color-accent)]',
             )}
-          </motion.div>
+          >
+            {isRecording ? (
+              <Square size={16} stroke={1.75} className="fill-current" />
+            ) : (
+              <Circle size={16} stroke={1.75} className="fill-current text-[var(--color-error)]" />
+            )}
+            {isRecording ? 'Stop recording' : 'Record'}
+          </button>
+        </div>
+      </motion.section>
+
+      {error && (
+        <div className="flex items-start gap-3 rounded-2xl bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-5 py-3.5 text-[14px] font-medium text-[var(--color-error)]">
+          <AlertTriangle size={18} stroke={1.75} className="mt-0.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+      {isConnected && (
+        <p className="rounded-2xl bg-[var(--color-surface-inset)] px-5 py-3.5 text-[14px] text-[var(--color-text-secondary)]">
+          Session running: changes apply to the next session
+        </p>
+      )}
+
+      <motion.div
+        {...enter(0.1)}
+        className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px]"
+      >
+        <fieldset disabled={isConnected} className="flex min-w-0 flex-col gap-4 disabled:opacity-60">
+          <Section icon={<IconVideo size={20} stroke={1.75} />} title="Video">
+            <QualityControls
+              options={scrcpyOptions}
+              onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
+            />
+          </Section>
+          <Section icon={<IconVolume size={20} stroke={1.75} />} title="Audio">
+            <AudioControls
+              options={scrcpyOptions}
+              onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
+            />
+          </Section>
+          <Section icon={<IconDeviceMobile size={20} stroke={1.75} />} title="Device behavior">
+            <DeviceOptionsControls
+              options={scrcpyOptions}
+              onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
+            />
+          </Section>
+        </fieldset>
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <ClipboardPanel
+            onPushClipboard={handlePushClipboard}
+            onPullClipboard={handlePullClipboard}
+            isConnected={isConnected}
+          />
+          <EncodersPanel
+            encoderSupport={encoderSupport}
+            isFetchingEncoder={isFetchingEncoder}
+            onRefreshEncoder={handleRefreshEncoder}
+            isConnected={isConnected}
+          />
+          <fieldset disabled={isConnected} className="min-w-0 disabled:opacity-60">
+            <Section icon={<IconBookmark size={20} stroke={1.75} />} title="Presets">
+              <PresetsManager
+                currentOptions={scrcpyOptions}
+                presets={presets}
+                onApplyPreset={updateOptions}
+                onSavePreset={handleSavePreset}
+                onDeletePreset={handleDeletePreset}
+              />
+            </Section>
+          </fieldset>
         </div>
       </motion.div>
-    </motion.div>
+
+      <ScreenshotFlash visible={screenshotFlash} />
+    </div>
   )
 }

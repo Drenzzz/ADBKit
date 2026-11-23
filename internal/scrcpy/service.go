@@ -223,7 +223,7 @@ func (s *Service) StartSession(ctx context.Context, serial string, opts Options)
 		ID:        uuid.NewString(),
 		Serial:    resolvedSerial,
 		Status:    StatusStarting,
-		StartedAt: time.Now().Unix(),
+		StartedAt: time.Now().UnixMilli(),
 	}
 	processCtx, cancel := context.WithCancel(context.Background())
 	args := []string{"--serial", resolvedSerial}

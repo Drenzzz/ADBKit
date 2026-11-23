@@ -4,7 +4,6 @@ import {
   IconCpu as Cpu,
   IconDeviceUsb as HardDrive
 } from "@tabler/icons-react"
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { PerformanceSnapshot } from '@/lib/types'
 
@@ -20,7 +19,7 @@ function formatBytes(bytes?: number): string {
 
 function getTempColorClass(temp?: number): string {
   if (!temp) return 'text-muted-foreground'
-  if (temp > 42) return 'text-destructive font-semibold animate-pulse'
+  if (temp > 42) return 'text-destructive font-semibold'
   if (temp > 37) return 'text-warning font-semibold'
   return 'text-success font-medium'
 }
@@ -40,17 +39,15 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
   return (
     <div className="flex flex-col gap-5">
       {/* Battery Card */}
-      <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
-        <CardHeader className="pb-3 pt-5 px-5">
-          <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-            <Battery className="h-3.5 w-3.5" />
-            Power & Thermals
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5 flex flex-col gap-4">
+      <section className="m3-surface rounded-3xl p-5 border border-border/60 bg-card shadow-[var(--shadow-card)]">
+        <h3 className="mb-4 flex items-center gap-2.5 text-[18px] font-semibold text-[var(--color-text-primary)]">
+          <span className="text-[var(--color-text-secondary)]"><Battery className="h-3.5 w-3.5" /></span>
+          Power & thermals
+        </h3>
+        <div className="flex flex-col gap-4">
           {/* Battery level bar */}
           <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between text-xs font-medium">
+            <div className="flex justify-between text-[14px] font-medium">
               <span className="text-muted-foreground">Charge Capacity</span>
               <span className="text-foreground">{batteryPercent}%</span>
             </div>
@@ -67,7 +64,7 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
 
           {/* Battery Temp indicator */}
           {snapshot.batteryTemperatureC !== undefined && (
-            <div className="flex items-center justify-between text-xs border-t border-border/40 pt-3">
+            <div className="flex items-center justify-between text-[14px] border-t border-border/40 pt-3">
               <span className="text-muted-foreground font-medium flex items-center gap-1.5">
                 <Cpu className="h-3.5 w-3.5 text-muted-foreground/80" />
                 Battery Temperature
@@ -79,40 +76,38 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
           )}
 
           {/* Battery Power Delivery source row */}
-          <div className="flex items-center justify-between text-xs border-t border-border/40 pt-3">
+          <div className="flex items-center justify-between text-[14px] border-t border-border/40 pt-3">
             <span className="text-muted-foreground font-medium">Power Delivery</span>
             <span className="text-foreground font-medium">USB Connection</span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* Storage Card */}
-      <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
-        <CardHeader className="pb-3 pt-5 px-5">
-          <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-            <Database className="h-3.5 w-3.5" />
-            Storage Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5 flex flex-col gap-4">
+      <section className="m3-surface rounded-3xl p-5 border border-border/60 bg-card shadow-[var(--shadow-card)]">
+        <h3 className="mb-4 flex items-center gap-2.5 text-[18px] font-semibold text-[var(--color-text-primary)]">
+          <span className="text-[var(--color-text-secondary)]"><Database className="h-3.5 w-3.5" /></span>
+          Storage status
+        </h3>
+        <div className="flex flex-col gap-4">
           {/* Storage progress bar */}
           <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between text-xs font-medium">
+            <div className="flex justify-between text-[14px] font-medium">
               <span className="text-muted-foreground">Internal Disk</span>
-              <span className="text-foreground text-[11px] font-mono">
+              <span className="text-foreground text-[13px] font-mono">
                 {formatBytes(usedStorage)} of {formatBytes(totalStorage)}
               </span>
             </div>
             <div className="h-2 w-full bg-border/50 rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full bg-primary transition-colors duration-500"
+                className="h-full rounded-full bg-primary-container transition-colors duration-500"
                 style={{ width: `${storagePercent}%` }}
               />
             </div>
           </div>
 
           {/* Available storage details */}
-          <div className="flex items-center justify-between text-xs border-t border-border/40 pt-3">
+          <div className="flex items-center justify-between text-[14px] border-t border-border/40 pt-3">
             <span className="text-muted-foreground font-medium flex items-center gap-1.5">
               <HardDrive className="h-3.5 w-3.5 text-muted-foreground/80" />
               Available Storage
@@ -123,14 +118,14 @@ export function SidebarStatusPanel({ snapshot }: SidebarStatusPanelProps) {
           </div>
 
           {/* Capacity free status row */}
-          <div className="flex items-center justify-between text-xs border-t border-border/40 pt-3">
+          <div className="flex items-center justify-between text-[14px] border-t border-border/40 pt-3">
             <span className="text-muted-foreground font-medium">Capacity Remaining</span>
             <span className="text-success font-medium">
               {(100 - storagePercent).toFixed(1)}% free
             </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

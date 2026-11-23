@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { IconArticle, IconFilter } from '@tabler/icons-react'
 import { useLogcatStore } from '@/stores/useLogcatStore'
 import { LogcatEntry } from './LogcatEntry'
 
-const ROW_HEIGHT = 24
+const ROW_HEIGHT = 32
 
 interface LogcatViewProps {
   scrollContainerRef: RefObject<HTMLDivElement | null>
@@ -71,22 +72,28 @@ export function LogcatView({ scrollContainerRef }: LogcatViewProps) {
 
   if (filteredLogs.length === 0 && logs.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-muted-foreground">
-        <div className="text-center">
-          <p className="text-sm font-medium">No logcat output</p>
-          <p className="text-xs mt-1">Start a logcat stream to see device logs here</p>
+      <div className="flex h-full flex-col items-center justify-center gap-3 select-none">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-[var(--color-background-card)] text-[var(--color-text-secondary)]">
+          <IconArticle size={24} stroke={1.75} />
         </div>
+        <p className="text-[16px] font-semibold text-[var(--color-text-primary)]">No logcat output</p>
+        <p className="max-w-xs text-center text-[14px] leading-relaxed text-[var(--color-text-secondary)]">
+          Start a logcat stream to see device logs here
+        </p>
       </div>
     )
   }
 
   if (filteredLogs.length === 0 && logs.length > 0) {
     return (
-      <div className="flex h-full items-center justify-center text-muted-foreground">
-        <div className="text-center">
-          <p className="text-sm font-medium">No matching logs</p>
-          <p className="text-xs mt-1">Try adjusting your filter criteria</p>
+      <div className="flex h-full flex-col items-center justify-center gap-3 select-none">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-[var(--color-background-card)] text-[var(--color-text-secondary)]">
+          <IconFilter size={24} stroke={1.75} />
         </div>
+        <p className="text-[16px] font-semibold text-[var(--color-text-primary)]">No matching logs</p>
+        <p className="max-w-xs text-center text-[14px] leading-relaxed text-[var(--color-text-secondary)]">
+          Try adjusting the level, tag, or message filter
+        </p>
       </div>
     )
   }

@@ -2,13 +2,12 @@ import { useState } from 'react'
 import {
   IconPencil as Pencil,
   IconX as X,
-  IconLoader2 as Loader2
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@astryxdesign/core/Button'
+import { TextInput } from '@astryxdesign/core/TextInput'
 import { setDeviceNickname, clearDeviceNickname } from '@/services/deviceService'
 import { useDevices } from '@/hooks/useDevices'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 export function RenameDialog({ serial, currentNickname, onClose }: {
   serial: string
@@ -47,7 +46,7 @@ export function RenameDialog({ serial, currentNickname, onClose }: {
       <div className="fixed inset-0 bg-background/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-sm rounded-lg border border-border bg-popover p-5 shadow-[var(--shadow-floating)]">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Rename device</h3>
+          <h3 className="text-[14px] font-semibold">Rename device</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
@@ -55,31 +54,36 @@ export function RenameDialog({ serial, currentNickname, onClose }: {
 
         <div className="flex flex-col gap-3">
           <div className="rounded-md bg-muted/50 px-3 py-2">
-            <p className="text-xs text-muted-foreground">Serial</p>
-            <p className="font-mono text-sm">{serial}</p>
+            <p className="text-[14px] text-muted-foreground">Serial</p>
+            <p className="font-mono text-[13px]">{serial}</p>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="nickname" className="text-xs font-medium text-muted-foreground">Nickname</label>
-            <Input
+            <label htmlFor="nickname" className="text-[14px] font-medium text-muted-foreground">Nickname</label>
+            <TextInput
               id="nickname"
+              label="Nickname"
+              isLabelHidden
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={(value) => setDraft(value)}
               placeholder="e.g. Daily Driver"
-              autoFocus
+              hasAutoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
           </div>
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="ghost" size="sm" onClick={onClose} disabled={saving}>
-            Cancel
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Pencil className="mr-1.5 h-3.5 w-3.5" />}
-            Save
-          </Button>
+          <Button variant="ghost" size="sm" onClick={onClose} isDisabled={saving} label="Cancel" />
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleSave}
+            isDisabled={saving}
+            isLoading={saving}
+            icon={<Pencil className="h-3.5 w-3.5" />}
+            label="Save"
+          />
         </div>
       </div>
     </div>

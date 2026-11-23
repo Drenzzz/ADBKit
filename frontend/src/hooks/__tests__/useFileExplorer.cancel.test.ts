@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useFileExplorerStore } from '@/stores/useFileExplorerStore'
 import { useFileExplorer } from '../useFileExplorer'
@@ -30,7 +30,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('@/services/fileService', () => mocks)
-vi.mock('sonner', () => ({ toast: mocks.toast }))
+vi.mock('@/lib/toast', () => ({ toast: mocks.toast }))
 
 describe('useFileExplorer transfer cancellation', () => {
   beforeEach(() => {

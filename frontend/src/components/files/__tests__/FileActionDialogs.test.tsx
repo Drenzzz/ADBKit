@@ -3,6 +3,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { FileActionDialogs } from '../FileActionDialogs'
 import type { FileEntry } from '@/lib/types'
 
+// jsdom lacks the native <dialog> methods Astryx Dialog drives.
+if (typeof HTMLDialogElement.prototype.showModal !== 'function') {
+  HTMLDialogElement.prototype.showModal = function () { this.open = true }
+  HTMLDialogElement.prototype.close = function () {
+    this.open = false
+    this.dispatchEvent(new Event('close'))
+  }
+}
+
 const targetFile: FileEntry = {
   name: 'file.bin',
   path: '/sdcard/file.bin',

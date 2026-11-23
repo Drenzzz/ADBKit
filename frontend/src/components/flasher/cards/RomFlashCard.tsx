@@ -1,24 +1,13 @@
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { useEffect, useState } from 'react'
+import { motion } from 'motion/react'
+import { ProgressBar } from '@astryxdesign/core/ProgressBar'
 import { FilePicker } from '@/components/flasher/shared/FilePicker'
 import { RomPartitionList } from '@/components/flasher/shared/RomPartitionList'
+import { Step } from '@/components/flasher/shared/Step'
 import { useFlasher } from '@/hooks/useFlasher'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import {
-  IconFolderSearch as FolderSearch,
-  IconLoader2 as Loader2,
-  IconCpu as Cpu
+  IconLoader2,
 } from "@tabler/icons-react"
 
 interface RomFlashCardProps {
@@ -46,116 +35,152 @@ export function RomFlashCard({ disabled }: RomFlashCardProps) {
   const hasDevice = !!activeFastbootSerial && !disabled
   const hasPlan = flashPlan && flashPlanSteps.length > 0
   const selectedCount = selectedPartitions.length
+  const partitionWord = selectedCount === 1 ? 'partition' : 'partitions'
   const completedCount = flashPlanSteps.filter((s) => s.status === 'success').length
   const progress = hasPlan ? (completedCount / flashPlanSteps.length) * 100 : 0
 
-  function handleConfirmFlash() {
-    setConfirmOpen(false)
-    executeBatchFlash()
-  }
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <header className="mb-6">
+        <h3 className="text-[32px] font-semibold tracking-tight text-[var(--color-text-primary)]">Flash ROM Folder</h3>
+        <p className="mt-1 text-[16px] text-[var(--color-text-secondary)]">
+          Scan a ROM folder, pick the partitions, flash them in one batch
+        </p>
+      </header>
+
+      <div className="flex min-h-0 flex-1 flex-col gap-6">
+        <Step n={1} label="Choose ROM folder">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <FilePicker
+              value={romFolderPath}
+              placeholder="Select ROM folder…"
+              variant="folder"
+              onBrowse={chooseRomFolder}
+              disabled={disabled || runningBatchFlash}
+              className="flex-1"
+            />
+            <button
+              type="button"
+              onClick={scanSelectedRomFolder}
+              disabled={disabled || !romFolderPath || scanningPlan || runningBatchFlash}
+              className="flex h-auto shrink-0 items-center justify-center gap-2 rounded-2xl border border-border/50 px-6 py-4 text-[16px] font-bold text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-background-card)]/60 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40 sm:w-48"
+            >
+              {scanningPlan && <IconLoader2 size={18} stroke={1.75} className="animate-spin motion-reduce:animate-none" />}
+              {scanningPlan ? 'Scanning…' : 'Scan Folder'}
+            </button>
+          </div>
+        </Step>
+
+        {hasPlan ? (
+          <Step n={2} label="Pick partitions to flash" fill>
+            <RomPartitionList
+              steps={flashPlanSteps}
+              selectedPartitions={selectedPartitions}
+              onToggle={togglePartitionSelection}
+              onSelectAll={selectAllPartitions}
+              onDeselectAll={deselectAllPartitions}
+              disabled={disabled || runningBatchFlash}
+            />
+          </Step>
+        ) : (
+          <div className="flex flex-1 items-center justify-center rounded-2xl border-2 border-dashed border-border/40 p-8">
+            <p className="max-w-sm text-center text-[16px] leading-relaxed text-[var(--color-text-secondary)]">
+              {romFolderPath
+                ? 'Scan the folder to list every flashable partition found inside.'
+                : 'Point to a folder with .img files. The scan lists each partition it can flash.'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <footer className="mt-6 flex flex-col gap-4 border-t border-border/40 pt-5">
+        {runningBatchFlash && hasPlan && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-[14px] font-semibold">
+              <span className="text-[var(--color-text-secondary)]">Flashing progress</span>
+              <span className="tabular-nums text-[var(--color-text-primary)]">{completedCount}/{flashPlanSteps.length}</span>
+            </div>
+            <ProgressBar label="Flashing progress" isLabelHidden value={progress} max={100} variant="accent" />
+          </div>
+        )}
+        <div className="flex items-center justify-between gap-4">
+          <p className="min-w-0 truncate text-[16px] text-[var(--color-text-secondary)]">
+            {hasPlan ? `${selectedCount} ${partitionWord} selected` : 'No scan yet'}
+          </p>
+          <button
+            type="button"
+            onClick={() => setConfirmOpen(true)}
+            disabled={!hasDevice || !hasPlan || selectedCount === 0 || runningBatchFlash}
+            className="flex h-[52px] shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--color-accent)] px-8 text-[16px] font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+          >
+            {runningBatchFlash && <IconLoader2 size={18} stroke={1.75} className="animate-spin motion-reduce:animate-none" />}
+            {runningBatchFlash ? 'Flashing ROM…' : `Flash ${selectedCount} ${partitionWord}`}
+          </button>
+        </div>
+      </footer>
+
+      {confirmOpen && (
+        <ConfirmOverlay
+          title="Confirm Batch Flash"
+          body={`This will flash ${selectedCount} ${partitionWord} to the connected device. Make sure you selected the correct ROM folder. This action cannot be undone.`}
+          confirmLabel={`Flash ${selectedCount} ${partitionWord}`}
+          onConfirm={() => { setConfirmOpen(false); executeBatchFlash() }}
+          onCancel={() => setConfirmOpen(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+export function ConfirmOverlay({ title, body, confirmLabel, onConfirm, onCancel, danger }: {
+  title: string
+  body: string
+  confirmLabel: string
+  onConfirm: () => void
+  onCancel: () => void
+  danger?: boolean
+}) {
+  const reduced = useReducedMotion()
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onCancel])
 
   return (
-    <Card className="relative overflow-hidden border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--terminal-bg)]/40 rounded-2xl shadow-[var(--shadow-card)] h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <FolderSearch className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
-          Flash ROM Folder
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-4 flex-1 flex flex-col justify-between">
-        <div className="space-y-4 flex-1">
-          <FilePicker
-            value={romFolderPath}
-            placeholder="Select ROM folder..."
-            variant="folder"
-            onBrowse={chooseRomFolder}
-            disabled={disabled || runningBatchFlash}
-          />
-
-          <Button
-            variant="outline"
-            className="w-full rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card hover:bg-[var(--muted)]/50 dark:bg-[var(--muted)] dark:hover:bg-[var(--muted)]/80 text-xs font-semibold cursor-pointer h-9 transition-colors"
-            onClick={scanSelectedRomFolder}
-            disabled={disabled || !romFolderPath || scanningPlan || runningBatchFlash}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm" onClick={onCancel}>
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        initial={reduced ? false : { opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={reduced ? { duration: 0.12 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg rounded-3xl border border-border/50 bg-card/95 p-8 backdrop-blur-2xl"
+      >
+        <h3 className="text-[22px] font-bold tracking-tight text-[var(--color-text-primary)]">{title}</h3>
+        <p className="mt-3 text-[16px] leading-relaxed text-[var(--color-text-secondary)]">{body}</p>
+        <div className="mt-7 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="h-[52px] rounded-full border border-border/50 px-7 text-[16px] font-bold text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-background-card)]/60 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
           >
-            {scanningPlan ? (
-              <>
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                Scanning ROM folder...
-              </>
-            ) : (
-              'Scan ROM Folder'
-            )}
-          </Button>
-
-          {hasPlan && (
-            <>
-              <div className="h-px bg-[var(--muted)] dark:bg-[var(--muted)]/80" />
-              <RomPartitionList
-                steps={flashPlanSteps}
-                selectedPartitions={selectedPartitions}
-                onToggle={togglePartitionSelection}
-                onSelectAll={selectAllPartitions}
-                onDeselectAll={deselectAllPartitions}
-                disabled={disabled || runningBatchFlash}
-              />
-            </>
-          )}
-
-          {runningBatchFlash && hasPlan && (
-            <div className="space-y-2 rounded-xl bg-[var(--muted)]/30 dark:bg-[var(--muted)]/30 p-3 border border-[var(--muted)] dark:border-[var(--muted)]/50">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
-                <span>Flashing progress</span>
-                <span>{completedCount}/{flashPlanSteps.length} completed</span>
-              </div>
-              <Progress value={progress} className="h-1.5 rounded-full" />
-            </div>
-          )}
-        </div>
-
-        {hasPlan && (
-          <Button
-            className="w-full rounded-full bg-primary hover:bg-primary/95 text-primary-foreground border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer text-xs font-semibold shadow-sm h-9 mt-4"
-            onClick={() => setConfirmOpen(true)}
-            disabled={!hasDevice || selectedCount === 0 || runningBatchFlash}
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className={`h-[52px] rounded-full px-7 text-[16px] font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 ${danger ? 'bg-[var(--color-error)] focus-visible:outline-[var(--color-error)]' : 'bg-[var(--color-accent)] focus-visible:outline-[var(--color-accent)]'}`}
           >
-            {runningBatchFlash
-              ? 'Flashing ROM...'
-              : `Flash ${selectedCount} Partition(s)`}
-          </Button>
-        )}
-      </CardContent>
-
-      {disabled && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/80 dark:bg-[var(--terminal-surface)]/85 backdrop-blur-[3px] select-none transition-colors duration-300">
-          <div className="flex items-center gap-1.5 rounded-full border border-[var(--border)] dark:border-[var(--border)] bg-card dark:bg-[var(--muted)]/90 px-3 py-1.5 shadow-sm text-[11px] font-semibold text-muted-foreground dark:text-muted-foreground">
-            <Cpu className="h-3.5 w-3.5 text-muted-foreground dark:text-muted-foreground" />
-            Fastboot Mode Required
-          </div>
+            {confirmLabel}
+          </button>
         </div>
-      )}
-
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Batch Flash</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will flash {selectedCount} partition(s) to the connected device. Make sure you
-              selected the correct ROM folder. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmFlash}
-              className="rounded-full bg-primary hover:bg-primary/95 text-primary-foreground border-0 shadow-sm"
-            >
-              Flash {selectedCount} Partition(s)
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </Card>
+      </motion.div>
+    </div>
   )
 }

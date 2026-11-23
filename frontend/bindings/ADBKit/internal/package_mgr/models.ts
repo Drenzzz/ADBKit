@@ -16,6 +16,15 @@ export interface APKPreview {
     "targetSdk": number;
 }
 
+/**
+ * AppIcon is a cached app identity extracted from an installed APK.
+ */
+export interface AppIcon {
+    "packageName": string;
+    "label": string;
+    "iconDataURL": string;
+}
+
 export interface Details {
     "packageName": string;
     "versionName": string;

@@ -21,12 +21,12 @@ describe('useUIStore', () => {
     expect(useUIStore.getState().theme).toBe('dark')
   })
 
-  it('applies the theme class to the document root', () => {
+  it('does not touch the document root class (Astryx owns data-theme)', () => {
     useUIStore.getState().setTheme('light')
     expect(document.documentElement.classList.contains('dark')).toBe(false)
 
     useUIStore.getState().setTheme('dark')
-    expect(document.documentElement.classList.contains('dark')).toBe(true)
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
 
   it('does not persist theme to localStorage', () => {

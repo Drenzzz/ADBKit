@@ -5,15 +5,7 @@ import {
   IconFileDownload as FileDown,
   IconBraces as FileJson
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
-import { Kbd } from '@/components/ui/kbd'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Switch } from '@astryxdesign/core/Switch'
 import { useLogcatStore } from '@/stores/useLogcatStore'
 import { useLogcat } from '@/hooks/useLogcat'
 import { LogcatView } from '@/components/logcat/LogcatView'
@@ -21,13 +13,9 @@ import { LogcatFilters } from '@/components/logcat/LogcatFilters'
 import { cn } from '@/lib/utils'
 
 const isMac = navigator.platform.toUpperCase().includes('MAC')
-const modKey = isMac ? '\u2318' : 'Ctrl'
+const modKey = isMac ? '⌘' : 'Ctrl'
 
-interface LogcatWorkspaceProps {
-  embedded?: boolean
-}
-
-export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
+export function LogcatWorkspace() {
   const {
     streamingSerial,
     isStreaming,
@@ -50,159 +38,172 @@ export function LogcatWorkspace({ embedded = false }: LogcatWorkspaceProps) {
   const bufferLimit = useLogcatStore((state) => state.bufferLimit)
   const setBufferLimit = useLogcatStore((state) => state.setBufferLimit)
 
+  const bufferRatio = Math.min(1, logCount / bufferLimit)
+
   return (
-    <div className="relative flex h-full min-h-0 flex-col">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-border/40">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          {isStreaming ? (
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] animate-pulse shrink-0" />
-          ) : (
-            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40 shrink-0" />
-          )}
-          <span className="text-xs text-muted-foreground truncate">
-            {isStreaming
-              ? streamingSerial
-              : streamingSerial
-                ? `${streamingSerial} · stopped`
-                : activeSerial
-                  ? activeSerial
-                  : 'No device'}
-          </span>
-        </div>
+    <div className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto p-4 lg:flex-row lg:overflow-visible">
+      <div className="flex min-h-[320px] min-w-0 flex-1 flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5">
+            <span
+              className={cn(
+                'h-2.5 w-2.5 shrink-0 rounded-full',
+                isStreaming
+                  ? 'bg-[var(--color-success)]'
+                  : 'bg-[var(--color-text-secondary)]/40',
+              )}
+            />
+            <span className="truncate text-[15px] font-semibold text-[var(--color-text-primary)]">
+              {isStreaming
+                ? streamingSerial
+                : streamingSerial
+                  ? `${streamingSerial} (stopped)`
+                  : activeSerial
+                    ? activeSerial
+                    : 'No device'}
+            </span>
+          </div>
 
-        <div className="flex items-center gap-1 shrink-0">
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
-                disabled={logCount === 0}
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              type="button"
+              aria-label="Clear logs"
+              onClick={handleClear}
+              disabled={logCount === 0}
+              className="flex size-10 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-card)]/60 hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+            >
+              <Trash2 size={18} stroke={1.75} />
+            </button>
+
+            {isStreaming ? (
+              <button
+                type="button"
+                onClick={handleStop}
+                className="flex h-10 items-center gap-2 rounded-full bg-[var(--color-error)] px-5 text-[14px] font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-error)]"
               >
-                <FileDown className="h-3.5 w-3.5" />
-                Export
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={exportAsText} className="text-xs">
-                <ArrowDownToLine className="mr-2 h-3.5 w-3.5" />
-                Export as TXT
-                <Kbd className="ml-auto">{modKey}+E</Kbd>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={exportAsJson} className="text-xs">
-                <FileJson className="mr-2 h-3.5 w-3.5" />
-                Export as JSON
-                <Kbd className="ml-auto">{modKey}+Shift+E</Kbd>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                Stop
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleStart}
+                disabled={!activeSerial}
+                className="flex h-10 items-center gap-2 rounded-full bg-[var(--color-accent)] px-5 text-[14px] font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+              >
+                <Play size={16} stroke={1.75} />
+                Start
+              </button>
+            )}
+          </div>
+        </div>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-            onClick={handleClear}
-            disabled={logCount === 0}
-            title={`Clear (${modKey}+K)`}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+        {!activeSerial && !isStreaming && (
+          <p className="text-[14px] text-[var(--color-text-secondary)]">
+            No device selected. Select a device first to start logcat.
+          </p>
+        )}
 
-          <div className="h-3.5 w-px bg-border/50 mx-0.5" />
+        <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl bg-[var(--color-surface-inset)]">
+          <div ref={scrollContainerRef} className="h-full overflow-auto">
+            <LogcatView scrollContainerRef={scrollContainerRef} />
+          </div>
 
-          {isStreaming ? (
-            <Button
-              size="sm"
-              variant="destructive"
-              className="h-7 text-xs px-3"
-              onClick={handleStop}
+          {showScrollButton && (
+            <button
+              type="button"
+              aria-label="Scroll to latest logs"
+              onClick={scrollToBottom}
+              className="absolute bottom-4 right-4 flex size-11 items-center justify-center rounded-full bg-[var(--color-background-card)] text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-background-muted)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
             >
-              Stop
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              className="h-7 text-xs px-3 gap-1.5"
-              onClick={handleStart}
-              disabled={!activeSerial}
-            >
-              <Play className="h-3 w-3" />
-              Start
-            </Button>
+              <ArrowDownToLine size={18} stroke={1.75} />
+            </button>
           )}
         </div>
-      </div>
 
-      <LogcatFilters />
-
-      <div className="flex-1 min-h-0 relative bg-[var(--terminal-bg)]">
-        <div ref={scrollContainerRef} className="h-full overflow-auto">
-          <LogcatView scrollContainerRef={scrollContainerRef} />
-        </div>
-
-        {showScrollButton && (
-          <Button
-            size="icon"
-            className="absolute bottom-4 right-4 h-7 w-7 rounded-full shadow-[var(--shadow-raised)]"
-            onClick={scrollToBottom}
-          >
-            <ArrowDownToLine className="h-3.5 w-3.5" />
-          </Button>
+        {error && (
+          <p className="rounded-xl bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-4 py-3 text-[14px] font-medium text-[var(--color-error)]">
+            {error}
+          </p>
         )}
       </div>
 
-      <div className="flex items-center justify-between border-t border-border/40 bg-background px-3 py-1.5">
-        <div className="flex items-center gap-2">
-          <Switch
-            checked={autoScroll}
-            onCheckedChange={setAutoScroll}
-            className="scale-75 origin-left"
-          />
-          <span className="text-xs text-muted-foreground">Auto-scroll</span>
+      <aside className="flex w-full shrink-0 flex-col gap-5 rounded-2xl bg-[var(--color-surface-inset)] p-4 lg:w-[280px] lg:overflow-y-auto">
+        <LogcatFilters />
+
+        <div className="flex flex-col gap-2">
+          <p className="text-[14px] font-semibold text-[var(--color-text-secondary)]">Export</p>
+          <button
+            type="button"
+            onClick={exportAsText}
+            disabled={logCount === 0}
+            className="flex h-11 items-center gap-3 rounded-xl bg-[var(--color-background-card)] px-3 text-[15px] font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-background-muted)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+          >
+            <FileDown size={18} stroke={1.75} className="shrink-0 text-[var(--color-text-secondary)]" />
+            <span className="flex-1 text-left">Export as TXT</span>
+            <span className="pointer-events-none inline-flex h-5 select-none items-center justify-center rounded-md border border-border/50 bg-[var(--color-surface-inset)] px-1.5 font-mono text-[13px] text-[var(--color-text-secondary)]">{modKey}+E</span>
+          </button>
+          <button
+            type="button"
+            onClick={exportAsJson}
+            disabled={logCount === 0}
+            className="flex h-11 items-center gap-3 rounded-xl bg-[var(--color-background-card)] px-3 text-[15px] font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-background-muted)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
+          >
+            <FileJson size={18} stroke={1.75} className="shrink-0 text-[var(--color-text-secondary)]" />
+            <span className="flex-1 text-left">Export as JSON</span>
+            <span className="pointer-events-none inline-flex h-5 select-none items-center justify-center rounded-md border border-border/50 bg-[var(--color-surface-inset)] px-1.5 font-mono text-[13px] text-[var(--color-text-secondary)]">{modKey}+Shift+E</span>
+          </button>
         </div>
-        <div className="flex items-center gap-2">
-          {bufferFull && (
-            <span className="text-[10px] text-[var(--warning)]">
-              Buffer full
-            </span>
-          )}
-          <div className="flex items-center gap-1">
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <p className="text-[14px] font-semibold text-[var(--color-text-secondary)]">Buffer</p>
+            {bufferFull && (
+              <span className="text-[14px] font-semibold text-[var(--color-warning)]">Full</span>
+            )}
+          </div>
+          <div className="h-1 overflow-hidden rounded-full bg-[var(--color-background-card)]">
+            <div
+              className={cn(
+                'h-full origin-left rounded-full transition-transform duration-300 motion-reduce:transition-none',
+                bufferFull ? 'bg-[var(--color-warning)]' : 'bg-[var(--color-accent)]',
+              )}
+              style={{ transform: `scaleX(${bufferRatio})` }}
+            />
+          </div>
+          <div className="flex items-center gap-2">
             <input
               type="number"
               min={1000}
               max={500000}
               step={1000}
               value={bufferLimit}
+              aria-label="Buffer limit"
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10)
                 if (!isNaN(val) && val >= 1000) {
                   setBufferLimit(val)
                 }
               }}
-              className="h-5 w-20 rounded border border-border/40 bg-muted/30 px-1.5 text-[10px] tabular-nums text-muted-foreground outline-none focus:border-ring focus:ring-1 focus:ring-ring/20"
+              className="h-9 w-24 rounded-full bg-[var(--color-background-card)] px-3 text-[14px] text-[var(--color-text-primary)] tabular-nums outline-none focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
             />
-            <span className="text-[10px] text-muted-foreground tabular-nums">
+            <span className="text-[14px] text-[var(--color-text-secondary)] tabular-nums">
               / {logCount.toLocaleString()}
             </span>
           </div>
         </div>
-      </div>
 
-      {error && (
-        <div className="px-3 py-1.5 border-t border-border/40 text-xs text-destructive">
-          {error}
+        <div className="flex items-center justify-between gap-3">
+          <p className="cursor-pointer text-[15px] font-medium text-[var(--color-text-primary)]">
+            Auto-scroll
+          </p>
+          <Switch
+            label="Auto-scroll"
+            isLabelHidden
+            value={autoScroll}
+            onChange={setAutoScroll}
+          />
         </div>
-      )}
-      {!activeSerial && !isStreaming && (
-        <div
-          className={cn(
-            'px-3 py-1.5 border-t border-border/40 text-xs text-muted-foreground',
-            embedded && 'hidden',
-          )}
-        >
-          No device selected. Select a device first to start logcat.
-        </div>
-      )}
+      </aside>
     </div>
   )
 }

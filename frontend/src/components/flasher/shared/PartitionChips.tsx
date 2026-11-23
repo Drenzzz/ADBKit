@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import {
-  IconChevronDown as ChevronDown,
-  IconChevronUp as ChevronUp
+  IconChevronDown,
+  IconChevronUp,
 } from "@tabler/icons-react"
 
 const COMMON_PARTITIONS = ['boot', 'recovery', 'dtbo', 'vbmeta', 'system', 'vendor']
@@ -44,8 +44,8 @@ export function PartitionChips({ selected, onSelect, disabled }: PartitionChipsP
   const partitions = expanded ? ALL_PARTITIONS : COMMON_PARTITIONS
 
   return (
-    <div className="space-y-2.5">
-      <div className="flex flex-wrap gap-1.5">
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-2">
         {partitions.map((p) => {
           const isSelected = selected === p
           return (
@@ -55,11 +55,11 @@ export function PartitionChips({ selected, onSelect, disabled }: PartitionChipsP
               disabled={disabled}
               onClick={() => onSelect(isSelected ? '' : p)}
               className={cn(
-                "rounded-full px-2.5 py-0.5 text-[11px] font-semibold border transition-colors duration-200 cursor-pointer outline-none select-none",
+                'rounded-full px-4 py-2.5 text-[16px] font-semibold transition-[background-color,color,transform] duration-150 outline-none select-none focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100',
                 isSelected
-                  ? "bg-primary border-primary text-primary-foreground shadow-sm scale-[1.03]"
-                  : "bg-background dark:bg-card border-border text-muted-foreground hover:text-foreground hover:bg-accent",
-                disabled && "opacity-40 cursor-not-allowed pointer-events-none"
+                  ? 'bg-[var(--color-accent)] text-white'
+                  : 'bg-[var(--color-surface-inset)] text-[var(--color-text-secondary)] hover:bg-[var(--color-background-card)]/60 hover:text-[var(--color-text-primary)]',
+                disabled && 'pointer-events-none opacity-40',
               )}
             >
               {p}
@@ -70,23 +70,14 @@ export function PartitionChips({ selected, onSelect, disabled }: PartitionChipsP
       <button
         type="button"
         className={cn(
-          "inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed outline-none",
-          disabled && "pointer-events-none"
+          'inline-flex items-center gap-1.5 rounded-full px-2 py-1.5 text-[14px] font-semibold text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40',
+          disabled && 'pointer-events-none',
         )}
         onClick={() => setExpanded(!expanded)}
         disabled={disabled}
       >
-        {expanded ? (
-          <>
-            <ChevronUp className="h-3 w-3" />
-            Show common partitions
-          </>
-        ) : (
-          <>
-            <ChevronDown className="h-3 w-3" />
-            Show all partitions
-          </>
-        )}
+        {expanded ? <IconChevronUp size={16} stroke={1.75} /> : <IconChevronDown size={16} stroke={1.75} />}
+        {expanded ? 'Show common partitions' : 'Show all partitions'}
       </button>
     </div>
   )

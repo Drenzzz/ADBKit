@@ -1,32 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { NoDeviceEmptyState } from '@/components/common/NoDeviceEmptyState'
 import {
   IconCornerDownLeft as CornerDownLeft,
   IconTerminal as TerminalIcon,
   IconTrash as Trash2,
-  IconLoader2 as Loader2,
-  IconWifi as Wifi,
   IconHistory as History,
-  IconX as X,
   IconArticle as ScrollText,
-  IconChevronDown as ChevronDown,
   IconRotate as RotateCw
 } from "@tabler/icons-react"
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { toast } from '@/lib/toast'
+import { Heading } from '@astryxdesign/core/Heading'
+import { Button } from '@astryxdesign/core/Button'
+import { SegmentedControl } from '@astryxdesign/core/SegmentedControl'
+import { SegmentedControlItem } from '@astryxdesign/core/SegmentedControl'
+import { Selector } from '@astryxdesign/core/Selector'
 import { cn } from '@/lib/utils'
 import type { TerminalMode } from '@/lib/types'
 import { getTerminalTargetSerial } from '@/lib/terminalTarget'
 import { useTerminalStore } from '@/stores/useTerminalStore'
+import { useLogcatStore } from '@/stores/useLogcatStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useDevices } from '@/hooks/useDevices'
 import {
@@ -39,6 +32,7 @@ import {
 import { TerminalView } from '@/components/terminal/TerminalView'
 import { CommandHistory } from '@/components/terminal/CommandHistory'
 import { LogcatWorkspace } from '@/components/logcat/LogcatWorkspace'
+import { NoDeviceState } from '@/components/apps/EmptyStates'
 
 type TerminalWorkspacePanel = 'shell' | 'logcat'
 
@@ -48,26 +42,7 @@ const MODE_OPTIONS: { value: TerminalMode; label: string }[] = [
   { value: 'fastboot-host', label: 'Fastboot' },
 ]
 
-const containerVariants = (reduced: boolean) => ({
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: reduced
-      ? { duration: 0, staggerChildren: 0 }
-      : { staggerChildren: 0.05 },
-  },
-})
-
-const itemVariants = (reduced: boolean) => ({
-  hidden: { opacity: 0, y: 10 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: reduced
-      ? { duration: 0 }
-      : { type: 'spring' as const, stiffness: 300, damping: 24 },
-  },
-})
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
 export default function TerminalPage() {
   const reduced = useReducedMotion()
@@ -101,6 +76,8 @@ export default function TerminalPage() {
   const outputBufferRef = useRef('')
   const flushTimerRef = useRef<number | null>(null)
   const history = useTerminalStore((state) => state.history)
+  const logcatStreaming = useLogcatStore((state) => state.isStreaming)
+  const logcatSerial = useLogcatStore((state) => state.streamingSerial)
 
   useEffect(() => {
     if (!connected && deviceMode === 'fastboot' && mode !== 'fastboot-host') {
@@ -270,304 +247,221 @@ export default function TerminalPage() {
     }
   }, [])
 
-  return (
-    <motion.div
-      variants={containerVariants(reduced)}
-      initial="hidden"
-      animate="show"
-      className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden pb-0 font-sans"
-    >
-      {!targetSerial && devices.length === 0 && !connected ? (
-        <div className="flex-1 flex flex-col">
-          <motion.div variants={itemVariants(reduced)} className="flex flex-col gap-1 mb-4">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Terminal</h1>
-            <p className="text-xs text-muted-foreground">
-              Run shell commands, inspect logcat, and manage live terminal sessions
-            </p>
-          </motion.div>
-          <NoDeviceEmptyState feature="terminal sessions" />
+  const isShell = activePanel === 'shell'
+  const stateSerial = isShell
+    ? connected && session
+      ? session.serial
+      : targetSerial
+    : logcatSerial || activeSerial
+  const stateOk = isShell ? connected : logcatStreaming
+  const stateLabel = isShell
+    ? connected
+      ? 'connected'
+      : connecting
+        ? 'connecting'
+        : 'idle'
+    : logcatStreaming
+      ? 'streaming'
+      : 'stopped'
+  const hasDevice = targetSerial !== '' || devices.length > 0 || connected
+
+  const iconButtonClass =
+    'flex size-11 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-[background-color,color,transform] duration-150 hover:bg-[var(--color-background-card)]/60 hover:text-[var(--color-text-primary)] active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40 motion-reduce:transition-none motion-reduce:active:scale-100'
+
+  if (!hasDevice) {
+    return (
+      <div className="dashboard-scale flex h-full min-h-0 flex-col gap-4 p-5">
+        <Heading level={1} type="display-1" weight="semibold">Terminal</Heading>
+        <div className="min-h-0 flex-1">
+          <NoDeviceState
+            onRefresh={refreshDevices}
+            refreshing={refreshing}
+            description="Connect an Android device via USB or wireless to start a terminal session"
+          />
         </div>
-      ) : (
-        <>
-      {/* Title Header */}
-      <motion.div variants={itemVariants(reduced)} className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Terminal</h1>
-        <p className="text-xs text-muted-foreground">
-          Run shell commands, inspect logcat, and manage live terminal sessions
-        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="dashboard-scale flex h-full min-h-0 flex-col gap-4 p-5">
+      <Heading level={1} type="display-1" weight="semibold" maxLines={1}>Terminal</Heading>
+      <motion.div
+        initial={reduced ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: EASE }}
+        className="m3-surface flex flex-wrap items-center gap-3 rounded-3xl px-5 py-4"
+      >
+          <SegmentedControl
+            value={activePanel}
+            onChange={(v) => setActivePanel(v as TerminalWorkspacePanel)}
+            label="Terminal panel"
+          >
+            <SegmentedControlItem value="shell" label="Shell" icon={<TerminalIcon size={18} stroke={1.75} />} />
+            <SegmentedControlItem value="logcat" label="Logcat" icon={<ScrollText size={18} stroke={1.75} />} />
+          </SegmentedControl>
+
+          {isShell && (
+            <Selector
+              label="Terminal mode"
+              isLabelHidden
+              value={mode}
+              onChange={(v) => handleModeChange(v as TerminalMode)}
+              options={MODE_OPTIONS}
+              isDisabled={connected}
+            />
+          )}
+
+          <div className="flex-1" />
+
+          <div className="flex items-center gap-2.5">
+            <span
+              className={cn(
+                'h-2.5 w-2.5 shrink-0 rounded-full',
+                stateOk
+                  ? 'bg-[var(--color-success)] '
+                  : 'bg-[var(--color-text-secondary)]/40',
+              )}
+            />
+            <span className="text-[15px] font-semibold text-[var(--color-text-primary)]">
+              {stateSerial || 'No device'}
+            </span>
+            <span className="text-[14px] font-semibold text-[var(--color-text-secondary)]">{stateLabel}</span>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Refresh devices"
+            onClick={refreshDevices}
+            disabled={refreshing}
+            className={iconButtonClass}
+          >
+            <RotateCw size={18} stroke={1.75} className={refreshing ? 'animate-spin motion-reduce:animate-none' : undefined} />
+          </button>
+
+          {isShell && (
+            <>
+              <button
+                type="button"
+                aria-label="Command history"
+                onClick={() => setShowHistory(!showHistory)}
+                className={cn(iconButtonClass, showHistory && 'bg-[var(--color-background-card)] text-[var(--color-text-primary)]')}
+              >
+                <History size={18} stroke={1.75} />
+              </button>
+              <button
+                type="button"
+                aria-label="Clear output"
+                onClick={clearOutput}
+                disabled={!session}
+                className={iconButtonClass}
+              >
+                <Trash2 size={18} stroke={1.75} />
+              </button>
+              {connected ? (
+                <button
+                  type="button"
+                  onClick={handleDisconnect}
+                  className="flex h-11 items-center rounded-full bg-[var(--color-error)] px-6 text-[15px] font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-error)]"
+                >
+                  Disconnect
+                </button>
+              ) : (
+                <Button
+                  label={connecting ? 'Connecting…' : 'Connect'}
+                  variant="primary"
+                  className="h-11 rounded-full px-6 text-[15px] font-bold"
+                  onClick={handleConnect}
+                  isDisabled={connecting || !canConnect(mode)}
+                />
+              )}
+            </>
+          )}
       </motion.div>
 
-      {/* Obsidian macOS-Style Window Container */}
-      <motion.div
-        variants={itemVariants(reduced)}
-        className="flex-1 min-h-0 overflow-hidden flex flex-col rounded-2xl border border-border bg-white dark:bg-[var(--terminal-bg)] shadow-[var(--shadow-floating)] relative"
-      >
-        
-        {/* macOS Window Header (Title Bar) */}
-        <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 dark:bg-[var(--terminal-surface)] border-b border-border dark:border-[var(--terminal-border)] select-none">
-          {/* Left: Window Dots (hover shows miniature symbols) */}
-          <div className="flex items-center gap-2 group/dots w-20">
-            <button
-              onClick={connected ? handleDisconnect : undefined}
-              className={cn(
-                "w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold transition-colors relative border border-transparent outline-none",
-                connected 
-                  ? "bg-[var(--traffic-light-red)] hover:bg-[var(--traffic-light-red)]/80 text-[color:var(--destructive)]/50 cursor-pointer" 
-                  : "bg-muted dark:bg-[var(--terminal-muted)] text-muted-foreground dark:text-[var(--terminal-bg)] cursor-not-allowed"
-              )}
-              title={connected ? "Disconnect session" : "No active session"}
-            >
-              <span className="opacity-0 group-hover/dots:opacity-100 absolute -top-0.5">×</span>
-            </button>
-            <div className="w-3 h-3 rounded-full bg-[var(--traffic-light-yellow)] relative flex items-center justify-center text-[7px] font-bold text-[color:var(--warning)]/50">
-              <span className="opacity-0 group-hover/dots:opacity-100 absolute -top-0.5">-</span>
-            </div>
-            <div className="w-3 h-3 rounded-full bg-[var(--traffic-light-green)] relative flex items-center justify-center text-[7px] font-bold text-[color:var(--success)]/50">
-              <span className="opacity-0 group-hover/dots:opacity-100 absolute -top-0.5">+</span>
-            </div>
-          </div>
+      <div className="relative min-h-0 flex-1">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activePanel}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, x: -16 }}
+            transition={{ duration: reduced ? 0.12 : 0.25, ease: EASE }}
+            className="m3-surface flex h-full min-h-0 flex-col overflow-hidden rounded-3xl"
+          >
+            {isShell ? (
+              <>
+                <TerminalView
+                  className="min-h-0 flex-1"
+                  output={output}
+                  onResize={handleResize}
+                />
 
-          {/* Center: iOS Segmented Tabs */}
-          <div className="flex items-center gap-0.5 rounded-full border border-border dark:border-[var(--terminal-border)] bg-muted/50 dark:bg-[var(--terminal-surface)] p-0.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
-            <button
-              onClick={() => setActivePanel('shell')}
-              className={cn(
-                'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-colors duration-200 cursor-pointer',
-                activePanel === 'shell'
-                  ? 'bg-background dark:bg-[var(--terminal-surface)] text-foreground dark:text-foreground shadow-sm'
-                  : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-[var(--terminal-text)]',
-              )}
-            >
-              <TerminalIcon className="h-3.5 w-3.5" />
-              Shell
-            </button>
-            <button
-              onClick={() => setActivePanel('logcat')}
-              className={cn(
-                'flex items-center gap-1.5 rounded-full px-4 py-1 text-xs font-semibold transition-colors duration-200 cursor-pointer',
-                activePanel === 'logcat'
-                  ? 'bg-background dark:bg-[var(--terminal-surface)] text-foreground dark:text-foreground shadow-sm'
-                  : 'text-muted-foreground dark:text-muted-foreground hover:text-foreground dark:hover:text-[var(--terminal-text)]',
-              )}
-            >
-              <ScrollText className="h-3.5 w-3.5" />
-              Logcat
-            </button>
-          </div>
-
-          {/* Right: Window Session Label */}
-          <div className="text-[10px] font-mono text-muted-foreground dark:text-[var(--terminal-muted)] w-20 text-right truncate">
-            {connected && session ? `${session.serial}` : 'idle'}
-          </div>
-        </div>
-
-        {/* Content Pane */}
-        {activePanel === 'shell' ? (
-          <div className="flex min-h-0 flex-1 flex-col">
-            {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-3 bg-muted dark:bg-[var(--terminal-bg)] px-4 py-2 border-b border-border dark:border-[var(--terminal-border)]">
-              {/* Dropdown Mode Selector */}
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  disabled={connected}
-                  className={cn(
-                    'inline-flex h-7 items-center gap-1.5 rounded-full border border-border dark:border-[var(--terminal-border)] bg-background dark:bg-[var(--terminal-surface)] px-3 py-1 text-xs font-semibold text-muted-foreground dark:text-[var(--terminal-text)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-surface)] transition-[colors,transform] cursor-pointer shadow-sm active:scale-[0.97]',
-                    connected && 'opacity-50 cursor-not-allowed',
-                  )}
-                >
-                  {modeLabel(mode)}
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-background dark:bg-[var(--terminal-surface)] border-border dark:border-[var(--terminal-border)] text-foreground dark:text-[var(--terminal-text)] rounded-xl shadow-[var(--shadow-raised)]">
-                  {MODE_OPTIONS.map((opt) => (
-                    <DropdownMenuItem
-                      key={opt.value}
-                      onClick={() => handleModeChange(opt.value)}
-                      className={cn(
-                        'text-xs rounded-lg cursor-pointer hover:bg-accent dark:hover:bg-[var(--terminal-surface)] focus:bg-accent dark:focus:bg-[var(--terminal-surface)] focus:text-foreground dark:focus:text-[var(--terminal-text)]',
-                        mode === opt.value && 'font-bold text-primary',
-                      )}
-                    >
-                      {opt.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Status indicators */}
-              {connected && session && (
-                <span className="flex items-center gap-1.5 text-xs text-[var(--success)] font-semibold">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] animate-pulse" />
-                  Connected
-                </span>
-              )}
-              {connecting && (
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground dark:text-[var(--terminal-muted)] font-semibold">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                  Connecting...
-                </span>
-              )}
-              {!connected && !connecting && targetSerial && (
-                <span className="text-xs text-muted-foreground dark:text-[var(--terminal-muted)] font-mono">
-                  Target: {targetSerial}
-                </span>
-              )}
-
-              <div className="flex-1" />
-
-              {/* Console control actions */}
-              <div className="flex items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className={cn(
-                    'h-7 w-7 p-0 rounded-full text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-surface)] transition-colors cursor-pointer',
-                    refreshing && 'animate-spin',
-                  )}
-                  onClick={refreshDevices}
-                  disabled={refreshing}
-                  title="Refresh devices"
-                >
-                  <RotateCw className="h-3.5 w-3.5" />
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className={cn(
-                    'h-7 w-7 p-0 rounded-full text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-surface)] transition-colors cursor-pointer',
-                    showHistory && 'bg-accent dark:bg-[var(--terminal-surface)] text-foreground dark:text-foreground',
-                  )}
-                  onClick={() => setShowHistory(!showHistory)}
-                  title="Command history"
-                >
-                  <History className="h-3.5 w-3.5" />
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 w-7 p-0 rounded-full text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-surface)] transition-colors cursor-pointer"
-                  onClick={clearOutput}
-                  disabled={!session}
-                  title="Clear output"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-
-                <div className="h-4 w-px bg-border dark:bg-[var(--terminal-surface)] mx-1" />
-
-                {connected ? (
-                  <Button
-                    size="sm"
-                    className="h-7 text-xs font-semibold px-4 rounded-full bg-[var(--destructive)] hover:bg-[var(--destructive)]/90 text-white border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer shadow-sm"
-                    onClick={handleDisconnect}
-                  >
-                    Disconnect
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    className="h-7 text-xs font-semibold px-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer shadow-sm gap-1.5"
-                    onClick={handleConnect}
-                    disabled={connecting || !canConnect(mode)}
-                  >
-                    {connecting ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Wifi className="h-3.5 w-3.5" />
-                    )}
-                    Connect
-                  </Button>
+                {error && (
+                  <div className="border-t border-border/40 bg-[color-mix(in_srgb,var(--color-error)_8%,transparent)] px-5 py-3 text-[14px] font-medium text-[var(--color-error)]">
+                    {error}
+                  </div>
                 )}
-              </div>
-            </div>
+                {!canConnect(mode) && !error && !connected && (
+                  <div className="border-t border-border/40 bg-[var(--color-surface-inset)] px-5 py-3 text-[14px] text-[var(--color-text-secondary)]">
+                    {mode === 'fastboot-host'
+                      ? 'No Fastboot device detected. Connect a device in Fastboot mode first.'
+                      : 'No device selected. Select a device first.'}
+                  </div>
+                )}
 
-            {/* Terminal view window screen */}
-            <div className="flex-1 min-h-0 overflow-hidden bg-white dark:bg-[var(--terminal-bg)]">
-              <TerminalView
-                className="h-full w-full"
-                output={output}
-                onResize={handleResize}
-              />
-            </div>
-
-            {/* Integrated Input Form */}
-            <form
-              className="flex items-center gap-2 border-t border-border dark:border-[var(--terminal-border)] bg-muted dark:bg-[var(--terminal-bg)]/90 px-4 py-2.5"
-              onSubmit={handleSubmitCommand}
-            >
-              <span className="font-mono text-xs text-[var(--logcat-info)] font-bold select-none shrink-0 ml-1">
-                $
-              </span>
-              <Input
-                value={command}
-                onChange={(event) => setCommand(event.target.value)}
-                onKeyDown={handleInputKeyDown}
-                placeholder={placeholderText(mode, connected)}
-                className="h-8 rounded-full font-mono text-xs border border-border dark:border-[var(--terminal-border)] bg-background dark:bg-[var(--terminal-surface)] focus-visible:ring-1 focus-visible:ring-ring dark:focus-visible:ring-[var(--terminal-border)] text-foreground dark:text-[var(--terminal-text)] placeholder:text-muted-foreground dark:placeholder:text-[var(--terminal-muted)] outline-none"
-                disabled={!connected || !session}
-                autoComplete="off"
-                autoCapitalize="off"
-                spellCheck={false}
-              />
-              <Button
-                type="submit"
-                size="sm"
-                className="h-8 gap-1.5 text-xs shrink-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/95 border-0 transition-[colors,transform] active:scale-[0.97] cursor-pointer px-4 shadow-sm font-semibold"
-                disabled={!connected || !session || command.trim() === ''}
-              >
-                <CornerDownLeft className="h-3.5 w-3.5" />
-                Send
-              </Button>
-            </form>
-
-            {/* Errors / helper footer */}
-            {error && (
-              <div className="px-5 py-2 border-t border-border dark:border-[var(--terminal-border)] bg-[var(--destructive)]/5 dark:bg-[var(--destructive)]/10 text-xs text-[var(--destructive)]">
-                {error}
-              </div>
-            )}
-            {!canConnect(mode) && !error && !connected && (
-              <div className="px-5 py-2 border-t border-border dark:border-[var(--terminal-border)] bg-muted dark:bg-[var(--terminal-surface)] text-xs text-muted-foreground font-medium">
-                {mode === 'fastboot-host'
-                  ? 'No Fastboot device detected. Connect a device in Fastboot mode first.'
-                  : 'No device selected. Select a device first.'}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="min-h-0 flex-1 bg-white dark:bg-[var(--terminal-bg)] select-text">
-            <LogcatWorkspace embedded />
-          </div>
-        )}
-
-        {/* macOS-style Command History Drawer */}
-        <AnimatePresence>
-          {showHistory && (
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-              className="absolute inset-y-0 right-0 z-50 w-80 border-l border-border dark:border-[var(--terminal-border)] bg-white/95 dark:bg-[var(--terminal-bg)]/95 backdrop-blur-md shadow-[var(--shadow-floating)] flex flex-col"
-            >
-              <div className="absolute left-0 top-3 -ml-3">
-                <Button
-                  size="icon"
-                  className="h-6 w-6 rounded-full p-0 shadow-[var(--shadow-card)] border border-border dark:border-[var(--terminal-border)] bg-background dark:bg-[var(--terminal-surface)] text-muted-foreground dark:text-[var(--terminal-muted)] hover:text-foreground dark:hover:text-[var(--terminal-text)] hover:bg-accent dark:hover:bg-[var(--terminal-muted)] cursor-pointer"
-                  onClick={() => setShowHistory(false)}
+                <form
+                  className="flex items-center gap-3 border-t border-border/40 bg-[var(--color-surface-inset)] px-4 py-3"
+                  onSubmit={handleSubmitCommand}
                 >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <CommandHistory onReExecute={handleReExecuteCommand} />
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-background-card)] font-mono text-[14px] font-bold text-[var(--color-accent)] select-none">
+                    $
+                  </span>
+                  <input
+                    value={command}
+                    onChange={(event) => setCommand(event.target.value)}
+                    onKeyDown={handleInputKeyDown}
+                    placeholder={placeholderText(mode, connected)}
+                    aria-label="Terminal command"
+                    className="h-12 min-w-0 flex-1 rounded-full bg-[var(--color-background-card)] px-5 font-mono text-[14px] text-[var(--color-text-primary)] outline-none transition-colors placeholder:text-[var(--color-text-secondary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+                    disabled={!connected || !session}
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!connected || !session || command.trim() === ''}
+                    className="flex h-12 shrink-0 items-center gap-2 rounded-full bg-[var(--color-accent)] px-6 text-[16px] font-bold text-white transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40 motion-reduce:transition-none motion-reduce:active:scale-100"
+                  >
+                    <CornerDownLeft size={18} stroke={1.75} />
+                    Send
+                  </button>
+                </form>
+              </>
+            ) : (
+              <LogcatWorkspace />
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showHistory && isShell && (
+            <motion.div
+              initial={reduced ? { opacity: 0 } : { x: '100%' }}
+              animate={reduced ? { opacity: 1 } : { x: 0 }}
+              exit={reduced ? { opacity: 0 } : { x: '100%' }}
+              transition={reduced ? { duration: 0.12 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+              className="absolute inset-y-0 right-0 z-40 flex w-[360px] flex-col overflow-hidden rounded-r-3xl border-l border-border/40 bg-[var(--color-surface-container)]"
+            >
+              <CommandHistory
+                onReExecute={handleReExecuteCommand}
+                onClose={() => setShowHistory(false)}
+              />
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
-        </>
-      )}
-    </motion.div>
+      </div>
+    </div>
   )
 }

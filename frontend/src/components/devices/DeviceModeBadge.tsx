@@ -3,14 +3,14 @@ import {
   IconBolt as Zap,
   IconHelp as HelpCircle
 } from "@tabler/icons-react"
-import { Badge } from '@/components/ui/badge'
+import { Badge } from '@astryxdesign/core/Badge'
 import { useDevices } from '@/hooks/useDevices'
 import type { DeviceMode } from '@/lib/types'
 
-const MODE_CONFIG: Record<DeviceMode, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: typeof Smartphone }> = {
-  adb: { label: 'ADB', variant: 'default', icon: Smartphone },
-  fastboot: { label: 'Fastboot', variant: 'secondary', icon: Zap },
-  unknown: { label: 'No Device', variant: 'outline', icon: HelpCircle },
+const MODE_CONFIG: Record<DeviceMode, { label: string; variant: 'purple' | 'warning' | 'neutral'; icon: typeof Smartphone }> = {
+  adb: { label: 'ADB', variant: 'purple', icon: Smartphone },
+  fastboot: { label: 'Fastboot', variant: 'warning', icon: Zap },
+  unknown: { label: 'No Device', variant: 'neutral', icon: HelpCircle },
 }
 
 export function DeviceModeBadge() {
@@ -19,9 +19,10 @@ export function DeviceModeBadge() {
   const Icon = config.icon
 
   return (
-    <Badge variant={config.variant} className="gap-1 text-[10px]">
-      <Icon className="h-3 w-3" />
-      {config.label}
-    </Badge>
+    <Badge
+      variant={config.variant}
+      label={config.label}
+      icon={<Icon size={14} stroke={1.75} />}
+    />
   )
 }

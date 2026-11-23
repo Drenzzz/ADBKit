@@ -12,12 +12,12 @@ function RouteErrorFallback({
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
       <div>
-        <h1 className="text-lg font-semibold text-destructive">Something went wrong</h1>
-        <p className="mt-1 max-w-sm text-sm text-muted-foreground">{message}</p>
+        <h1 className="text-[18px] font-semibold text-destructive">Something went wrong</h1>
+        <p className="mt-1 max-w-sm text-[14px] text-muted-foreground">{message}</p>
       </div>
       <button
         onClick={resetErrorBoundary}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        className="rounded-md bg-primary-container px-4 py-2 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary-container/90"
       >
         Try again
       </button>
@@ -36,12 +36,12 @@ function GlobalErrorFallback({
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
       <div>
-        <h1 className="text-lg font-semibold text-destructive">Application Error</h1>
-        <p className="mt-1 max-w-sm text-sm text-muted-foreground">{message}</p>
+        <h1 className="text-[18px] font-semibold text-destructive">Application Error</h1>
+        <p className="mt-1 max-w-sm text-[14px] text-muted-foreground">{message}</p>
       </div>
       <button
         onClick={resetErrorBoundary}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        className="rounded-md bg-primary-container px-4 py-2 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-primary-container/90"
       >
         Try again
       </button>

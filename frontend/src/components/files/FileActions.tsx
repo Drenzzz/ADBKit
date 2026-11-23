@@ -1,21 +1,19 @@
 import {
-  IconDots as MoreHorizontal,
-  IconFolderOpen as FolderOpen,
-  IconDownload as Download,
-  IconPencil as Pencil,
-  IconTrash as Trash2,
-  IconDeviceUsb as HardDrive,
-  IconFolderDown as FolderInput,
-  IconFolderUp as FolderUp,
-  IconCopy as Files
+  IconDotsVertical,
+  IconFolderOpen,
+  IconDownload,
+  IconPencil,
+  IconTrash,
+  IconDeviceUsb,
+  IconFolderDown,
+  IconFolderUp,
+  IconCopy,
 } from "@tabler/icons-react"
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+  DropdownMenuDivider,
+} from '@astryxdesign/core/DropdownMenu'
 import type { FileEntry } from '@/lib/types'
 
 interface FileActionsProps {
@@ -31,6 +29,9 @@ interface FileActionsProps {
   onGetSize: (file: FileEntry) => void
 }
 
+const ITEM = 'px-4 py-2.5 text-[15px] font-medium'
+const ICON = 'size-[18px] stroke-[1.75]'
+
 export function FileActions({
   file,
   isBusy,
@@ -44,59 +45,69 @@ export function FileActions({
   onGetSize,
 }: FileActionsProps) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
-        disabled={isBusy}
-      >
-        <MoreHorizontal className="h-4 w-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        {file.type === 'directory' && (
-          <DropdownMenuItem onClick={() => onOpen(file)}>
-            <FolderOpen className="mr-2 h-4 w-4" />
-            Open
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuItem onClick={() => onPull(file)}>
-          <Download className="mr-2 h-4 w-4" />
-          Export to PC
-        </DropdownMenuItem>
-        {file.type === 'directory' && (
-          <>
-            <DropdownMenuItem onClick={() => onPush(file)}>
-              <Files className="mr-2 h-4 w-4" />
-              Import files here
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onPushFolder(file)}>
-              <FolderUp className="mr-2 h-4 w-4" />
-              Import folder here
-            </DropdownMenuItem>
-          </>
-        )}
-        {file.type === 'directory' && (
-          <DropdownMenuItem onClick={() => onGetSize(file)}>
-            <HardDrive className="mr-2 h-4 w-4" />
-            Get size
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => onMove(file)}>
-          <FolderInput className="mr-2 h-4 w-4" />
-          Move to...
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onRename(file)}>
-          <Pencil className="mr-2 h-4 w-4" />
-          Rename
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => onDelete(file)}
-          className="text-destructive focus:text-destructive"
+    <DropdownMenu
+      placement="below"
+      alignment="end"
+      menuWidth={256}
+      renderTrigger={(props) => (
+        <button
+          {...props}
+          type="button"
+          disabled={isBusy}
+          aria-label={`Actions for ${file.name}`}
+          className="flex size-10 items-center justify-center rounded-full text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-background-muted)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-40"
         >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+          <IconDotsVertical size={18} stroke={1.75} />
+        </button>
+      )}
+      header={
+        <div className="border-b border-border/40 px-4 pb-2.5 pt-2">
+          <p className="truncate text-[14px] font-bold tracking-tight text-[var(--color-text-primary)]">
+            {file.name}
+          </p>
+          <p className="mt-0.5 truncate text-[14px] tabular text-[var(--color-text-secondary)]">
+            {file.type === 'directory' ? 'Folder' : `${file.sizeHuman} · ${file.modifiedAt}`}
+          </p>
+        </div>
+      }
+    >
+      {file.type === 'directory' && (
+        <DropdownMenuItem className={ITEM} icon={<IconFolderOpen className={ICON} />} label="Open" onClick={() => onOpen(file)} />
+      )}
+      <DropdownMenuItem className={ITEM} icon={<IconDownload className={ICON} />} label="Export to PC" onClick={() => onPull(file)} />
+      {file.type === 'directory' && (
+        <>
+          <DropdownMenuItem className={ITEM} icon={<IconCopy className={ICON} />} label="Import files here" onClick={() => onPush(file)} />
+          <DropdownMenuItem className={ITEM} icon={<IconFolderUp className={ICON} />} label="Import folder here" onClick={() => onPushFolder(file)} />
+          <DropdownMenuItem
+            className={ITEM}
+            icon={<IconDeviceUsb className={ICON} />}
+            label={
+              <span className="flex w-full items-center gap-2">
+                Get size
+                <span className="ml-auto text-[14px] text-[var(--color-text-secondary)]">du</span>
+              </span>
+            }
+            onClick={() => onGetSize(file)}
+          />
+        </>
+      )}
+      <DropdownMenuDivider className="my-1.5" />
+      <DropdownMenuItem className={ITEM} icon={<IconFolderDown className={ICON} />} label="Move to…" onClick={() => onMove(file)} />
+      <DropdownMenuItem className={ITEM} icon={<IconPencil className={ICON} />} label="Rename" onClick={() => onRename(file)} />
+      <DropdownMenuDivider className="my-1.5" />
+      <DropdownMenuItem
+        className={ITEM}
+        variant="destructive"
+        icon={<IconTrash className={ICON} />}
+        label={
+          <span className="flex w-full items-center gap-2">
+            Delete
+            <span className="ml-auto text-[14px] opacity-70">permanent</span>
+          </span>
+        }
+        onClick={() => onDelete(file)}
+      />
     </DropdownMenu>
   )
 }

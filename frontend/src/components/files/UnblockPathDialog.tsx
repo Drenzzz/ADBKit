@@ -1,12 +1,5 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
+import { Button } from '@astryxdesign/core/Button'
 import { IconSettings } from '@tabler/icons-react'
 import type { UnblockResult } from '@/lib/types'
 
@@ -28,38 +21,40 @@ export function UnblockPathDialog({
   const isVolumeMissing = result.type === 2
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {isVolumeMissing ? 'Storage Not Available' : 'Path Not Accessible'}
-          </DialogTitle>
-          <DialogDescription className="space-y-2">
-            <p className="font-mono text-xs bg-muted px-2 py-1.5 rounded border">
-              {result.path}
-            </p>
-            {result.reason && (
-              <p className="text-sm text-foreground">{result.reason}</p>
-            )}
-            <p className="text-sm">
-              {isVolumeMissing
-                ? 'The removable storage is currently disconnected. Reconnect it and try again.'
-                : 'This path is protected by Android and cannot be accessed through File Explorer.'}
-            </p>
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
+    <Dialog isOpen={open} onOpenChange={onOpenChange} width={448} padding={6}>
+      <div className="grid gap-6">
+        <DialogHeader
+          onOpenChange={onOpenChange}
+          title={
+            <span className="font-heading text-base leading-none font-medium">
+              {isVolumeMissing ? 'Storage Not Available' : 'Path Not Accessible'}
+            </span>
+          }
+          subtitle={
+            <span className="block space-y-2 text-sm text-muted-foreground">
+              <span className="block font-mono text-[13px] bg-muted px-2 py-1.5 rounded border">
+                {result.path}
+              </span>
+              {result.reason && (
+                <span className="block text-[14px] text-foreground">{result.reason}</span>
+              )}
+              <span className="block text-[14px]">
+                {isVolumeMissing
+                  ? 'The removable storage is currently disconnected. Reconnect it and try again.'
+                  : 'This path is protected by Android and cannot be accessed through File Explorer.'}
+              </span>
+            </span>
+          }
+        />
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-0">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
+            label="Cancel"
+          />
           {isVolumeMissing && (
-            <Button size="sm" onClick={onRetry}>
-              Retry
-            </Button>
+            <Button variant="primary" size="sm" onClick={onRetry} label="Retry" />
           )}
           {!isVolumeMissing && (
             <Button
@@ -68,13 +63,12 @@ export function UnblockPathDialog({
               onClick={() => {
                 onOpenChange(false)
               }}
-            >
-              <IconSettings className="h-3.5 w-3.5 mr-1.5" />
-              Open Device Settings
-            </Button>
+              icon={<IconSettings className="h-3.5 w-3.5" />}
+              label="Open Device Settings"
+            />
           )}
-        </DialogFooter>
-      </DialogContent>
+        </div>
+      </div>
     </Dialog>
   )
 }

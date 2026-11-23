@@ -13,6 +13,9 @@ import {
   LaunchPackage,
   ForceStopPackage,
   GetPackageDetails,
+  GetAppIcon,
+  GetAppLabels,
+  GetAppIcons,
   SelectApkFile,
 } from '../../bindings/ADBKit/internal/app/app'
 import type {
@@ -79,6 +82,27 @@ export async function forceStopPackage(packageName: string): Promise<string> {
 export async function getPackageDetails(packageName: string): Promise<PackageDetails> {
   const raw = await GetPackageDetails(packageName)
   return raw as unknown as PackageDetails
+}
+
+export interface AppIcon {
+  packageName: string
+  label: string
+  iconDataURL: string
+}
+
+export async function getAppIcon(packageName: string): Promise<AppIcon> {
+  const raw = await GetAppIcon(packageName)
+  return raw as unknown as AppIcon
+}
+
+export async function getAppLabels(packageNames: string[]): Promise<Record<string, string>> {
+  const raw = await GetAppLabels(packageNames)
+  return (raw ?? {}) as Record<string, string>
+}
+
+export async function getAppIcons(packageNames: string[]): Promise<Record<string, AppIcon>> {
+  const raw = await GetAppIcons(packageNames)
+  return (raw ?? {}) as Record<string, AppIcon>
 }
 
 export async function selectApkFile(): Promise<string> {

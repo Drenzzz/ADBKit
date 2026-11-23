@@ -1,24 +1,8 @@
 import { useState } from 'react'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
+import { AlertDialog } from '@astryxdesign/core/AlertDialog'
+import { Button } from '@astryxdesign/core/Button'
+import { TextInput } from '@astryxdesign/core/TextInput'
 import type { FileEntry } from '@/lib/types'
 
 interface FileActionDialogsProps {
@@ -27,7 +11,6 @@ interface FileActionDialogsProps {
 
   isPullDialogOpen: boolean
   isPushDialogOpen: boolean
-  isPushFolderDialogOpen: boolean
   isRenameDialogOpen: boolean
   isDeleteDialogOpen: boolean
   isNewFolderDialogOpen: boolean
@@ -37,7 +20,6 @@ interface FileActionDialogsProps {
 
   setIsPullDialogOpen: (open: boolean) => void
   setIsPushDialogOpen: (open: boolean) => void
-  setIsPushFolderDialogOpen: (open: boolean) => void
   setIsRenameDialogOpen: (open: boolean) => void
   setIsDeleteDialogOpen: (open: boolean) => void
   setIsNewFolderDialogOpen: (open: boolean) => void
@@ -47,7 +29,6 @@ interface FileActionDialogsProps {
 
   onPullConfirm: (localPath: string) => Promise<void>
   onPushConfirm: (localPath: string) => void
-  onPushFolderConfirm: (localPaths: string[]) => void
   onRenameConfirm: (newName: string) => void
   onDeleteConfirm: () => void
   onNewFolderConfirm: (folderName: string) => void
@@ -58,7 +39,6 @@ interface FileActionDialogsProps {
   chooseLocalFile: () => Promise<string>
   chooseLocalSaveFile: (defaultFilename: string) => Promise<string>
   chooseLocalDirectory: () => Promise<string>
-  chooseMultipleLocalDirectories: () => Promise<string[]>
 }
 
 export function FileActionDialogs({
@@ -66,7 +46,6 @@ export function FileActionDialogs({
   selectedCount,
   isPullDialogOpen,
   isPushDialogOpen,
-  isPushFolderDialogOpen,
   isRenameDialogOpen,
   isDeleteDialogOpen,
   isNewFolderDialogOpen,
@@ -75,7 +54,6 @@ export function FileActionDialogs({
   isBatchDeleteDialogOpen,
   setIsPullDialogOpen,
   setIsPushDialogOpen,
-  setIsPushFolderDialogOpen,
   setIsRenameDialogOpen,
   setIsDeleteDialogOpen,
   setIsNewFolderDialogOpen,
@@ -84,7 +62,6 @@ export function FileActionDialogs({
   setIsBatchDeleteDialogOpen,
   onPullConfirm,
   onPushConfirm,
-  onPushFolderConfirm,
   onRenameConfirm,
   onDeleteConfirm,
   onNewFolderConfirm,
@@ -94,7 +71,6 @@ export function FileActionDialogs({
   chooseLocalFile,
   chooseLocalSaveFile,
   chooseLocalDirectory,
-  chooseMultipleLocalDirectories,
 }: FileActionDialogsProps) {
   const [renameValue, setRenameValue] = useState('')
   const [folderName, setFolderName] = useState('')
@@ -102,104 +78,96 @@ export function FileActionDialogs({
 
   return (
     <>
-      <Dialog open={isPullDialogOpen} onOpenChange={setIsPullDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Export File</DialogTitle>
-            <DialogDescription>
-              Export this file from device to PC.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPullDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
+      <Dialog isOpen={isPullDialogOpen} onOpenChange={setIsPullDialogOpen} width={448} padding={6}>
+        <div className="grid gap-6">
+          <DialogHeader
+            onOpenChange={setIsPullDialogOpen}
+            title={<span className="font-heading text-base leading-none font-medium">Export File</span>}
+            subtitle={<span className="text-sm text-muted-foreground">Export this file from device to PC.</span>}
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="secondary" onClick={() => setIsPullDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={async () => {
               const path = await chooseLocalSaveFile(dialogTargetFile?.name ?? 'exported-file')
               if (path) await onPullConfirm(path)
-            }}>Choose Location</Button>
-          </DialogFooter>
-        </DialogContent>
+            }} label="Choose Location" />
+          </div>
+        </div>
       </Dialog>
 
-      <Dialog open={isPushDialogOpen} onOpenChange={setIsPushDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import File</DialogTitle>
-            <DialogDescription>
-              Import a file to <span className="font-mono text-sm">{dialogTargetFile?.path}</span>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPushDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
+      <Dialog isOpen={isPushDialogOpen} onOpenChange={setIsPushDialogOpen} width={448} padding={6}>
+        <div className="grid gap-6">
+          <DialogHeader
+            onOpenChange={setIsPushDialogOpen}
+            title={<span className="font-heading text-base leading-none font-medium">Import File</span>}
+            subtitle={
+              <span className="text-sm text-muted-foreground">
+                Import a file to <span className="font-mono text-[13px]">{dialogTargetFile?.path}</span>
+              </span>
+            }
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="secondary" onClick={() => setIsPushDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={async () => {
               const path = await chooseLocalFile()
               if (path) { onPushConfirm(path); setIsPushDialogOpen(false) }
-            }}>Choose File</Button>
-          </DialogFooter>
-        </DialogContent>
+            }} label="Choose File" />
+          </div>
+        </div>
       </Dialog>
 
-      <Dialog open={isPushFolderDialogOpen} onOpenChange={setIsPushFolderDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import Folder</DialogTitle>
-            <DialogDescription>
-              Import one or more folders from PC to this device directory.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPushFolderDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
-              const paths = await chooseMultipleLocalDirectories()
-              if (paths.length) { onPushFolderConfirm(paths); setIsPushFolderDialogOpen(false) }
-            }}>Choose Folders</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isRenameDialogOpen} onOpenChange={(open) => {
+      <Dialog isOpen={isRenameDialogOpen} onOpenChange={(open) => {
         setIsRenameDialogOpen(open)
         if (open && dialogTargetFile) setRenameValue(dialogTargetFile.name)
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rename</DialogTitle>
-            <DialogDescription>Rename {dialogTargetFile?.name}</DialogDescription>
-          </DialogHeader>
-          <Input
+      }} width={448} padding={6}>
+        <div className="grid gap-6">
+          <DialogHeader
+            onOpenChange={setIsRenameDialogOpen}
+            title={<span className="font-heading text-base leading-none font-medium">Rename</span>}
+            subtitle={<span className="text-sm text-muted-foreground">Rename {dialogTargetFile?.name}</span>}
+          />
+          <TextInput
+            label="New name"
+            isLabelHidden
             value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
+            onChange={(value) => setRenameValue(value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && renameValue.trim()) {
                 onRenameConfirm(renameValue)
                 setIsRenameDialogOpen(false)
               }
             }}
-            autoFocus
+            hasAutoFocus
           />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => { onRenameConfirm(renameValue); setIsRenameDialogOpen(false) }} disabled={!renameValue.trim()}>Rename</Button>
-          </DialogFooter>
-        </DialogContent>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="secondary" onClick={() => setIsRenameDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={() => { onRenameConfirm(renameValue); setIsRenameDialogOpen(false) }} isDisabled={!renameValue.trim()} label="Rename" />
+          </div>
+        </div>
       </Dialog>
 
-      <Dialog open={isMoveDialogOpen} onOpenChange={(open) => {
+      <Dialog isOpen={isMoveDialogOpen} onOpenChange={(open) => {
         setIsMoveDialogOpen(open)
         if (open && dialogTargetFile) {
           const parent = dialogTargetFile.path.slice(0, dialogTargetFile.path.lastIndexOf('/')) || '/'
           setMoveValue(parent)
         }
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Move</DialogTitle>
-            <DialogDescription>
-              Move <span className="font-mono text-sm">{dialogTargetFile?.name}</span> to a destination directory on the device.
-            </DialogDescription>
-          </DialogHeader>
-          <Input
+      }} width={448} padding={6}>
+        <div className="grid gap-6">
+          <DialogHeader
+            onOpenChange={setIsMoveDialogOpen}
+            title={<span className="font-heading text-base leading-none font-medium">Move</span>}
+            subtitle={
+              <span className="text-sm text-muted-foreground">
+                Move <span className="font-mono text-[13px]">{dialogTargetFile?.name}</span> to a destination directory on the device.
+              </span>
+            }
+          />
+          <TextInput
+            label="Destination directory"
+            isLabelHidden
             value={moveValue}
-            onChange={(e) => setMoveValue(e.target.value)}
+            onChange={(value) => setMoveValue(value)}
             placeholder="/sdcard/destination"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && moveValue.trim()) {
@@ -207,47 +175,41 @@ export function FileActionDialogs({
                 setIsMoveDialogOpen(false)
               }
             }}
-            autoFocus
+            hasAutoFocus
           />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsMoveDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => { onMoveConfirm(moveValue); setIsMoveDialogOpen(false) }} disabled={!moveValue.trim()}>Move</Button>
-          </DialogFooter>
-        </DialogContent>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="secondary" onClick={() => setIsMoveDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={() => { onMoveConfirm(moveValue); setIsMoveDialogOpen(false) }} isDisabled={!moveValue.trim()} label="Move" />
+          </div>
+        </div>
       </Dialog>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete File</AlertDialogTitle>
-            <AlertDialogDescription>
-              Delete <span className="font-mono text-sm">{dialogTargetFile?.name}</span>? This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={onDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AlertDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Delete File"
+        description={`Delete ${dialogTargetFile?.name ?? ''}? This cannot be undone.`}
+        actionLabel="Delete"
+        actionVariant="destructive"
+        onAction={onDeleteConfirm}
+        width={448}
+      />
 
-      <Dialog open={isNewFolderDialogOpen} onOpenChange={(open) => {
+      <Dialog isOpen={isNewFolderDialogOpen} onOpenChange={(open) => {
         setIsNewFolderDialogOpen(open)
         if (open) setFolderName('')
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New Folder</DialogTitle>
-            <DialogDescription>Create a new folder in the current directory.</DialogDescription>
-          </DialogHeader>
-          <Input
+      }} width={448} padding={6}>
+        <div className="grid gap-6">
+          <DialogHeader
+            onOpenChange={setIsNewFolderDialogOpen}
+            title={<span className="font-heading text-base leading-none font-medium">New Folder</span>}
+            subtitle={<span className="text-sm text-muted-foreground">Create a new folder in the current directory.</span>}
+          />
+          <TextInput
+            label="Folder name"
+            isLabelHidden
             value={folderName}
-            onChange={(e) => setFolderName(e.target.value)}
+            onChange={(value) => setFolderName(value)}
             placeholder="Folder name"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && folderName.trim()) {
@@ -255,50 +217,42 @@ export function FileActionDialogs({
                 setIsNewFolderDialogOpen(false)
               }
             }}
-            autoFocus
+            hasAutoFocus
           />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewFolderDialogOpen(false)}>Cancel</Button>
-            <Button onClick={() => { onNewFolderConfirm(folderName); setIsNewFolderDialogOpen(false) }} disabled={!folderName.trim()}>Create</Button>
-          </DialogFooter>
-        </DialogContent>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="secondary" onClick={() => setIsNewFolderDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={() => { onNewFolderConfirm(folderName); setIsNewFolderDialogOpen(false) }} isDisabled={!folderName.trim()} label="Create" />
+          </div>
+        </div>
       </Dialog>
 
-      <Dialog open={isBatchPullDialogOpen} onOpenChange={setIsBatchPullDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Export {selectedCount} File(s)</DialogTitle>
-            <DialogDescription>Choose a directory on your computer to save the selected files.</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsBatchPullDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
+      <Dialog isOpen={isBatchPullDialogOpen} onOpenChange={setIsBatchPullDialogOpen} width={448} padding={6}>
+        <div className="grid gap-6">
+          <DialogHeader
+            onOpenChange={setIsBatchPullDialogOpen}
+            title={<span className="font-heading text-base leading-none font-medium">Export {selectedCount} File(s)</span>}
+            subtitle={<span className="text-sm text-muted-foreground">Choose a directory on your computer to save the selected files.</span>}
+          />
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="secondary" onClick={() => setIsBatchPullDialogOpen(false)} label="Cancel" />
+            <Button variant="primary" onClick={async () => {
               const dir = await chooseLocalDirectory()
               if (dir) { onBatchPullConfirm(dir); setIsBatchPullDialogOpen(false) }
-            }}>Choose Directory</Button>
-          </DialogFooter>
-        </DialogContent>
+            }} label="Choose Directory" />
+          </div>
+        </div>
       </Dialog>
 
-      <AlertDialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete {selectedCount} File(s)</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the selected files from the device. This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={onBatchDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete All
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <AlertDialog
+        isOpen={isBatchDeleteDialogOpen}
+        onOpenChange={setIsBatchDeleteDialogOpen}
+        title={`Delete ${selectedCount} File(s)`}
+        description="This will permanently delete the selected files from the device. This cannot be undone."
+        actionLabel="Delete All"
+        actionVariant="destructive"
+        onAction={onBatchDeleteConfirm}
+        width={448}
+      />
     </>
   )
 }

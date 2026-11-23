@@ -37,7 +37,7 @@ export function ActiveDeviceSelector() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/50 px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-accent/50"
+        className="flex items-center gap-1.5 rounded-md border border-border/50 bg-muted/50 px-2.5 py-1.5 text-[14px] font-medium transition-colors hover:bg-accent/50"
       >
         <Smartphone className="h-3.5 w-3.5 text-muted-foreground" />
         <span className="max-w-[120px] truncate">{displayLabel}</span>
@@ -50,7 +50,7 @@ export function ActiveDeviceSelector() {
             <button
               key={device.serial}
               onClick={() => handleSelect(device.serial)}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-accent/50"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-[14px] transition-colors hover:bg-accent/50"
             >
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate font-medium">

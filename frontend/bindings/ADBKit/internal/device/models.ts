@@ -23,6 +23,7 @@ export interface Info {
     "batteryLevel"?: string;
     "storageInfo"?: string;
     "ramTotal"?: string;
+    "swapTotal"?: string;
 }
 
 export enum Mode {

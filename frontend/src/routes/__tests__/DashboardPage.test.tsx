@@ -3,8 +3,11 @@ import DashboardPage from '../DashboardPage'
 import { renderRoute } from '@/test-utils'
 
 describe('DashboardPage smoke', () => {
-  it('renders without crashing', async () => {
+  it('renders the dashboard panels', async () => {
     renderRoute(<DashboardPage />)
-    expect(document.body).toBeTruthy()
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(document.body.textContent).toContain('Wireless connection')
+    expect(document.body.textContent).toContain('No device connected')
+    expect(document.body.textContent).not.toContain('Live monitor')
   })
 })

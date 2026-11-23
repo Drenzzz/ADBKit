@@ -6,10 +6,9 @@ import {
   IconTerminal as Terminal,
   IconCpu as Cpu
 } from "@tabler/icons-react"
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getBinaryStatus } from '@/services/binaryService'
 import type { BinaryInfo, BinarySetupResult } from '@/lib/types'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 
 function BinaryRow({ label, icon, info }: { label: string; icon: React.ReactNode; info: BinaryInfo }) {
   const ready = info.status === 'ready'
@@ -17,10 +16,10 @@ function BinaryRow({ label, icon, info }: { label: string; icon: React.ReactNode
     <div className="flex items-center justify-between py-2.5">
       <div className="flex items-center gap-2.5">
         <div className="text-muted-foreground">{icon}</div>
-        <span className="text-xs font-semibold text-foreground">{label}</span>
+        <span className="text-[14px] font-semibold text-foreground">{label}</span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-[11px] font-mono text-muted-foreground max-w-[150px] truncate">
+        <span className="text-[13px] font-mono text-muted-foreground max-w-[150px] truncate">
           {ready ? info.version ?? 'Ready' : info.status}
         </span>
         {ready ? (
@@ -54,30 +53,26 @@ export function BinaryStatusCard() {
   }, [refresh])
 
   return (
-    <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)]">
-      <CardHeader className="pb-2 pt-4 px-4">
-        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-          <ShieldCheck className="h-3.5 w-3.5" />
-          Binary Diagnostics
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-4 pb-4">
-        {loading ? (
-          <div className="space-y-3 py-2">
-            <Skeleton className="h-5 w-full" />
-            <Skeleton className="h-5 w-full" />
-            <Skeleton className="h-5 w-full" />
-          </div>
-        ) : !status ? (
-          <p className="text-xs text-muted-foreground py-2 text-center">Failed to load diagnostics.</p>
-        ) : (
-          <div className="divide-y divide-border/40">
-            <BinaryRow label="ADB Tool" icon={<Terminal className="h-3.5 w-3.5" />} info={status.adb} />
-            <BinaryRow label="Fastboot Flasher" icon={<Cpu className="h-3.5 w-3.5" />} info={status.fastboot} />
-            <BinaryRow label="Scrcpy Engine" icon={<Cpu className="h-3.5 w-3.5" />} info={status.scrcpy} />
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <section className="m3-surface rounded-3xl p-5 border border-border/60 bg-card shadow-[var(--shadow-card)]">
+      <h3 className="mb-4 flex items-center gap-2.5 text-[18px] font-semibold text-[var(--color-text-primary)]">
+        <span className="text-[var(--color-text-secondary)]"><ShieldCheck className="h-3.5 w-3.5" /></span>
+        Binary Diagnostics
+      </h3>
+      {loading ? (
+        <div className="space-y-3 py-2">
+          <Skeleton height={20} width="100%" radius={2} />
+          <Skeleton height={20} width="100%" radius={2} />
+          <Skeleton height={20} width="100%" radius={2} />
+        </div>
+      ) : !status ? (
+        <p className="text-[14px] text-muted-foreground py-2 text-center">Failed to load diagnostics.</p>
+      ) : (
+        <div className="divide-y divide-border/40">
+          <BinaryRow label="ADB Tool" icon={<Terminal className="h-3.5 w-3.5" />} info={status.adb} />
+          <BinaryRow label="Fastboot Flasher" icon={<Cpu className="h-3.5 w-3.5" />} info={status.fastboot} />
+          <BinaryRow label="Scrcpy Engine" icon={<Cpu className="h-3.5 w-3.5" />} info={status.scrcpy} />
+        </div>
+      )}
+    </section>
   )
 }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
+import { IconTerminal } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 
 interface TerminalViewProps {
@@ -9,7 +10,7 @@ interface TerminalViewProps {
 }
 
 const TERMINAL_VIRTUALIZATION_THRESHOLD = 1000
-const TERMINAL_ROW_HEIGHT = 20
+const TERMINAL_ROW_HEIGHT = 24
 
 export function TerminalView({ className, output, onResize }: TerminalViewProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -40,23 +41,21 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
   function renderLine(line: string, idx: number) {
     const trimmed = line.trim()
 
-    // Highlight commands prompt
     if (trimmed.startsWith('$')) {
       const cmdPart = line.substring(line.indexOf('$') + 1)
       const prevLine = idx > 0 ? lines[idx - 1].trim() : ''
       const showSpacer = idx > 0 && prevLine !== ''
       return (
         <div
-          className={cn('font-mono leading-5', showSpacer && 'mt-4')}
+          className={cn('font-mono text-[14px] leading-6', showSpacer && 'mt-4')}
           key={idx}
         >
-          <span className="text-[var(--logcat-info)] dark:text-[var(--logcat-info)] font-semibold select-none">$</span>
-          <span className="text-foreground dark:text-[var(--terminal-text)] font-semibold">{cmdPart}</span>
+          <span className="font-semibold text-[var(--color-accent)] select-none">$</span>
+          <span className="font-semibold text-[var(--color-text-primary)]">{cmdPart}</span>
         </div>
       )
     }
 
-    // Highlight errors
     const lowerLine = trimmed.toLowerCase()
     if (
       lowerLine.includes('error') ||
@@ -65,27 +64,26 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
       lowerLine.includes('err:')
     ) {
       return (
-        <div key={idx} className="font-mono leading-5 text-[var(--logcat-error)] dark:text-[var(--logcat-error)] font-semibold whitespace-pre-wrap break-all">
+        <div key={idx} className="font-mono text-[14px] leading-6 font-semibold text-[var(--logcat-error)] whitespace-pre-wrap break-all">
           {line}
         </div>
       )
     }
 
-    // Highlight fastboot OKAY / Finished
     if (
       trimmed.includes('OKAY [') ||
       trimmed.includes('Finished. Total time:') ||
       trimmed.startsWith('Rebooting')
     ) {
       return (
-        <div key={idx} className="font-mono leading-5 text-[var(--logcat-warn)] dark:text-[var(--logcat-warn)] font-semibold whitespace-pre-wrap break-words">
+        <div key={idx} className="font-mono text-[14px] leading-6 font-semibold text-[var(--color-success)] whitespace-pre-wrap break-words">
           {line}
         </div>
       )
     }
 
     return (
-      <div key={idx} className="font-mono leading-5 text-foreground dark:text-[var(--terminal-text)] whitespace-pre-wrap break-words">
+      <div key={idx} className="font-mono text-[14px] leading-6 text-[var(--color-text-primary)] whitespace-pre-wrap break-words">
         {line}
       </div>
     )
@@ -95,12 +93,20 @@ export function TerminalView({ className, output, onResize }: TerminalViewProps)
     <div
       ref={containerRef}
       className={cn(
-        'h-full w-full overflow-auto bg-background dark:bg-[var(--terminal-bg)] px-5 py-4 font-mono text-xs leading-5 text-foreground dark:text-[var(--terminal-text)] select-text selection:bg-primary/20 dark:selection:bg-primary/30 selection:text-foreground dark:selection:text-[var(--terminal-text)]',
+        'h-full w-full overflow-auto bg-[var(--color-surface-inset)] px-5 py-4 font-mono text-[14px] leading-6 text-[var(--color-text-primary)] select-text selection:bg-[var(--color-accent)]/20 selection:text-[var(--color-text-primary)]',
         className,
       )}
     >
       {lines.length === 0 || (lines.length === 1 && lines[0] === '') ? (
-        <div className="text-muted-foreground dark:text-[var(--terminal-muted)] italic select-none">No terminal output yet.</div>
+        <div className="flex h-full flex-col items-center justify-center gap-3 font-sans select-none">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-[var(--color-background-card)] text-[var(--color-text-secondary)]">
+            <IconTerminal size={24} stroke={1.75} />
+          </div>
+          <p className="text-[16px] font-semibold text-[var(--color-text-primary)]">No output yet</p>
+          <p className="max-w-xs text-center text-[14px] leading-relaxed text-[var(--color-text-secondary)]">
+            Connect a session and send a command to see output here
+          </p>
+        </div>
       ) : shouldVirtualize ? (
         <div
           style={{

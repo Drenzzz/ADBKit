@@ -114,6 +114,11 @@ func (s *Service) GetDeviceInfo(ctx context.Context, serial string) (*Info, erro
 		info.RAMTotal = ramTotal
 	}
 
+	swapTotal, err := s.getSwapTotal(ctx, matched.Serial)
+	if err == nil {
+		info.SwapTotal = swapTotal
+	}
+
 	return info, nil
 }
 

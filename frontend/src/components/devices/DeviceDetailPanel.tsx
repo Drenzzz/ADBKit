@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import {
   IconDeviceMobile as Smartphone,
   IconStack2 as Layers,
@@ -22,8 +22,7 @@ import {
   IconRefresh as RefreshCw
 } from "@tabler/icons-react"
 import { cn } from '@/lib/utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button } from '@astryxdesign/core/Button'
 import { useDevices } from '@/hooks/useDevices'
 import type { DeviceInfo } from '@/lib/types'
 
@@ -84,67 +83,66 @@ export function DeviceDetailPanel() {
   }
 
   return (
-    <Card className="border border-border/60 bg-card shadow-[var(--shadow-card)] w-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-4 px-4">
-        <CardTitle className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-          <Info className="h-3.5 w-3.5" />
-          Device Specifications
-        </CardTitle>
+    <section className="m3-surface rounded-3xl p-5 border border-border/60 bg-card shadow-[var(--shadow-card)] w-full">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h3 className="flex items-center gap-2.5 text-[18px] font-semibold text-[var(--color-text-primary)]">
+          <span className="text-[var(--color-text-secondary)]"><Info className="h-3.5 w-3.5" /></span>
+          Device specifications
+        </h3>
         {activeSerial && (
           <Button
             variant="ghost"
-            size="icon"
+            isIconOnly
+            size="sm"
             className="h-7 w-7 text-muted-foreground hover:text-foreground"
             onClick={refreshDevices}
-            disabled={loading}
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
+            isDisabled={loading}
+            label="Refresh device details"
+            icon={<RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />}
+          />
         )}
-      </CardHeader>
-      <CardContent className="px-4 pb-4">
-        {!deviceInfo ? (
-          <p className="text-xs text-muted-foreground py-4 text-center">No active device details.</p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
-            {cells.map((cell) => {
-              const Icon = cell.icon
-              const isCopied = copiedKey === cell.label
-              return (
-                <motion.button
-                  key={cell.label}
-                  type="button"
-                  whileHover={reduced ? undefined : { scale: 1.01 }}
-                  whileTap={reduced ? undefined : { scale: 0.98 }}
-                  onClick={() => handleCopy(cell.label, cell.value)}
-                  className="group flex items-start gap-2.5 rounded-xl border border-border/40 bg-muted/10 p-2.5 text-left transition-colors hover:border-border/60 hover:bg-muted/20 hover:shadow-sm cursor-pointer"
-                >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-background border border-border/40 text-muted-foreground group-hover:text-primary transition-colors">
-                    <Icon className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-[9px] uppercase tracking-[0.12em] text-muted-foreground/60">
-                        {cell.label}
-                      </p>
-                      <span className="flex h-3 w-3 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                        {isCopied ? (
-                          <Check className="h-2.5 w-2.5 text-success" />
-                        ) : (
-                          <Copy className="h-2.5 w-2.5 text-muted-foreground/50 group-hover:text-primary" />
-                        )}
-                      </span>
-                    </div>
-                    <p className={cn('mt-0.5 truncate text-xs font-semibold text-foreground', cell.mono && 'font-mono text-[10px]')}>
-                      {cell.value}
+      </div>
+      {!deviceInfo ? (
+        <p className="text-[14px] text-muted-foreground py-4 text-center">No active device details.</p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+          {cells.map((cell) => {
+            const Icon = cell.icon
+            const isCopied = copiedKey === cell.label
+            return (
+              <motion.button
+                key={cell.label}
+                type="button"
+                whileHover={reduced ? undefined : { scale: 1.01 }}
+                whileTap={reduced ? undefined : { scale: 0.98 }}
+                onClick={() => handleCopy(cell.label, cell.value)}
+                className="group flex items-start gap-2.5 rounded-xl border border-border/40 bg-muted/10 p-2.5 text-left transition-colors hover:border-border/60 hover:bg-muted/20 hover:shadow-sm cursor-pointer"
+              >
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-background border border-border/40 text-muted-foreground group-hover:text-primary transition-colors">
+                  <Icon className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[14px] text-muted-foreground/80">
+                      {cell.label}
                     </p>
+                    <span className="flex h-3 w-3 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                      {isCopied ? (
+                        <Check className="h-2.5 w-2.5 text-success" />
+                      ) : (
+                        <Copy className="h-2.5 w-2.5 text-muted-foreground/50 group-hover:text-primary" />
+                      )}
+                    </span>
                   </div>
-                </motion.button>
-              )
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                  <p className={cn('mt-0.5 truncate text-[14px] font-semibold text-foreground', cell.mono && 'font-mono text-[13px]')}>
+                    {cell.value}
+                  </p>
+                </div>
+              </motion.button>
+            )
+          })}
+        </div>
+      )}
+    </section>
   )
 }

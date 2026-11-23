@@ -80,6 +80,20 @@ func (a *App) GetPackageDetails(packageName string) (packagemgr.Details, error) 
 	})
 }
 
+func (a *App) GetAppIcon(packageName string) (packagemgr.AppIcon, error) {
+	return auditAction(a, "get_app_icon", func() (packagemgr.AppIcon, error) {
+		return a.pkgSvc.GetAppIcon(a.ctx, packageName)
+	})
+}
+
+func (a *App) GetAppLabels(packageNames []string) map[string]string {
+	return a.pkgSvc.GetAppLabels(packageNames)
+}
+
+func (a *App) GetAppIcons(packageNames []string) map[string]packagemgr.AppIcon {
+	return a.pkgSvc.GetAppIcons(a.ctx, packageNames)
+}
+
 func (a *App) InspectAPK(filePath string) (packagemgr.APKPreview, error) {
 	return auditAction(a, "inspect_apk", func() (packagemgr.APKPreview, error) {
 		return a.pkgSvc.InspectAPK(filePath)

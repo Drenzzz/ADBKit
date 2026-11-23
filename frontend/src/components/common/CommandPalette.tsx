@@ -19,7 +19,7 @@ import { useUIStore } from '@/stores/useUIStore'
 import { useDeviceStore } from '@/stores/useDeviceStore'
 import { useSettings } from '@/hooks/useSettings'
 import { getDevices } from '@/services/deviceService'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 const routeCommands = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -94,14 +94,14 @@ export function CommandPalette() {
       <Command className="relative z-10 w-full max-w-md overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-[var(--shadow-raised)]">
         <Command.Input
           placeholder="Type a command or search..."
-          className="flex h-11 w-full rounded-t-xl border-b border-border bg-transparent px-4 text-sm outline-none placeholder:text-muted-foreground"
+          className="flex h-11 w-full rounded-t-xl border-b border-border bg-transparent px-4 text-[14px] outline-none placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
         />
         <Command.List className="max-h-72 overflow-y-auto p-1.5">
-          <Command.Empty className="py-6 text-center text-sm text-muted-foreground">
+          <Command.Empty className="py-6 text-center text-[14px] text-muted-foreground">
             No results found.
           </Command.Empty>
 
-          <Command.Group heading="Navigation" className="text-xs text-muted-foreground">
+          <Command.Group heading="Navigation" className="text-[14px] text-muted-foreground">
             {routeCommands.map(({ path, label, icon: Icon }) => (
               <Command.Item
                 key={path}
@@ -110,7 +110,7 @@ export function CommandPalette() {
                   navigate(path)
                   setCommandPaletteOpen(false)
                 }}
-                className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"
+                className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-[14px] transition-colors hover:bg-accent/50 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] data-[selected=true]:bg-accent/60"
               >
                 <Icon className="h-4 w-4 text-muted-foreground" />
                 <span>{label}</span>
@@ -120,11 +120,11 @@ export function CommandPalette() {
 
           <Command.Separator className="my-1 h-px bg-border/50" />
 
-          <Command.Group heading="Actions" className="text-xs text-muted-foreground">
+          <Command.Group heading="Actions" className="text-[14px] text-muted-foreground">
             <Command.Item
               value="Refresh devices"
               onSelect={() => void handleRefreshDevices()}
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-[14px] transition-colors hover:bg-accent/50 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] data-[selected=true]:bg-accent/60"
             >
               <RefreshCw className="h-4 w-4 text-muted-foreground" />
               <span>Refresh connected devices</span>
@@ -135,7 +135,7 @@ export function CommandPalette() {
                 navigate('/terminal')
                 setCommandPaletteOpen(false)
               }}
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-[14px] transition-colors hover:bg-accent/50 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] data-[selected=true]:bg-accent/60"
             >
               <Terminal className="h-4 w-4 text-muted-foreground" />
               <span>Open terminal session</span>
@@ -143,7 +143,7 @@ export function CommandPalette() {
             <Command.Item
               value="Screenshot"
               onSelect={handleScreenshot}
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-[14px] transition-colors hover:bg-accent/50 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] data-[selected=true]:bg-accent/60"
             >
               <Camera className="h-4 w-4 text-muted-foreground" />
               <span>Open Scrcpy Hub</span>
@@ -154,7 +154,7 @@ export function CommandPalette() {
                 handleToggleTheme()
                 setCommandPaletteOpen(false)
               }}
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent/50 data-[selected=true]:bg-accent/60"
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-[14px] transition-colors hover:bg-accent/50 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] data-[selected=true]:bg-accent/60"
             >
               {theme === 'dark' ? (
                 <Sun className="h-4 w-4 text-muted-foreground" />
@@ -167,11 +167,11 @@ export function CommandPalette() {
         </Command.List>
 
         <div className="flex items-center justify-between border-t border-border px-3 py-1.5">
-          <span className="text-[10px] text-muted-foreground">
-            Press <kbd className="rounded border border-border bg-muted px-1 py-0.5 text-[10px]">Esc</kbd> to close
+          <span className="text-[14px] text-muted-foreground">
+            Press <kbd className="rounded border border-border bg-muted px-1 py-0.5 text-[14px]">Esc</kbd> to close
           </span>
-          <span className="text-[10px] text-muted-foreground">
-            <kbd className="rounded border border-border bg-muted px-1 py-0.5 text-[10px]">Ctrl+K</kbd> to toggle
+          <span className="text-[14px] text-muted-foreground">
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5 text-[14px]">Ctrl+K</kbd> to toggle
           </span>
         </div>
       </Command>

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useEffect } from 'react'
+import { motion } from 'motion/react'
+import { Button } from '@astryxdesign/core/Button'
 import { useSetupWizardStore } from '@/stores/useSetupWizardStore'
 import { getSetupState } from '@/services/binaryService'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -18,20 +19,15 @@ function detectOS(): string {
 }
 
 const REQUIRED_BINARIES = [
-  { name: 'ADB', description: 'Device detection and shell access', icon: Terminal },
-  { name: 'Fastboot', description: 'Bootloader operations and flashing', icon: Smartphone },
-  { name: 'scrcpy', description: 'Screen mirroring and clipboard sync', icon: Monitor },
-]
+  { key: 'adb', name: 'ADB', description: 'Device detection and shell access', icon: Terminal },
+  { key: 'fastboot', name: 'Fastboot', description: 'Bootloader operations and flashing', icon: Smartphone },
+  { key: 'scrcpy', name: 'Scrcpy', description: 'Screen mirroring and clipboard sync', icon: Monitor },
+] as const
 
 export function WelcomeStep() {
   const { nextStep, setSetupState } = useSetupWizardStore()
   const osName = detectOS()
   const reduced = useReducedMotion()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     let active = true
@@ -51,66 +47,60 @@ export function WelcomeStep() {
     }
   }, [setSetupState])
 
-  const transition = reduced
-    ? 'none'
-    : 'opacity 320ms cubic-bezier(0.32, 0.72, 0, 1), transform 320ms cubic-bezier(0.32, 0.72, 0, 1)'
-
   return (
-    <div className="flex w-full flex-col gap-8 text-left">
-      <header
+    <div className="flex min-h-0 flex-1 flex-col">
+      <motion.div
         className="flex flex-col gap-3"
-        style={{
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(8px)',
-          transition,
-        }}
+        initial={reduced ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={reduced ? { duration: 0 } : { duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="flex items-center gap-3">
-          <img src="/logo.webp" alt="ADBKit" className="h-12 w-12 object-contain" />
-          <div className="flex flex-col">
-            <span className="text-lg font-semibold tracking-tight text-foreground">Welcome to ADBKit.</span>
-            <span className="text-xs text-muted-foreground">One quick pass to connect the local Android tools ADBKit uses every day.</span>
-          </div>
+        <img src="/logo.webp" alt="" className="h-16 w-16 object-contain" />
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-4xl font-semibold tracking-tight text-foreground">
+            Welcome to ADBKit
+          </h1>
+          <p className="max-w-xl text-[16px] leading-7 text-muted-foreground">
+            Connect the local Android tools ADBKit drives: adb, fastboot, and scrcpy.
+          </p>
         </div>
-      </header>
+      </motion.div>
 
-      <div className="flex flex-col gap-3">
+      <div className="mt-8 flex flex-col gap-3">
         {REQUIRED_BINARIES.map(({ name, description, icon: Icon }, i) => (
-          <div
-            key={name}
-            className="flex items-center gap-3 rounded-xl border border-border/50 bg-background px-4 py-3"
-            style={{
-              opacity: mounted ? 1 : 0,
-              transform: mounted ? 'translateY(0)' : 'translateY(8px)',
-              transition: `${transition} ${80 + i * 60}ms`,
-            }}
-          >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/40 bg-muted text-muted-foreground">
-              <Icon className="h-4 w-4" />
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="text-sm font-medium text-foreground">{name}</span>
-              <span className="truncate text-xs text-muted-foreground">{description}</span>
-            </div>
-          </div>
+            <motion.div
+              key={name}
+              className="flex items-start gap-4 rounded-xl border border-border bg-background px-5 py-4"
+              initial={reduced ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={
+                reduced
+                  ? { duration: 0 }
+                  : { duration: 0.32, delay: 0.08 + i * 0.06, ease: [0.16, 1, 0.3, 1] }
+              }
+            >
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <Icon className="h-5 w-5" />
+              </div>
+              <div className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="text-[16px] font-medium text-foreground">{name}</span>
+                <p className="text-[14px] leading-6 text-muted-foreground">{description}</p>
+              </div>
+            </motion.div>
         ))}
       </div>
 
-      <footer
-        className="flex flex-col gap-3 border-t border-border/30 pt-5 sm:flex-row sm:items-center sm:justify-between"
-        style={{
-          opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(8px)',
-          transition: `${transition} 220ms`,
-        }}
+      <motion.footer
+        className="mt-auto flex flex-col gap-6 pt-6 sm:flex-row sm:items-center sm:justify-between"
+        initial={reduced ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={reduced ? { duration: 0 } : { duration: 0.32, delay: 0.28 }}
       >
-        <span className="text-xs text-muted-foreground">
-          Host detected: <span className="text-foreground">{osName}</span>
+        <span className="text-[14px] text-muted-foreground">
+          Host detected: <span className="font-medium text-foreground">{osName}</span>
         </span>
-        <Button onClick={nextStep} size="sm" className="h-8 self-end gap-1.5 px-4 sm:self-auto">
-          Continue
-        </Button>
-      </footer>
+        <Button variant="primary" onClick={nextStep} size="md" className="h-11 px-7 text-[16px]" label="Continue" />
+      </motion.footer>
     </div>
   )
 }

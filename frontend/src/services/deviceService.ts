@@ -79,7 +79,7 @@ export async function disconnectWireless(address: string): Promise<string> {
 
 export async function getWirelessHistory(): Promise<WirelessHistoryEntry[]> {
   const raw = await GetWirelessHistory()
-  return (raw as unknown as WirelessHistoryEntry[]) ?? []
+  return Array.isArray(raw) ? (raw as unknown as WirelessHistoryEntry[]) : []
 }
 
 export async function saveWirelessHistory(entries: WirelessHistoryEntry[]): Promise<void> {

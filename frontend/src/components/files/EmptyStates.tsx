@@ -1,39 +1,89 @@
 import {
-  IconDeviceMobile as Smartphone,
-  IconFolderOpen as FolderOpen,
-  IconSearch as Search,
-  IconRefresh as Refresh,
-  IconUsb as Usb
+  IconDeviceMobile,
+  IconFolderOpen,
+  IconRefresh,
+  IconSearch,
+  IconUsb,
 } from "@tabler/icons-react"
-import { Button } from '@/components/ui/button'
+import { motion } from 'motion/react'
+import { Button } from '@astryxdesign/core/Button'
+import { Heading } from '@astryxdesign/core/Heading'
+import { Text } from '@astryxdesign/core/Text'
+import { VStack } from '@astryxdesign/core/VStack'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
-export function NoDeviceState() {
+function EmptyShell({ children }: { children: React.ReactNode }) {
+  const reduced = useReducedMotion()
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
-      <Smartphone className="h-10 w-10" />
-      <p className="text-sm font-medium">No device connected</p>
-      <p className="text-xs">Connect an Android device to browse files.</p>
+    <motion.div
+      initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={reduced ? { duration: 0.15 } : { duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+      className="m3-surface flex h-full min-h-[320px] flex-col items-center justify-center gap-5 p-8 text-center"
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+function EmptyIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--color-background-muted)] text-[var(--color-text-secondary)]">
+      {children}
     </div>
+  )
+}
+
+export function NoDeviceState({ onRefresh, refreshing }: { onRefresh?: () => void; refreshing?: boolean }) {
+  return (
+    <EmptyShell>
+      <EmptyIcon>
+        <IconDeviceMobile size={36} stroke={1.5} />
+      </EmptyIcon>
+      <VStack gap={1}>
+        <Heading level={2} weight="semibold">No device connected</Heading>
+        <Text type="body" color="secondary">Connect an Android device to browse files</Text>
+      </VStack>
+      {onRefresh && (
+        <Button
+          label={refreshing ? 'Scanning…' : 'Refresh devices'}
+          icon={<IconRefresh size={18} stroke={1.75} className={refreshing ? 'animate-spin motion-reduce:animate-none' : undefined} />}
+          variant="primary"
+          isDisabled={refreshing}
+          onClick={onRefresh}
+        />
+      )}
+    </EmptyShell>
   )
 }
 
 export function EmptyFolderState() {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
-      <FolderOpen className="h-10 w-10" />
-      <p className="text-sm font-medium">This folder is empty</p>
-      <p className="text-xs">No files or directories found here.</p>
-    </div>
+    <EmptyShell>
+      <EmptyIcon>
+        <IconFolderOpen size={36} stroke={1.5} />
+      </EmptyIcon>
+      <VStack gap={1}>
+        <Heading level={2} weight="semibold">This folder is empty</Heading>
+        <Text type="body" color="secondary">No files or directories found here</Text>
+      </VStack>
+    </EmptyShell>
   )
 }
 
 export function NoSearchResultsState({ term }: { term: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
-      <Search className="h-10 w-10" />
-      <p className="text-sm font-medium">No results for &quot;{term}&quot;</p>
-      <p className="text-xs">Try a different search term.</p>
-    </div>
+    <EmptyShell>
+      <EmptyIcon>
+        <IconSearch size={36} stroke={1.5} />
+      </EmptyIcon>
+      <VStack gap={1}>
+        <Heading level={2} weight="semibold">No results</Heading>
+        <Text type="body" color="secondary">
+          Nothing matched “{term}”. Try a different search term.
+        </Text>
+      </VStack>
+    </EmptyShell>
   )
 }
 
@@ -45,17 +95,22 @@ export function UnmountedSdCardState({
   onRetry: () => void
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
-      <Usb className="h-10 w-10" />
-      <p className="text-sm font-medium">SD card not available</p>
-      <p className="text-xs text-center max-w-xs">
-        The storage at <span className="font-mono text-[10px]">{mountPoint}</span> is not
-        currently connected. The card may have been ejected or USB was disconnected.
-      </p>
-      <Button variant="outline" size="sm" onClick={onRetry} className="mt-1 cursor-pointer">
-        <Refresh className="h-3.5 w-3.5 mr-1.5" />
-        Retry
-      </Button>
-    </div>
+    <EmptyShell>
+      <EmptyIcon>
+        <IconUsb size={36} stroke={1.5} />
+      </EmptyIcon>
+      <VStack gap={1}>
+        <Heading level={2} weight="semibold">SD card not available</Heading>
+        <Text type="body" color="secondary">
+          The storage at {mountPoint} is not currently connected. The card may have been ejected or USB was disconnected.
+        </Text>
+      </VStack>
+      <Button
+        label="Retry"
+        icon={<IconRefresh size={18} stroke={1.75} />}
+        variant="secondary"
+        onClick={onRetry}
+      />
+    </EmptyShell>
   )
 }

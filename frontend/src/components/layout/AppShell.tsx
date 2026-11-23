@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import { BottomDock } from './BottomDock'
+import { Window } from '@wailsio/runtime'
+import { AppSideNav } from './AppSideNav'
 import { SetupWizard } from '@/components/setup/SetupWizard'
 import { getSetupState } from '@/services/binaryService'
 import { getAppConfig } from '@/services/settingsService'
@@ -12,16 +13,12 @@ const CommandPalette = lazy(() =>
   import('@/components/common/CommandPalette').then(({ CommandPalette: Component }) => ({ default: Component })),
 )
 
-function applyThemeClass(theme: 'dark' | 'light') {
-  document.documentElement.classList.toggle('dark', theme === 'dark')
-}
-
 function StartupLoader() {
   return (
     <div className="flex h-screen items-center justify-center bg-background text-foreground">
       <div className="flex flex-col items-center gap-3">
         <img src="/logo.webp" alt="ADBKit" className="h-12 w-12 object-contain opacity-80" />
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary motion-reduce:animate-none" />
         <span className="text-xs text-muted-foreground">Loading…</span>
       </div>
     </div>
@@ -32,8 +29,32 @@ function DeviceSync() {
   useDeviceSync()
   return null
 }
+
+const ROUTE_TITLES: Record<string, string> = {
+  '/': 'Dashboard',
+  '/devices': 'Devices',
+  '/apps': 'Apps',
+  '/files': 'Files',
+  '/flasher': 'Flasher',
+  '/terminal': 'Terminal',
+  '/scrcpy': 'Scrcpy',
+  '/settings': 'Settings',
+}
+
+// Mirror the OS window title onto the current menu position, e.g.
+// "Devices". document.title alone does not reach the native window in
+// WebKitGTK, so drive Window.SetTitle directly.
+function useRouteTitle(pathname: string) {
+  useEffect(() => {
+    const title = ROUTE_TITLES[pathname] ?? 'Dashboard'
+    document.title = title
+    Window.SetTitle(title)
+  }, [pathname])
+}
+
 export function AppShell() {
   const location = useLocation()
+  useRouteTitle(location.pathname)
   const isNoGlobalScroll = ['/apps', '/files', '/devices', '/terminal', '/scrcpy', '/settings'].includes(location.pathname)
 
   const [setupChecked, setSetupChecked] = useState(false)
@@ -50,7 +71,6 @@ export function AppShell() {
         const nextTheme = config.theme === 'light' ? 'light' : 'dark'
         if (nextTheme !== currentTheme) {
           setUiTheme(nextTheme)
-          applyThemeClass(nextTheme)
         }
         setSetupComplete(state.setupCompleted)
         setSetupChecked(true)
@@ -72,7 +92,7 @@ export function AppShell() {
   if (!setupComplete) {
     return (
       <div data-file-drop-target="app" className="flex min-h-[100dvh] flex-col overflow-hidden bg-background text-foreground">
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <SetupWizard onComplete={() => setSetupComplete(true)} />
         </main>
       </div>
@@ -82,16 +102,20 @@ export function AppShell() {
   return (
     <>
       <DeviceSync />
-      <div data-file-drop-target="app" className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-        <main className="flex-1 min-h-0 flex flex-col">
-          <div className={cn(
-            "flex-1 min-h-0 w-full flex flex-col p-6 pb-24",
-            isNoGlobalScroll ? "overflow-hidden" : "overflow-y-auto"
-          )}>
-            <Outlet />
+      <div data-file-drop-target="app" className="flex h-screen overflow-hidden bg-background text-foreground">
+        <AppSideNav />
+        <main className="flex min-w-0 flex-1 flex-col p-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card">
+            <div
+              className={cn(
+                'flex min-h-0 flex-1 flex-col',
+                isNoGlobalScroll ? 'overflow-hidden' : 'overflow-y-auto',
+              )}
+            >
+              <Outlet />
+            </div>
           </div>
         </main>
-        <BottomDock />
         <Suspense fallback={null}>
           <CommandPalette />
         </Suspense>

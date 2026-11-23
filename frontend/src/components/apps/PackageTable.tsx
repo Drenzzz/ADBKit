@@ -1,11 +1,15 @@
 import { useMemo, useRef } from 'react'
+import { motion } from 'motion/react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
+import { CheckboxInput } from '@astryxdesign/core/CheckboxInput'
+import { Skeleton } from '@astryxdesign/core/Skeleton'
 import { PackageRow } from './PackageRow'
+import { PackageActions } from './PackageActions'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { PackageInfo, PackageDetails } from '@/lib/types'
 
-const ROW_HEIGHT = 48
+const ROW_HEIGHT = 68
 
 interface PackageTableProps {
   packages: PackageInfo[]
@@ -43,40 +47,33 @@ export function PackageTable({
   loadDetails,
 }: PackageTableProps) {
   const parentRef = useRef<HTMLDivElement>(null)
+  const reduced = useReducedMotion()
 
   const virtualizer = useVirtualizer({
     count: packages.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ROW_HEIGHT,
-    overscan: 10,
+    overscan: 8,
   })
 
   const totalHeight = virtualizer.getTotalSize()
 
   const allNames = useMemo(() => packages.map((p) => p.packageName), [packages])
-  const isAllSelected = useMemo(() => {
-    if (allNames.length === 0) return false
-    return allNames.every((name) => selectedPackages.includes(name))
-  }, [allNames, selectedPackages])
-
-  const isSomeSelected = useMemo(() => {
-    if (allNames.length === 0) return false
-    const count = allNames.filter((name) => selectedPackages.includes(name)).length
-    return count > 0 && count < allNames.length
-  }, [allNames, selectedPackages])
+  const selectedCount = useMemo(
+    () => allNames.filter((name) => selectedPackages.includes(name)).length,
+    [allNames, selectedPackages],
+  )
+  const isAllSelected = allNames.length > 0 && selectedCount === allNames.length
+  const isSomeSelected = selectedCount > 0 && !isAllSelected
 
   if (loading && packages.length === 0) {
     return (
-      <div className="rounded-2xl border border-border/50 bg-card">
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border/40 bg-muted/10">
-          <Skeleton className="h-4 w-4" />
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-4 flex-1" />
-          <Skeleton className="h-4 w-20" />
-        </div>
-        <div className="space-y-0 p-2">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <Skeleton key={index} className="h-12 w-full" />
+      <div className="m3-surface min-h-0 flex-1 overflow-hidden">
+        <div className="space-y-0 p-3">
+          {Array.from({ length: 9 }).map((_, index) => (
+            <div key={index} className="mb-2">
+              <Skeleton height={60} width="100%" radius={4} />
+            </div>
           ))}
         </div>
       </div>
@@ -84,37 +81,28 @@ export function PackageTable({
   }
 
   return (
-    <div className="rounded-2xl border border-border/50 bg-card overflow-hidden flex-1 min-h-0 flex flex-col">
-      {/* Table Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border/40 bg-muted/20 shrink-0">
-        <Checkbox
-          checked={isAllSelected}
-          onCheckedChange={() => onToggleAll(allNames)}
-          className="h-4 w-4 shrink-0"
-          aria-label="Select all visible packages"
+    <motion.div
+      className="m3-surface flex min-h-0 flex-1 flex-col overflow-hidden"
+      initial={reduced ? false : { opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {/* Header: select-all + count */}
+      <div className="flex shrink-0 items-center gap-3 border-b border-border/40 px-6 py-3">
+        <CheckboxInput
+          value={isAllSelected}
+          onChange={() => onToggleAll(allNames)}
+          size="sm"
+          label="Select all visible packages"
+          isLabelHidden
         />
-        {isSomeSelected && (
-          <span className="text-[10px] text-muted-foreground -ml-1">partial</span>
-        )}
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-24">
-          Status
-        </span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex-1">
-          Package
-        </span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-24 text-right">
-          Size
-        </span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-20 text-right">
-          Actions
+        <span className="text-[14px] font-semibold tracking-normal text-[var(--color-text-secondary)]">
+          {isSomeSelected ? `${selectedCount} of ${allNames.length} selected` : 'Package'}
         </span>
       </div>
 
-      {/* Table Body (Virtualized) */}
-      <div
-        ref={parentRef}
-        className="perf-scroll overflow-auto flex-1 min-h-0"
-      >
+      {/* Body (virtualized) */}
+      <div ref={parentRef} className="perf-scroll min-h-0 flex-1 overflow-auto">
         <div
           style={{
             height: `${totalHeight}px`,
@@ -134,35 +122,50 @@ export function PackageTable({
               <div
                 key={pkg.packageName}
                 data-index={virtualRow.index}
-                ref={virtualizer.measureElement}
                 style={{
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   width: '100%',
+                  height: `${virtualRow.size}px`,
                   transform: `translate3d(0, ${virtualRow.start}px, 0)`,
                 }}
+                className={cn(
+                  'group flex h-full items-center border-l-2 transition-[background-color,border-color] duration-150 ease-out hover:bg-[var(--color-background-muted)]',
+                  isSelected
+                    ? 'border-l-[var(--color-accent)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-accent)_14%,transparent)]'
+                    : 'border-l-transparent',
+                  isBusy && 'pointer-events-none opacity-60',
+                )}
               >
-                <PackageRow
-                  pkg={pkg}
-                  details={details}
-                  isSelected={isSelected}
-                  isBusy={isBusy}
-                  onToggleSelect={onToggleSelect}
-                  onDetails={onDetails}
-                  onLaunch={onLaunch}
-                  onForceStop={onForceStop}
-                  onToggleEnabled={onToggleEnabled}
-                  onClearData={onClearData}
-                  onPullApk={onPullApk}
-                  onUninstall={onUninstall}
-                  loadDetails={loadDetails}
-                />
+                  <PackageRow
+                    pkg={pkg}
+                    details={details}
+                    loadDetails={loadDetails}
+                    onToggleSelect={onToggleSelect}
+                  />
+                <div
+                  className="flex shrink-0 items-center pr-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                    <PackageActions
+                      packageName={pkg.packageName}
+                      isEnabled={pkg.isEnabled}
+                      isBusy={isBusy}
+                      onDetails={onDetails}
+                      onLaunch={onLaunch}
+                      onForceStop={onForceStop}
+                      onToggleEnabled={onToggleEnabled}
+                      onClearData={onClearData}
+                      onPullApk={onPullApk}
+                      onUninstall={onUninstall}
+                    />
+                </div>
               </div>
             )
           })}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

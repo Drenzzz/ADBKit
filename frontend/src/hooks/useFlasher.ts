@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import * as fastbootSvc from '@/services/fastbootService'
 import * as deviceSvc from '@/services/deviceService'
 import { useFlasherStore } from '@/stores/useFlasherStore'
@@ -213,7 +213,7 @@ export function useFlasher() {
     try {
       const plan = await fastbootSvc.scanRomFolder(folderPath)
       store.setFlashPlan(plan)
-      toast.success(`Found ${plan.steps.length} partition(s) in ROM folder`)
+      toast.success(`Found ${plan.steps.length} ${plan.steps.length === 1 ? 'partition' : 'partitions'} in ROM folder`)
     } catch (err) {
       toast.error(getErrorMessage(err))
       store.setFlashPlan(null)
@@ -286,7 +286,7 @@ export function useFlasher() {
     try {
       const filteredPlan = { steps: plan.steps.filter((s) => selected.includes(s.partition)) }
       await fastbootSvc.flashRomFolder(serial, folderPath, filteredPlan)
-      toast.success(`Batch flash completed: ${filteredSteps.length} partition(s)`)
+      toast.success(`Batch flash completed: ${filteredSteps.length} ${filteredSteps.length === 1 ? 'partition' : 'partitions'}`)
     } catch (err) {
       const msg = getErrorMessage(err)
       // Per-step error state already arrives via the flash_step_status event listener.

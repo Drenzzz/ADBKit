@@ -33,12 +33,13 @@ describe('BatchBar', () => {
 
   it('disables all action buttons when busyAction is not null', () => {
     render(<BatchBar {...defaultProps} busyAction="uninstall" />)
-    expect(screen.getByText('Enable').closest('button')).toBeDisabled()
-    expect(screen.getByText('Disable').closest('button')).toBeDisabled()
-    expect(screen.getByText('Stop').closest('button')).toBeDisabled()
-    expect(screen.getByText('Clear').closest('button')).toBeDisabled()
-    expect(screen.getByText('Export').closest('button')).toBeDisabled()
-    expect(screen.getByText('Uninstall').closest('button')).toBeDisabled()
+    // Astryx Button signals disabled via aria-disabled, not the native attribute.
+    expect(screen.getByText('Enable').closest('button')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('Disable').closest('button')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('Stop').closest('button')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('Clear').closest('button')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('Export').closest('button')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('Uninstall').closest('button')).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('calls onUninstall when Uninstall button is clicked', () => {
@@ -55,7 +56,7 @@ describe('BatchBar', () => {
 
   it('calls onClear when X button is clicked', () => {
     render(<BatchBar {...defaultProps} />)
-    fireEvent.click(screen.getByRole('button', { name: '' }).closest('button')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Clear selection' }))
     expect(defaultProps.onClear).toHaveBeenCalledTimes(1)
   })
 })

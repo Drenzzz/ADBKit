@@ -1,95 +1,70 @@
 import type { ScrcpyOptions } from '@/lib/types'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Selector } from '@astryxdesign/core/Selector'
+import { Switch } from '@astryxdesign/core/Switch'
+import { IconVolume, IconGauge } from "@tabler/icons-react"
 
 interface AudioControlsProps {
   options: ScrcpyOptions
   onOptionChange: (key: string, value: number | string | boolean) => void
 }
 
-interface AudioChoice {
-  value: string
-  name: string
-  description: string
-}
-
-const AUDIO_CODECS: AudioChoice[] = [
-  { value: 'opus', name: 'Opus', description: 'Default, low latency' },
-  { value: 'aac', name: 'AAC', description: 'Wide device support' },
-  { value: 'flac', name: 'FLAC', description: 'Lossless, large files' },
-  { value: 'raw', name: 'RAW', description: 'Uncompressed PCM' },
+const AUDIO_CODECS = [
+  { value: 'opus', label: 'Opus', description: 'Default, low latency' },
+  { value: 'aac', label: 'AAC', description: 'Wide device support' },
+  { value: 'flac', label: 'FLAC', description: 'Lossless, large files' },
+  { value: 'raw', label: 'RAW', description: 'Uncompressed PCM' },
 ]
 
 export function AudioControls({ options, onOptionChange }: AudioControlsProps) {
+  const codec = AUDIO_CODECS.find((c) => c.value === (options.audio_codec || 'opus'))
+
   return (
-    <div className="space-y-4">
-      {/* Disable Audio Switch */}
-      <div className="flex items-center justify-between gap-4 py-1">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-4 rounded-xl bg-[var(--color-surface-inset)] px-4 py-3.5">
         <div className="space-y-0.5">
-          <Label htmlFor="no-audio" className="text-xs font-bold text-foreground">
-            Disable Audio
-          </Label>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            Mute audio capture during mirroring.
+          <p className="text-[15px] font-semibold text-[var(--color-text-primary)]">
+            Disable audio
+          </p>
+          <p className="text-[14px] text-[var(--color-text-secondary)] leading-relaxed">
+            Mute audio capture during mirroring
           </p>
         </div>
         <Switch
-          id="no-audio"
-          checked={options.no_audio}
-          onCheckedChange={(checked) => onOptionChange('no_audio', checked)}
+          label="Disable audio"
+          isLabelHidden
+          value={options.no_audio}
+          onChange={(checked) => onOptionChange('no_audio', checked)}
         />
       </div>
 
-      {/* Audio Codec Select */}
-      <div className="space-y-1.5">
-        <Label htmlFor="audio-codec" className="text-xs font-bold text-foreground">
-          Audio Codec
-        </Label>
-        <Select
-          value={options.audio_codec || 'opus'}
-          onValueChange={(value) => onOptionChange('audio_codec', String(value ?? 'opus'))}
-          disabled={options.no_audio}
-        >
-          <SelectTrigger id="audio-codec" className="h-8.5 rounded-full text-xs bg-background dark:bg-card/60 border border-border focus:ring-1 focus:ring-ring">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="min-w-[240px] rounded-2xl border-border">
-            {AUDIO_CODECS.map((codec) => (
-              <SelectItem key={codec.value} value={codec.value} className="py-2 cursor-pointer">
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-mono text-xs font-semibold">{codec.name}</span>
-                  <span className="text-[10px] text-muted-foreground whitespace-normal">
-                    {codec.description}
-                  </span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Audio Bitrate */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="audio-bit-rate" className="text-xs font-bold text-foreground">
-            Audio Bitrate
-          </Label>
-          <span className="text-[10px] font-bold text-muted-foreground font-mono">
-            {options.audio_bit_rate === 0
-              ? 'Default'
-              : `${(options.audio_bit_rate / 1000).toFixed(0)} kbps`}
-          </span>
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <p className="flex items-center gap-2 text-[15px] font-semibold text-[var(--color-text-primary)]">
+            <IconVolume size={18} stroke={1.75} className="text-[var(--color-text-secondary)]" />
+            Audio codec
+          </p>
+          <Selector
+            label="Audio codec"
+            isLabelHidden
+            value={options.audio_codec || 'opus'}
+            onChange={(v) => onOptionChange('audio_codec', String(v))}
+            options={AUDIO_CODECS.map(({ value, label }) => ({ value, label }))}
+            isDisabled={options.no_audio}
+          />
+          <p className="text-[14px] leading-relaxed text-[var(--color-text-secondary)]">{codec?.description}</p>
         </div>
-        <div className="relative flex items-center">
-          <Input
+
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <div className="flex items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-[15px] font-semibold text-[var(--color-text-primary)]">
+              <IconGauge size={18} stroke={1.75} className="text-[var(--color-text-secondary)]" />
+              Audio bitrate
+            </p>
+            <span className="font-mono text-[14px] text-[var(--color-text-secondary)] tabular-nums">
+              {options.audio_bit_rate === 0 ? 'Default' : `${(options.audio_bit_rate / 1000).toFixed(0)} kbps`}
+            </span>
+          </div>
+          <input
             id="audio-bit-rate"
             type="number"
             min={0}
@@ -100,9 +75,8 @@ export function AudioControls({ options, onOptionChange }: AudioControlsProps) {
               const kbps = parseFloat(e.target.value) || 0
               onOptionChange('audio_bit_rate', Math.round(kbps * 1000))
             }}
-            className="h-8.5 w-full rounded-full border border-border bg-background dark:bg-card/60 focus-visible:ring-1 focus-visible:ring-ring text-xs pl-3.5 pr-8"
+            className="h-11 w-full rounded-full bg-[var(--color-background-card)] px-4 text-[15px] text-[var(--color-text-primary)] outline-none transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] disabled:opacity-50"
           />
-          <span className="absolute right-3 text-[9px] text-muted-foreground dark:text-muted-foreground pointer-events-none font-mono">k</span>
         </div>
       </div>
     </div>
