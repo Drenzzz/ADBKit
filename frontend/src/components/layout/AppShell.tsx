@@ -17,7 +17,7 @@ function StartupLoader() {
     <div className="flex h-screen items-center justify-center bg-background text-foreground">
       <div className="flex flex-col items-center gap-3">
         <img src="/logo.webp" alt="ADBKit" className="h-12 w-12 object-contain opacity-80" />
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-border border-t-primary motion-reduce:animate-none" />
         <span className="text-xs text-muted-foreground">Loading…</span>
       </div>
     </div>

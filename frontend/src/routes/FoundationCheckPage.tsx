@@ -11,7 +11,7 @@ export default function FoundationCheckPage() {
       <Theme theme={neutralTheme} mode="dark">
         <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
           <span className="text-sm text-foreground">
-            Nested dark theme — this card must use Astryx tokens.
+            Nested dark theme: this card must use Astryx tokens.
           </span>
           <button
             type="button"

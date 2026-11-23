@@ -62,7 +62,7 @@ describe('AppShell', () => {
       expect(document.body.textContent).toContain('ROUTE_CONTENT')
     }, { timeout: 3000 })
 
-    const content = [...document.querySelectorAll('div')].find((el) =>
+    const content = [...document.querySelectorAll('main div')].find((el) =>
       el.className.includes('rounded-2xl'),
     )
     expect(content).toBeTruthy()

@@ -41,17 +41,18 @@ describe('AppSideNav', () => {
     expect(labels.slice(0, ROUTE_LABELS.length)).toEqual(ROUTE_LABELS)
   })
 
-  it('pairs every rail button with a CSS tooltip label', async () => {
+  it('shows a permanent visible label on every rail button instead of tooltips', async () => {
     renderSideNav('/')
 
     await waitFor(() => {
       expect(railButtons().length).toBeGreaterThanOrEqual(ROUTE_LABELS.length)
     })
 
-    // Each RailButton wraps its trigger and tooltip in a group; the tooltip
-    // is a sibling span, not an Astryx popover (WebKitGTK clips those).
-    const tooltips = document.querySelectorAll('[role="tooltip"]')
-    expect(tooltips.length).toBe(railButtons().length)
+    const buttons = railButtons()
+    ROUTE_LABELS.forEach((label, i) => {
+      expect(buttons[i].textContent).toContain(label)
+    })
+    expect(document.querySelectorAll('[role="tooltip"]')).toHaveLength(0)
   })
 
   it('marks the active route as the current page', async () => {

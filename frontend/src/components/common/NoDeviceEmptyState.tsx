@@ -11,8 +11,8 @@ export function NoDeviceEmptyState({ feature }: { feature: string }) {
         </div>
         <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background bg-muted-foreground/30" />
       </div>
-      <h3 className="text-sm font-semibold text-foreground mb-1">No device connected</h3>
-      <p className="text-xs text-muted-foreground/60 max-w-[260px] leading-relaxed">
+      <h3 className="text-[14px] font-semibold text-foreground mb-1">No device connected</h3>
+      <p className="text-[14px] text-muted-foreground/60 max-w-[260px] leading-relaxed">
         Connect an Android device via USB or wireless to use {feature}.
       </p>
     </div>
