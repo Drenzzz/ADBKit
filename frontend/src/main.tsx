@@ -10,7 +10,6 @@ import { ToastBridge } from '@/lib/toast'
 import './index.css'
 import { Theme } from '@astryxdesign/core/theme'
 import { LayerProvider } from '@astryxdesign/core/Layer'
-import { TooltipProvider } from '@/components/ui/tooltip'
 import { AppErrorBoundary } from '@/components/common/ErrorBoundary'
 import { router } from './App'
 import { useUIStore } from '@/stores/useUIStore'
@@ -32,9 +31,7 @@ function ThemedApp() {
     <Theme theme={themes[defaultThemeSlug]} mode={theme}>
       <LayerProvider>
         <ToastBridge />
-        <TooltipProvider delay={150}>
-          <RouterProvider router={router} />
-        </TooltipProvider>
+        <RouterProvider router={router} />
       </LayerProvider>
     </Theme>
   )

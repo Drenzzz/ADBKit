@@ -82,8 +82,6 @@
   --destructive: var(--color-error);
 
   /* Hallmark floor 48: toast and glass literals lifted into role tokens. */
-  --toast-glass-bg: rgba(255, 255, 255, 0.7);
-  --toast-glass-bg-dark: rgba(28, 28, 30, 0.75);
   --success: var(--color-success);
   --warning: var(--color-warning);
 }
@@ -376,25 +374,6 @@ input[type='range'].range-tonal:focus-visible {
   .spec-marquee-track > span + span { display: none; }
 }
 
-.glass-panel {
-  position: relative !important;
-  background-color: var(--toast-glass-bg) !important;
-}
-
-[data-theme='dark'] .glass-panel {
-  background-color: var(--toast-glass-bg-dark) !important;
-}
-
-.glass-panel::before {
-  content: "" !important;
-  pointer-events: none !important;
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: -1 !important;
-  border-radius: inherit !important;
-  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-  backdrop-filter: blur(24px) saturate(150%) !important;
-}
 
 .perf-scroll {
   transform: translateZ(0);
