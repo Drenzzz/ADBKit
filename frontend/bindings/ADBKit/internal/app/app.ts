@@ -148,6 +148,10 @@ export function GetActiveSlot(serial: string): $CancellablePromise<string> {
     return $Call.ByID(2823231567, serial);
 }
 
+export function GetAndroidVersion(serial: string): $CancellablePromise<number> {
+    return $Call.ByID(1375326492, serial);
+}
+
 export function GetAppConfig(): $CancellablePromise<core$0.AppConfigSnapshot> {
     return $Call.ByID(3154339166);
 }
@@ -218,6 +222,10 @@ export function GetRuntimeDiagnostics(): $CancellablePromise<core$0.RuntimeDiagn
 
 export function GetScrcpyClipboard(serial: string): $CancellablePromise<string> {
     return $Call.ByID(2301369359, serial);
+}
+
+export function GetScrcpyDisplayList(serial: string): $CancellablePromise<scrcpy$0.DisplayList | null> {
+    return $Call.ByID(2063784183, serial);
 }
 
 export function GetScrcpyEncoderSupport(serial: string): $CancellablePromise<scrcpy$0.EncoderSupport | null> {

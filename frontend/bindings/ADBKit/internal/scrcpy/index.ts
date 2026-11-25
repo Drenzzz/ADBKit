@@ -7,6 +7,8 @@ export {
 
 export type {
     CodecSupport,
+    Display,
+    DisplayList,
     EncoderSupport,
     Options,
     Session,
