@@ -280,9 +280,12 @@ func fallbackMessage(output string, fallback string) string {
 	return fallback
 }
 
-// transferFailureDetail keeps the last lines the process printed, so a failed
-// transfer reports adb's own reason instead of "exit status 1". Under a PTY,
-// stderr is merged into stdout, hence the fallback.
+// transferFailureDetail keeps adb's own words, so a failed transfer reports why
+// instead of "exit status 1". The first line of stderr usually is the cause
+// (remote doesn't exist), later lines are often progress/bytes noise, so the
+// result leads with the first line. Line-anchored and short-clamped: it is
+// only a few lines long. Under a PTY, stderr is merged into stdout, hence the
+// fallback.
 func transferFailureDetail(result *core.ExecResult, err error) string {
 	if result == nil {
 		if err == nil {
@@ -302,10 +305,6 @@ func transferFailureDetail(result *core.ExecResult, err error) string {
 		return err.Error()
 	}
 
-	const maxLines = 5
 	lines := strings.Split(output, "\n")
-	if len(lines) > maxLines {
-		lines = lines[len(lines)-maxLines:]
-	}
-	return strings.TrimSpace(strings.Join(lines, "\n"))
+	return strings.TrimSpace(lines[0])
 }
