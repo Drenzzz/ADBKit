@@ -24,6 +24,112 @@ type EncoderSupport struct {
 	AudioCodecs []CodecSupport `json:"audioCodecs"`
 }
 
+type Display struct {
+  ID      int    `json:"id"`
+  Name    string `json:"name"`
+  Display bool   `json:"display"`
+}
+
+type DisplayList struct {
+  Serial string    `json:"serial"`
+  Displays []Display `json:"displays"`
+}
+
+func ParseDisplays(output string) []Display {
+  displays := []Display{}
+  for _, raw := range strings.Split(output, "\n") {
+    line := strings.TrimSpace(raw)
+    if !strings.HasPrefix(line, "display ") {
+      continue
+    }
+    rest := strings.TrimSpace(strings.TrimPrefix(line, "display "))
+    parts := strings.Fields(rest)
+    if len(parts) < 1 {
+      continue
+    }
+    id := parseInt(parts[0])
+    name := ""
+    if len(parts) > 1 {
+      name = strings.Join(parts[1:], " ")
+    }
+    displays = append(displays, Display{ID: id, Name: name, Display: true})
+  }
+  return displays
+}
+
+func parseInt(s string) int {
+  n := 0
+  for _, c := range s {
+    if c >= '0' && c <= '9' {
+      n = n*10 + int(c-'0')
+    }
+  }
+  return n
+}
+
+func (s *Service) GetDisplayList(ctx context.Context, serial string) (*DisplayList, error) {
+  resolvedSerial, err := s.resolveSerial(ctx, serial)
+  if err != nil {
+    return nil, err
+  }
+
+  scrcpyPath, err := s.resolveBinaryPath()
+  if err != nil {
+    return nil, err
+  }
+
+  adbPath, _ := s.resolveADBPath()
+  args := []string{"--serial", resolvedSerial, "--list-displays"}
+
+  cmd := exec.CommandContext(ctx, scrcpyPath, args...)
+  core.ConfigureChildProcess(cmd)
+  if adbPath != "" {
+    cmd.Env = append([]string{}, "ADB="+adbPath)
+  }
+  out, runErr := cmd.CombinedOutput()
+  if runErr != nil {
+    return nil, core.NewOperationError(
+      "get_scrcpy_displays",
+      "Failed to list displays",
+      strings.TrimSpace(string(out)),
+      true,
+    )
+  }
+
+  return &DisplayList{
+    Serial:   resolvedSerial,
+    Displays: ParseDisplays(string(out)),
+  }, nil
+}
+
+func (s *Service) GetAndroidVersion(ctx context.Context, serial string) (int, error) {
+  resolvedSerial, err := s.resolveSerial(ctx, serial)
+  if err != nil {
+    return 0, err
+  }
+
+  adbPath, err := s.resolveADBPath()
+  if err != nil {
+    return 0, err
+  }
+
+  cmd := exec.CommandContext(ctx, adbPath, "-s", resolvedSerial, "shell", "getprop", "ro.build.version.sdk")
+  core.ConfigureChildProcess(cmd)
+  out, runErr := cmd.CombinedOutput()
+  if runErr != nil {
+    return 0, core.NewOperationError(
+      "get_android_version",
+      "Failed to read Android version",
+      strings.TrimSpace(string(out)),
+      true,
+    )
+  }
+
+  return parseInt(strings.TrimSpace(string(out))), nil
+}
+
+
+
 func (s *Service) GetEncoderSupport(ctx context.Context, serial string) (*EncoderSupport, error) {
 	resolvedSerial, err := s.resolveSerial(ctx, serial)
 	if err != nil {

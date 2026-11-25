@@ -1,4 +1,5 @@
 import type {
+  ScrcpyDisplayList,
   ScrcpyEncoderSupport,
   ScrcpyOptions,
   ScrcpySession,
@@ -12,6 +13,8 @@ import {
   StopScrcpyRecording,
   TakeScrcpyScreenshot,
   GetScrcpyEncoderSupport,
+  GetScrcpyDisplayList,
+  GetAndroidVersion,
   PushScrcpyClipboard,
   GetScrcpyClipboard,
   SelectSavePath,
@@ -45,6 +48,18 @@ export async function getScrcpyEncoderSupport(
 ): Promise<ScrcpyEncoderSupport> {
   const raw = await GetScrcpyEncoderSupport(serial)
   return raw as unknown as ScrcpyEncoderSupport
+}
+
+export async function getScrcpyDisplayList(
+  serial: string,
+): Promise<ScrcpyDisplayList> {
+  const raw = await GetScrcpyDisplayList(serial)
+  return raw as unknown as ScrcpyDisplayList
+}
+
+export async function getAndroidVersion(serial: string): Promise<number> {
+  const raw = await GetAndroidVersion(serial)
+  return raw as unknown as number
 }
 
 export async function startScrcpyRecording(

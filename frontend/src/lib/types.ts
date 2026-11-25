@@ -428,6 +428,17 @@ export interface ScrcpyCodecSupport {
   aliasOf: string
 }
 
+export interface ScrcpyDisplay {
+  id: number
+  name: string
+  display: boolean
+}
+
+export interface ScrcpyDisplayList {
+  serial: string
+  displays: ScrcpyDisplay[]
+}
+
 export interface ScrcpyEncoderSupport {
   serial: string
   videoCodecs: ScrcpyCodecSupport[]

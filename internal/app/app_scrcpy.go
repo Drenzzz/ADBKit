@@ -59,6 +59,18 @@ func (a *App) GetScrcpyEncoderSupport(serial string) (*scrcpy.EncoderSupport, er
 	})
 }
 
+func (a *App) GetScrcpyDisplayList(serial string) (*scrcpy.DisplayList, error) {
+	return auditAction(a, "get_scrcpy_display_list", func() (*scrcpy.DisplayList, error) {
+		return a.scrSvc.GetDisplayList(a.ctx, serial)
+	})
+}
+
+func (a *App) GetAndroidVersion(serial string) (int, error) {
+	return auditAction(a, "get_android_version", func() (int, error) {
+		return a.scrSvc.GetAndroidVersion(a.ctx, serial)
+	})
+}
+
 func (a *App) PushScrcpyClipboard(serial string, text string) error {
 	return auditVoidAction(a, "push_scrcpy_clipboard", func() error {
 		return a.scrSvc.PushClipboard(serial, text)

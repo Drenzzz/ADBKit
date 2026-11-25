@@ -16,7 +16,7 @@ import { useScrcpy } from '@/hooks/useScrcpy'
 import { useDevices } from '@/hooks/useDevices'
 import { NoDeviceState } from '@/components/apps/EmptyStates'
 import { useScrcpyStore } from '@/stores/scrcpyStore'
-import { getScrcpyEncoderSupport } from '@/services/scrcpyService'
+import { getScrcpyEncoderSupport, getAndroidVersion, getScrcpyDisplayList } from '@/services/scrcpyService'
 import { RecordingIndicator } from '@/components/scrcpy/RecordingIndicator'
 import { ScreenshotFlash } from '@/components/scrcpy/ScreenshotFlash'
 import { PresetsManager } from '@/components/scrcpy/PresetsManager'
@@ -109,6 +109,20 @@ export default function ScrcpyPage() {
   const [screenshotFlash, setScreenshotFlash] = useState(false)
   const [recordingDuration, setRecordingDuration] = useState('00:00')
   const [sessionElapsed, setSessionElapsed] = useState('00:00')
+  const [androidSdk, setAndroidSdk] = useState<number | null>(null)
+  const [displays, setDisplays] = useState<Array<{ id: number; name: string }>>([])
+
+  useEffect(() => {
+    if (!activeSerial) return
+    let cancelled = false
+    getAndroidVersion(activeSerial)
+      .then((sdk) => { if (!cancelled) setAndroidSdk(sdk) })
+      .catch(() => { if (!cancelled) setAndroidSdk(null) })
+    getScrcpyDisplayList(activeSerial)
+      .then((list) => { if (!cancelled) setDisplays(list.displays) })
+      .catch(() => { if (!cancelled) setDisplays([]) })
+    return () => { cancelled = true }
+  }, [activeSerial])
 
   useEffect(() => {
     if (!isRecording || !recordingStartedAt) {
@@ -337,6 +351,8 @@ export default function ScrcpyPage() {
             <DeviceOptionsControls
               options={scrcpyOptions}
               onOptionChange={(key, val) => updateOptions({ ...scrcpyOptions, [key]: val })}
+              displays={displays}
+              androidSdk={androidSdk}
             />
           </Section>
         </fieldset>

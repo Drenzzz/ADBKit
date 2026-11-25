@@ -6,6 +6,8 @@ import { FieldLabel } from '@astryxdesign/core/Field'
 interface DeviceOptionsControlsProps {
   options: ScrcpyOptions
   onOptionChange: (key: string, value: number | string | boolean) => void
+  displays?: Array<{ id: number; name: string }>
+  androidSdk?: number | null
 }
 
 interface ToggleRowProps {
@@ -36,7 +38,11 @@ const labelClass = 'text-[15px] font-semibold text-[var(--color-text-primary)]'
 export function DeviceOptionsControls({
   options,
   onOptionChange,
+  displays,
+  androidSdk,
 }: DeviceOptionsControlsProps) {
+  const cameraSupported = androidSdk == null || androidSdk >= 31
+  const audioOnlySupported = true
   return (
     <div className="space-y-5">
       <div className="divide-y divide-border/40">
@@ -94,6 +100,9 @@ export function DeviceOptionsControls({
           checked={options.no_video}
           onChange={(v) => onOptionChange('no_video', v)}
         />
+        {!audioOnlySupported && (
+          <p className="text-[14px] text-[var(--color-text-secondary)]">Audio-only not supported</p>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
@@ -111,6 +120,7 @@ export function DeviceOptionsControls({
           />
           <p className="text-[14px] leading-relaxed text-[var(--color-text-secondary)]">
             Camera mirroring requires Android 12+
+            {!cameraSupported && ' (not supported on this device)'}
           </p>
         </div>
         <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
@@ -163,14 +173,24 @@ export function DeviceOptionsControls({
         </div>
         <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
           <FieldLabel label="Display ID" inputID="display-id" className={labelClass} />
-          <input
-            id="display-id"
-            type="number"
-            min={0}
-            value={options.display_id}
-            onChange={(e) => onOptionChange('display_id', Number(e.target.value) || 0)}
-            className={inputClass}
-          />
+          {displays && displays.length > 0 ? (
+            <Selector
+              label="Display ID"
+              isLabelHidden
+              value={String(options.display_id)}
+              onChange={(v) => onOptionChange('display_id', Number(v) || 0)}
+              options={displays.map((d) => ({ value: String(d.id), label: d.name || `Display ${d.id}` }))}
+            />
+          ) : (
+            <input
+              id="display-id"
+              type="number"
+              min={0}
+              value={options.display_id}
+              onChange={(e) => onOptionChange('display_id', Number(e.target.value) || 0)}
+              className={inputClass}
+            />
+          )}
         </div>
         <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
           <FieldLabel label="Rotation" inputID="rotation" className={labelClass} />
