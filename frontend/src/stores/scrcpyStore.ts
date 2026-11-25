@@ -17,6 +17,7 @@ const DEFAULT_OPTIONS: ScrcpyOptions = {
   video_codec: 'h264',
   show_touches: false,
   no_audio: false,
+  no_video: false,
   no_control: false,
   stay_awake: true,
   turn_screen_off: false,
@@ -28,6 +29,11 @@ const DEFAULT_OPTIONS: ScrcpyOptions = {
   display_id: 0,
   time_limit: 0,
   hw_dec: '',
+  video_source: 'display',
+  window_width: 0,
+  window_height: 0,
+  window_x: 0,
+  window_y: 0,
 }
 
 interface ScrcpyActions {

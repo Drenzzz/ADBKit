@@ -383,6 +383,7 @@ export interface ScrcpyOptions {
   video_codec: string
   show_touches: boolean
   no_audio: boolean
+  no_video: boolean
   no_control: boolean
   stay_awake: boolean
   turn_screen_off: boolean
@@ -394,6 +395,11 @@ export interface ScrcpyOptions {
   display_id: number
   time_limit: number
   hw_dec: string
+  video_source: string
+  window_width: number
+  window_height: number
+  window_x: number
+  window_y: number
 }
 
 export interface ScrcpySession {

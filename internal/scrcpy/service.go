@@ -42,6 +42,7 @@ type Options struct {
 	VideoCodec         string `json:"video_codec"`
 	ShowTouches        bool   `json:"show_touches"`
 	NoAudio            bool   `json:"no_audio"`
+	NoVideo            bool   `json:"no_video"`
 	NoControl          bool   `json:"no_control"`
 	StayAwake          bool   `json:"stay_awake"`
 	TurnScreenOff      bool   `json:"turn_screen_off"`
@@ -53,6 +54,11 @@ type Options struct {
 	DisplayID          int    `json:"display_id"`
 	TimeLimit          int    `json:"time_limit"`
 	HwDec              string `json:"hw_dec"`
+	VideoSource        string `json:"video_source"`
+	WindowWidth        int    `json:"window_width"`
+	WindowHeight       int    `json:"window_height"`
+	WindowX            int    `json:"window_x"`
+	WindowY            int    `json:"window_y"`
 }
 
 func (o Options) ToArgs() []string {
@@ -80,6 +86,24 @@ func (o Options) ToArgs() []string {
 	}
 	if o.NoAudio {
 		args = append(args, "--no-audio")
+	}
+	if o.NoVideo {
+		args = append(args, "--no-video")
+	}
+	if o.VideoSource != "" && o.VideoSource != "display" {
+		args = append(args, "--video-source", o.VideoSource)
+	}
+	if o.WindowWidth > 0 {
+		args = append(args, "--window-width", fmt.Sprintf("%d", o.WindowWidth))
+	}
+	if o.WindowHeight > 0 {
+		args = append(args, "--window-height", fmt.Sprintf("%d", o.WindowHeight))
+	}
+	if o.WindowX > 0 {
+		args = append(args, "--window-x", fmt.Sprintf("%d", o.WindowX))
+	}
+	if o.WindowY > 0 {
+		args = append(args, "--window-y", fmt.Sprintf("%d", o.WindowY))
 	}
 	if o.NoControl {
 		args = append(args, "--no-control")

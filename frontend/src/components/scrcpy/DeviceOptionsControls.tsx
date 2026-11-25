@@ -1,5 +1,6 @@
 import type { ScrcpyOptions } from '@/lib/types'
 import { Switch } from '@astryxdesign/core/Switch'
+import { Selector } from '@astryxdesign/core/Selector'
 import { FieldLabel } from '@astryxdesign/core/Field'
 
 interface DeviceOptionsControlsProps {
@@ -87,9 +88,79 @@ export function DeviceOptionsControls({
           checked={options.disable_screensaver}
           onChange={(v) => onOptionChange('disable_screensaver', v)}
         />
+        <ToggleRow
+          label="Audio only"
+          description="Forward audio without video (no-video)"
+          checked={options.no_video}
+          onChange={(v) => onOptionChange('no_video', v)}
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <FieldLabel label="Video source" inputID="video-source" className={labelClass} />
+          <Selector
+            label="Video source"
+            isLabelHidden
+            value={options.video_source || 'display'}
+            onChange={(v) => onOptionChange('video_source', String(v))}
+            options={[
+              { value: 'display', label: 'Display' },
+              { value: 'camera', label: 'Camera' },
+            ]}
+          />
+          <p className="text-[14px] leading-relaxed text-[var(--color-text-secondary)]">
+            Camera mirroring requires Android 12+
+          </p>
+        </div>
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <FieldLabel label="Window width" inputID="window-width" className={labelClass} />
+          <input
+            id="window-width"
+            type="number"
+            min={0}
+            value={options.window_width}
+            onChange={(e) => onOptionChange('window_width', Number(e.target.value) || 0)}
+            placeholder="0 = auto"
+            className={inputClass}
+          />
+        </div>
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <FieldLabel label="Window height" inputID="window-height" className={labelClass} />
+          <input
+            id="window-height"
+            type="number"
+            min={0}
+            value={options.window_height}
+            onChange={(e) => onOptionChange('window_height', Number(e.target.value) || 0)}
+            placeholder="0 = auto"
+            className={inputClass}
+          />
+        </div>
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <FieldLabel label="Window X" inputID="window-x" className={labelClass} />
+          <input
+            id="window-x"
+            type="number"
+            min={0}
+            value={options.window_x}
+            onChange={(e) => onOptionChange('window_x', Number(e.target.value) || 0)}
+            placeholder="0 = default"
+            className={inputClass}
+          />
+        </div>
+        <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
+          <FieldLabel label="Window Y" inputID="window-y" className={labelClass} />
+          <input
+            id="window-y"
+            type="number"
+            min={0}
+            value={options.window_y}
+            onChange={(e) => onOptionChange('window_y', Number(e.target.value) || 0)}
+            placeholder="0 = default"
+            className={inputClass}
+          />
+        </div>
         <div className="space-y-3 rounded-xl bg-[var(--color-surface-inset)] p-4">
           <FieldLabel label="Display ID" inputID="display-id" className={labelClass} />
           <input

@@ -92,6 +92,36 @@ func TestOptionsToArgsSkipsDefaults(t *testing.T) {
 	}
 }
 
+func TestOptionsToArgsIncludesNewFlags(t *testing.T) {
+	opts := Options{
+		NoVideo:     true,
+		VideoSource: "camera",
+		WindowWidth: 1280,
+		WindowHeight: 720,
+		WindowX:      100,
+		WindowY:      50,
+	}
+	args := opts.ToArgs()
+	joined := ""
+	for _, a := range args {
+		joined += a + " "
+	}
+	for _, want := range []string{"--no-video", "--video-source camera", "--window-width 1280", "--window-height 720", "--window-x 100", "--window-y 50"} {
+		if !contains(joined, want) {
+			t.Fatalf("expected args to contain %q, got %v", want, args)
+		}
+	}
+}
+
+func contains(s, substr string) bool {
+	for i := 0; i+len(substr) <= len(s); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
+}
+
 func TestParseEncoderLineExtractsAlias(t *testing.T) {
 	line := "--video-codec=h264 --video-encoder=OMX.google.h264.encoder        (sw) (alias for c2.android.avc.encoder)"
 	_, _, support, ok := parseEncoderLine(line)

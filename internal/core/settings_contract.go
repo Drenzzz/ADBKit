@@ -14,6 +14,7 @@ type ScrcpyOptions struct {
 	VideoCodec         string `json:"video_codec"`
 	ShowTouches        bool   `json:"show_touches"`
 	NoAudio            bool   `json:"no_audio"`
+	NoVideo            bool   `json:"no_video"`
 	NoControl          bool   `json:"no_control"`
 	StayAwake          bool   `json:"stay_awake"`
 	TurnScreenOff      bool   `json:"turn_screen_off"`
@@ -24,6 +25,11 @@ type ScrcpyOptions struct {
 	Rotation           int    `json:"rotation"`
 	DisplayID          int    `json:"display_id"`
 	TimeLimit          int    `json:"time_limit"`
+	VideoSource        string `json:"video_source"`
+	WindowWidth        int    `json:"window_width"`
+	WindowHeight       int    `json:"window_height"`
+	WindowX            int    `json:"window_x"`
+	WindowY            int    `json:"window_y"`
 }
 
 func DefaultScrcpyOptions() ScrcpyOptions {
@@ -33,6 +39,7 @@ func DefaultScrcpyOptions() ScrcpyOptions {
 		AudioCodec:   "opus",
 		VideoCodec:   "h264",
 		StayAwake:    true,
+		VideoSource:  "display",
 	}
 }
 
