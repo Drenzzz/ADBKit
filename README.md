@@ -7,60 +7,28 @@
 <p align="center">A desktop toolkit for Android device work with ADB, Fastboot, and scrcpy.</p>
 
 <p align="center">
-  <a href="https://github.com/Drenzzz/ADBKit/stargazers">
-    <img src="https://img.shields.io/github/stars/Drenzzz/ADBKit?style=flat&amp;logo=github&amp;label=Stars" alt="GitHub stars">
-  </a>
-  <a href="https://github.com/Drenzzz/ADBKit/issues">
-    <img src="https://img.shields.io/github/issues/Drenzzz/ADBKit?style=flat&amp;logo=github&amp;label=Issues" alt="Open GitHub issues">
-  </a>
-  <a href="https://github.com/Drenzzz/ADBKit/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Drenzzz/ADBKit?style=flat&amp;label=License" alt="GPL-3.0 license">
-  </a>
-  <a href="https://github.com/Drenzzz/ADBKit/releases">
-    <img src="https://img.shields.io/github/v/tag/Drenzzz/ADBKit?style=flat&amp;label=Latest%20tag" alt="Latest Git tag">
-  </a>
-  <a href="https://adbkit.pages.dev/">
-    <img src="https://img.shields.io/badge/Website-adbkit.pages.dev-65aeff?style=flat&amp;logo=netlify&amp;logoColor=white" alt="ADBKit website">
-  </a>
-  <a href="https://github.com/Drenzzz/ADBKit/actions/workflows/ci.yml">
-    <img src="https://github.com/Drenzzz/ADBKit/actions/workflows/ci.yml/badge.svg" alt="CI status">
-  </a>
+  <a href="https://github.com/Drenzzz/ADBKit/stargazers"><img src="https://shieldcn.dev/github/stars/Drenzzz/ADBKit.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logoColor=f9e2af" alt="GitHub stars"></a>
+  <a href="https://github.com/Drenzzz/ADBKit/releases"><img src="https://shieldcn.dev/github/downloads/Drenzzz/ADBKit.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logoColor=fab387" alt="Downloads"></a>
+  <a href="https://github.com/Drenzzz/ADBKit/network"><img src="https://shieldcn.dev/github/forks/Drenzzz/ADBKit.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logoColor=89b4fa" alt="Forks"></a>
+  <a href="https://github.com/Drenzzz/ADBKit/actions/workflows/ci.yml"><img src="https://shieldcn.dev/github/ci/Drenzzz/ADBKit.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&workflow=ci.yml" alt="CI status"></a>
+  <a href="https://github.com/Drenzzz/ADBKit/releases"><img src="https://shieldcn.dev/github/release/Drenzzz/ADBKit.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logoColor=cba6f7" alt="Latest release"></a>
+  <a href="https://github.com/Drenzzz/ADBKit/blob/main/LICENSE"><img src="https://shieldcn.dev/github/license/Drenzzz/ADBKit.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logoColor=89b4fa" alt="License"></a>
+  <a href="https://adbkit.pages.dev/"><img src="https://shieldcn.dev/badge/Website-adbkit.pages.dev-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=netlify&logoColor=00C7B7" alt="ADBKit website"></a>
 </p>
 
 <p align="center">
-  <a href="#supported-platforms">
-    <img src="https://img.shields.io/badge/Linux-GTK4%20%2B%20WebKitGTK%206-4c9a2a?style=flat&amp;logo=linux&amp;logoColor=white" alt="Linux with GTK4 and WebKitGTK 6">
-  </a>
-  <a href="#supported-platforms">
-    <img src="https://img.shields.io/badge/Windows%2010%2B-WebView2-0078d6?style=flat&amp;logo=windows&amp;logoColor=white" alt="Windows 10 and later with WebView2">
-  </a>
-  <a href="#supported-platforms">
-    <img src="https://img.shields.io/badge/macOS%2012%2B-build%20config-555555?style=flat&amp;logo=apple&amp;logoColor=white" alt="macOS 12 and later build configuration">
-  </a>
+  <a href="#supported-platforms"><img src="https://shieldcn.dev/badge/Linux-GTK4%20%2B%20WebKitGTK%206-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=linux&logoColor=94e2d5" alt="Linux with GTK4 and WebKitGTK 6"></a>
+  <a href="#supported-platforms"><img src="https://shieldcn.dev/badge/Windows%2010%2B-WebView2-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=ri%3AFaWindows&logoColor=0096ef" alt="Windows 10 and later with WebView2"></a>
 </p>
 
 <p align="center">
-  <a href="#development">
-    <img src="https://img.shields.io/badge/Go-1.25%2B-00ADD8?style=flat&amp;logo=go&amp;logoColor=white" alt="Go 1.25 or later">
-  </a>
-  <a href="#development">
-    <img src="https://img.shields.io/badge/Wails-v3.1.0-4b5563?style=flat" alt="Wails v3.1.0">
-  </a>
-  <a href="#development">
-    <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat&amp;logo=react&amp;logoColor=20232a" alt="React 19">
-  </a>
-  <a href="#development">
-    <img src="https://img.shields.io/badge/TypeScript-7-3178C6?style=flat&amp;logo=typescript&amp;logoColor=white" alt="TypeScript 7">
-  </a>
-  <a href="#development">
-    <img src="https://img.shields.io/badge/Vite-8-646CFF?style=flat&amp;logo=vite&amp;logoColor=white" alt="Vite 8">
-  </a>
-  <a href="#development">
-    <img src="https://img.shields.io/badge/Bun-package%20manager-f9f1e1?style=flat&amp;logo=bun&amp;logoColor=14151a" alt="Bun package manager">
-  </a>
-  <a href="#development">
-    <img src="https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?style=flat&amp;logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS v4">
-  </a>
+  <a href="#development"><img src="https://shieldcn.dev/badge/Go-1.26%2B-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=go&logoColor=89dceb" alt="Go 1.26 or later"></a>
+  <a href="#development"><img src="https://shieldcn.dev/badge/Wails-v3.1.0-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=wails&logoColor=f63b3b" alt="Wails v3.1.0"></a>
+  <a href="#development"><img src="https://shieldcn.dev/badge/React-19-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=react&logoColor=89dceb" alt="React 19"></a>
+  <a href="#development"><img src="https://shieldcn.dev/badge/TypeScript-7-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=typescript&logoColor=89b4fa" alt="TypeScript 7"></a>
+  <a href="#development"><img src="https://shieldcn.dev/badge/Vite-8-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=vite&logoColor=cba6f7" alt="Vite 8"></a>
+  <a href="#development"><img src="https://shieldcn.dev/badge/Bun-package%20manager-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=bun" alt="Bun package manager"></a>
+  <a href="#development"><img src="https://shieldcn.dev/badge/Tailwind%20CSS-v4-2A2550.svg?mode=dark&radius=999&font=geist&split=true&height=28&fontSize=13&labelColor=1A1714&labelTextColor=ffffff&color=2A2550&valueColor=ffffff&logo=tailwindcss&logoColor=94e2d5" alt="Tailwind CSS v4"></a>
 </p>
 
 <p align="center">
@@ -82,33 +50,31 @@ ADB, Fastboot, and scrcpy must all be ready before setup can finish.
 
 ### Dashboard and devices
 
-- Select and switch between connected devices.
+- Switch between connected devices.
 - View device details, battery, storage, RAM, connection state, and performance.
 - Connect over USB or wireless ADB, including the wireless pairing flow.
-- Edit device nicknames, take screenshots, detect device modes, and run reboot actions.
+- Edit nicknames, capture screenshots, detect device modes, and reboot.
 
 ### App manager
 
 - Browse installed packages in a virtualized list.
-- Install APKs from a picker or drag and drop them into the app, with a preview of the real app name, package, version, and sizes before installing.
+- Install APKs from a picker or drag and drop, with a preview of app name, package, version, and sizes.
 - Uninstall, enable, disable, clear data, and run batch actions.
-- Pull APK files and inspect package details with search, filtering, and sorting.
+- Pull APK files and inspect package details with search, filter, and sort.
 
 ### File explorer
 
 - Browse device storage with breadcrumbs and hidden-file support.
 - Push, pull, create, rename, and delete files or folders.
-- See transfer progress and cancel an active transfer.
+- Track transfer progress and cancel an active transfer.
 - View storage usage and jump to mounted external SD cards.
-- Get clear guidance when Android blocks a protected or unavailable path.
 
 ### Flasher
 
 - Flash individual partitions after validating the target name.
 - Scan a ROM folder and review its Flash Plan before writing images.
-- Manage A/B slots and use the wipe-data confirmation guardrail.
+- Manage A/B slots with a wipe-data confirmation guardrail.
 - Send ZIP files through ADB sideload and run validated Fastboot commands.
-- Use Wake on Fastboot actions for continue, wake, unlock, and stay-awake flows.
 
 ### Terminal and Logcat
 
@@ -120,20 +86,19 @@ ADB, Fastboot, and scrcpy must all be ready before setup can finish.
 ### Scrcpy
 
 - Start screen mirroring in a native window.
-- Record the device screen with a timer and file-size estimate.
-- Capture screenshots and save them to the host.
-- Synchronize the clipboard between the device and computer.
+- Switch video source between display and camera, or run audio-only.
+- Set window width, height, and position.
+- Record the screen with a timer and file-size estimate, and capture screenshots.
 - Adjust resolution, FPS, bitrate, codec, audio, rotation, and saved presets.
-- Switch between hardware and software video decoding (scrcpy 5.x).
+- Pick a display when the device exposes several, and switch hardware/software decoding (scrcpy 5.x).
 
 ### Setup, settings, and diagnostics
 
-- Detect binaries in saved configuration, the system PATH, managed packages, and common paths.
-- Take device screenshots from the Devices page without a mirror session.
+- Detect binaries in saved configuration, PATH, managed packages, and common paths.
+- Capture device screenshots from the Devices page without a mirror session.
 - Select custom files or directories for ADB, Fastboot, and scrcpy.
-- Download and preserve complete Platform Tools and scrcpy packages, verified against pinned checksums on every platform.
-- Switch between dark and light themes and set terminal defaults.
-- Persist window state and configure the device synchronization interval.
+- Download complete Platform Tools and scrcpy packages, verified against pinned checksums.
+- Switch dark and light themes, set terminal defaults, and persist window state.
 - Review optional audit logs and runtime diagnostics.
 
 ## Supported platforms
@@ -152,30 +117,37 @@ the host system to provide GTK4, WebKitGTK 6, and their runtime dependencies.
 
 Download the package for your platform from the
 [ADBKit releases page](https://github.com/Drenzzz/ADBKit/releases), or browse
-the [ADBKit website](https://adbkit.netlify.app) for release stats.
+the [ADBKit website](https://adbkit.pages.dev/) for release stats. File names
+below use `*` as a placeholder for the version.
 
 ### Linux
 
 For an AppImage:
 
 ```bash
-chmod +x ./ADBKit-<version>-linux-amd64.AppImage
-./ADBKit-<version>-linux-amd64.AppImage
+chmod +x ./adbkit-*-linux-x86_64-system.AppImage
+./adbkit-*-linux-x86_64-system.AppImage
 ```
 
-Package managers can install the files produced for their format:
+Install a system package with the matching tool:
 
 ```bash
-sudo apt install ./<deb-file>
-sudo dnf install ./<rpm-file>
-sudo pacman -U ./<arch-package>
+sudo apt install ./adbkit-*_amd64.deb
+sudo dnf install ./adbkit-*-1.x86_64.rpm
+sudo pacman -U ./adbkit-*-1-x86_64.pkg.tar.zst
 ```
 
 ### Windows
 
 Run the downloaded `.exe`. Windows 11 normally includes WebView2. On Windows 10
 or managed machines, install the Evergreen WebView2 Runtime if ADBKit does not
-start.
+start. The current build is unsigned, so Windows SmartScreen may ask for
+confirmation. Verify checksums where a `SHA256SUMS` file is attached to the
+release:
+
+```bash
+sha256sum -c SHA256SUMS
+```
 
 ### First launch
 
@@ -183,6 +155,12 @@ The setup wizard checks for ADB, Fastboot, and scrcpy. It can use an existing
 installation, accept a custom path, or download a managed package. The managed
 packages keep the supporting files required by ADB, Fastboot, and scrcpy, such
 as `lib64/` and `scrcpy-server`.
+
+Default data locations:
+
+- Linux: `~/.local/share/adbkit` or `$XDG_DATA_HOME/adbkit`
+- Windows: the folder containing `adbkit.exe`, or `%APPDATA%\adbkit`
+- macOS: `~/Library/Application Support/adbkit` (build configuration only; no release artifact is published yet)
 
 ## Screenshots
 
@@ -192,9 +170,11 @@ Terminal, Scrcpy, and Settings are in
 
 ## Development
 
+Stack: Go 1.26, Wails v3, React 19, TypeScript 7, Vite 8, Bun, and Tailwind CSS v4.
+
 ### Requirements
 
-- Go 1.25 or later
+- Go 1.26 or later
 - Bun
 - Wails v3 CLI
 - Platform dependencies required by Wails and the target operating system
@@ -287,6 +267,11 @@ should include tests for the affected path and pass `make check`.
 
 Report security vulnerabilities privately using the process in
 [SECURITY.md](SECURITY.md), not through a public issue.
+
+## Disclaimer
+
+ADBKit is an independent project. It is not affiliated with, endorsed by, or
+connected to Google or the Android Open Source Project.
 
 ## License
 
