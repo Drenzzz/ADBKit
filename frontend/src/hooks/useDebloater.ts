@@ -58,78 +58,83 @@ export function useDebloater() {
   )
 
   useEffect(() => {
-    store.resetForDeviceChange()
+    useDebloaterStore.getState().resetForDeviceChange()
   }, [activeSerial])
 
   const loadCatalogMeta = useCallback(async () => {
     try {
       const meta = await getDebloaterCatalogMeta()
-      store.setCatalogMeta(meta)
+      useDebloaterStore.getState().setCatalogMeta(meta)
     } catch {
       // ignore metadata load failure
     }
   }, [])
 
   const scan = useCallback(async () => {
+    const s = useDebloaterStore.getState()
     if (!hasReadyActiveDevice) {
-      store.setScanResult(null)
-      store.clearDebloatSelection()
-      store.setError('No ADB device connected')
+      s.setScanResult(null)
+      s.clearDebloatSelection()
+      s.setError('No ADB device connected')
       return
     }
 
-    store.setScanning(true)
-    store.setError(null)
+    s.setScanning(true)
+    s.setError(null)
     try {
       const result = await scanDebloater()
-      store.setScanResult(result)
+      const current = useDebloaterStore.getState()
+      current.setScanResult(result)
       const installedNames = new Set(result.items.map((item) => item.packageName))
-      store.setSelectedDebloat(
-        store.selectedDebloat.filter((name) => installedNames.has(name)),
+      current.setSelectedDebloat(
+        current.selectedDebloat.filter((name) => installedNames.has(name)),
       )
     } catch (err) {
-      store.setError(getErrorMessage(err))
+      useDebloaterStore.getState().setError(getErrorMessage(err))
     } finally {
-      store.setScanning(false)
+      useDebloaterStore.getState().setScanning(false)
     }
-  }, [hasReadyActiveDevice, store.selectedDebloat])
+  }, [hasReadyActiveDevice])
 
   const fetchRestorable = useCallback(async () => {
+    const s = useDebloaterStore.getState()
     if (!hasReadyActiveDevice) {
-      store.setRestorablePackages([])
-      store.clearRestoreSelection()
-      store.setError('No ADB device connected')
+      s.setRestorablePackages([])
+      s.clearRestoreSelection()
+      s.setError('No ADB device connected')
       return
     }
 
-    store.setLoadingRestorable(true)
-    store.setError(null)
+    s.setLoadingRestorable(true)
+    s.setError(null)
     try {
       const items = await listRestorablePackages()
-      store.setRestorablePackages(items)
+      const current = useDebloaterStore.getState()
+      current.setRestorablePackages(items)
       const restorableNames = new Set(items.map((item) => item.packageName))
-      store.setSelectedRestore(
-        store.selectedRestore.filter((name) => restorableNames.has(name)),
+      current.setSelectedRestore(
+        current.selectedRestore.filter((name) => restorableNames.has(name)),
       )
     } catch (err) {
-      store.setError(getErrorMessage(err))
+      useDebloaterStore.getState().setError(getErrorMessage(err))
     } finally {
-      store.setLoadingRestorable(false)
+      useDebloaterStore.getState().setLoadingRestorable(false)
     }
-  }, [hasReadyActiveDevice, store.selectedRestore])
+  }, [hasReadyActiveDevice])
 
   useEffect(() => {
-    if (store.activeMode === 'debloater' && hasReadyActiveDevice && !store.scanResult) {
+    const s = useDebloaterStore.getState()
+    if (s.activeMode === 'debloater' && hasReadyActiveDevice && !s.scanResult) {
       void scan()
       void loadCatalogMeta()
     } else if (
-      store.activeMode === 'restore' &&
+      s.activeMode === 'restore' &&
       hasReadyActiveDevice &&
-      store.restorablePackages.length === 0
+      s.restorablePackages.length === 0
     ) {
       void fetchRestorable()
     }
-  }, [store.activeMode, hasReadyActiveDevice, activeSerial])
+  }, [store.activeMode, hasReadyActiveDevice, activeSerial, scan, loadCatalogMeta, fetchRestorable])
 
   const filteredCandidates = useMemo(() => {
     const items = store.scanResult?.items ?? []

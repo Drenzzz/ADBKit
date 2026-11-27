@@ -52,7 +52,7 @@ export function DebloaterCatalogDialog({
           <div className="rounded-xl bg-[var(--color-background-muted)]/60 p-3">
             <p className="text-[12px] text-[var(--color-text-secondary)]">Built-in</p>
             <p className="mt-0.5 text-[18px] font-bold tabular text-[var(--color-text-primary)]">
-              {meta?.builtinCount ?? '—'}
+              {meta?.builtinCount ?? '-'}
             </p>
           </div>
           <div className="rounded-xl bg-[var(--color-background-muted)]/60 p-3">
@@ -64,7 +64,7 @@ export function DebloaterCatalogDialog({
           <div className="rounded-xl bg-[var(--color-background-muted)]/60 p-3">
             <p className="text-[12px] text-[var(--color-text-secondary)]">Protected</p>
             <p className="mt-0.5 text-[18px] font-bold tabular text-[var(--color-text-primary)]">
-              {meta?.criticalCount ?? '—'}
+              {meta?.criticalCount ?? '-'}
             </p>
           </div>
         </div>

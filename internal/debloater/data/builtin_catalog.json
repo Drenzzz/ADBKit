@@ -338,7 +338,7 @@
       "vendor": "xiaomi",
       "category": "Ads & Telemetry",
       "risk": "safe",
-      "description": "Primary MIUI/HyperOS system ad service — recommended first removal."
+      "description": "Primary MIUI/HyperOS system ad service (recommended first removal)."
     },
     {
       "packageName": "com.miui.systemAdSolution",
@@ -477,7 +477,7 @@
       "vendor": "xiaomi",
       "category": "Stock Apps & Utilities",
       "risk": "safe",
-      "description": "Xiaomi stock browser — common source of notification spam."
+      "description": "Xiaomi stock browser, common source of notification spam."
     },
     {
       "packageName": "com.mi.globalbrowser.mini",
