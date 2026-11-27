@@ -144,6 +144,92 @@ export type PackageSortOrder = 'az' | 'za' | 'size-desc' | 'size-asc'
 
 export type PackageBatchAction = 'uninstall' | 'enable' | 'disable' | 'force-stop' | 'clear-data' | 'pull-apk'
 
+export type AppsViewMode = 'packages' | 'debloater' | 'restore'
+
+export type DebloatRiskTier = 'safe' | 'caution' | 'critical'
+
+export type DebloatVendorFilter = 'all' | 'xiaomi' | 'google' | 'third-party' | 'custom'
+
+export type DebloatRiskFilter = 'all' | 'safe' | 'caution'
+
+export type DebloatTypeFilter = 'all' | 'system' | 'user'
+
+export interface DebloatPreset {
+  id: string
+  name: string
+  description: string
+  vendor: string
+  packageNames: string[]
+}
+
+export interface DebloatScanItem {
+  packageName: string
+  appName: string
+  vendor: string
+  category: string
+  risk: DebloatRiskTier
+  description: string
+  legacy: boolean
+  aospReused: boolean
+  autoEnableWarning: boolean
+  source: string
+  isEnabled: boolean
+  isSystemApp: boolean
+}
+
+export interface DebloatScanCounts {
+  total: number
+  safe: number
+  caution: number
+  system: number
+  user: number
+}
+
+export interface DebloatScanResult {
+  deviceSerial: string
+  deviceBrand: string
+  deviceManufacturer: string
+  deviceModel: string
+  catalogVersion: string
+  items: DebloatScanItem[]
+  presets: DebloatPreset[]
+  counts: DebloatScanCounts
+}
+
+export interface RestorablePackage {
+  packageName: string
+  appName?: string
+  vendor?: string
+  category?: string
+  risk?: DebloatRiskTier
+  description?: string
+  inCatalog: boolean
+}
+
+export interface DebloatActionItemResult {
+  packageName: string
+  success: boolean
+  message: string
+  skipped?: boolean
+}
+
+export interface DebloatBatchResult {
+  action: 'debloat' | 'disable' | 'restore'
+  total: number
+  succeeded: number
+  failed: number
+  skipped: number
+  results: DebloatActionItemResult[]
+}
+
+export interface DebloatCatalogMeta {
+  version: string
+  builtinCount: number
+  customCount: number
+  criticalCount: number
+  customCatalogPath?: string
+}
+
 export interface PackageInfo {
   packageName: string
   isEnabled: boolean
