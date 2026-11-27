@@ -4,6 +4,7 @@ import (
 	"ADBKit/internal/audit"
 	"ADBKit/internal/binary"
 	"ADBKit/internal/core"
+	"ADBKit/internal/debloater"
 	"ADBKit/internal/device"
 	"ADBKit/internal/dialog"
 	"ADBKit/internal/download"
@@ -30,9 +31,10 @@ type App struct {
 	devSvc   *device.Service
 	wireSvc  *device.WirelessService
 	monSvc   *device.MonitorService
-	diaSvc   *dialog.Service
-	pkgSvc   *packagemgr.Service
-	fileSvc  *file.Service
+	diaSvc     *dialog.Service
+	pkgSvc     *packagemgr.Service
+	debloatSvc *debloater.Service
+	fileSvc    *file.Service
 	termSvc  *shell.TerminalService
 	logSvc   *shell.LogcatService
 	fbSvc    *flasher.FastbootService
@@ -80,6 +82,11 @@ func (a *App) ServiceStartup(ctx context.Context, _ application.ServiceOptions) 
 	a.monSvc = device.NewMonitorService(a.dataDir, getBinPath)
 	a.diaSvc = dialog.New(ctx)
 	a.pkgSvc = packagemgr.NewService(a.resolveActiveSerial, a.diaSvc.SelectSaveFile, getBinPath)
+	debloatSvc, err := debloater.NewService(a.dataDir, a.pkgSvc, a.devSvc, a.resolveActiveSerial)
+	if err != nil {
+		log.Printf("failed to init debloater service: %v", err)
+	}
+	a.debloatSvc = debloatSvc
 	a.fileSvc = file.NewService(ctx, a.resolveActiveSerial, getBinPath)
 	a.termSvc = shell.NewTerminalService(ctx, a.binSvc, a.currentConfig, a.resolveTerminalSerial)
 	a.logSvc = shell.NewLogcatService(ctx, a.binSvc, a.currentConfig)

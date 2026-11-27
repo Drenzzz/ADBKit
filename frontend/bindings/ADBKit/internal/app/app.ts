@@ -16,6 +16,9 @@ import * as binary$0 from "../binary/models.js";
 import * as core$0 from "../core/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
+import * as debloater$0 from "../debloater/models.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
 import * as device$0 from "../device/models.js";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
@@ -48,6 +51,10 @@ export function ClearCustomBinary(name: string): $CancellablePromise<void> {
     return $Call.ByID(2476663758, name);
 }
 
+export function ClearCustomDebloaterCatalog(): $CancellablePromise<debloater$0.CatalogMeta> {
+    return $Call.ByID(1617380124);
+}
+
 export function ClearDeviceNickname(serial: string): $CancellablePromise<void> {
     return $Call.ByID(3549130150, serial);
 }
@@ -72,12 +79,20 @@ export function CreateDirectory(remotePath: string): $CancellablePromise<string>
     return $Call.ByID(2415799174, remotePath);
 }
 
+export function DebloatPackages(packageNames: string[] | null, keepData: boolean): $CancellablePromise<debloater$0.BatchResult> {
+    return $Call.ByID(610640643, packageNames, keepData);
+}
+
 export function DeleteFile(remotePath: string): $CancellablePromise<string> {
     return $Call.ByID(1355371458, remotePath);
 }
 
 export function DeleteMultipleFiles(remotePaths: string[] | null): $CancellablePromise<string> {
     return $Call.ByID(3099217239, remotePaths);
+}
+
+export function DisableDebloatPackages(packageNames: string[] | null): $CancellablePromise<debloater$0.BatchResult> {
+    return $Call.ByID(1320808297, packageNames);
 }
 
 export function DisableMultiplePackages(packageNames: string[] | null): $CancellablePromise<string> {
@@ -114,6 +129,10 @@ export function EnableWirelessTCPIP(port: string, serial: string): $CancellableP
 
 export function ExportAuditLogs(path: string): $CancellablePromise<void> {
     return $Call.ByID(1133489211, path);
+}
+
+export function ExportDebloaterTemplate(filePath: string): $CancellablePromise<string> {
+    return $Call.ByID(2578718233, filePath);
 }
 
 /**
@@ -178,6 +197,10 @@ export function GetBinaryStatus(): $CancellablePromise<binary$0.BinarySetupResul
 
 export function GetCapabilities(): $CancellablePromise<{ [_ in string]?: boolean } | null> {
     return $Call.ByID(1642500355);
+}
+
+export function GetDebloaterCatalogMeta(): $CancellablePromise<debloater$0.CatalogMeta> {
+    return $Call.ByID(2142416687);
 }
 
 export function GetDeviceInfo(serial: string): $CancellablePromise<device$0.Info | null> {
@@ -265,6 +288,10 @@ export function ImportAuditLogs(path: string): $CancellablePromise<number> {
     return $Call.ByID(3429852810, path);
 }
 
+export function ImportCustomDebloaterCatalog(filePath: string): $CancellablePromise<debloater$0.CatalogMeta> {
+    return $Call.ByID(200984334, filePath);
+}
+
 export function InspectAPK(filePath: string): $CancellablePromise<packagemgr$0.APKPreview> {
     return $Call.ByID(2473824945, filePath);
 }
@@ -291,6 +318,10 @@ export function ListManagedBinaries(): $CancellablePromise<string[] | null> {
 
 export function ListPackages(filterType: string): $CancellablePromise<packagemgr$0.Info[] | null> {
     return $Call.ByID(3630353506, filterType);
+}
+
+export function ListRestorablePackages(): $CancellablePromise<debloater$0.UninstalledItem[] | null> {
+    return $Call.ByID(64206873);
 }
 
 export function ListSdCards(): $CancellablePromise<file$0.SdCard[] | null> {
@@ -337,6 +368,10 @@ export function RenameFile(oldRemotePath: string, newRemotePath: string): $Cance
     return $Call.ByID(1724962491, oldRemotePath, newRemotePath);
 }
 
+export function RestorePackages(packageNames: string[] | null): $CancellablePromise<debloater$0.BatchResult> {
+    return $Call.ByID(528479010, packageNames);
+}
+
 export function RetryBinaryDetection(): $CancellablePromise<binary$0.BinarySetupResult | null> {
     return $Call.ByID(2288452565);
 }
@@ -351,6 +386,10 @@ export function SaveLogcatToFile(content: string, defaultFilename: string): $Can
 
 export function SaveWirelessHistory(entries: core$0.WirelessHistoryEntry[] | null): $CancellablePromise<void> {
     return $Call.ByID(280639586, entries);
+}
+
+export function ScanDebloater(): $CancellablePromise<debloater$0.ScanResult> {
+    return $Call.ByID(1654709702);
 }
 
 export function ScanRomFolder(folderPath: string): $CancellablePromise<flasher$0.Plan | null> {
@@ -377,6 +416,10 @@ export function SelectFlashImageFile(): $CancellablePromise<string> {
     return $Call.ByID(3511365674);
 }
 
+export function SelectJsonFile(): $CancellablePromise<string> {
+    return $Call.ByID(1939477107);
+}
+
 export function SelectMultipleDirectories(): $CancellablePromise<string[] | null> {
     return $Call.ByID(3923529714);
 }
@@ -387,6 +430,10 @@ export function SelectMultipleFiles(): $CancellablePromise<string[] | null> {
 
 export function SelectPlatformToolsDirectory(): $CancellablePromise<dialog$0.PlatformToolsSelection | null> {
     return $Call.ByID(3336253378);
+}
+
+export function SelectSaveJsonFile(defaultFilename: string): $CancellablePromise<string> {
+    return $Call.ByID(3343563514, defaultFilename);
 }
 
 export function SelectSavePath(defaultFilename: string): $CancellablePromise<string> {
