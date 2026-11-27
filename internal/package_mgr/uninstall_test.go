@@ -86,3 +86,36 @@ func TestRunBatchOperation_PropagatesOperationErrors(t *testing.T) {
 		t.Fatalf("expected underlying error detail in message, got %q", msg)
 	}
 }
+
+func TestUninstallPackageForUser0_ValidationAndNoDevice(t *testing.T) {
+	svc := &Service{
+		resolveActiveSerial: func(ctx context.Context) (string, error) {
+			return "", errors.New("no device")
+		},
+		getBinPath: func() core.BinaryPaths {
+			return core.BinaryPaths{Adb: "/usr/bin/adb"}
+		},
+	}
+
+	if _, err := svc.UninstallPackageForUser0(context.Background(), "com.bad;pkg", true); err == nil {
+		t.Fatal("expected invalid package name to error")
+	}
+	if _, err := svc.UninstallPackageForUser0(context.Background(), "com.miui.msa.global", true); err == nil {
+		t.Fatal("expected error when no active device")
+	}
+	if _, err := svc.RestorePackage(context.Background(), "com.bad;pkg"); err == nil {
+		t.Fatal("expected invalid package name to error on restore")
+	}
+	if _, err := svc.RestorePackage(context.Background(), "com.miui.msa.global"); err == nil {
+		t.Fatal("expected error when no active device on restore")
+	}
+}
+
+func TestDiffUninstalledPackages(t *testing.T) {
+	allOut := "package:com.android.chrome\npackage:com.miui.msa.global\npackage:com.miui.analytics\n"
+	activeOut := "package:com.android.chrome\n"
+	got := diffUninstalledPackages(allOut, activeOut)
+	if len(got) != 2 || got[0] != "com.miui.analytics" || got[1] != "com.miui.msa.global" {
+		t.Fatalf("diffUninstalledPackages = %v, want [com.miui.analytics com.miui.msa.global]", got)
+	}
+}

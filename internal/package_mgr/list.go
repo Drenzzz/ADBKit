@@ -4,6 +4,7 @@ import (
 	"ADBKit/internal/core"
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -167,4 +168,69 @@ func parsePackageListOutput(output string, isEnabled bool, isSystemApp bool) []I
 	}
 
 	return packages
+}
+
+func (s *Service) ListUninstalledPackages(ctx context.Context) ([]string, error) {
+	serial, err := s.requireActiveSerial(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	type rawOutput struct {
+		stdout string
+		err    error
+	}
+
+	allCh := make(chan rawOutput, 1)
+	activeCh := make(chan rawOutput, 1)
+
+	runPM := func(args []string, opErrMsg string, ch chan<- rawOutput) {
+		result, err := core.RunCommand(ctx, core.ExecRequest{
+			Command: s.getBinPath().Adb,
+			Args:    args,
+			Timeout: 15 * time.Second,
+		})
+		if err != nil {
+			ch <- rawOutput{err: core.NewOperationError("list_uninstalled_packages", opErrMsg, err.Error(), true)}
+			return
+		}
+		if result.ExitCode != 0 {
+			ch <- rawOutput{err: core.NewOperationError("list_uninstalled_packages", opErrMsg, strings.TrimSpace(result.Stderr), true)}
+			return
+		}
+		ch <- rawOutput{stdout: result.Stdout}
+	}
+
+	go runPM([]string{"-s", serial, "shell", "pm", "list", "packages", "-u"}, "Failed to list all packages", allCh)
+	go runPM([]string{"-s", serial, "shell", "pm", "list", "packages"}, "Failed to list installed packages", activeCh)
+
+	allRes := <-allCh
+	if allRes.err != nil {
+		return nil, allRes.err
+	}
+	activeRes := <-activeCh
+	if activeRes.err != nil {
+		return nil, activeRes.err
+	}
+
+	return diffUninstalledPackages(allRes.stdout, activeRes.stdout), nil
+}
+
+func diffUninstalledPackages(allWithUninstalledOutput, installedOutput string) []string {
+	allPkgs := parsePackageListOutput(allWithUninstalledOutput, false, false)
+	installedPkgs := parsePackageListOutput(installedOutput, true, false)
+
+	installedSet := make(map[string]struct{}, len(installedPkgs))
+	for _, pkg := range installedPkgs {
+		installedSet[pkg.PackageName] = struct{}{}
+	}
+
+	uninstalled := make([]string, 0)
+	for _, pkg := range allPkgs {
+		if _, active := installedSet[pkg.PackageName]; !active {
+			uninstalled = append(uninstalled, pkg.PackageName)
+		}
+	}
+	sort.Strings(uninstalled)
+	return uninstalled
 }

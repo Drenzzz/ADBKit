@@ -1,0 +1,1249 @@
+{
+  "version": "2026.11.27",
+  "packages": [
+    {
+      "packageName": "com.google.android.videos",
+      "appName": "Google TV",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google TV (formerly Play Movies & TV). Safe to remove if unused."
+    },
+    {
+      "packageName": "com.google.android.apps.youtube.music",
+      "appName": "YouTube Music",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Default YouTube Music streaming client."
+    },
+    {
+      "packageName": "com.google.android.youtube",
+      "appName": "YouTube",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "Official YouTube app. Safe if you use a browser or alternative client."
+    },
+    {
+      "packageName": "com.google.android.apps.books",
+      "appName": "Google Play Books",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google e-book reader. Safe to remove if unused."
+    },
+    {
+      "packageName": "com.google.android.apps.magazines",
+      "appName": "Google News",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google News aggregator. Safe to remove if unused."
+    },
+    {
+      "packageName": "com.google.android.apps.podcasts",
+      "appName": "Google Podcasts",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Discontinued in 2024 (migrated to YouTube Music). Safe to remove on older ROMs.",
+      "legacy": true
+    },
+    {
+      "packageName": "com.google.android.apps.tachyon",
+      "appName": "Google Duo",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Legacy video calling app merged into Google Meet in 2022. Safe to remove.",
+      "legacy": true
+    },
+    {
+      "packageName": "com.google.android.apps.meetings",
+      "appName": "Google Meet",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google Meet video conferencing client. Safe to remove if unused."
+    },
+    {
+      "packageName": "com.google.android.apps.work.oobconfig",
+      "appName": "Work Profile Setup",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Used only during managed Android Work Profile onboarding."
+    },
+    {
+      "packageName": "com.google.android.music",
+      "appName": "Google Play Music",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Discontinued in 2020. Safe to remove on legacy ROMs.",
+      "legacy": true
+    },
+    {
+      "packageName": "com.google.android.apps.docs",
+      "appName": "Google Drive",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "Cloud storage client. Safe if you do not sync or open Drive files."
+    },
+    {
+      "packageName": "com.google.android.apps.docs.editors.docs",
+      "appName": "Google Docs",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google Docs editor. Can be reinstalled from Play Store anytime."
+    },
+    {
+      "packageName": "com.google.android.apps.docs.editors.sheets",
+      "appName": "Google Sheets",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google Sheets editor. Can be reinstalled from Play Store anytime."
+    },
+    {
+      "packageName": "com.google.android.apps.docs.editors.slides",
+      "appName": "Google Slides",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google Slides editor. Can be reinstalled from Play Store anytime."
+    },
+    {
+      "packageName": "com.google.android.keep",
+      "appName": "Google Keep",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google Keep notes app. Safe to remove if you use another notes app."
+    },
+    {
+      "packageName": "com.google.android.apps.photos",
+      "appName": "Google Photos",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "Cloud gallery. Safe if you use the stock or a third-party gallery app."
+    },
+    {
+      "packageName": "com.google.android.gm",
+      "appName": "Gmail",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "Google email client. Safe if you use another email app."
+    },
+    {
+      "packageName": "com.google.android.calendar",
+      "appName": "Google Calendar",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "Google calendar app. Safe if you use another calendar app."
+    },
+    {
+      "packageName": "com.google.android.apps.maps",
+      "appName": "Google Maps",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "Navigation and maps. Safe if you do not use Google Maps."
+    },
+    {
+      "packageName": "com.android.chrome",
+      "appName": "Google Chrome",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "Default web browser. Make sure another browser is installed before removing."
+    },
+    {
+      "packageName": "com.google.android.apps.subscriptions.red",
+      "appName": "Google One",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Google One subscription and backup manager."
+    },
+    {
+      "packageName": "com.google.android.apps.walletnfcrel",
+      "appName": "Google Wallet",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "NFC tap-to-pay & passes. Safe if you do not use Google Pay."
+    },
+    {
+      "packageName": "com.google.android.apps.bard",
+      "appName": "Google Gemini",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "safe",
+      "description": "Gemini AI assistant app. Safe to remove if you do not use Gemini."
+    },
+    {
+      "packageName": "com.google.android.apps.nbu.files",
+      "appName": "Files by Google",
+      "vendor": "google",
+      "category": "Media & Productivity",
+      "risk": "caution",
+      "description": "Google file manager. Safe if you already use another file manager."
+    },
+    {
+      "packageName": "com.google.android.apps.wellbeing",
+      "appName": "Digital Wellbeing",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "safe",
+      "description": "Screen-time tracker. Removing reduces background usage monitoring."
+    },
+    {
+      "packageName": "com.google.android.feedback",
+      "appName": "Market Feedback Agent",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "safe",
+      "description": "Legacy Google crash/feedback reporter (non-functional on Android 12+)."
+    },
+    {
+      "packageName": "com.google.android.marvin.talkback",
+      "appName": "Android Accessibility Suite",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "Screen reader and accessibility tools. Keep if you rely on TalkBack."
+    },
+    {
+      "packageName": "com.google.android.projection.gearhead",
+      "appName": "Android Auto",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "Car head-unit projection. Safe to remove if you do not use Android Auto."
+    },
+    {
+      "packageName": "com.google.android.apps.turbo",
+      "appName": "Device Health Services",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "safe",
+      "description": "Adaptive battery estimation service. Safe to remove."
+    },
+    {
+      "packageName": "com.google.android.gms.location.history",
+      "appName": "Google Location History",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "safe",
+      "description": "Timeline location history service. Safe if unused."
+    },
+    {
+      "packageName": "com.google.android.apps.safetyhub",
+      "appName": "Personal Safety",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "Emergency SOS and car crash detection will stop working if removed."
+    },
+    {
+      "packageName": "com.google.android.apps.googleassistant",
+      "appName": "Google Assistant",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "safe",
+      "description": "Standalone Google Assistant app."
+    },
+    {
+      "packageName": "com.google.android.ar.lens",
+      "appName": "Google Lens",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "safe",
+      "description": "Standalone Google Lens visual search app."
+    },
+    {
+      "packageName": "com.google.ar.core",
+      "appName": "Google Play Services for AR",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "ARCore runtime. Safe to remove if you do not use AR apps or games."
+    },
+    {
+      "packageName": "com.google.android.googlequicksearchbox",
+      "appName": "Google App",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "Removing this disables the Google search widget, Lens shortcuts, and Circle to Search."
+    },
+    {
+      "packageName": "com.google.android.as",
+      "appName": "Android System Intelligence",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "Powers Live Caption, Now Playing, and Smart Reply. Those features stop working if removed."
+    },
+    {
+      "packageName": "com.google.android.as.oss",
+      "appName": "Private Compute Services",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "Companion service for Android System Intelligence."
+    },
+    {
+      "packageName": "com.google.android.tts",
+      "appName": "Google Text-to-Speech",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "Voice synthesis engine. Removing breaks navigation voice guidance and screen-reader TTS."
+    },
+    {
+      "packageName": "com.google.android.printservice.recommendation",
+      "appName": "Print Service Recommendation",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "safe",
+      "description": "Suggests printer plugins in system settings. Safe to remove."
+    },
+    {
+      "packageName": "com.google.android.aicore",
+      "appName": "Android AICore",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "On-device Gemini Nano runtime (Android 15+). Removing disables local AI summaries and smart features."
+    },
+    {
+      "packageName": "com.google.android.safetycore",
+      "appName": "Android System SafetyCore",
+      "vendor": "google",
+      "category": "Background & System",
+      "risk": "caution",
+      "description": "Local privacy scanner for Sensitive Content Warnings in Messages."
+    },
+    {
+      "packageName": "com.miui.msa.global",
+      "appName": "MSA (MIUI System Ads)",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Primary MIUI/HyperOS system ad service — recommended first removal."
+    },
+    {
+      "packageName": "com.miui.systemAdSolution",
+      "appName": "System Ad Solution",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Companion ad delivery service for MSA."
+    },
+    {
+      "packageName": "com.miui.analytics",
+      "appName": "MIUI Analytics",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Xiaomi usage analytics and tracking service."
+    },
+    {
+      "packageName": "com.miui.daemon",
+      "appName": "MIUI Daemon",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Background telemetry daemon. Note: may auto-re-enable if only disabled.",
+      "autoEnableWarning": true
+    },
+    {
+      "packageName": "com.miui.miservice",
+      "appName": "Services & Feedback",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Xiaomi feedback and promotional hub."
+    },
+    {
+      "packageName": "com.miui.bugreport",
+      "appName": "MIUI Bug Report",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "System bug log collector for Xiaomi feedback."
+    },
+    {
+      "packageName": "com.miui.hybrid",
+      "appName": "Quick Apps",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Xiaomi instant-app runtime without installation."
+    },
+    {
+      "packageName": "com.miui.hybrid.accessory",
+      "appName": "Quick Apps Service",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Companion service for Xiaomi Quick Apps."
+    },
+    {
+      "packageName": "com.xiaomi.mipicks",
+      "appName": "GetApps",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Xiaomi's preinstalled app store and ad recommendations."
+    },
+    {
+      "packageName": "com.xiaomi.discover",
+      "appName": "System Apps Updater / GetApps Regional",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "caution",
+      "description": "Xiaomi regional app recommender/updater. Safe if you update apps via Play Store."
+    },
+    {
+      "packageName": "com.miui.yellowpage",
+      "appName": "Yellow Pages",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Built-in phone directory and caller lookup."
+    },
+    {
+      "packageName": "com.xiaomi.joyose",
+      "appName": "Joyose",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "caution",
+      "description": "Telemetry & thermal/Game Turbo throttling service. Removing disables Game Turbo thermal limits."
+    },
+    {
+      "packageName": "com.miui.contentcatcher",
+      "appName": "Content Catcher",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "caution",
+      "description": "Screen-content indexing helper. Often auto-re-enables when only disabled.",
+      "autoEnableWarning": true
+    },
+    {
+      "packageName": "com.miui.voicetrigger",
+      "appName": "Voice Trigger",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "caution",
+      "description": "Wake-word listener for Xiaomi voice assistant. Auto-re-enables on some MIUI builds.",
+      "autoEnableWarning": true
+    },
+    {
+      "packageName": "com.miui.personalassistant",
+      "appName": "Personal Assistant",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Assistant cards and smart suggestions provider."
+    },
+    {
+      "packageName": "com.miui.voiceassist",
+      "appName": "Xiaomi Voice Assistant",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Xiaomi's built-in voice assistant. Safe if unused."
+    },
+    {
+      "packageName": "com.miui.cit",
+      "appName": "CIT (Hardware Test)",
+      "vendor": "xiaomi",
+      "category": "Ads & Telemetry",
+      "risk": "safe",
+      "description": "Hidden factory hardware diagnostic menu."
+    },
+    {
+      "packageName": "com.mi.globalbrowser",
+      "appName": "Mi Browser",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi stock browser — common source of notification spam."
+    },
+    {
+      "packageName": "com.mi.globalbrowser.mini",
+      "appName": "Mint Browser",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi lightweight browser. Safe to remove."
+    },
+    {
+      "packageName": "com.mi.global.shop",
+      "appName": "Mi Store",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Official Xiaomi global shopping app."
+    },
+    {
+      "packageName": "com.mi.global.bbs",
+      "appName": "Xiaomi Community",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi Community forum app."
+    },
+    {
+      "packageName": "com.miui.player",
+      "appName": "Mi Music",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Stock MIUI music player with ad placements."
+    },
+    {
+      "packageName": "com.miui.videoplayer",
+      "appName": "Mi Video",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Stock MIUI video player with ad placements."
+    },
+    {
+      "packageName": "com.miui.android.fashiongallery",
+      "appName": "Wallpaper Carousel / Glance",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Lock-screen wallpaper ads and news carousel."
+    },
+    {
+      "packageName": "com.mi.globalminusscreen",
+      "appName": "App Vault",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Leftmost widgets/ads screen on the stock launcher."
+    },
+    {
+      "packageName": "com.xiaomi.glgm",
+      "appName": "Game Center",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi preinstalled game portal."
+    },
+    {
+      "packageName": "com.xiaomi.payment",
+      "appName": "Mi Coin",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi virtual currency and payment service."
+    },
+    {
+      "packageName": "com.mipay.wallet.id",
+      "appName": "Mi Pay (ID)",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi digital wallet (Indonesia ROM)."
+    },
+    {
+      "packageName": "com.mipay.wallet.in",
+      "appName": "Mi Pay (IN)",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi digital wallet (India ROM)."
+    },
+    {
+      "packageName": "com.miui.notes",
+      "appName": "Mi Notes",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Stock notes app. Safe if you use another notes app."
+    },
+    {
+      "packageName": "com.miui.compass",
+      "appName": "Compass",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Stock compass utility."
+    },
+    {
+      "packageName": "com.miui.weather2",
+      "appName": "Mi Weather",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Stock weather app and widget."
+    },
+    {
+      "packageName": "com.miui.calculator",
+      "appName": "Mi Calculator",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Stock calculator app."
+    },
+    {
+      "packageName": "com.miui.fm",
+      "appName": "FM Radio",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Stock FM radio app."
+    },
+    {
+      "packageName": "com.miui.fmservice",
+      "appName": "FM Radio Service",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Background service for FM Radio."
+    },
+    {
+      "packageName": "com.xiaomi.scanner",
+      "appName": "Mi Scanner",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "QR code and document scanner."
+    },
+    {
+      "packageName": "com.miui.screenrecorder",
+      "appName": "Screen Recorder",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Built-in screen recorder. Keep if you use Control Center screen recording."
+    },
+    {
+      "packageName": "com.xiaomi.midrop",
+      "appName": "ShareMe",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi local file transfer app."
+    },
+    {
+      "packageName": "com.miui.huanji",
+      "appName": "Mi Mover",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Phone-to-phone data migration tool."
+    },
+    {
+      "packageName": "com.mi.android.globalFileexplorer",
+      "appName": "Mi File Manager",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Stock file manager. Safe if you have another file manager installed."
+    },
+    {
+      "packageName": "com.duokan.phone.remotecontroller",
+      "appName": "Mi Remote",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "IR blaster remote control app."
+    },
+    {
+      "packageName": "com.miui.phrase",
+      "appName": "Frequent Phrases",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Keyboard text shortcuts service."
+    },
+    {
+      "packageName": "com.miui.touchassistant",
+      "appName": "Quick Ball",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Floating navigation shortcut ball."
+    },
+    {
+      "packageName": "com.miui.cleanmaster",
+      "appName": "Cleaner",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Removing breaks the Cleaner button inside Xiaomi Security, though the OS stays stable."
+    },
+    {
+      "packageName": "com.miui.cloudservice",
+      "appName": "Xiaomi Cloud",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Mi Cloud sync. Safe only if you do not rely on Xiaomi Cloud backups."
+    },
+    {
+      "packageName": "com.miui.cloudservice.sysbase",
+      "appName": "Xiaomi Cloud Sysbase",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Base service for Xiaomi Cloud."
+    },
+    {
+      "packageName": "com.miui.cloudbackup",
+      "appName": "Xiaomi Cloud Backup",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Cloud backup module for Xiaomi Cloud."
+    },
+    {
+      "packageName": "com.miui.micloudsync",
+      "appName": "Mi Cloud Sync",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Contacts/gallery sync with Xiaomi Cloud."
+    },
+    {
+      "packageName": "com.miui.translationservice",
+      "appName": "Translation Service",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Built-in MIUI text translation service."
+    },
+    {
+      "packageName": "com.miui.translation.kingsoft",
+      "appName": "Kingsoft Translate",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Kingsoft translation engine."
+    },
+    {
+      "packageName": "com.miui.translation.xmcloud",
+      "appName": "Xiaomi Cloud Translate",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi cloud translation engine."
+    },
+    {
+      "packageName": "com.miui.translation.youdao",
+      "appName": "Youdao Translate",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Youdao translation engine."
+    },
+    {
+      "packageName": "com.miui.mishare.connectivity",
+      "appName": "Mi Share Connectivity",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Cross-device Mi Share transfer. Safe if you do not use Mi Share."
+    },
+    {
+      "packageName": "com.miui.smsextra",
+      "appName": "SMS Extra",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Extra MIUI SMS card/OTP parsing features."
+    },
+    {
+      "packageName": "com.mobiletools.systemhelper",
+      "appName": "System Helper",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Auxiliary MIUI helper package."
+    },
+    {
+      "packageName": "com.xiaomi.xmsf",
+      "appName": "Xiaomi Messaging Service (XMSF)",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Xiaomi push framework. Safe if you do not rely on Xiaomi app push notifications."
+    },
+    {
+      "packageName": "com.xiaomi.xmsfkeeper",
+      "appName": "XMSF Keeper",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Watchdog for XMSF push service. Often auto-re-enables when only disabled.",
+      "autoEnableWarning": true
+    },
+    {
+      "packageName": "com.xiaomi.mi_connect_service",
+      "appName": "Mi Connect Service",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Xiaomi interconnectivity service for tablets/laptops/audio."
+    },
+    {
+      "packageName": "com.xiaomi.mirror",
+      "appName": "Mi Mirror",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi screen cast and mirroring client."
+    },
+    {
+      "packageName": "com.xiaomi.simactivate.service",
+      "appName": "SIM Activate Service",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "Xiaomi Cloud SIM activation. Safe after initial setup if Xiaomi Cloud SMS is unused."
+    },
+    {
+      "packageName": "com.xiaomi.powerchecker",
+      "appName": "Power Checker",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi background power usage monitor."
+    },
+    {
+      "packageName": "com.xiaomi.ab",
+      "appName": "Xiaomi AB Test",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi A/B testing diagnostic package."
+    },
+    {
+      "packageName": "com.xiaomi.aiasst.service",
+      "appName": "AI Assistant Service",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi AI call/assistant service. Safe if unused."
+    },
+    {
+      "packageName": "com.xiaomi.gamecenter.sdk.service",
+      "appName": "Game Center SDK",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "SDK companion for Xiaomi Game Center."
+    },
+    {
+      "packageName": "com.xiaomi.migameservice",
+      "appName": "Mi Game Service",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Background service for Xiaomi Game Center."
+    },
+    {
+      "packageName": "com.xiaomi.miplay_client",
+      "appName": "Mi Play Client",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Xiaomi media casting client."
+    },
+    {
+      "packageName": "com.xiaomi.barrage",
+      "appName": "Barrage",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "safe",
+      "description": "Floating notification/comment overlay in Xiaomi video & gaming tools."
+    },
+    {
+      "packageName": "com.miui.thirdappassistant",
+      "appName": "Third-Party App Assistant",
+      "vendor": "xiaomi",
+      "category": "Stock Apps & Utilities",
+      "risk": "caution",
+      "description": "MIUI/HyperOS helper for third-party app prompts and integrations."
+    },
+    {
+      "packageName": "com.android.browser",
+      "appName": "Mi Browser (AOSP Name)",
+      "vendor": "xiaomi",
+      "category": "HyperOS AOSP-Reused",
+      "risk": "caution",
+      "description": "HyperOS 2/3 reuses AOSP package name for Mi Browser. Install another browser first.",
+      "aospReused": true
+    },
+    {
+      "packageName": "com.android.email",
+      "appName": "Xiaomi Email",
+      "vendor": "xiaomi",
+      "category": "HyperOS AOSP-Reused",
+      "risk": "caution",
+      "description": "HyperOS stock Email app. Safe if you use Gmail or another email client.",
+      "aospReused": true
+    },
+    {
+      "packageName": "com.android.soundrecorder",
+      "appName": "Sound Recorder",
+      "vendor": "xiaomi",
+      "category": "HyperOS AOSP-Reused",
+      "risk": "caution",
+      "description": "Stock voice recorder. Safe if you use another recorder app.",
+      "aospReused": true
+    },
+    {
+      "packageName": "com.android.fileexplorer",
+      "appName": "File Manager (Legacy AOSP)",
+      "vendor": "xiaomi",
+      "category": "HyperOS AOSP-Reused",
+      "risk": "caution",
+      "description": "Older Xiaomi File Manager using AOSP name. Install another file manager first.",
+      "aospReused": true
+    },
+    {
+      "packageName": "com.android.globalFileexplorer",
+      "appName": "File Manager (Global AOSP)",
+      "vendor": "xiaomi",
+      "category": "HyperOS AOSP-Reused",
+      "risk": "caution",
+      "description": "Global File Manager using AOSP name. Install another file manager first.",
+      "aospReused": true
+    },
+    {
+      "packageName": "com.facebook.services",
+      "appName": "Facebook Services",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Facebook background service."
+    },
+    {
+      "packageName": "com.facebook.system",
+      "appName": "Facebook App Installer",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Auto-installer for Facebook services."
+    },
+    {
+      "packageName": "com.facebook.appmanager",
+      "appName": "Facebook App Manager",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Background updater for Facebook apps."
+    },
+    {
+      "packageName": "com.facebook.katana",
+      "appName": "Facebook",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Facebook social app."
+    },
+    {
+      "packageName": "com.amazon.appmanager",
+      "appName": "Amazon App Manager",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Amazon background service."
+    },
+    {
+      "packageName": "com.amazon.kindle",
+      "appName": "Amazon Kindle",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Amazon Kindle reader."
+    },
+    {
+      "packageName": "com.amazon.mp3",
+      "appName": "Amazon Music",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Amazon Music client."
+    },
+    {
+      "packageName": "com.amazon.mShop.android.shopping",
+      "appName": "Amazon Shopping",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Amazon Shopping app."
+    },
+    {
+      "packageName": "com.amazon.venezia",
+      "appName": "Amazon Appstore",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Amazon Appstore client."
+    },
+    {
+      "packageName": "com.booking",
+      "appName": "Booking.com",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Booking.com travel app."
+    },
+    {
+      "packageName": "com.alibaba.aliexpresshd",
+      "appName": "AliExpress",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled AliExpress shopping app."
+    },
+    {
+      "packageName": "com.netflix.partner.activation",
+      "appName": "Netflix Partner Activation",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Netflix OEM partner activation stub."
+    },
+    {
+      "packageName": "com.netflix.mediaclient",
+      "appName": "Netflix",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Netflix streaming app."
+    },
+    {
+      "packageName": "com.zhiliaoapp.musically",
+      "appName": "TikTok",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled TikTok app."
+    },
+    {
+      "packageName": "com.ss.android.ugc.trill",
+      "appName": "TikTok (Asia)",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled TikTok regional variant."
+    },
+    {
+      "packageName": "com.spotify.music",
+      "appName": "Spotify",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled Spotify music app."
+    },
+    {
+      "packageName": "com.linkedin.android",
+      "appName": "LinkedIn",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled LinkedIn app."
+    },
+    {
+      "packageName": "com.wps.xiaomi.abroad.lite",
+      "appName": "WPS Office Lite",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled WPS Office Lite for Xiaomi."
+    },
+    {
+      "packageName": "com.ebay.mobile",
+      "appName": "eBay",
+      "vendor": "third-party",
+      "category": "Partner Preloads",
+      "risk": "safe",
+      "description": "Preinstalled eBay shopping app."
+    },
+    {
+      "packageName": "com.xiaomi.finddevice",
+      "appName": "Xiaomi Find Device",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Bound directly to Xiaomi boot security. Removing causes bootloop."
+    },
+    {
+      "packageName": "com.miui.securitycenter",
+      "appName": "MIUI Security Center",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Manages app permissions, battery optimization, and core security."
+    },
+    {
+      "packageName": "com.miui.securityadd",
+      "appName": "MIUI Security Add-on",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Required companion to MIUI Security Center."
+    },
+    {
+      "packageName": "com.xiaomi.account",
+      "appName": "Xiaomi Account",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Removing while signed into a Mi Account crashes Settings."
+    },
+    {
+      "packageName": "com.xiaomi.market",
+      "appName": "Xiaomi System Market",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Required for system app updates and OTA integrity."
+    },
+    {
+      "packageName": "com.miui.home",
+      "appName": "MIUI System Launcher",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Default system launcher. Removing causes launcher loss or bootloop."
+    },
+    {
+      "packageName": "com.miui.guardprovider",
+      "appName": "MIUI Guard Provider",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Core MIUI security component."
+    },
+    {
+      "packageName": "com.lbe.security.miui",
+      "appName": "MIUI Permission Manager",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Handles runtime app permission prompts."
+    },
+    {
+      "packageName": "com.miui.packageinstaller",
+      "appName": "MIUI Package Installer",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "System APK installer. Removing breaks APK installation."
+    },
+    {
+      "packageName": "com.miui.global.packageinstaller",
+      "appName": "MIUI Global Package Installer",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Global ROM APK installer. Removing breaks APK installation."
+    },
+    {
+      "packageName": "com.android.updater",
+      "appName": "System Updater (OTA)",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "MIUI/HyperOS OTA firmware updater."
+    },
+    {
+      "packageName": "com.xiaomi.bluetooth",
+      "appName": "Xiaomi Bluetooth Service",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Core HyperOS Bluetooth stack. Removing breaks Bluetooth pairing."
+    },
+    {
+      "packageName": "com.miui.powerkeeper",
+      "appName": "MIUI PowerKeeper",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "System power and battery management driver."
+    },
+    {
+      "packageName": "com.xiaomi.metoknlp",
+      "appName": "Xiaomi Location Provider",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Network location driver."
+    },
+    {
+      "packageName": "com.miui.tsmclient",
+      "appName": "MIUI TSM Client",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "NFC/secure-element system driver."
+    },
+    {
+      "packageName": "com.miui.accessibility",
+      "appName": "MIUI Accessibility",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "System accessibility framework component."
+    },
+    {
+      "packageName": "com.miui.backup",
+      "appName": "MIUI Local Backup",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Core local backup framework."
+    },
+    {
+      "packageName": "com.miui.freeform",
+      "appName": "MIUI Freeform Windows",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Floating window system driver."
+    },
+    {
+      "packageName": "com.miui.face",
+      "appName": "MIUI Face Unlock",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Biometric face unlock driver."
+    },
+    {
+      "packageName": "com.miui.miwallpaper",
+      "appName": "MIUI Wallpaper",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "System lockscreen/home wallpaper renderer."
+    },
+    {
+      "packageName": "com.miui.aod",
+      "appName": "MIUI Always-On Display",
+      "vendor": "xiaomi",
+      "category": "Critical System",
+      "risk": "critical",
+      "description": "Always-on display system driver."
+    }
+  ]
+}
