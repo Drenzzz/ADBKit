@@ -122,6 +122,23 @@ func (s *Service) SelectApkFile() (string, error) {
 	return path, nil
 }
 
+func (s *Service) SelectJsonFile() (string, error) {
+	if s.ctx == nil {
+		return "", core.NewOperationError("select_json_file", "application context is not initialized", "", true)
+	}
+	path, err := application.Get().Dialog.OpenFileWithOptions(&application.OpenFileDialogOptions{
+		Title:           "Select JSON catalog file",
+		ShowHiddenFiles: false,
+		Filters: []application.FileFilter{
+			{DisplayName: "JSON files", Pattern: "*.json"},
+		},
+	}).PromptForSingleSelection()
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
 func (s *Service) SelectSaveFile(defaultFilename string) (string, error) {
 	if s.ctx == nil {
 		return "", core.NewOperationError("select_save_file", "application context is not initialized", "", true)

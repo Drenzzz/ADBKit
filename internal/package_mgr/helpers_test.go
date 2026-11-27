@@ -200,3 +200,44 @@ func TestSortPackages(t *testing.T) {
 		t.Errorf("expected last 'com.z.app', got %q", sorted[2].PackageName)
 	}
 }
+
+func TestValidateStrictPackageName(t *testing.T) {
+	cases := []struct {
+		input   string
+		want    string
+		wantErr bool
+	}{
+		{"com.miui.msa.global", "com.miui.msa.global", false},
+		{"com.xiaomi.mi_connect_service", "com.xiaomi.mi_connect_service", false},
+		{"com.example-app", "com.example-app", false},
+		{"", "", true},
+		{"com.evil;rm -rf /", "", true},
+		{"com.evil && echo", "", true},
+		{"com.evil\nname", "", true},
+	}
+
+	for _, tc := range cases {
+		got, err := ValidateStrictPackageName(tc.input)
+		if (err != nil) != tc.wantErr {
+			t.Fatalf("ValidateStrictPackageName(%q) err=%v, wantErr=%v", tc.input, err, tc.wantErr)
+		}
+		if !tc.wantErr && got != tc.want {
+			t.Fatalf("ValidateStrictPackageName(%q) = %q, want %q", tc.input, got, tc.want)
+		}
+	}
+}
+
+func TestIsPMFailureOutput(t *testing.T) {
+	if !isPMFailureOutput("Failure [not installed for 0]\n") {
+		t.Fatal("expected Failure [not installed for 0] to be detected")
+	}
+	if !isPMFailureOutput("Package com.foo doesn't exist\n") {
+		t.Fatal("expected doesn't exist to be detected")
+	}
+	if isPMFailureOutput("Success\n") {
+		t.Fatal("Success must not be treated as failure")
+	}
+	if isPMFailureOutput("Package com.foo installed for user: 0\n") {
+		t.Fatal("install-existing success must not be treated as failure")
+	}
+}

@@ -15,6 +15,35 @@ func validatePackageName(packageName string) (string, error) {
 	return trimmed, nil
 }
 
+func ValidateStrictPackageName(packageName string) (string, error) {
+	trimmed := strings.TrimSpace(packageName)
+	if trimmed == "" {
+		return "", core.NewOperationError("validate_package_name", "Package name is required", "package name must not be empty", false)
+	}
+	for _, r := range trimmed {
+		isValid := (r >= 'a' && r <= 'z') ||
+			(r >= 'A' && r <= 'Z') ||
+			(r >= '0' && r <= '9') ||
+			r == '.' || r == '_' || r == '-'
+		if !isValid {
+			return "", core.NewOperationError("validate_package_name", "Package name is invalid", fmt.Sprintf("invalid character in package name: %q", trimmed), false)
+		}
+	}
+	return trimmed, nil
+}
+
+func isPMFailureOutput(stdout string) bool {
+	trimmed := strings.TrimSpace(stdout)
+	if trimmed == "" {
+		return false
+	}
+	lower := strings.ToLower(trimmed)
+	return strings.HasPrefix(lower, "failure") ||
+		strings.Contains(lower, "\nfailure") ||
+		strings.Contains(lower, "doesn't exist") ||
+		strings.Contains(lower, "unknown package")
+}
+
 func parsePackagePathOutput(output string) (string, error) {
 	for _, rawLine := range strings.Split(output, "\n") {
 		line := strings.TrimSpace(rawLine)

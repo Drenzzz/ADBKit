@@ -34,6 +34,72 @@ func (s *Service) UninstallPackage(ctx context.Context, packageName string) (str
 	return fallbackMessage(result.Stdout, fmt.Sprintf("Uninstalled %s", trimmedName)), nil
 }
 
+func (s *Service) UninstallPackageForUser0(ctx context.Context, packageName string, keepData bool) (string, error) {
+	trimmedName, err := ValidateStrictPackageName(packageName)
+	if err != nil {
+		return "", err
+	}
+
+	serial, err := s.requireActiveSerial(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	args := []string{"-s", serial, "shell", "pm", "uninstall"}
+	if keepData {
+		args = append(args, "-k")
+	}
+	args = append(args, "--user", "0", trimmedName)
+
+	result, err := core.RunCommand(ctx, core.ExecRequest{
+		Command: s.getBinPath().Adb,
+		Args:    args,
+		Timeout: 30 * time.Second,
+	})
+	if err != nil {
+		return "", core.NewOperationError("debloat_package", "Failed to uninstall package for user 0", err.Error(), true)
+	}
+	if result.ExitCode != 0 || isPMFailureOutput(result.Stdout) {
+		detail := strings.TrimSpace(result.Stderr)
+		if detail == "" {
+			detail = extractFirstLine(result.Stdout)
+		}
+		return "", core.NewOperationError("debloat_package", "Failed to uninstall package for user 0", detail, true)
+	}
+
+	return fallbackMessage(result.Stdout, fmt.Sprintf("Uninstalled %s for user 0", trimmedName)), nil
+}
+
+func (s *Service) RestorePackage(ctx context.Context, packageName string) (string, error) {
+	trimmedName, err := ValidateStrictPackageName(packageName)
+	if err != nil {
+		return "", err
+	}
+
+	serial, err := s.requireActiveSerial(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	result, err := core.RunCommand(ctx, core.ExecRequest{
+		Command: s.getBinPath().Adb,
+		Args:    []string{"-s", serial, "shell", "cmd", "package", "install-existing", trimmedName},
+		Timeout: 30 * time.Second,
+	})
+	if err != nil {
+		return "", core.NewOperationError("restore_package", "Failed to restore package", err.Error(), true)
+	}
+	if result.ExitCode != 0 || isPMFailureOutput(result.Stdout) {
+		detail := strings.TrimSpace(result.Stderr)
+		if detail == "" {
+			detail = extractFirstLine(result.Stdout)
+		}
+		return "", core.NewOperationError("restore_package", "Failed to restore package", detail, true)
+	}
+
+	return fallbackMessage(result.Stdout, fmt.Sprintf("Restored %s", trimmedName)), nil
+}
+
 func (s *Service) DisablePackage(ctx context.Context, packageName string) (string, error) {
 	return s.setPackageEnabledState(ctx, packageName, false)
 }
