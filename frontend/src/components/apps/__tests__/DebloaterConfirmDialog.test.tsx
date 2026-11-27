@@ -47,7 +47,7 @@ const cautionAutoEnableItem: DebloatScanItem = {
 }
 
 describe('DebloaterConfirmDialog', () => {
-  it('allows direct confirmation for safe-only selections with -k enabled by default', () => {
+  it('allows direct confirmation for safe-only selections and clears data without -k', () => {
     const onConfirm = vi.fn()
     render(
       <DebloaterConfirmDialog
@@ -59,12 +59,13 @@ describe('DebloaterConfirmDialog', () => {
       />,
     )
 
-    expect(screen.getByText(/pm uninstall -k --user 0 com\.miui\.msa\.global/)).toBeInTheDocument()
+    expect(screen.getByText(/pm uninstall --user 0 com\.miui\.msa\.global/)).toBeInTheDocument()
+    expect(screen.queryByText(/Keep app data/)).not.toBeInTheDocument()
     const confirmBtn = screen.getByRole('button', { name: 'Debloat (--user 0)' })
     expect(confirmBtn).not.toHaveAttribute('aria-disabled', 'true')
 
     fireEvent.click(confirmBtn)
-    expect(onConfirm).toHaveBeenCalledWith(true)
+    expect(onConfirm).toHaveBeenCalledTimes(1)
   })
 
   it('requires explicit acknowledgement checkbox when caution packages are selected', () => {
@@ -89,7 +90,7 @@ describe('DebloaterConfirmDialog', () => {
     expect(confirmBtn).not.toHaveAttribute('aria-disabled', 'true')
 
     fireEvent.click(confirmBtn)
-    expect(onConfirm).toHaveBeenCalledWith(true)
+    expect(onConfirm).toHaveBeenCalledTimes(1)
   })
 
   it('shows MIUI auto-re-enable warning when disabling flagged packages', () => {

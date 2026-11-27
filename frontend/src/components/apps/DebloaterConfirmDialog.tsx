@@ -5,7 +5,6 @@ import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { Button } from '@astryxdesign/core/Button'
 import { Badge } from '@astryxdesign/core/Badge'
 import { CheckboxInput } from '@astryxdesign/core/CheckboxInput'
-import { Switch } from '@astryxdesign/core/Switch'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { DebloatScanItem } from '@/lib/types'
 
@@ -15,7 +14,7 @@ interface DebloaterConfirmDialogProps {
   action: 'debloat' | 'disable'
   items: DebloatScanItem[]
   busy?: boolean
-  onConfirm: (keepData: boolean) => Promise<boolean> | void
+  onConfirm: () => Promise<boolean> | void
 }
 
 export function DebloaterConfirmDialog({
@@ -27,12 +26,10 @@ export function DebloaterConfirmDialog({
   onConfirm,
 }: DebloaterConfirmDialogProps) {
   const reduced = useReducedMotion()
-  const [keepData, setKeepData] = useState(true)
   const [ackCaution, setAckCaution] = useState(false)
 
   useEffect(() => {
     if (open) {
-      setKeepData(true)
       setAckCaution(false)
     }
   }, [open])
@@ -46,12 +43,12 @@ export function DebloaterConfirmDialog({
 
   const samplePkg = items[0]?.packageName ?? '<package>'
   const commandPreview = isDebloat
-    ? `adb shell pm uninstall ${keepData ? '-k ' : ''}--user 0 ${samplePkg}`
+    ? `adb shell pm uninstall --user 0 ${samplePkg}`
     : `adb shell pm disable-user --user 0 ${samplePkg}`
 
   const handleConfirm = async () => {
     if (!canConfirm) return
-    const ok = await onConfirm(keepData)
+    const ok = await onConfirm()
     if (ok !== false) {
       onOpenChange(false)
     }
@@ -61,7 +58,7 @@ export function DebloaterConfirmDialog({
     <Dialog
       isOpen={open}
       onOpenChange={onOpenChange}
-      width={560}
+      width={520}
       padding={0}
       className="dashboard-scale overflow-hidden rounded-2xl"
     >
@@ -87,18 +84,18 @@ export function DebloaterConfirmDialog({
             {isDebloat ? <IconTrash size={24} stroke={1.75} /> : <IconAlertTriangle size={24} stroke={1.75} />}
           </div>
           <DialogHeader
-            className="space-y-1.5 text-left"
+            className="min-w-0 flex-1 space-y-1.5 text-left"
             title={
-              <span className="text-[20px] font-bold leading-snug tracking-tight text-[var(--color-text-primary)]">
+              <span className="block whitespace-normal text-[20px] font-bold leading-snug tracking-tight text-[var(--color-text-primary)]">
                 {isDebloat
                   ? `Debloat ${items.length} package(s)`
                   : `Disable ${items.length} package(s)`}
               </span>
             }
             subtitle={
-              <span className="text-[15px] leading-relaxed text-[var(--color-text-secondary)]">
+              <span className="block whitespace-normal break-words text-[14px] leading-relaxed text-[var(--color-text-secondary)]">
                 {isDebloat
-                  ? 'Removes packages for user 0. System apps remain recoverable from the Restore tab.'
+                  ? 'Uninstalls packages and clears their app data & cache for user 0. System apps can still be restored in the Restore tab.'
                   : 'Disables packages for user 0 without uninstalling them.'}
               </span>
             }
@@ -113,31 +110,11 @@ export function DebloaterConfirmDialog({
             )}
           </div>
 
-          {isDebloat && (
-            <div className="flex items-center justify-between gap-4 rounded-xl bg-[var(--color-background-muted)]/60 px-4 py-3">
-              <div className="min-w-0">
-                <p className="text-[14px] font-semibold text-[var(--color-text-primary)]">
-                  Keep app data & cache (-k)
-                </p>
-                <p className="text-[13px] text-[var(--color-text-secondary)]">
-                  Preserves local data so restoring later is seamless.
-                </p>
-              </div>
-              <Switch
-                label="Keep app data (-k)"
-                isLabelHidden
-                value={keepData}
-                onChange={setKeepData}
-                isDisabled={busy}
-              />
-            </div>
-          )}
-
           <div className="rounded-xl bg-[var(--color-background-muted)]/50 px-4 py-2.5">
             <p className="text-[12px] font-medium uppercase tracking-wide text-[var(--color-text-secondary)]">
               ADB command preview
             </p>
-            <code className="mt-1 block truncate font-mono text-[13px] text-[var(--color-text-primary)]">
+            <code className="mt-1 block break-all font-mono text-[13px] text-[var(--color-text-primary)]">
               {commandPreview}
             </code>
           </div>

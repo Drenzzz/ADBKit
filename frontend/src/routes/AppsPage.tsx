@@ -500,11 +500,11 @@ export default function AppsPage() {
         action={debloatConfirmAction ?? 'debloat'}
         items={debloater.selectedCandidateItems}
         busy={debloater.executingAction !== null}
-        onConfirm={(keepData) => {
+        onConfirm={() => {
           if (debloatConfirmAction === 'disable') {
             return debloater.executeDisable()
           }
-          return debloater.executeDebloat(keepData)
+          return debloater.executeDebloat()
         }}
       />
 

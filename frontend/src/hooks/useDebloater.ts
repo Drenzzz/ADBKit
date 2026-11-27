@@ -195,13 +195,13 @@ export function useDebloater() {
   )
 
   const executeDebloat = useCallback(
-    async (keepData: boolean): Promise<boolean> => {
+    async (): Promise<boolean> => {
       const names = store.selectedDebloat
       if (names.length === 0) return false
 
       store.setExecutingAction('debloat')
       try {
-        const result = await debloatPackages(names, keepData)
+        const result = await debloatPackages(names, false)
         notifyBatchResult(result, 'debloated')
         store.clearDebloatSelection()
         await Promise.all([scan(), fetchRestorable()])
