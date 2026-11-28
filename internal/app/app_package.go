@@ -100,6 +100,24 @@ func (a *App) InspectAPK(filePath string) (packagemgr.APKPreview, error) {
 	})
 }
 
+func (a *App) GetPackagePermissions(packageName string) (packagemgr.PackagePermissionsReport, error) {
+	return auditAction(a, "get_package_permissions", func() (packagemgr.PackagePermissionsReport, error) {
+		return a.pkgSvc.GetPackagePermissions(a.ctx, packageName)
+	})
+}
+
+func (a *App) SetPackagePermission(packageName string, permissionName string, granted bool) (string, error) {
+	return auditAction(a, "set_package_permission", func() (string, error) {
+		return a.pkgSvc.SetPackagePermission(a.ctx, packageName, permissionName, granted)
+	})
+}
+
+func (a *App) SetPackageAppOp(packageName string, opName string, mode string) (string, error) {
+	return auditAction(a, "set_package_appop", func() (string, error) {
+		return a.pkgSvc.SetPackageAppOp(a.ctx, packageName, opName, mode)
+	})
+}
+
 func (a *App) SelectApkFile() (string, error) {
 	return a.diaSvc.SelectApkFile()
 }
