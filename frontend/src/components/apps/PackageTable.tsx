@@ -19,6 +19,7 @@ interface PackageTableProps {
   detailsCache: Map<string, PackageDetails>
   onToggleSelect: (name: string) => void
   onToggleAll: (names: string[]) => void
+  onPermissions: (name: string) => void
   onDetails: (name: string) => void
   onLaunch: (name: string) => void
   onForceStop: (name: string) => void
@@ -37,6 +38,7 @@ export function PackageTable({
   detailsCache,
   onToggleSelect,
   onToggleAll,
+  onPermissions,
   onDetails,
   onLaunch,
   onForceStop,
@@ -152,6 +154,7 @@ export function PackageTable({
                       packageName={pkg.packageName}
                       isEnabled={pkg.isEnabled}
                       isBusy={isBusy}
+                      onPermissions={onPermissions}
                       onDetails={onDetails}
                       onLaunch={onLaunch}
                       onForceStop={onForceStop}
