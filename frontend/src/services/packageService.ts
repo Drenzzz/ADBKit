@@ -13,6 +13,9 @@ import {
   LaunchPackage,
   ForceStopPackage,
   GetPackageDetails,
+  GetPackagePermissions,
+  SetPackagePermission,
+  SetPackageAppOp,
   GetAppIcon,
   GetAppLabels,
   GetAppIcons,
@@ -23,6 +26,7 @@ import type {
   PackageDetails,
   PackageFilter,
   PackageInfo,
+  PackagePermissionsReport,
 } from '@/lib/types'
 
 export async function listPackages(filter: PackageFilter): Promise<PackageInfo[]> {
@@ -107,4 +111,17 @@ export async function getAppIcons(packageNames: string[]): Promise<Record<string
 
 export async function selectApkFile(): Promise<string> {
   return SelectApkFile()
+}
+
+export async function getPackagePermissions(packageName: string): Promise<PackagePermissionsReport> {
+  const raw = await GetPackagePermissions(packageName)
+  return raw as unknown as PackagePermissionsReport
+}
+
+export async function setPackagePermission(packageName: string, permissionName: string, granted: boolean): Promise<string> {
+  return SetPackagePermission(packageName, permissionName, granted)
+}
+
+export async function setPackageAppOp(packageName: string, opName: string, mode: string): Promise<string> {
+  return SetPackageAppOp(packageName, opName, mode)
 }

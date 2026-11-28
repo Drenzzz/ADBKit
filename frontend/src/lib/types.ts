@@ -256,6 +256,27 @@ export interface APKPreview {
   targetSdk: number
 }
 
+export interface PackagePermission {
+  name: string
+  label: string
+  group: string
+  isRuntime: boolean
+  isGranted: boolean
+}
+
+export interface PackageAppOp {
+  name: string
+  label: string
+  mode: string
+}
+
+export interface PackagePermissionsReport {
+  packageName: string
+  permissions: PackagePermission[]
+  appOps: PackageAppOp[]
+  appOpsSupported: boolean
+}
+
 export interface FileEntry {
   name: string
   path: string

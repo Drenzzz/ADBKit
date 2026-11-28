@@ -5,5 +5,8 @@ export type {
     APKPreview,
     AppIcon,
     Details,
-    Info
+    Info,
+    PackageAppOp,
+    PackagePermission,
+    PackagePermissionsReport
 } from "./models.js";

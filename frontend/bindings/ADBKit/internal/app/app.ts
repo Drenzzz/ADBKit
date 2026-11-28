@@ -235,6 +235,10 @@ export function GetPackageDetails(packageName: string): $CancellablePromise<pack
     return $Call.ByID(2421988071, packageName);
 }
 
+export function GetPackagePermissions(packageName: string): $CancellablePromise<packagemgr$0.PackagePermissionsReport> {
+    return $Call.ByID(2415751865, packageName);
+}
+
 export function GetPerformanceSnapshot(serial: string): $CancellablePromise<device$0.PerformanceSnapshot> {
     return $Call.ByID(981742441, serial);
 }
@@ -466,6 +470,14 @@ export function SetCustomBinary(name: string, path: string): $CancellablePromise
 
 export function SetDeviceNickname(serial: string, nickname: string): $CancellablePromise<void> {
     return $Call.ByID(1226283515, serial, nickname);
+}
+
+export function SetPackageAppOp(packageName: string, opName: string, mode: string): $CancellablePromise<string> {
+    return $Call.ByID(955430561, packageName, opName, mode);
+}
+
+export function SetPackagePermission(packageName: string, permissionName: string, granted: boolean): $CancellablePromise<string> {
+    return $Call.ByID(1528454068, packageName, permissionName, granted);
 }
 
 /**
