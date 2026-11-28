@@ -23,6 +23,7 @@ import { PackageTable } from '@/components/apps/PackageTable'
 import { BatchBar } from '@/components/apps/BatchBar'
 import { InstallApkDialog } from '@/components/apps/InstallApkDialog'
 import { PackageDetailSheet } from '@/components/apps/PackageDetailSheet'
+import { PackagePermissionsDialog } from '@/components/apps/PackagePermissionsDialog'
 import { ConfirmDialog } from '@/components/apps/ConfirmDialog'
 import { DebloaterView } from '@/components/apps/DebloaterView'
 import { DebloaterConfirmDialog } from '@/components/apps/DebloaterConfirmDialog'
@@ -96,6 +97,7 @@ export default function AppsPage() {
   const [installApkPath, setInstallApkPath] = useState<string | undefined>()
   const [managerOpen, setManagerOpen] = useState(false)
   const [detailPackage, setDetailPackage] = useState<string | null>(null)
+  const [permissionsPackage, setPermissionsPackage] = useState<string | null>(null)
   const [catalogDialogOpen, setCatalogDialogOpen] = useState(false)
   const [debloatConfirmAction, setDebloatConfirmAction] = useState<'debloat' | 'disable' | null>(null)
   const [confirmAction, setConfirmAction] = useState<{
@@ -173,6 +175,7 @@ export default function AppsPage() {
     detailsCache: appManager.detailsCache,
     onToggleSelect: appManager.togglePackageSelection,
     onToggleAll: appManager.toggleVisibleSelection,
+    onPermissions: (name: string) => setPermissionsPackage(name),
     onDetails: (name: string) => setDetailPackage(name),
     onLaunch: appManager.launch,
     onForceStop: (name: string) =>
@@ -482,6 +485,12 @@ export default function AppsPage() {
         onOpenChange={(open) => { if (!open) setDetailPackage(null) }}
         packageName={detailPackage ?? ''}
         onFetchDetails={appManager.getDetails}
+      />
+
+      <PackagePermissionsDialog
+        open={permissionsPackage !== null}
+        onOpenChange={(open) => { if (!open) setPermissionsPackage(null) }}
+        packageName={permissionsPackage ?? ''}
       />
 
       <ConfirmDialog

@@ -39,3 +39,33 @@ export interface Info {
     "isEnabled": boolean;
     "isSystemApp": boolean;
 }
+
+/**
+ * PackageAppOp represents an AppOps entry.
+ */
+export interface PackageAppOp {
+    "name": string;
+    "label": string;
+    "mode": string;
+}
+
+/**
+ * PackagePermission represents a single Android permission for an app.
+ */
+export interface PackagePermission {
+    "name": string;
+    "label": string;
+    "group": string;
+    "isRuntime": boolean;
+    "isGranted": boolean;
+}
+
+/**
+ * PackagePermissionsReport is returned by GetPackagePermissions.
+ */
+export interface PackagePermissionsReport {
+    "packageName": string;
+    "permissions": PackagePermission[] | null;
+    "appOps": PackageAppOp[] | null;
+    "appOpsSupported": boolean;
+}

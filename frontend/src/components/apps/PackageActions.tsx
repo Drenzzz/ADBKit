@@ -9,6 +9,7 @@ import {
   IconDownload,
   IconEraser,
   IconInfoCircle,
+  IconShieldLock,
 } from '@tabler/icons-react'
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ interface PackageActionsProps {
   packageName: string
   isEnabled: boolean
   isBusy: boolean
+  onPermissions: (name: string) => void
   onDetails: (name: string) => void
   onLaunch: (name: string) => void
   onForceStop: (name: string) => void
@@ -36,6 +38,7 @@ export function PackageActions({
   packageName,
   isEnabled,
   isBusy,
+  onPermissions,
   onDetails,
   onLaunch,
   onForceStop,
@@ -80,6 +83,7 @@ export function PackageActions({
         </div>
       }
     >
+      <DropdownMenuItem className={ITEM} icon={<IconShieldLock className={ICON} />} label="Permissions" onClick={run(onPermissions)} />
       <DropdownMenuItem className={ITEM} icon={<IconInfoCircle className={ICON} />} label="Details" onClick={run(onDetails)} />
       <DropdownMenuItem className={ITEM} icon={<IconPlayerPlay className={ICON} />} label="Launch" onClick={run(onLaunch)} />
       <DropdownMenuItem className={ITEM} icon={<IconSquare className={ICON} />} label="Force stop" onClick={run(onForceStop)} />
